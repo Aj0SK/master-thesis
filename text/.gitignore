@@ -1,0 +1,6 @@
+main.*
+main-en.*
+
+!main.tex
+!main-en.tex
+
