@@ -11,6 +11,6 @@ jobs:
               cd text
               make
       - store_artifacts:
-          path: output/
-          destination: output
+          path: text/main-en.pdf
+          destination: main-en.pdf
 
