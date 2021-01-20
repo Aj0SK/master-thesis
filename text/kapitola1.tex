@@ -1,11 +1,11 @@
 \chapter{History and recent advancements}
 \label{kap:kap1}
 
-The size of information and data grows exponentially in recent years. In order to store this data, we use different data structures. These data structures not only represent the data but also enable us to make certain operations over them. There is a significant effort in not only speeding up these structures but also making them smaller in size so that they can be managed easier in memory and not on secondary data storage thas is often orders of magnitude time slower.
+The size of information and data grows exponentially in recent years. In order to store this data, we use different data structures. These data structures not only represent the data but also enable us to make certain operations over them. There is a significant effort in not only speeding up these structures but also making them smaller in size so that they can be managed easier in memory and not on secondary data storage thas is often orders of magnitude time slower. The key factor is to find the balance between the speed of common operations and the amount of information that we need to store.
 
 \section{Space-efficient data structures}
 
-When we measure how space-efficient the data structure is, we often measure this in additional information that we store alongside the original data. Most of the time, with the complexity of operations that our data structure supports also the size of metadata stored increase. The original data could be however compressed to further increase the space-efficiency. To remove ambiguity, we measure the size of the original data as the number of the information-theoretical optimal number of bits used to store the original data. We will now introduce the basic definition that distinguishes between space-efficiency of data structure:
+When we measure how space-efficient the data structure is, we often measure this in additional information that we store alongside the original data. Most of the time, with the complexity of operations that our data structure supports also the size of metadata stored increases. The original data could be however also compressed to further increase the space-efficiency. To remove ambiguity, we measure the size of the original data as the information-theoretical optimal number of bits used to store the original data. We will now introduce the basic definition that distinguishes between space-efficiency of data structures:
 
 Let's say that X is the information-theoretical optimal number of bits needed to store the data. A data structure representing this data is called:
 \begin{itemize}
@@ -14,35 +14,9 @@ Let's say that X is the information-theoretical optimal number of bits needed to
 \item compact if it takes $O(X)$ bits of space
 \end{itemize}
 
-As an example, the classical representation of string in language as C uses the null-terminated method. In this form, the original string is stored in memory with the null termination character at the end. It is easy to see that this representation is implicit. To represent the string we could also store the string and only remember it's length, not using the null termination character. This would, however, lead to a succinct data structure as we need $log(X)$ bits to store the length of the string.
+As an example, the common representation of string in a language such as C uses the null-termination method. In this form, the original string is stored in memory with the null termination character just after the end of the string. It is easy to see that this representation is implicit. To represent the string we could also store the string and only remember it's length, not using the null termination character. This would, however, lead to a succinct data structure as we need $O(log(X))$ bits to store the length of the string.
 
-It should be clear that the additional requirement on the data structure to be space-efficient many times leads to worse time complexity. Even if the theoretical time complexity remains the same for compressed data structures, the real-world implementation can suffer in performance as the compressed methods are many times not ideal in the classical computer model.
-
-\section{History and recent progress in the field}
-
-We will now look briefly into the history and then on recent results in this topic. The field dates back to the Jacobsen work on static succinct data structures.
-
-There are of course many possible data structures and operations that they can support in order to be reasonable to use. We will now look at the most common operations that are supported in the succinct data structures.
-
-\begin{theorem}
-Let's say that we have a finite sequence of $N$ elements.
-We define two operations rank and select: \\
-$rank_q(x) = | \{ k \in [ 1, 2, \ldots, x]:N[k] = q  \} |$ \\
-$select_q(x) = min \{ k \in [ 1, 2, \ldots, n):rank_q(k)=x  \} $
-\end{theorem}
-
-In other words, $rank_q(x)$ denotes the number of elements in $N$ that are equal to $q$ and their position in $N$ is less than $x$. $select_q(x)$ returns the position of $x$-th occurence of $q$.
-These two types of operations are very common in succinct data structures. Lets say we want to store the sequence of elements that are not of fixed size.
-With the sequence of data, represented by the individual bits of elements. We can also store metadata in the form of bitvector, that has one's on the indexes
-where the new elements begins as we see in Fig. \ref{obr:obr_rank_select}.
-
-\begin{figure}
-\centerline{\includegraphics[width=0.4\textwidth]{images/obr_rank_select}}
-\caption[Rank select usage in representation of sequence of elements with different size]{Rank select used in metadata, denoting start of the element.}
-\label{obr:obr_rank_select}
-\end{figure}
-
-\section{Dynamic succinct data structures}
+It should be clear that the additional requirement on the data structure to be space-efficient many times leads to worse time complexity. Even if the theoretical time complexity remains the same for compressed data structures, the real-world implementation can suffer in performance as the methods that are used for work with compressed data are many times not ideal in the classical computer model.
 
 \subsection{K-th order entropy}
 
@@ -65,3 +39,57 @@ $H_k(S) = \frac{1}{n} \sum_{|w|=k} |S_w| H_0(S_w)$
 \end{theorem}
 
 This is a measure of information that is emitted with respect to the previous $k$-characters.
+
+\section{History and recent progress in the field}
+
+We will now look briefly into the history and then on recent results in this topic. The field dates back to the Jacobsen work on static succinct data structures.
+
+There are of course many possible data structures and operations that they can support in order to be reasonable to use. We will now look at the most common operations that are supported in the succinct data structures.
+
+\begin{theorem}
+Let's say that we have a finite sequence of $N$ elements.
+We define two operations rank and select: \\
+$rank_q(x) = | \{ k \in [ 1, 2, \ldots, x]:N[k] = q  \} |$ \\
+$select_q(x) = min \{ k \in [ 1, 2, \ldots, n):rank_q(k)=x  \} $
+\end{theorem}
+
+In other words, $rank_q(x)$ denotes the number of elements in $N$ that are equal to $q$ and their position in $N$ is less than $x$. $select_q(x)$ returns the position of $x$-th occurence of $q$.
+These two types of operations are very common in succinct data structures. Let's say we want to store the sequence of elements that are not of fixed size.
+With the sequence of data, represented by the individual bits of elements. We can also store metadata in the form of bit-vector, that has one's on the indexes
+where the new element begins as we see in Fig. \ref{obr:obr_rank_select}.
+
+\begin{figure}
+\centerline{\includegraphics[width=0.4\textwidth]{images/obr_rank_select}}
+\caption[Rank select usage in representation of sequence of elements with different size]{Rank select used in metadata, denoting start of the element.}
+\label{obr:obr_rank_select}
+\end{figure}
+
+\section{Dynamic succinct data structures}
+
+The most recent results in succinct data structures look into how to make these data structures more usable in real life scenarios. Many times, the
+strongest assumption of these data structures is, that the data we store are not changing in any way. For a few years now, there is considerable amount
+of effort put into dynamic succinct data structures. 
+
+\subsection{RRR}
+
+RRR is used for representing static bitmaps. We split the binary representation of data into big chunks, which we call blocks.
+Each $f$ of subsequent blocks are connected into non-overlapping superblocks. Each block is then encoded as a pair of integers $(c, o)$. $c$
+is the count of the set bits in the corresponding block and $o$ is an offset into the table $T[c]$ that stores in lexicographic order all the sequences of
+length $b$ with $c$ bits set to 1.
+
+\subsection{Searchable Partial Sums with Inserts}
+
+\begin{theorem}
+The Searchable Partial Sums with Inserts (SPSI) problem is a problem, requiring the data structure to
+store sequence $x_1, x_2, \ldots , x_n$ of non-negative $k$-bits integers and supporting the opperations:
+\begin{itemize}
+    \item $sum(i) = \Sigma_{j=1}^{i} x_j$
+    \item $search(s) = min(\{i : \Sigma_{j=1}{i} x_j > s \})$
+    \item $update(i, k): \forall k \in Z, k \geq 0 \lor (k\leq 0 \implies x_i + k \geq 0): x_i \rightarrow x_i + k$
+    \item $insert(i): x_1, x_2,\ldots, x_n \rightarrow x_1, x_2,\ldots , x_{i-1}, 0, x_{i}, \ldots , x_n$
+\end{itemize}
+\end{theorem}
+
+This problem is also very popular in relation with succinct data structures. It is because of his close relation with the bitvectors.
+As can be seen in [Dynamic], this data structure can be used to represent the bitvector. In real implementations, the data structure
+implementing this operations can be efficiently implemented using the B-tree.
