@@ -23,6 +23,7 @@ The amount of data that these types of structures are dealing with is many times
 We should also note, that the additional requirement on the data structure to be space-efficient many times leads to worse time complexity. Even if the theoretical time complexity remains the same for compressed data structures, the real-world implementation can suffer in performance as the methods that are used to work with compressed data are many times not ideal in the classical computer model.
 
 \subsection{K-th order entropy}
+% https://drive.google.com/file/d/14KEQWGwfo3-jggcFI9kgi2IE3VImg74d/view
 
 \begin{theorem}
 Let $S$ be a string of size $n$ and $n_i$ denoting number of occurences of character
@@ -42,14 +43,21 @@ $H_k(S) = \frac{1}{n} \sum_{A \in [1, \sigma ]^k} |T_A| H_0(T_A)$
 \end{center}
 \end{theorem}
 
-We can think of the $k$-order empirical entropy as a measure of information that is emitted with respect to the previous $k$-characters. This type of measure is especially useful when we know that we are dealing with some data where the symbol is somehow dependent on previously emitted symbols. This kind of behaviour can be seen for example in the sequences of characters from natural languages.
+We can think of the $k$-order empirical entropy of a string $S$ as a measure of information that is emitted by one character if we look at this character with respect to the previous $k$-characters. This type of measure is especially useful when we know that we are dealing with some data where the symbol is somehow dependent on previously emitted symbols. This kind of behaviour can be seen for example in the sequences of characters from natural languages.
+
+\begin{theorem}
+Let $H_i$ be the $i$-order entropy. For every $k<lg_{\sigma}n$ it holds that:
+\begin{center}
+$0\leq H_{k}\leq H_{k-1}\leq \ldots\leq H_0 \leq lg\, \sigma$
+\end{center}
+\end{theorem}
 
 \section{History and recent progress in the field}
 
 We will now look briefly into the history and then on the most recent results in this topic. The field dates back to the Jacobsen work on static succinct data structures \cite{jacobson1988succinct}. Jacobsen distinguishes between data compression when we take the big chunk of data and try to fit it into a smaller place and
 data optimization when we want to actively do queries over this stored information. His work mainly looked into a space-efficient representation of linked lists, trees and direct-acyclic graphs with ability to do traversing over them.
 
-There are of course many possible data structures and operations that they can support in order to be reasonable to use. We will now look at the most common operations that are supported in the succinct data structures. From our observations, the most basic operations used are $rank$ and $select$.
+There are of course many possible data structures and operations that they can support in order to be reasonable to use. We will now look at the most common operations that are supported in the succinct data structures. From our observations, the most basic operations used are $rank$ and $select$. These two operations are defined over sequence of elements from the alphabet $\sigma$.
 
 \begin{theorem}
 Lets $N$ be a finite sequence of $n$ elements.
@@ -58,22 +66,22 @@ $rank_q(x) = | \{k; k \in [ 1, 2, \ldots, x] : N[k] = q  \} |$ \\
 $select_q(x) = min \{k; k \in [ 1, 2, \ldots, n) : rank_q(k)=x  \} $
 \end{theorem}
 
-In other words, $rank_q(x)$ denotes the number of elements in $N$ that are equal to $q$ and their position in $N$ is less than $x$. $select_q(x)$ returns the position of $x$-th occurence of $q$. We will later show, why these two operations are useful.
+In other words, $rank_q(x)$ denotes the number of elements in $N$ that are equal to $q$ and their position in $N$ is less than $x$. $select_q(x)$ returns the position of $x$-th occurrence of $q$. We will later show, why these two operations are useful.
 
 \subsection{Bit-vector}
 
-One of the most basic data structures used as a building block in many other succinct data structures is bit-vector.
+One of the most basic data structures used as a building block in many other succinct data structures is bit-vector. This is a special type of a sequence maintaining data structure working over the elements from the smallest possible non-trivial alphabet $\sigma$ of size 2.
 
 \begin{theorem}
 Let $B$ be a sequence of $n$ elements from the alphabet $\Sigma = \{0, 1\}$. We call a bit-vector data structure storing this sequence
 and allowing operation $access(i)$ that returns the $i$-th character.
 \end{theorem}
 
-When looking at the space-efficient implementation of a bit-vector we need to see that as we have only symbols 0 and 1 of length 1 we are not able to compress bit-vector by using some other codes for this values. The one way to compress the bit-vector is groups more of the symbols and trying to represent somehow this new block. We will now show some basic techniques to represent and compress the bit-vectors. 
+When looking at the space-efficient implementation of a bit-vector we need to see that as we have only symbols 0 and 1 of length 1 we are not able to compress bit-vector by using some other codes for this values. The one way to compress the bit-vector is grouping more of the symbols and trying to represent somehow this new block. We will now show some basic techniques to represent and compress the bit-vectors. 
 
 \subsection{RRR}
 
-RRR is common method used for representing static bitmaps introduced by Raman, Raman, Rao \cite{raman2007succinct} achieving space complexity $nH_0(S) + O(log(n))$. We split the binary representation of data into big chunks, which we call blocks.
+RRR is common method used for representing static bitmaps introduced by Raman, Raman, Rao \cite{raman2007succinct} achieving space complexity $nH_0(S) + O(log\,n))$. We split the binary representation of data into big chunks, which we call blocks.
 Each $f$ of subsequent blocks are connected into non-overlapping superblocks. Each block is then encoded as a pair of integers $(c, o)$. $c$
 is the count of the set bits in the corresponding block and $o$ is an offset into the table $T[c]$ that stores in lexicographic order all the sequences of
 length $b$ with $c$ bits set to 1.
@@ -81,13 +89,13 @@ length $b$ with $c$ bits set to 1.
 \subsection{Run length encoding}
 
 Another widely used type of storage is run-length encoding. We will assume, that one of the values in bit-vector(either 0 or 1) is more frequent than the other. Let's say that we know, there are way more zeroes present in our data. It is natural to expect that there will be a lot of subsequent occurrences of zeroes that we call runs. We will store only the lengths of zero runs between the subsequent ones. So for example
-sequence $0001011001000$ is stored as $3, 1, 0, 2, 3$.
+sequence $0001011001000$ is though of as $0^{3}10^{1}10^{0}10^{2}10^{3}$ and stored as numbers $3, 1, 0, 2, 3$.
 
-We can now compress subsequent runs of zeroes and write them as the index $0^{p_1}10^{p_2}110^{p_3}\ldots 10^{p_k}$. 
-
-After introducing the bit-vector we can see a little bit more into why $rank$ and $select$ operations are very common in succinct data structures. Let's say we want to store the sequence of elements that are not of fixed size.
-With the sequence of data, represented by the individual bits of elements. We can also store metadata in the form of bit-vector, that has one's on the indexes
-where the new element begins as we see in Fig. \ref{obr:obr_rank_select}.
+After introducing the bit-vector we can see a little bit more into why $rank$ and $select$ operations are very common in succinct data structures. Let say we want to represent a static sequence of elements that are not of fixed size but are representable by some bit sequence.
+We can then create two bit-vectors. One consists of a bit representation of elements one after the other.
+The second bit-vector with the same size is constructured full of 0 only having 1 on the places where the new element starts.
+Using the $rank$ and $select$ queries we can easily retrieve the bit representation of the $i$-th element.
+Example of this representation is on Fig. \ref{obr:obr_rank_select}.
 
 \begin{figure}
 \centerline{\includegraphics[width=0.4\textwidth]{images/obr_rank_select}}
@@ -95,11 +103,12 @@ where the new element begins as we see in Fig. \ref{obr:obr_rank_select}.
 \label{obr:obr_rank_select}
 \end{figure}
 
-
 \section{Dynamic succinct data structures}
 
 The most recent results in succinct data structures look into how to make these data structures more usable in real-life scenarios. Many times, the
 strongest assumption of these data structures is, that the data we store is not changing in any way. For a few years now, there is a considerable effort put into dynamic succinct data structures. There are two types of what the word dynamic means. Let's say that our data structure represents some sequence of numbers. In some cases, it can refer to the ability to change some value in the underlying sequence. In other cases, it refers to the possibility to insert a new element at the arbitrary position in the sequence. Sometimes, it only means changing the element at an arbitrary position and adding the new element only at the end of the sequence.
+
+The most recent breakthrought in the theory of succinct data structures regarding data structure maintaining sequence of characters from alphabet $\Sigma$ is \cite{munro2015compressed}. Their result obtains memory complexity $nH_k+o(n\,log\,\sigma)$. Their result in time complexity is $O(log\,n/log log\,n)$ which is considered optimal for rank, select and access. Also, there is possibility to insert and delete any element also in time $O(log\,n/log log\,n)$. Their solution is based on some existing results, split between different cases based on the size of $\Sigma$.
 
 \subsection{Searchable Partial Sums with Inserts}
 
@@ -108,16 +117,16 @@ The Searchable Partial Sums with Inserts (SPSI) problem is asking for the data s
 store sequence $x_1, x_2, \ldots , x_n$ of non-negative $l$-bits integers and supporting the opperations:
 \begin{itemize}
     \item $sum(i) = \Sigma_{j=1}^{i} x_j$
-    \item $search(s) = min(\{i : \Sigma_{j=1}{i} x_j > s \})$
+    \item $search(s) = min(\{i; i\in \{1, 2,\ldots, n\}, \Sigma_{j=1}^{i} x_j > s \})$
     \item $update(i, k): \forall k \in Z, k \geq 0 \lor (k\leq 0 \implies x_i + k \geq 0): x_i \rightarrow x_i + k$
     \item $insert(i): x_1, x_2,\ldots, x_n \rightarrow x_1, x_2,\ldots , x_{i-1}, 0, x_{i}, \ldots , x_n$
 \end{itemize}
 \end{theorem}
 
 This problem is also very popular in relation to succinct data structures. It is because of its close relationship with the bit-vectors.
-As can be seen in [Dynamic], this data structure can be used to represent the bit-vector.
+As can be seen in \cite{prezza2017framework}, this data structure can be used to represent the bit-vector.
 
-\section{Implementation}
+\section{Existing implementations}
 
 In this work, we focus on transforming some of the ideas that were developed over years to real-life implementations. Many times, the solutions aiming at the best theoretical bounds are very complicated and build on top of several ideas from previous works. Many of the current best results from the perspective of theoretical complexity do not provide any implementation. We looked at what is the current status of working implementations and what theoretical bounds they reach.
 
@@ -126,3 +135,12 @@ We will now look at the best libraries that implement these succinct data struct
 When we add the requirement of dynamism, we see that the number of libraries drops significantly. One of the most notable libraries supporting 
 dynamic succinct data structures is DYNAMIC. It builds on top of the SPSI problem. Their implementation uses B-tree to represent this data structure. B-tree is a type of a $(a, b)$-tree, so we are free to choose the degree of a node in the tree and also the number of elements stored in one node. Using these two parameters, we can balance the implementation to get good tree depth and also ideal length of one node so it fits exactly into one cache line, making the implementation fast. Additionally, using the B-tree as an implementation for SPSI, DYNAMIC implements other succinct
 data structures using their SPSI implementation. One of the main issues DYNAMIC implementat
+
+\subsection{Testing}
+
+Testing of the implementations is done differently between the 
+
+
+\section{Proposed solution}
+
+Our main objective will be to build dynamic data structure, representing the bit-vector with the operations $access$, $rank$, $select$, $flip$ and $insert\_at\_end$ with the guaranteed memory usage $nH_k+o(n)$. We want to achieve also the best possible time complexity for $rank$ and $select$ but we do not target any specific time complexity class as we want to make our implementation as fast as possible on current computer model. Only requirement for our operations is to have time complexity at most $O(log\,n)$.
