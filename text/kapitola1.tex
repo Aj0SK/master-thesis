@@ -52,6 +52,15 @@ $0\leq H_{k}\leq H_{k-1}\leq \ldots\leq H_0 \leq lg\, \sigma$
 \end{center}
 \end{theorem}
 
+\begin{theorem}
+Let $S$ be a string from the alphabet $\Sigma$ such that $|\Sigma|=\sigma$. We say that the representation of $S$ is:
+\begin{itemize}
+    \item succinct if it takes $n\,lg\,\sigma + o(n\,lg\,\sigma)$ bits
+    \item zeroth-order compressed if it takes $n\,H_0(S) + o(n\,lg\,\sigma)$ bits
+    \item high-order compressed if it takes $n\,H_k(S) + o(n\,lg\,\sigma)$ bits
+\end{itemize}
+\end{theorem}
+
 \section{History and recent progress in the field}
 
 We will now look briefly into the history and then on the most recent results in this topic. The field dates back to the Jacobsen work on static succinct data structures \cite{jacobson1988succinct}. Jacobsen distinguishes between data compression when we take the big chunk of data and try to fit it into a smaller place and
@@ -108,7 +117,7 @@ Example of this representation is on Fig. \ref{obr:obr_rank_select}.
 The most recent results in succinct data structures look into how to make these data structures more usable in real-life scenarios. Many times, the
 strongest assumption of these data structures is, that the data we store is not changing in any way. For a few years now, there is a considerable effort put into dynamic succinct data structures. There are two types of what the word dynamic means. Let's say that our data structure represents some sequence of numbers. In some cases, it can refer to the ability to change some value in the underlying sequence. In other cases, it refers to the possibility to insert a new element at the arbitrary position in the sequence. Sometimes, it only means changing the element at an arbitrary position and adding the new element only at the end of the sequence.
 
-The most recent breakthrought in the theory of succinct data structures regarding data structure maintaining sequence of characters from alphabet $\Sigma$ is \cite{munro2015compressed}. Their result obtains memory complexity $nH_k+o(n\,log\,\sigma)$. Their result in time complexity is $O(log\,n/log log\,n)$ which is considered optimal for rank, select and access. Also, there is possibility to insert and delete any element also in time $O(log\,n/log log\,n)$. Their solution is based on some existing results, split between different cases based on the size of $\Sigma$.
+The most recent breakthrought in the theory of succinct data structures regarding data structure maintaining sequence of characters from alphabet $\Sigma$ is \cite{munro2015compressed}. Their result obtains memory complexity $nH_k+o(n\,log\,\sigma)$. Their result in time complexity is $O(log\,n/log log\,n)$ which is considered optimal for rank, select and access. Also, there is possibility to insert and delete any element also in time $O(log\,n/log log\,n)$. Their solution is based on some existing results, split between different cases based on the size of $\Sigma$. The implementation is theoretically very strong result but contains a lot of patterns that make it not very usable in practice.
 
 \subsection{Searchable Partial Sums with Inserts}
 
