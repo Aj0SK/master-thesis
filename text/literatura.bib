@@ -5,6 +5,7 @@
 
 % Theory:
 
+% first work in succinct data structures
 @article{jacobson1988succinct,
   title={Succinct static data structures},
   author={Jacobson, Guy Joseph},
@@ -12,6 +13,7 @@
   publisher={Carnegie Mellon University}
 } % https://dl.acm.org/doi/book/10.5555/915547
 
+% RRR
 @article{raman2007succinct,
   title={Succinct indexable dictionaries with applications to encoding k-ary trees, prefix sums and multisets},
   author={Raman, Rajeev and Raman, Venkatesh and Satti, Srinivasa Rao},
@@ -23,6 +25,7 @@
   publisher={ACM New York, NY, USA}
 } % https://dl.acm.org/doi/abs/10.1145/1290672.1290680?casa_token=593z8wA-YGYAAAAA:wv_kdp8YJTmvYbIU4DJMLCxiYGaLVemMQvX9jXWgSHcC_JbY-FAOl7hJ1IABIIh0VZumwDYQiF9ivA
 
+% best result in dynamic data structures
 @incollection{munro2015compressed,
   title={Compressed data structures for dynamic sequences},
   author={Munro, J Ian and Nekrich, Yakov},
@@ -32,6 +35,7 @@
   publisher={Springer}
 } % https://link.springer.com/chapter/10.1007/978-3-662-48350-3_74
 
+% best result in static data structures
 @article{belazzougui2015optimal,
   title={Optimal lower and upper bounds for representing sequences},
   author={Belazzougui, Djamal and Navarro, Gonzalo},
@@ -43,6 +47,7 @@
   publisher={ACM New York, NY, USA}
 } % https://dl.acm.org/doi/abs/10.1145/2629339?casa_token=6Wu_fZIU3e0AAAAA:QXlQMN8IpYn8RW9ve08j2OC7NLZp6eGNa24JGz3iupFuwHvvOqTJQOvdxWKcWZf_pMv0U-6sRy1ZQA
 
+% Navarro's book
 @book{navarro2016compact,
   title={Compact data structures: A practical approach},
   author={Navarro, Gonzalo},
@@ -50,7 +55,7 @@
   publisher={Cambridge University Press}
 }
 
-% lower bounds cited by 
+% lower bound for dynamic data structures
 @inproceedings{fredman1989cell,
   title={The cell probe complexity of dynamic data structures},
   author={Fredman, Michael and Saks, Michael},
@@ -59,11 +64,21 @@
   year={1989}
 } % https://dl.acm.org/doi/abs/10.1145/73007.73040?casa_token=NwRXAgySWSMAAAAA:DVGNGioy6tscgjrvUIqqiw0wTNVo0P6iD3a3oq4-X4mLq9p1PIlb5ID81S8BH-KcKxFp6XSkRiGF3A
 
+% lower bound for dynamic data structures: optimal bound is \omega(lg n / lg w) from https://drive.google.com/file/d/14AZ3t0rZ58oiS_-KF05ycwjP5wvJ0-05/view
+@article{beame2002optimal,
+  title={Optimal bounds for the predecessor problem and related problems},
+  author={Beame, Paul and Fich, Faith E},
+  journal={Journal of Computer and System Sciences},
+  volume={65},
+  number={1},
+  pages={38--72},
+  year={2002},
+  publisher={Elsevier}
+} % https://www.sciencedirect.com/science/article/pii/S0022000002918222
 
 % Implementations:
 
 % Static:
-
 
 % DYNAMIC
 @article{prezza2017framework,
@@ -107,6 +122,16 @@
   year = "Retrieved May 30, 2020"
 } % https://code.google.com/archive/p/ds-vector/
 
+% from https://drive.google.com/file/d/1qm4bxXc6yjso9yErbzaBHbVx0lCvWeir/view
+@inproceedings{grossi2013design,
+  title={Design of practical succinct data structures for large data collections},
+  author={Grossi, Roberto and Ottaviano, Giuseppe},
+  booktitle={International Symposium on Experimental Algorithms},
+  pages={5--17},
+  year={2013},
+  organization={Springer}
+} % https://link.springer.com/chapter/10.1007/978-3-642-38527-8_3
+
 % sdsl
 @inproceedings{gog2014theory,
   title={From theory to practice: Plug and play with succinct data structures},
@@ -116,6 +141,30 @@
   year={2014},
   organization={Springer}
 } % sdsl - https://link.springer.com/chapter/10.1007/978-3-319-07959-2_28
+
+% libcsd
+@inproceedings{brisaboa2011compressed,
+  title={Compressed string dictionaries},
+  author={Brisaboa, Nieves R and C{\'a}novas, Rodrigo and Claude, Francisco and Mart{\'\i}nez-Prieto, Miguel A and Navarro, Gonzalo},
+  booktitle={International Symposium on Experimental Algorithms},
+  pages={136--147},
+  year={2011},
+  organization={Springer}
+} % https://github.com/migumar2/libCSD
+
+% succinct lib
+@manual{succinct,
+  title = "Library succinct",
+  note = "\url{https://github.com/ot/succinct}",
+  year = "Retrieved May 30, 2020"
+} % https://github.com/ot/succinct
+
+% sux lib
+@manual{sux,
+  title = "Library sux",
+  note = "\url{http://sux.di.unimi.it/}",
+  year = "Retrieved May 30, 2020"
+} % http://sux.di.unimi.it/
 
 @manual{pizza-chilli,
   title = "Pizza-chilli framework",

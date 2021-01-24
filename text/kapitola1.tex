@@ -119,9 +119,9 @@ So far the most recent result in this area is reached in \cite{belazzougui2015op
 \section{Dynamic succinct data structures}
 
 The most recent results in succinct data structures look into how to make these data structures more usable in real-life scenarios. Many times, the
-strongest assumption of these data structures is, that the data we store is not changing in any way. For a few years now, there is a considerable effort put into dynamic succinct data structures. There are two types of what the word dynamic means. Let's say that our data structure represents some sequence of numbers. In some cases, it can refer to the ability to change some value in the underlying sequence. In other cases, it refers to the possibility to insert a new element at the arbitrary position in the sequence. Sometimes, it only means changing the element at an arbitrary position and adding the new element only at the end of the sequence.
+strongest assumption of these data structures is, that the data we store is not changing in any way. For a few years now, there is a considerable effort put into dynamic succinct data structures. There are two types of what the word dynamic means. Let's say that our data structure represents some sequence of numbers. In some cases, it can refer to the ability to change some value in the underlying sequence. In other cases, it refers to the possibility to insert a new element at the arbitrary position in the sequence. Sometimes, it only means changing the element at an arbitrary position and adding the new element only at the end of the sequence. Known lower bound for dynamic rank and select is $\omega(lg\,n/lg\,w)$\cite{beame2002optimal}.
 
-The most recent breakthrought in the theory of succinct data structures regarding data structure maintaining sequence of characters from alphabet $\Sigma$ is \cite{munro2015compressed}. Their result obtains memory complexity $nH_k+o(n\,log\,\sigma)$. Their result in time complexity is $O(log\,n/log log\,n)$ which is considered optimal for rank, select and access. Also, there is possibility to insert and delete any element also in time $O(log\,n/log log\,n)$. Their solution is based on some existing results, split between different cases based on the size of $\Sigma$. This work is theoretically very strong result but contains a lot of patterns that make it not very usable and too complex in practice.
+The most recent breakthrought in the theory of succinct data structures regarding data structure maintaining sequence of characters from alphabet $\Sigma$ is \cite{munro2015compressed}. Their result obtains memory complexity $nH_k+o(n\,log\,\sigma)$. Their result in time complexity is $O(log\,n/log log\,n)$ which is considered optimal for rank, select and access. Also, there is possibility to insert and delete any element also in time $O(log\,n/log log\,n)$. Their solution is based on some existing results, split between different cases based on the size of $\Sigma$. This work is theoretically very strong result but contains a lot of patterns that make it not very usable and too complex in practice. It also lacks implementation to the best of our knowledge.
 
 \subsection{Searchable Partial Sums with Inserts}
 
@@ -143,7 +143,7 @@ As can be seen in \cite{prezza2017framework}, this data structure can be used to
 
 In this work, we focus on transforming some of the ideas that were developed over years to real-life implementations. Many times, the solutions aiming at the best theoretical bounds are very complicated and build on top of several ideas from previous works. Many of the current best results from the perspective of theoretical complexity do not provide any implementation. We looked at what is the current status of working implementations and what theoretical bounds they reach.
 
-We will now look at the best libraries that implement these succinct data structures. Libraries implementing succinct data structures are numerous and pretty common by now.
+Libraries implementing succinct data structures are numerous and pretty common by now such as sdsl\cite{gog2014theory}, pizza\&chilli\cite{pizza-chilli}, libcsd\cite{brisaboa2011compressed}, succinct\cite{succinct}, sux\cite{sux}.
 
 When we add the requirement of dynamism, we see that the number of libraries drops significantly. One of the most notable libraries supporting 
 dynamic succinct data structures is DYNAMIC. It builds on top of the SPSI problem. Their implementation uses B-tree to represent this data structure. B-tree is a type of a $(a, b)$-tree, so we are free to choose the degree of a node in the tree and also the number of elements stored in one node. Using these two parameters, we can balance the implementation to get good tree depth and also ideal length of one node so it fits exactly into one cache line, making the implementation fast. Additionally, using the B-tree as an implementation for SPSI, DYNAMIC implements other succinct
@@ -153,7 +153,9 @@ Idea of dynamic bit-vector from \cite{policriti2015average} can be found impleme
 
 The other two most notable and recent results that both dominate the DYNAMIC in terms of the speed and additional bit usage are \cite{marchini2020compact} and \cite{pibiri2020rank}.
 
-In \cite{marchini2020compact} they use a fenwick tree \cite{fenwick1994new}, data structure used for fast prefix sum queries.
+In \cite{marchini2020compact} they use a fenwick tree \cite{fenwick1994new}, the data structure used for logarithmic prefix sum queries and updates. The structure of the Fenwick tree is further changed so that it fits nicely wich processor cache.
+
+One of the most recent work, solving the same problem is also described in \cite{pibiri2020rank}.
 
 \subsection{Testing}
 
@@ -164,4 +166,4 @@ One of the most common choices is implementing some part of a data compression a
 
 \section{Proposed solution}
 
-Our main objective will be to build dynamic data structure, representing the bit-vector with the operations $access$, $rank$, $select$, $flip$ and $insert\_at\_end$ with the guaranteed memory usage $nH_k+o(n)$ which corresponds to high-order compressed representation. We want to achieve also the best possible time complexity for $rank$ and $select$ but we do not target any specific time complexity class as we want to make our implementation as fast as possible on current computer model. Only requirement for our operations is to have time complexity at most $O(log\,n)$.
+Our main objective will be to build dynamic data structure, representing the sequence of elements with the operations $access$, $rank$, $select$ and dynamic operations $change$ $insert\_at\_end$ with the guaranteed memory usage $nH_k+o(n\,lg\,\sigma)$ which corresponds to high-order compressed representation. We want to achieve also the best possible time complexity for $rank$ and $select$ but we do not target any specific time complexity class as we want to make our implementation as fast as possible on current computer model. Only requirement for our operations is to have time complexity at most $O(log\,n)$. Our first step toward our goal is to create a data structure for $|\Sigma|=2$. We think that this will be easier as the usage of special CPU instructions will be more straightforward. We would want to then take some of the ideas and our experience in developing the general solution for any meaningful size of $\Sigma$.
