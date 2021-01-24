@@ -3,6 +3,8 @@
 	# "\newcommand{\singleletter}[1]{#1} "
 	# "\newcommand{\switchargs}[2]{#2#1} " }
 
+% Theory:
+
 @article{jacobson1988succinct,
   title={Succinct static data structures},
   author={Jacobson, Guy Joseph},
@@ -41,13 +43,6 @@
   publisher={ACM New York, NY, USA}
 } % https://dl.acm.org/doi/abs/10.1145/2629339?casa_token=6Wu_fZIU3e0AAAAA:QXlQMN8IpYn8RW9ve08j2OC7NLZp6eGNa24JGz3iupFuwHvvOqTJQOvdxWKcWZf_pMv0U-6sRy1ZQA
 
-@article{prezza2017framework,
-  title={A framework of dynamic data structures for string processing},
-  author={Prezza, Nicola},
-  journal={arXiv preprint arXiv:1701.07238},
-  year={2017}
-} % https://arxiv.org/abs/1701.07238
-
 @book{navarro2016compact,
   title={Compact data structures: A practical approach},
   author={Navarro, Gonzalo},
@@ -55,6 +50,31 @@
   publisher={Cambridge University Press}
 }
 
+% lower bounds cited by 
+@inproceedings{fredman1989cell,
+  title={The cell probe complexity of dynamic data structures},
+  author={Fredman, Michael and Saks, Michael},
+  booktitle={Proceedings of the twenty-first annual ACM symposium on Theory of computing},
+  pages={345--354},
+  year={1989}
+} % https://dl.acm.org/doi/abs/10.1145/73007.73040?casa_token=NwRXAgySWSMAAAAA:DVGNGioy6tscgjrvUIqqiw0wTNVo0P6iD3a3oq4-X4mLq9p1PIlb5ID81S8BH-KcKxFp6XSkRiGF3A
+
+
+% Implementations:
+
+% Static:
+
+
+% DYNAMIC
+@article{prezza2017framework,
+  title={A framework of dynamic data structures for string processing},
+  author={Prezza, Nicola},
+  journal={arXiv preprint arXiv:1701.07238},
+  year={2017}
+} % https://arxiv.org/abs/1701.07238
+
+
+% Rank-select over bit-map
 @article{pibiri2020rank,
   title={Rank/Select Queries over Mutable Bitmaps},
   author={Pibiri, Giulio Ermanno and Kanda, Shunsuke},
@@ -62,6 +82,7 @@
   year={2020}
 } % https://arxiv.org/abs/2009.12809
 
+% Bit-vector using fenwick tree
 @article{marchini2020compact,
   title={Compact Fenwick trees for dynamic ranking and selection},
   author={Marchini, Stefano and Vigna, Sebastiano},
@@ -73,29 +94,20 @@
   publisher={Wiley Online Library}
 } % https://onlinelibrary.wiley.com/doi/full/10.1002/spe.2791?casa_token=UBfSNHXH8mEAAAAA%3A_XXoaDJlLJN3qzYhBR6suUP2T8wlXkW4-12fBmGC8jbNE8tf7TGBVCbRtRElSrEtY5yfOmaN3aFCmcsI
 
+% Implementations of 
 @manual{memoria,
-  title = "Genetics",
+  title = "Memoria",
   note = "\url{https://bitbucket.org/vsmirnov/memoria/wiki/Home}",
   year = "Retrieved May 30, 2020"
 } % https://bitbucket.org/vsmirnov/memoria/wiki/Home
 
 @manual{ds-vector,
-  title = "Genetics",
+  title = "ds-vector",
   note = "\url{https://code.google.com/archive/p/ds-vector/}",
   year = "Retrieved May 30, 2020"
 } % https://code.google.com/archive/p/ds-vector/
 
-@article{fenwick1994new,
-  title={A new data structure for cumulative frequency tables},
-  author={Fenwick, Peter M},
-  journal={Software: Practice and experience},
-  volume={24},
-  number={3},
-  pages={327--336},
-  year={1994},
-  publisher={Wiley Online Library}
-} % https://onlinelibrary.wiley.com/doi/abs/10.1002/spe.4380240306
-
+% sdsl
 @inproceedings{gog2014theory,
   title={From theory to practice: Plug and play with succinct data structures},
   author={Gog, Simon and Beller, Timo and Moffat, Alistair and Petri, Matthias},
@@ -105,11 +117,28 @@
   organization={Springer}
 } % sdsl - https://link.springer.com/chapter/10.1007/978-3-319-07959-2_28
 
-@manual{ds-vector,
-  title = "Genetics",
+@manual{pizza-chilli,
+  title = "Pizza-chilli framework",
   note = "\url{http://pizzachili.dcc.uchile.cl/}",
   year = "Retrieved May 30, 2020"
 } % http://pizzachili.dcc.uchile.cl/
+
+
+% bit-vector implementation cited by DYNAMIC
+@manual{ds-bitvector,
+  title = "Dynamic bit-vector impl.",
+  note = "\url{https://github.com/nicola-gigante/bitvector}",
+  year = "Retrieved May 30, 2020"
+} % https://github.com/nicola-gigante/bitvector
+@inproceedings{policriti2015average,
+  title={Average linear time and compressed space construction of the Burrows-Wheeler transform},
+  author={Policriti, Alberto and Gigante, Nicola and Prezza, Nicola},
+  booktitle={International Conference on Language and Automata Theory and Applications},
+  pages={587--598},
+  year={2015},
+  organization={Springer}
+} % https://link.springer.com/chapter/10.1007/978-3-319-15579-1_46
+
 
 @article{makinen2008dynamic,
   title={Dynamic entropy-compressed sequences and full-text indexes},
@@ -122,10 +151,28 @@
   publisher={ACM New York, NY, USA}
 }
 
-@inproceedings{fredman1989cell,
-  title={The cell probe complexity of dynamic data structures},
-  author={Fredman, Michael and Saks, Michael},
-  booktitle={Proceedings of the twenty-first annual ACM symposium on Theory of computing},
-  pages={345--354},
-  year={1989}
-} % https://dl.acm.org/doi/abs/10.1145/73007.73040?casa_token=NwRXAgySWSMAAAAA:DVGNGioy6tscgjrvUIqqiw0wTNVo0P6iD3a3oq4-X4mLq9p1PIlb5ID81S8BH-KcKxFp6XSkRiGF3A
+% Other:
+
+% Lempel Ziv compression algorithm
+@article{ziv1977universal,
+  title={A universal algorithm for sequential data compression},
+  author={Ziv, Jacob and Lempel, Abraham},
+  journal={IEEE Transactions on information theory},
+  volume={23},
+  number={3},
+  pages={337--343},
+  year={1977},
+  publisher={IEEE}
+} % https://ieeexplore.ieee.org/abstract/document/1055714
+
+% Fenwick tree
+@article{fenwick1994new,
+  title={A new data structure for cumulative frequency tables},
+  author={Fenwick, Peter M},
+  journal={Software: Practice and experience},
+  volume={24},
+  number={3},
+  pages={327--336},
+  year={1994},
+  publisher={Wiley Online Library}
+} % https://onlinelibrary.wiley.com/doi/abs/10.1002/spe.4380240306
