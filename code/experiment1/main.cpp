@@ -55,7 +55,21 @@ vector<bool> generate_random_bits(size_t n)
 }
 
 template <size_t kN, size_t kDensity, size_t kB, size_t kSB>
-void BM_Select(benchmark::State& state)
+static void BM_Rank(benchmark::State& state)
+{
+  auto bv = get_bit_vector(kN, kDensity);
+  rrr_vector<kB, int_vector<>, kSB> rrr(bv);
+  typename rrr_vector<kB>::rank_1_type rank_rrr(&rrr);
+  srand(0);
+  for (auto _ : state)
+  {
+    auto x = rank_rrr(rand() % kN);
+    benchmark::DoNotOptimize(x);
+  }
+}
+
+template <size_t kN, size_t kDensity, size_t kB, size_t kSB>
+static void BM_Select(benchmark::State& state)
 {
   auto bv = get_bit_vector(kN, kDensity);
   rrr_vector<kB, int_vector<>, kSB> rrr(bv);
@@ -67,18 +81,17 @@ void BM_Select(benchmark::State& state)
     benchmark::DoNotOptimize(x);
   }
 }
-BENCHMARK_TEMPLATE(BM_Select, 1 << 28, 5, 63, 32);
+BENCHMARK_TEMPLATE(BM_Select, 1 << 26, 5, 63, 32);
+BENCHMARK_TEMPLATE(BM_Rank, 1 << 26, 5, 63, 32);
 
 BENCHMARK_MAIN();
 
 /*int main()
 {
-  // auto vec = generate_random_bits(1'000);
-
-
+  auto bv = get_bit_vector(kN, kDensity);
   rrr_vector<kB, int_vector<>, kSB> rrr(bv);
 
-  cout << "Bit-vector of size " << bv.size() << "\n";
+  cout << "Bit-vector of size " << rrr.size() << "\n";
   cout << calculate_entropy(vec) << "\n";
 
   cout << "Size is " << 8 * size_in_bytes(rrr) << "\n";
