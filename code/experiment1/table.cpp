@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <array>
+#include <benchmark/benchmark.h>
 #include <iostream>
 #include <vector>
 
@@ -10,20 +11,20 @@ using std::vector;
 
 constexpr size_t kN = 1 << 3;
 constexpr size_t kC = 4;
-constexpr size_t maxn = 64;
+constexpr size_t kMaxBinN = 64;
 
 // from https://cp-algorithms.com/combinatorics/binomial-coefficients.html
 class BinCoeff
 {
 public:
-  using arr = std::array<std::array<std::size_t, maxn + 1>, maxn + 1>;
+  using Arr = std::array<std::array<std::size_t, kMaxBinN + 1>, kMaxBinN + 1>;
 
-  static constexpr arr set_data()
+  static constexpr Arr set_data()
   {
-    arr C = {};
+    Arr C = {};
 
     C[0][0] = 1;
-    for (size_t n = 1; n <= maxn; ++n)
+    for (size_t n = 1; n <= kMaxBinN; ++n)
     {
       C[n][0] = C[n][n] = 1;
       for (size_t k = 1; k < n; ++k)
@@ -34,7 +35,7 @@ public:
   }
 };
 
-static constexpr BinCoeff::arr nCrArr{BinCoeff::set_data()};
+static constexpr BinCoeff::Arr nCrArr{BinCoeff::set_data()};
 
 constexpr size_t nCr(size_t N, size_t K)
 {
@@ -85,12 +86,13 @@ vector<bool> get_ith(size_t n, size_t c, size_t target)
   for (size_t i = 0; i < n; ++i)
   {
     size_t bits_to_right = n - i - 1;
-    size_t x = nCr(bits_to_right, c);
-    if (target > x)
+    // size_t count_with_zero = nCr(bits_to_right, c);
+    size_t count_with_zero = nCrArr[bits_to_right][c];
+    if (target > count_with_zero)
     {
       --c;
       out.push_back(1);
-      target -= x;
+      target -= count_with_zero;
     }
     else
     {
@@ -101,8 +103,40 @@ vector<bool> get_ith(size_t n, size_t c, size_t target)
   return out;
 }
 
-int main()
+static void BM_SomeFunction1(benchmark::State& state)
 {
+  srand(0);
+  for (auto _ : state)
+  {
+    size_t a = rand() % kMaxBinN;
+    size_t b = rand() % kMaxBinN;
+    size_t x = nCrArr[a][b];
+    benchmark::DoNotOptimize(x);
+  }
+}
+
+static void BM_SomeFunction2(benchmark::State& state)
+{
+  srand(0);
+  for (auto _ : state)
+  {
+    size_t a = rand() % kMaxBinN;
+    size_t b = rand() % kMaxBinN;
+    size_t x = nCr(a, b);
+    benchmark::DoNotOptimize(x);
+  }
+}
+
+BENCHMARK(BM_SomeFunction1);
+BENCHMARK(BM_SomeFunction2);
+
+int main(int argc, char** argv)
+{
+  ::benchmark::Initialize(&argc, argv);
+  if (::benchmark::ReportUnrecognizedArguments(argc, argv))
+    return 1;
+  ::benchmark::RunSpecifiedBenchmarks();
+
   {
     // some tests
     static_assert(nCr(12, 4) == 495);
@@ -128,6 +162,16 @@ int main()
         return 0;
       }
     }
+
+    for (size_t i = 0; i + 1 < kMaxBinN; ++i)
+      for (size_t j = 0; j < i; ++j)
+      {
+        if (nCrArr[i][j] != nCr(i, j))
+        {
+          cout << "Error in binomial coeff... for " << i << " " << j << "\n";
+          return 0;
+        }
+      }
   }
 
   return 0;
