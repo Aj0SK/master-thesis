@@ -2,7 +2,6 @@
 #include <algorithm>
 #include <benchmark/benchmark.h>
 #include <cmath>
-#include <fstream>
 #include <iostream>
 #include <sdsl/int_vector.hpp>
 #include <sdsl/rrr_vector.hpp>
@@ -10,6 +9,7 @@
 
 using namespace sdsl;
 
+using std::cerr;
 using std::cout;
 using std::vector;
 
@@ -30,9 +30,10 @@ double calculate_entropy(const vector<bool>& input)
 bit_vector get_bit_vector(size_t n, size_t density)
 {
   vector<bool> vec;
-  for (size_t i = 0; i < n * density / 100ull; ++i)
+  size_t ones_count = n * density / 100ull;
+  for (size_t i = 0; i < ones_count; ++i)
     vec.push_back(true);
-  while (vec.size() != n)
+  for (size_t i = 0; i < n - ones_count; ++i)
     vec.push_back(false);
 
   random_shuffle(vec.begin(), vec.end());
@@ -54,37 +55,121 @@ vector<bool> generate_random_bits(size_t n)
   return bits;
 }
 
-template <size_t kN, size_t kDensity, size_t kB, size_t kSB>
+template <size_t kN, size_t kDensity, size_t kB, size_t kSB, bool random,
+          size_t iterations = 1'000>
 static void BM_Rank(benchmark::State& state)
 {
   auto bv = get_bit_vector(kN, kDensity);
   rrr_vector<kB, int_vector<>, kSB> rrr(bv);
   typename rrr_vector<kB>::rank_1_type rank_rrr(&rrr);
+
+  double ratio = 8.0 * size_in_bytes(rrr) / static_cast<double>(kN);
+  state.counters["Space"] = ratio;
+
   srand(0);
+
+  vector<size_t> indexes;
+  indexes.reserve(iterations);
+  for (size_t i = 0; i < iterations; ++i)
+  {
+    if constexpr (random)
+    {
+      indexes.push_back(rand() % kN);
+    }
+    else
+    {
+      indexes.push_back(i);
+    }
+  }
+
   for (auto _ : state)
   {
-    auto x = rank_rrr(rand() % kN);
-    benchmark::DoNotOptimize(x);
+    for (auto index : indexes)
+    {
+      auto x = rank_rrr(index);
+      benchmark::DoNotOptimize(x);
+    }
   }
 }
 
-template <size_t kN, size_t kDensity, size_t kB, size_t kSB>
+template <size_t kN, size_t kDensity, size_t kB, size_t kSB, bool random,
+          size_t iterations = 1'000>
 static void BM_Select(benchmark::State& state)
 {
   auto bv = get_bit_vector(kN, kDensity);
   rrr_vector<kB, int_vector<>, kSB> rrr(bv);
   typename rrr_vector<kB>::select_1_type select_rrr(&rrr);
+
+  double ratio = 8.0 * size_in_bytes(rrr) / static_cast<double>(kN);
+  state.counters["Space"] = ratio;
+
   srand(0);
+
+  vector<size_t> indexes;
+  indexes.reserve(iterations);
+  for (size_t i = 0; i < iterations; ++i)
+  {
+    if constexpr (random)
+    {
+      indexes.push_back(rand() % kN);
+    }
+    else
+    {
+      indexes.push_back(i);
+    }
+  }
+
   for (auto _ : state)
   {
-    auto x = select_rrr(rand() % kN);
-    benchmark::DoNotOptimize(x);
+    for (auto index : indexes)
+    {
+      auto x = select_rrr(index);
+      benchmark::DoNotOptimize(x);
+    }
   }
 }
-BENCHMARK_TEMPLATE(BM_Select, 1 << 26, 5, 63, 32);
-BENCHMARK_TEMPLATE(BM_Rank, 1 << 26, 5, 63, 32);
 
-BENCHMARK_MAIN();
+///// Select
+
+BENCHMARK_TEMPLATE(BM_Select, 1 << 24, 5, 15, 32, true);
+BENCHMARK_TEMPLATE(BM_Select, 1 << 24, 5, 15, 32, false);
+BENCHMARK_TEMPLATE(BM_Select, 1 << 24, 5, 63, 32, true);
+BENCHMARK_TEMPLATE(BM_Select, 1 << 24, 5, 63, 32, false);
+BENCHMARK_TEMPLATE(BM_Select, 1 << 24, 5, 127, 32, true);
+BENCHMARK_TEMPLATE(BM_Select, 1 << 24, 5, 127, 32, false);
+
+BENCHMARK_TEMPLATE(BM_Select, 1 << 24, 10, 15, 32, true);
+BENCHMARK_TEMPLATE(BM_Select, 1 << 24, 10, 15, 32, false);
+BENCHMARK_TEMPLATE(BM_Select, 1 << 24, 10, 63, 32, true);
+BENCHMARK_TEMPLATE(BM_Select, 1 << 24, 10, 63, 32, false);
+BENCHMARK_TEMPLATE(BM_Select, 1 << 24, 10, 127, 32, true);
+BENCHMARK_TEMPLATE(BM_Select, 1 << 24, 10, 127, 32, false);
+
+///// Rank
+
+BENCHMARK_TEMPLATE(BM_Rank, 1 << 24, 5, 15, 32, true);
+BENCHMARK_TEMPLATE(BM_Rank, 1 << 24, 5, 15, 32, false);
+BENCHMARK_TEMPLATE(BM_Rank, 1 << 24, 5, 63, 32, true);
+BENCHMARK_TEMPLATE(BM_Rank, 1 << 24, 5, 63, 32, false);
+BENCHMARK_TEMPLATE(BM_Rank, 1 << 24, 5, 127, 32, true);
+BENCHMARK_TEMPLATE(BM_Rank, 1 << 24, 5, 127, 32, false);
+
+BENCHMARK_TEMPLATE(BM_Rank, 1 << 24, 10, 15, 32, true);
+BENCHMARK_TEMPLATE(BM_Rank, 1 << 24, 10, 15, 32, false);
+BENCHMARK_TEMPLATE(BM_Rank, 1 << 24, 10, 63, 32, true);
+BENCHMARK_TEMPLATE(BM_Rank, 1 << 24, 10, 63, 32, false);
+BENCHMARK_TEMPLATE(BM_Rank, 1 << 24, 10, 127, 32, true);
+BENCHMARK_TEMPLATE(BM_Rank, 1 << 24, 10, 127, 32, false);
+
+// BENCHMARK_MAIN();
+
+int main(int argc, char** argv)
+{
+  ::benchmark::Initialize(&argc, argv);
+  if (::benchmark::ReportUnrecognizedArguments(argc, argv))
+    return 1;
+  ::benchmark::RunSpecifiedBenchmarks();
+}
 
 /*int main()
 {
