@@ -1,13 +1,40 @@
 #include <algorithm>
+#include <array>
 #include <iostream>
 #include <vector>
 
+using std::array;
 using std::cerr;
 using std::cout;
 using std::vector;
 
 constexpr size_t kN = 1 << 3;
 constexpr size_t kC = 4;
+constexpr size_t maxn = 64;
+
+// from https://cp-algorithms.com/combinatorics/binomial-coefficients.html
+class BinCoeff
+{
+public:
+  using arr = std::array<std::array<std::size_t, maxn + 1>, maxn + 1>;
+
+  static constexpr arr set_data()
+  {
+    arr C = {};
+
+    C[0][0] = 1;
+    for (size_t n = 1; n <= maxn; ++n)
+    {
+      C[n][0] = C[n][n] = 1;
+      for (size_t k = 1; k < n; ++k)
+        C[n][k] = C[n - 1][k - 1] + C[n - 1][k];
+    }
+
+    return C;
+  }
+};
+
+static constexpr BinCoeff::arr nCrArr{BinCoeff::set_data()};
 
 constexpr size_t nCr(size_t N, size_t K)
 {
@@ -82,6 +109,12 @@ int main()
     static_assert(nCr(45, 10) == 3'190'187'286);
     static_assert(nCr(30, 3) == 4'060);
     static_assert(nCr(25, 7) == 480'700);
+    static_assert(nCr(19, 3) == 969);
+
+    static_assert(nCrArr[12][4] == 495);
+    static_assert(nCrArr[45][10] == 3'190'187'286);
+    static_assert(nCrArr[25][7] == 480'700);
+
     size_t kTestN = 13;
     size_t kTestC = 3;
 
