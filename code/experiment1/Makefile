@@ -10,7 +10,13 @@ prepare:
 	mkdir -p $(BUILD)
 
 $(BUILD)/main.out: main.cpp
-	$(CXX) $(CXXFLAGS) main.cpp $(BENCHMARK) $(SDSL) -o $(BUILD)/main.out
+	$(CXX) $(CXXFLAGS) $< $(BENCHMARK) $(SDSL) -o $@
 
 benchmark: $(BUILD)/main.out
-	$(BUILD)/main.out > out.txt
+	$< > out.txt
+
+$(BUILD)/table.out: table.cpp
+	$(CXX) $(CXXFLAGS) $< $(BENCHMARK) -o $@
+
+table: $(BUILD)/table.out
+	$<
