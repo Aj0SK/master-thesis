@@ -4,7 +4,7 @@ SDSL = -lsdsl -ldivsufsort -ldivsufsort64
 BENCHMARK = -isystem benchmark/include -Lbenchmark/build/src -lbenchmark -lpthread
 BUILD = build
 
-all: prepare benchmark
+all: prepare table benchmark
 
 prepare:
 	mkdir -p $(BUILD)
