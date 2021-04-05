@@ -199,6 +199,8 @@ pair<uint16_t, uint16_t> divide(uint32_t x) { return {x >> 16, x}; }
 
 int main(int argc, char** argv)
 {
+  /*cout << "Testing 30 bit indexing."
+       << "\n";
   for (size_t k = 0; k <= 30; ++k)
   {
     size_t counter = 0;
@@ -219,12 +221,12 @@ int main(int argc, char** argv)
           {
             cerr << "!!!!!!!!!!Failed on " << k << " " << counter << "\n";
             auto [res_a, res_b] = divide(res);
-            cerr << "But is ";
+            cerr << "It is ";
             print_binary(res_a);
             cout << " and ";
             print_binary(res_b);
             cout << "\n";
-            cerr << "Should be ";
+            cerr << "but it should be ";
             print_binary(a);
             cout << " ";
             print_binary(b);
@@ -234,7 +236,7 @@ int main(int argc, char** argv)
           ++counter;
         }
     }
-  }
+  }*/
 
   ::benchmark::Initialize(&argc, argv);
   if (::benchmark::ReportUnrecognizedArguments(argc, argv))

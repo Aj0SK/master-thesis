@@ -1,4 +1,4 @@
-CXX = clang++
+CXX = g++
 CXXFLAGS = -std=c++17 -O3 -Wall -march=native -I ~/include -L ~/lib 
 MY = -I../shared
 SDSL = -lsdsl -ldivsufsort -ldivsufsort64
