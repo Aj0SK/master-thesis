@@ -11,7 +11,7 @@ using std::next_permutation;
 using std::pair;
 using std::vector;
 
-constexpr size_t kMaxBinN = 50;
+constexpr size_t kMaxBinN = 64;
 
 // stores C(n, k) for all pairs of n and k and should be computed at the
 // compile time
@@ -74,37 +74,50 @@ public:
   }
 };
 
+vector<pair<int, int>> get_test(int N)
+{
+  srand(2104);
+  vector<pair<int, int>> test;
+  test.reserve(10'000);
+  for (size_t i = 0; i < 10'000; ++i)
+  {
+    size_t k = 1 + rand() % (N - 1);
+    size_t index = rand() % nCrArr[N][k];
+    test.push_back({k, index});
+  }
+  return test;
+}
+
 static void BM_SDSL15(benchmark::State& state)
 {
-  srand(0);
+  auto test = get_test(15);
   for (auto _ : state)
   {
-    state.PauseTiming();
-    size_t k = 1 + rand() % 14;
-    size_t index = rand() % nCrArr[15][k];
-    state.ResumeTiming();
-    size_t x = binomial15::nr_to_bin(k, index);
-    benchmark::DoNotOptimize(x);
+    for (auto [k, index] : test)
+    {
+      auto x = binomial15::nr_to_bin(k, index);
+      benchmark::DoNotOptimize(x);
+    }
   }
 }
 
 template <typename T, size_t N> static void BM_FUNC(benchmark::State& state)
 {
-  srand(0);
+  auto test = get_test(N);
   for (auto _ : state)
   {
-    state.PauseTiming();
-    size_t k = 1 + rand() % (N - 1);
-    size_t index = rand() % nCrArr[N][k];
-    state.ResumeTiming();
-    size_t x = get_ith_in_lexicographic_sdsl<T>(N, k, index + 1);
-    benchmark::DoNotOptimize(x);
+    for (auto [k, index] : test)
+    {
+      auto x = get_ith_in_lexicographic_sdsl<T>(N, k, index + 1);
+      benchmark::DoNotOptimize(x);
+    }
   }
 }
 
 BENCHMARK(BM_SDSL15);
 BENCHMARK_TEMPLATE(BM_FUNC, uint32_t, 15);
 BENCHMARK_TEMPLATE(BM_FUNC, uint32_t, 30);
+BENCHMARK_TEMPLATE(BM_FUNC, uint64_t, 63);
 
 int main(int argc, char** argv)
 {
