@@ -115,7 +115,5 @@ int main(int argc, char** argv)
          << "\n";
   }
 
-  auto helper = sorted_bit_sequences(15, kTestC);
-
   return 0;
 }

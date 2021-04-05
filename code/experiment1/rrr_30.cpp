@@ -101,6 +101,51 @@ static void BM_SDSL15(benchmark::State& state)
   }
 }
 
+uint32_t f(size_t k, size_t index)
+{
+  size_t total = 0, ones_in_big = (k > 15) ? (k - 15) : 0;
+  for (; ones_in_big < std::min(k, static_cast<size_t>(15)); ++ones_in_big)
+  {
+    size_t will_add = nCrArr[15][ones_in_big] * nCrArr[15][k - ones_in_big];
+    if (total + will_add == index)
+    {
+      total += will_add;
+      ++ones_in_big;
+      break;
+    }
+    else if (total + will_add > index)
+    {
+      break;
+    }
+    total += will_add;
+  }
+
+  size_t ones_in_small = k - ones_in_big;
+
+  index -= total;
+
+  uint32_t small_index =
+      binomial15::nr_to_bin(ones_in_small, index % nCrArr[15][ones_in_small]);
+
+  uint32_t big_index =
+      binomial15::nr_to_bin(ones_in_big, index / nCrArr[15][ones_in_small]);
+
+  return (small_index << 16) | big_index;
+}
+
+static void BM_SDSL30(benchmark::State& state)
+{
+  auto test = get_test(30);
+  for (auto _ : state)
+  {
+    for (auto [k, index] : test)
+    {
+      auto x = f(k, index);
+      benchmark::DoNotOptimize(x);
+    }
+  }
+}
+
 template <typename T, size_t N> static void BM_FUNC(benchmark::State& state)
 {
   auto test = get_test(N);
@@ -115,19 +160,59 @@ template <typename T, size_t N> static void BM_FUNC(benchmark::State& state)
 }
 
 BENCHMARK(BM_SDSL15);
+BENCHMARK(BM_SDSL30);
 BENCHMARK_TEMPLATE(BM_FUNC, uint32_t, 15);
 BENCHMARK_TEMPLATE(BM_FUNC, uint32_t, 30);
 BENCHMARK_TEMPLATE(BM_FUNC, uint64_t, 63);
 
+pair<uint16_t, uint16_t> divide(uint32_t x) { return {x >> 16, x}; }
+
 int main(int argc, char** argv)
 {
+  /*for (size_t k = 0; k <= 30; ++k)
+  {
+    size_t counter = 0;
+    for (size_t ones_in_big = 0; ones_in_big <= k; ++ones_in_big)
+    {
+      size_t ones_in_small = k - ones_in_big;
+      for (size_t i = 0; i < nCrArr[15][ones_in_big]; ++i)
+        for (size_t j = 0; j < nCrArr[15][ones_in_small]; ++j)
+        {
+          uint16_t small = binomial15::nr_to_bin(ones_in_small, j);
+          uint16_t big = binomial15::nr_to_bin(ones_in_big, i);
+
+          uint32_t x = (small << 16) | big;
+
+          auto [a, b] = divide(x);
+
+          if (auto res = f(k, counter); x != res)
+          {
+            cerr << "!!!!!!!!!!Failed on " << k << " " << counter << "\n";
+            auto [res_a, res_b] = divide(res);
+            cerr << "But is ";
+            print_binary(res_a);
+            cout << " and ";
+            print_binary(res_b);
+            cout << "\n";
+            cerr << "Should be ";
+            print_binary(a);
+            cout << " ";
+            print_binary(b);
+            cout << "\n";
+            exit(0);
+          }
+          ++counter;
+        }
+    }
+  }*/
+
   ::benchmark::Initialize(&argc, argv);
   if (::benchmark::ReportUnrecognizedArguments(argc, argv))
     return 1;
   ::benchmark::RunSpecifiedBenchmarks();
 
   size_t counter = 0;
-  for (size_t k = 1; k < 15; ++k)
+  for (size_t k = 1; k <= 15; ++k)
   {
     for (size_t i = 0; i < nCrArr[15][k]; ++i)
     {
@@ -136,7 +221,7 @@ int main(int argc, char** argv)
 
       if (x != y)
       {
-        cerr << "Problem in impl."
+        cerr << "Problem in impl 15."
              << "\n";
         return 1;
       }
@@ -144,7 +229,7 @@ int main(int argc, char** argv)
     }
   }
 
-  cout << "Performed " << counter << " tests."
+  cout << "Performed " << counter << " 15-bit tests."
        << "\n";
 
   return 0;
