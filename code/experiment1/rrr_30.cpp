@@ -130,9 +130,11 @@ auto helper = []() {
 
 uint32_t f(size_t k, size_t index)
 {
-  size_t ones_in_big = (k > 15) ? (k - 15) : 0;
+  const size_t ones_in_big_lower = (k > 15) ? (k - 15) : 0;
+  const size_t ones_in_big_upper = std::min(k, static_cast<size_t>(15));
 
-  for (; ones_in_big < std::min(k, static_cast<size_t>(15)); ++ones_in_big)
+  size_t ones_in_big = ones_in_big_lower;
+  for (; ones_in_big < ones_in_big_upper; ++ones_in_big)
   {
     if (auto curr_index = helper[k][ones_in_big + 1]; curr_index >= index)
     {
@@ -141,6 +143,12 @@ uint32_t f(size_t k, size_t index)
       break;
     }
   }
+
+  /*auto it = std::upper_bound(helper[k].begin() + ones_in_big_lower,
+                             helper[k].begin() + ones_in_big_upper, index);
+  size_t ones_in_big = std::distance(helper[k].begin(), it);
+  if (helper[k][ones_in_big] > index)
+    --ones_in_big;*/
 
   index -= helper[k][ones_in_big];
 
