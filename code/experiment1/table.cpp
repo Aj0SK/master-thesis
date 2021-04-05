@@ -1,8 +1,4 @@
-#include <algorithm>
-#include <array>
 #include <benchmark/benchmark.h>
-#include <bitset>
-#include <climits>
 #include <iostream>
 #include <vector>
 
@@ -12,7 +8,6 @@
 using std::array;
 using std::cerr;
 using std::cout;
-using std::pair;
 using std::vector;
 
 constexpr size_t kMaxBinN = 64;
@@ -68,43 +63,6 @@ static void BM_GetIthFast(benchmark::State& state)
 
 BENCHMARK(BM_GetIthFast);
 
-// source: sdsl-lite
-// link:
-// https://github.com/simongog/sdsl-lite/blob/master/include/sdsl/rrr_vector_15.hpp
-pair<vector<uint32_t>, vector<uint32_t>> SDSL_lite_15()
-{
-  constexpr size_t n = 15;
-
-  vector<uint32_t> m_nr_to_bin, m_bin_to_nr;
-  m_nr_to_bin.resize(1 << n);
-  m_bin_to_nr.resize(1 << n);
-
-  for (int i = 0, cnt = 0, class_cnt = 0; i <= n; ++i)
-  {
-    class_cnt = 0;
-    std::vector<bool> b(n, 0);
-    for (int j = 0; j < i; ++j)
-      b[n - j - 1] = 1;
-    do
-    {
-      uint32_t x = 0;
-      for (int k = 0; k < n; ++k)
-        x |= ((uint32_t)b[n - k - 1]) << (n - 1 - k);
-      m_nr_to_bin[cnt] = x;
-      m_bin_to_nr[x] = class_cnt;
-      ++cnt;
-      ++class_cnt;
-    } while (next_permutation(b.begin(), b.end()));
-  }
-
-  return {m_nr_to_bin, m_bin_to_nr};
-}
-
-template <typename T> void print_binary(T x)
-{
-  cout << std::bitset<8 * sizeof(x)>(x);
-}
-
 int main(int argc, char** argv)
 {
   ::benchmark::Initialize(&argc, argv);
@@ -158,7 +116,6 @@ int main(int argc, char** argv)
   }
 
   auto helper = sorted_bit_sequences(15, kTestC);
-  auto [to_bin_sdsl16, from_bin_sdsl] = SDSL_lite_15();
 
   return 0;
 }
