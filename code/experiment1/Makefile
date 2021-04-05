@@ -1,5 +1,6 @@
 CXX = g++
 CXXFLAGS = -std=c++17 -O2 -march=native -I ~/include -L ~/lib
+MY = -I../shared
 SDSL = -lsdsl -ldivsufsort -ldivsufsort64
 BENCHMARK = -isystem benchmark/include -Lbenchmark/build/src -lbenchmark -lpthread
 BUILD = build
@@ -16,7 +17,7 @@ benchmark: $(BUILD)/main.out
 	$< > out.txt
 
 $(BUILD)/table.out: table.cpp
-	$(CXX) $(CXXFLAGS) $< $(BENCHMARK) -o $@
+	$(CXX) $(CXXFLAGS) $(MY) $< $(BENCHMARK) -o $@
 
 table: $(BUILD)/table.out
 	$<
