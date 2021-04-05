@@ -75,34 +75,7 @@ public:
   }
 };
 
-vector<pair<int, int>> get_test(int N)
-{
-  srand(2104);
-  vector<pair<int, int>> test;
-  test.reserve(10'000);
-  for (size_t i = 0; i < 10'000; ++i)
-  {
-    size_t k = 1 + rand() % (N - 1);
-    size_t index = rand() % nCrArr[N][k];
-    test.push_back({k, index});
-  }
-  return test;
-}
-
-static void BM_SDSL15(benchmark::State& state)
-{
-  auto test = get_test(15);
-  for (auto _ : state)
-  {
-    for (auto [k, index] : test)
-    {
-      auto x = binomial15::nr_to_bin(k, index);
-      benchmark::DoNotOptimize(x);
-    }
-  }
-}
-
-auto to_add = []() {
+static auto to_add = []() {
   std::array<std::array<size_t, 16>, 31> x;
   for (size_t k = 0; k < 31; ++k)
     for (size_t ones_in_big = 0; ones_in_big < 16; ++ones_in_big)
@@ -112,8 +85,8 @@ auto to_add = []() {
   return x;
 }();
 
-auto helper = []() {
-  std::array<std::array<size_t, 16>, 31> x = {0};
+static auto helper = []() {
+  std::array<std::array<size_t, 16>, 31> x;
   for (size_t k = 0; k < 31; ++k)
   {
     size_t total = 0;
@@ -161,6 +134,36 @@ uint32_t f(size_t k, size_t index)
       binomial15::nr_to_bin(ones_in_big, index / nCrArr[15][ones_in_small]);
 
   return (small_index << 16) | big_index;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Benchmarks
+
+vector<pair<int, int>> get_test(int N)
+{
+  srand(2104);
+  vector<pair<int, int>> test;
+  test.reserve(10'000);
+  for (size_t i = 0; i < 10'000; ++i)
+  {
+    size_t k = 1 + rand() % (N - 1);
+    size_t index = rand() % nCrArr[N][k];
+    test.push_back({k, index});
+  }
+  return test;
+}
+
+static void BM_SDSL15(benchmark::State& state)
+{
+  auto test = get_test(15);
+  for (auto _ : state)
+  {
+    for (auto [k, index] : test)
+    {
+      auto x = binomial15::nr_to_bin(k, index);
+      benchmark::DoNotOptimize(x);
+    }
+  }
 }
 
 static void BM_SDSL30(benchmark::State& state)
