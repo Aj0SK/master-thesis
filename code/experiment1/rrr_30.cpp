@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <array>
 #include <benchmark/benchmark.h>
 #include <iostream>
 #include <vector>
@@ -101,28 +102,49 @@ static void BM_SDSL15(benchmark::State& state)
   }
 }
 
-uint32_t f(size_t k, size_t index)
-{
-  size_t total = 0, ones_in_big = (k > 15) ? (k - 15) : 0;
-  for (; ones_in_big < std::min(k, static_cast<size_t>(15)); ++ones_in_big)
+auto to_add = []() {
+  std::array<std::array<size_t, 16>, 31> x;
+  for (size_t k = 0; k < 31; ++k)
+    for (size_t ones_in_big = 0; ones_in_big < 16; ++ones_in_big)
+    {
+      x[k][ones_in_big] = nCrArr[15][ones_in_big] * nCrArr[15][k - ones_in_big];
+    }
+  return x;
+}();
+
+auto helper = []() {
+  std::array<std::array<size_t, 16>, 31> x = {0};
+  for (size_t k = 0; k < 31; ++k)
   {
-    size_t will_add = nCrArr[15][ones_in_big] * nCrArr[15][k - ones_in_big];
-    if (total + will_add == index)
+    size_t total = 0;
+    for (size_t ones_in_big = (k > 15) ? (k - 15) : 0;
+         ones_in_big <= std::min(k, static_cast<size_t>(15)); ++ones_in_big)
     {
-      total += will_add;
-      ++ones_in_big;
-      break;
+      x[k][ones_in_big] = total;
+      total += to_add[k][ones_in_big];
     }
-    else if (total + will_add > index)
-    {
-      break;
-    }
-    total += will_add;
   }
 
-  size_t ones_in_small = k - ones_in_big;
+  return x;
+}();
 
-  index -= total;
+uint32_t f(size_t k, size_t index)
+{
+  size_t ones_in_big = (k > 15) ? (k - 15) : 0;
+
+  for (; ones_in_big < std::min(k, static_cast<size_t>(15)); ++ones_in_big)
+  {
+    if (auto curr_index = helper[k][ones_in_big + 1]; curr_index >= index)
+    {
+      if (curr_index == index)
+        ++ones_in_big;
+      break;
+    }
+  }
+
+  index -= helper[k][ones_in_big];
+
+  size_t ones_in_small = k - ones_in_big;
 
   uint32_t small_index =
       binomial15::nr_to_bin(ones_in_small, index % nCrArr[15][ones_in_small]);
@@ -169,7 +191,7 @@ pair<uint16_t, uint16_t> divide(uint32_t x) { return {x >> 16, x}; }
 
 int main(int argc, char** argv)
 {
-  /*for (size_t k = 0; k <= 30; ++k)
+  for (size_t k = 0; k <= 30; ++k)
   {
     size_t counter = 0;
     for (size_t ones_in_big = 0; ones_in_big <= k; ++ones_in_big)
@@ -204,7 +226,7 @@ int main(int argc, char** argv)
           ++counter;
         }
     }
-  }*/
+  }
 
   ::benchmark::Initialize(&argc, argv);
   if (::benchmark::ReportUnrecognizedArguments(argc, argv))

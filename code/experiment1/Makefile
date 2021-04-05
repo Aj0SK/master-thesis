@@ -1,5 +1,5 @@
 CXX = clang++
-CXXFLAGS = -std=c++17 -O2 -Wall -march=native -I ~/include -L ~/lib 
+CXXFLAGS = -std=c++17 -O3 -Wall -march=native -I ~/include -L ~/lib 
 MY = -I../shared
 SDSL = -lsdsl -ldivsufsort -ldivsufsort64
 BENCHMARK = -isystem benchmark/include -Lbenchmark/build/src -lbenchmark -lpthread
