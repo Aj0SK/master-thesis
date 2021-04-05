@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <benchmark/benchmark.h>
 #include <iostream>
 #include <vector>
 
@@ -9,6 +10,12 @@ using std::cout;
 using std::next_permutation;
 using std::pair;
 using std::vector;
+
+constexpr size_t kMaxBinN = 50;
+
+// stores C(n, k) for all pairs of n and k and should be computed at the
+// compile time
+static constexpr auto nCrArr{BinCoeff<kMaxBinN>::set_data()};
 
 // source: sdsl-lite
 // link:
@@ -67,30 +74,65 @@ public:
   }
 };
 
-int main()
+static void BM_SDSL15(benchmark::State& state)
 {
-  // sdsl
-
-  for (size_t i = 1; i < 15; ++i)
+  srand(0);
+  for (auto _ : state)
   {
-    cout << i;
-    cout << ":";
-    auto x = binomial15::nr_to_bin(i, 1);
-    print_binary(x);
-    cout << "\n";
+    state.PauseTiming();
+    size_t k = 1 + rand() % 14;
+    size_t index = rand() % nCrArr[15][k];
+    state.ResumeTiming();
+    size_t x = binomial15::nr_to_bin(k, index);
+    benchmark::DoNotOptimize(x);
+  }
+}
 
-    auto y = get_ith_in_lexicographic_sdsl<uint32_t>(15, i, 2);
-    cout << "alt:";
-    print_binary(y);
-    cout << "\n";
+template <typename T, size_t N> static void BM_FUNC(benchmark::State& state)
+{
+  srand(0);
+  for (auto _ : state)
+  {
+    state.PauseTiming();
+    size_t k = 1 + rand() % (N - 1);
+    size_t index = rand() % nCrArr[N][k];
+    state.ResumeTiming();
+    size_t x = get_ith_in_lexicographic_sdsl<T>(N, k, index + 1);
+    benchmark::DoNotOptimize(x);
+  }
+}
 
-    if (x != y)
+BENCHMARK(BM_SDSL15);
+BENCHMARK_TEMPLATE(BM_FUNC, uint32_t, 15);
+BENCHMARK_TEMPLATE(BM_FUNC, uint32_t, 30);
+
+int main(int argc, char** argv)
+{
+  ::benchmark::Initialize(&argc, argv);
+  if (::benchmark::ReportUnrecognizedArguments(argc, argv))
+    return 1;
+  ::benchmark::RunSpecifiedBenchmarks();
+
+  size_t counter = 0;
+  for (size_t k = 1; k < 15; ++k)
+  {
+    for (size_t i = 0; i < nCrArr[15][k]; ++i)
     {
-      cerr << "Problem in impl."
-           << "\n";
-      return 1;
+      auto x = binomial15::nr_to_bin(k, i);
+      auto y = get_ith_in_lexicographic_sdsl<uint32_t>(15, k, i + 1);
+
+      if (x != y)
+      {
+        cerr << "Problem in impl."
+             << "\n";
+        return 1;
+      }
+      ++counter;
     }
   }
+
+  cout << "Performed " << counter << " tests."
+       << "\n";
 
   return 0;
 }
