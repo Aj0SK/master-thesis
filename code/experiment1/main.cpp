@@ -137,6 +137,8 @@ BENCHMARK_TEMPLATE(BM_Select, 1 << 24, 5, 63, 32, true);
 BENCHMARK_TEMPLATE(BM_Select, 1 << 24, 5, 63, 32, false);
 BENCHMARK_TEMPLATE(BM_Select, 1 << 24, 5, 127, 32, true);
 BENCHMARK_TEMPLATE(BM_Select, 1 << 24, 5, 127, 32, false);
+BENCHMARK_TEMPLATE(BM_Select, 1 << 24, 5, 255, 32, true);
+BENCHMARK_TEMPLATE(BM_Select, 1 << 24, 5, 255, 32, false);
 
 BENCHMARK_TEMPLATE(BM_Select, 1 << 24, 10, 15, 32, true);
 BENCHMARK_TEMPLATE(BM_Select, 1 << 24, 10, 15, 32, false);
@@ -144,6 +146,8 @@ BENCHMARK_TEMPLATE(BM_Select, 1 << 24, 10, 63, 32, true);
 BENCHMARK_TEMPLATE(BM_Select, 1 << 24, 10, 63, 32, false);
 BENCHMARK_TEMPLATE(BM_Select, 1 << 24, 10, 127, 32, true);
 BENCHMARK_TEMPLATE(BM_Select, 1 << 24, 10, 127, 32, false);
+BENCHMARK_TEMPLATE(BM_Select, 1 << 24, 10, 255, 32, true);
+BENCHMARK_TEMPLATE(BM_Select, 1 << 24, 10, 255, 32, false);
 
 ///// Rank
 
@@ -153,6 +157,8 @@ BENCHMARK_TEMPLATE(BM_Rank, 1 << 24, 5, 63, 32, true);
 BENCHMARK_TEMPLATE(BM_Rank, 1 << 24, 5, 63, 32, false);
 BENCHMARK_TEMPLATE(BM_Rank, 1 << 24, 5, 127, 32, true);
 BENCHMARK_TEMPLATE(BM_Rank, 1 << 24, 5, 127, 32, false);
+BENCHMARK_TEMPLATE(BM_Rank, 1 << 24, 5, 255, 32, true);
+BENCHMARK_TEMPLATE(BM_Rank, 1 << 24, 5, 255, 32, false);
 
 BENCHMARK_TEMPLATE(BM_Rank, 1 << 24, 10, 15, 32, true);
 BENCHMARK_TEMPLATE(BM_Rank, 1 << 24, 10, 15, 32, false);
@@ -160,6 +166,8 @@ BENCHMARK_TEMPLATE(BM_Rank, 1 << 24, 10, 63, 32, true);
 BENCHMARK_TEMPLATE(BM_Rank, 1 << 24, 10, 63, 32, false);
 BENCHMARK_TEMPLATE(BM_Rank, 1 << 24, 10, 127, 32, true);
 BENCHMARK_TEMPLATE(BM_Rank, 1 << 24, 10, 127, 32, false);
+BENCHMARK_TEMPLATE(BM_Rank, 1 << 24, 10, 255, 32, true);
+BENCHMARK_TEMPLATE(BM_Rank, 1 << 24, 10, 255, 32, false);
 
 // BENCHMARK_MAIN();
 

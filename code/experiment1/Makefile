@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -std=c++17 -O2 -Wall -Wextra -march=native -I ~/include -L ~/lib
+CXXFLAGS = -std=c++17 -O3 -Wall -Wextra -march=native -I ~/include -L ~/lib
 MY = -I../shared
 SDSL = -lsdsl -ldivsufsort -ldivsufsort64
 BENCHMARK = -isystem benchmark/include -Lbenchmark/build/src -lbenchmark -lpthread
@@ -23,7 +23,7 @@ table: $(BUILD)/table.out
 	$<
 
 $(BUILD)/rrr_30.out: rrr_30.cpp ../shared/*.h
-	$(CXX) $(CXXFLAGS) $(MY) $< $(BENCHMARK) -o $@
+	$(CXX) $(CXXFLAGS) $(MY) $< $(BENCHMARK) $(SDSL) -o $@
 
 rrr_30: $(BUILD)/rrr_30.out
 	$<
