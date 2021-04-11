@@ -16,141 +16,148 @@ using std::next_permutation;
 using std::pair;
 using std::vector;
 
-constexpr bool kTest = false;
+constexpr bool kTest = true;
 constexpr size_t kMaxBinN = 64;
 
-// stores C(n, k) for all pairs of n and k and should be computed at the
-// compile time
-static constexpr auto nCrArr{BinCoeff<kMaxBinN>::set_data()};
-
-static auto to_add = []() {
-  std::array<std::array<size_t, 16>, 31> x;
-  for (size_t k = 0; k < 31; ++k)
-    for (size_t ones_in_big = 0; ones_in_big < 16; ++ones_in_big)
-    {
-      x[k][ones_in_big] = nCrArr[15][ones_in_big] * nCrArr[15][k - ones_in_big];
-    }
-  return x;
-}();
-
-static auto helper = []() {
-  std::array<std::array<uint32_t, 16>, 31> x;
-  for (size_t k = 0; k < 31; ++k)
+class RRR30_Helper
+{
+private:
+  inline static struct impl
   {
-    std::fill(x[k].begin(), x[k].end(), 0);
-    uint32_t total = 0;
-    for (size_t ones_in_big = (k > 15) ? (k - 15) : 0;
-         ones_in_big <= std::min(k, static_cast<size_t>(15)); ++ones_in_big)
+    std::array<std::array<size_t, 16>, 31> to_add;
+    std::array<std::array<uint32_t, 16>, 31> helper;
+    impl()
     {
-      x[k][ones_in_big] = total;
-      total += to_add[k][ones_in_big];
+      for (size_t k = 0; k < 31; ++k)
+        for (size_t ones_in_big = 0; ones_in_big < 16; ++ones_in_big)
+        {
+          to_add[k][ones_in_big] =
+              nCrArr[15][ones_in_big] * nCrArr[15][k - ones_in_big];
+        }
+
+      for (size_t k = 0; k < 31; ++k)
+      {
+        std::fill(helper[k].begin(), helper[k].end(), 0);
+        uint32_t total = 0;
+        for (size_t ones_in_big = (k > 15) ? (k - 15) : 0;
+             ones_in_big <= std::min(k, static_cast<size_t>(15)); ++ones_in_big)
+        {
+          helper[k][ones_in_big] = total;
+          total += to_add[k][ones_in_big];
+        }
+      }
     }
+  } data;
+
+public:
+  // stores C(n, k) for all pairs of n and k and should be computed at the
+  // compile time
+  static constexpr auto nCrArr{BinCoeff<kMaxBinN>::set_data()};
+
+  static inline uint32_t f(size_t k, uint32_t index)
+  {
+    const size_t ones_in_big_lower = (k > 15) ? (k - 15) : 0;
+    const size_t ones_in_big_upper = std::min(k, static_cast<size_t>(15));
+
+    size_t ones_in_big = ones_in_big_lower;
+    for (; ones_in_big < ones_in_big_upper; ++ones_in_big)
+    {
+      if (auto curr_index = data.helper[k][ones_in_big + 1];
+          curr_index >= index)
+      {
+        if (curr_index == index)
+          ++ones_in_big;
+        break;
+      }
+    }
+
+    index -= data.helper[k][ones_in_big];
+
+    size_t ones_in_small = k - ones_in_big;
+
+    uint32_t small_index =
+        binomial15::nr_to_bin(ones_in_small, index % nCrArr[15][ones_in_small]);
+
+    uint32_t big_index =
+        binomial15::nr_to_bin(ones_in_big, index / nCrArr[15][ones_in_small]);
+
+    return (small_index << 16) | big_index;
   }
 
-  return x;
-}();
-
-uint32_t f(size_t k, uint32_t index)
-{
-  const size_t ones_in_big_lower = (k > 15) ? (k - 15) : 0;
-  const size_t ones_in_big_upper = std::min(k, static_cast<size_t>(15));
-
-  size_t ones_in_big = ones_in_big_lower;
-  for (; ones_in_big < ones_in_big_upper; ++ones_in_big)
+  static inline uint32_t f_binary(size_t k, uint32_t index)
   {
-    if (auto curr_index = helper[k][ones_in_big + 1]; curr_index >= index)
-    {
-      if (curr_index == index)
-        ++ones_in_big;
-      break;
-    }
-  }
+    const size_t ones_in_big_lower = (k > 15) ? (k - 15) : 0;
+    const size_t ones_in_big_upper = std::min(k, static_cast<size_t>(15));
 
-  index -= helper[k][ones_in_big];
-
-  size_t ones_in_small = k - ones_in_big;
-
-  uint32_t small_index =
-      binomial15::nr_to_bin(ones_in_small, index % nCrArr[15][ones_in_small]);
-
-  uint32_t big_index =
-      binomial15::nr_to_bin(ones_in_big, index / nCrArr[15][ones_in_small]);
-
-  return (small_index << 16) | big_index;
-}
-
-uint32_t f_binary(size_t k, uint32_t index)
-{
-  const size_t ones_in_big_lower = (k > 15) ? (k - 15) : 0;
-  const size_t ones_in_big_upper = std::min(k, static_cast<size_t>(15));
-
-  auto it = std::upper_bound(helper[k].begin() + ones_in_big_lower,
-                             helper[k].begin() + ones_in_big_upper, index);
-  size_t ones_in_big = std::distance(helper[k].begin(), it);
-  if (helper[k][ones_in_big] > index)
-    --ones_in_big;
-
-  index -= helper[k][ones_in_big];
-
-  size_t ones_in_small = k - ones_in_big;
-
-  uint32_t small_index =
-      binomial15::nr_to_bin(ones_in_small, index % nCrArr[15][ones_in_small]);
-
-  uint32_t big_index =
-      binomial15::nr_to_bin(ones_in_big, index / nCrArr[15][ones_in_small]);
-
-  return (small_index << 16) | big_index;
-}
-
-uint32_t f_simd(size_t k, uint32_t index)
-{
-  const size_t ones_in_big_upper = std::min(k, static_cast<size_t>(15));
-
-  const __m128i keys = _mm_set1_epi32(index);
-  const __m128i vec1 =
-      _mm_loadu_si128(reinterpret_cast<const __m128i*>(&helper[k][0]));
-  const __m128i vec2 =
-      _mm_loadu_si128(reinterpret_cast<const __m128i*>(&helper[k][4]));
-  const __m128i vec3 =
-      _mm_loadu_si128(reinterpret_cast<const __m128i*>(&helper[k][8]));
-  const __m128i vec4 =
-      _mm_loadu_si128(reinterpret_cast<const __m128i*>(&helper[k][12]));
-
-  const __m128i cmp1 = _mm_cmpgt_epi32(vec1, keys);
-  const __m128i cmp2 = _mm_cmpgt_epi32(vec2, keys);
-  const __m128i cmp3 = _mm_cmpgt_epi32(vec3, keys);
-  const __m128i cmp4 = _mm_cmpgt_epi32(vec4, keys);
-
-  const __m128i tmp1 = _mm_packs_epi32(cmp1, cmp2);
-  const __m128i tmp2 = _mm_packs_epi32(cmp3, cmp4);
-  const uint32_t mask1 = _mm_movemask_epi8(tmp1);
-  const uint32_t mask2 = _mm_movemask_epi8(tmp2);
-
-  const uint32_t mask = (mask2 << 16) | mask1;
-
-  size_t ones_in_big = ones_in_big_upper;
-
-  if (mask != 0)
-  {
-    ones_in_big = (1 + __builtin_ctz(mask)) / 2;
-
-    if (helper[k][ones_in_big] > index)
+    auto it =
+        std::upper_bound(data.helper[k].begin() + ones_in_big_lower,
+                         data.helper[k].begin() + ones_in_big_upper, index);
+    size_t ones_in_big = std::distance(data.helper[k].begin(), it);
+    if (data.helper[k][ones_in_big] > index)
       --ones_in_big;
+
+    index -= data.helper[k][ones_in_big];
+
+    size_t ones_in_small = k - ones_in_big;
+
+    uint32_t small_index =
+        binomial15::nr_to_bin(ones_in_small, index % nCrArr[15][ones_in_small]);
+
+    uint32_t big_index =
+        binomial15::nr_to_bin(ones_in_big, index / nCrArr[15][ones_in_small]);
+
+    return (small_index << 16) | big_index;
   }
 
-  index -= helper[k][ones_in_big];
+  static inline uint32_t f_simd(size_t k, uint32_t index)
+  {
+    const size_t ones_in_big_upper = std::min(k, static_cast<size_t>(15));
 
-  size_t ones_in_small = k - ones_in_big;
+    const __m128i keys = _mm_set1_epi32(index);
+    const __m128i vec1 =
+        _mm_loadu_si128(reinterpret_cast<const __m128i*>(&data.helper[k][0]));
+    const __m128i vec2 =
+        _mm_loadu_si128(reinterpret_cast<const __m128i*>(&data.helper[k][4]));
+    const __m128i vec3 =
+        _mm_loadu_si128(reinterpret_cast<const __m128i*>(&data.helper[k][8]));
+    const __m128i vec4 =
+        _mm_loadu_si128(reinterpret_cast<const __m128i*>(&data.helper[k][12]));
 
-  uint32_t small_index =
-      binomial15::nr_to_bin(ones_in_small, index % nCrArr[15][ones_in_small]);
+    const __m128i cmp1 = _mm_cmpgt_epi32(vec1, keys);
+    const __m128i cmp2 = _mm_cmpgt_epi32(vec2, keys);
+    const __m128i cmp3 = _mm_cmpgt_epi32(vec3, keys);
+    const __m128i cmp4 = _mm_cmpgt_epi32(vec4, keys);
 
-  uint32_t big_index =
-      binomial15::nr_to_bin(ones_in_big, index / nCrArr[15][ones_in_small]);
+    const __m128i tmp1 = _mm_packs_epi32(cmp1, cmp2);
+    const __m128i tmp2 = _mm_packs_epi32(cmp3, cmp4);
+    const uint32_t mask1 = _mm_movemask_epi8(tmp1);
+    const uint32_t mask2 = _mm_movemask_epi8(tmp2);
 
-  return (small_index << 16) | big_index;
-}
+    const uint32_t mask = (mask2 << 16) | mask1;
+
+    size_t ones_in_big = ones_in_big_upper;
+
+    if (mask != 0)
+    {
+      ones_in_big = (1 + __builtin_ctz(mask)) / 2;
+
+      if (data.helper[k][ones_in_big] > index)
+        --ones_in_big;
+    }
+
+    index -= data.helper[k][ones_in_big];
+
+    size_t ones_in_small = k - ones_in_big;
+
+    uint32_t small_index =
+        binomial15::nr_to_bin(ones_in_small, index % nCrArr[15][ones_in_small]);
+
+    uint32_t big_index =
+        binomial15::nr_to_bin(ones_in_big, index / nCrArr[15][ones_in_small]);
+
+    return (small_index << 16) | big_index;
+  }
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 // Benchmarks
@@ -163,7 +170,7 @@ vector<pair<int, int>> get_test(int N)
   for (size_t i = 0; i < 10'000; ++i)
   {
     size_t k = 1 + rand() % (N - 1);
-    size_t index = rand() % nCrArr[N][k];
+    size_t index = rand() % RRR30_Helper::nCrArr[N][k];
     test.push_back({k, index});
   }
   return test;
@@ -189,7 +196,7 @@ static void BM_SDSL30_LINEAR(benchmark::State& state)
   {
     for (auto [k, index] : test)
     {
-      auto x = f(k, index);
+      auto x = RRR30_Helper::f(k, index);
       benchmark::DoNotOptimize(x);
     }
   }
@@ -202,7 +209,7 @@ static void BM_SDSL30_LINEAR_SIMD(benchmark::State& state)
   {
     for (auto [k, index] : test)
     {
-      auto x = f_simd(k, index);
+      auto x = RRR30_Helper::f_simd(k, index);
       benchmark::DoNotOptimize(x);
     }
   }
@@ -215,7 +222,7 @@ static void BM_SDSL30_BINARY(benchmark::State& state)
   {
     for (auto [k, index] : test)
     {
-      auto x = f_binary(k, index);
+      auto x = RRR30_Helper::f_binary(k, index);
       benchmark::DoNotOptimize(x);
     }
   }
@@ -257,8 +264,8 @@ int main(int argc, char** argv)
       for (size_t ones_in_big = 0; ones_in_big <= k; ++ones_in_big)
       {
         size_t ones_in_small = k - ones_in_big;
-        for (size_t i = 0; i < nCrArr[15][ones_in_big]; ++i)
-          for (size_t j = 0; j < nCrArr[15][ones_in_small]; ++j)
+        for (size_t i = 0; i < RRR30_Helper::nCrArr[15][ones_in_big]; ++i)
+          for (size_t j = 0; j < RRR30_Helper::nCrArr[15][ones_in_small]; ++j)
           {
             uint16_t small = binomial15::nr_to_bin(ones_in_small, j);
             uint16_t big = binomial15::nr_to_bin(ones_in_big, i);
@@ -267,22 +274,12 @@ int main(int argc, char** argv)
 
             auto [a, b] = divide(x);
 
-            if (auto res = f(k, counter); x != res ||
-                                          res != f_simd(k, counter) ||
-                                          res != f_binary(k, counter))
+            if (auto res = RRR30_Helper::f(k, counter);
+                x != res || res != RRR30_Helper::f_simd(k, counter) ||
+                res != RRR30_Helper::f_binary(k, counter))
             {
               cerr << "!!!!!!!!!!Failed on " << k << " " << counter << "\n";
               auto [res_a, res_b] = divide(res);
-              cerr << "It is ";
-              print_binary(res_a);
-              cout << " and ";
-              print_binary(res_b);
-              cout << "\n";
-              cerr << "but it should be ";
-              print_binary(a);
-              cout << " ";
-              print_binary(b);
-              cout << "\n";
               exit(0);
             }
             ++counter;
@@ -299,7 +296,7 @@ int main(int argc, char** argv)
   size_t counter = 0;
   for (size_t k = 1; k <= 15; ++k)
   {
-    for (size_t i = 0; i < nCrArr[15][k]; ++i)
+    for (size_t i = 0; i < RRR30_Helper::nCrArr[15][k]; ++i)
     {
       auto x = binomial15::nr_to_bin(k, i);
       auto y = get_ith_in_lexicographic_sdsl<uint32_t>(15, k, i + 1);
