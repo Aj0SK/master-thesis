@@ -1,15 +1,13 @@
+#include "bin_helper.h"
+#include "bit_sequence.h"
+
 #include <algorithm>
 #include <array>
 #include <benchmark/benchmark.h>
-#include <immintrin.h>
 #include <iostream>
 #include <sdsl/rrr_helper.hpp>
 #include <sdsl/rrr_vector_15.hpp>
 #include <vector>
-#include <xmmintrin.h>
-
-#include "bin_helper.h"
-#include "bit_sequence.h"
 
 using std::cout;
 using std::next_permutation;
@@ -18,146 +16,6 @@ using std::vector;
 
 constexpr bool kTest = true;
 constexpr size_t kMaxBinN = 64;
-
-class RRR30_Helper
-{
-private:
-  inline static struct impl
-  {
-    std::array<std::array<size_t, 16>, 31> to_add;
-    std::array<std::array<uint32_t, 16>, 31> helper;
-    impl()
-    {
-      for (size_t k = 0; k < 31; ++k)
-        for (size_t ones_in_big = 0; ones_in_big < 16; ++ones_in_big)
-        {
-          to_add[k][ones_in_big] =
-              nCrArr[15][ones_in_big] * nCrArr[15][k - ones_in_big];
-        }
-
-      for (size_t k = 0; k < 31; ++k)
-      {
-        std::fill(helper[k].begin(), helper[k].end(), 0);
-        uint32_t total = 0;
-        for (size_t ones_in_big = (k > 15) ? (k - 15) : 0;
-             ones_in_big <= std::min(k, static_cast<size_t>(15)); ++ones_in_big)
-        {
-          helper[k][ones_in_big] = total;
-          total += to_add[k][ones_in_big];
-        }
-      }
-    }
-  } data;
-
-public:
-  // stores C(n, k) for all pairs of n and k and should be computed at the
-  // compile time
-  static constexpr auto nCrArr{BinCoeff<kMaxBinN>::set_data()};
-
-  static inline uint32_t f(size_t k, uint32_t index)
-  {
-    const size_t ones_in_big_lower = (k > 15) ? (k - 15) : 0;
-    const size_t ones_in_big_upper = std::min(k, static_cast<size_t>(15));
-
-    size_t ones_in_big = ones_in_big_lower;
-    for (; ones_in_big < ones_in_big_upper; ++ones_in_big)
-    {
-      if (auto curr_index = data.helper[k][ones_in_big + 1];
-          curr_index >= index)
-      {
-        if (curr_index == index)
-          ++ones_in_big;
-        break;
-      }
-    }
-
-    index -= data.helper[k][ones_in_big];
-
-    size_t ones_in_small = k - ones_in_big;
-
-    uint32_t small_index =
-        binomial15::nr_to_bin(ones_in_small, index % nCrArr[15][ones_in_small]);
-
-    uint32_t big_index =
-        binomial15::nr_to_bin(ones_in_big, index / nCrArr[15][ones_in_small]);
-
-    return (small_index << 16) | big_index;
-  }
-
-  static inline uint32_t f_binary(size_t k, uint32_t index)
-  {
-    const size_t ones_in_big_lower = (k > 15) ? (k - 15) : 0;
-    const size_t ones_in_big_upper = std::min(k, static_cast<size_t>(15));
-
-    auto it =
-        std::upper_bound(data.helper[k].begin() + ones_in_big_lower,
-                         data.helper[k].begin() + ones_in_big_upper, index);
-    size_t ones_in_big = std::distance(data.helper[k].begin(), it);
-    if (data.helper[k][ones_in_big] > index)
-      --ones_in_big;
-
-    index -= data.helper[k][ones_in_big];
-
-    size_t ones_in_small = k - ones_in_big;
-
-    uint32_t small_index =
-        binomial15::nr_to_bin(ones_in_small, index % nCrArr[15][ones_in_small]);
-
-    uint32_t big_index =
-        binomial15::nr_to_bin(ones_in_big, index / nCrArr[15][ones_in_small]);
-
-    return (small_index << 16) | big_index;
-  }
-
-  static inline uint32_t f_simd(size_t k, uint32_t index)
-  {
-    const size_t ones_in_big_upper = std::min(k, static_cast<size_t>(15));
-
-    const __m128i keys = _mm_set1_epi32(index);
-    const __m128i vec1 =
-        _mm_loadu_si128(reinterpret_cast<const __m128i*>(&data.helper[k][0]));
-    const __m128i vec2 =
-        _mm_loadu_si128(reinterpret_cast<const __m128i*>(&data.helper[k][4]));
-    const __m128i vec3 =
-        _mm_loadu_si128(reinterpret_cast<const __m128i*>(&data.helper[k][8]));
-    const __m128i vec4 =
-        _mm_loadu_si128(reinterpret_cast<const __m128i*>(&data.helper[k][12]));
-
-    const __m128i cmp1 = _mm_cmpgt_epi32(vec1, keys);
-    const __m128i cmp2 = _mm_cmpgt_epi32(vec2, keys);
-    const __m128i cmp3 = _mm_cmpgt_epi32(vec3, keys);
-    const __m128i cmp4 = _mm_cmpgt_epi32(vec4, keys);
-
-    const __m128i tmp1 = _mm_packs_epi32(cmp1, cmp2);
-    const __m128i tmp2 = _mm_packs_epi32(cmp3, cmp4);
-    const uint32_t mask1 = _mm_movemask_epi8(tmp1);
-    const uint32_t mask2 = _mm_movemask_epi8(tmp2);
-
-    const uint32_t mask = (mask2 << 16) | mask1;
-
-    size_t ones_in_big = ones_in_big_upper;
-
-    if (mask != 0)
-    {
-      ones_in_big = (1 + __builtin_ctz(mask)) / 2;
-
-      if (data.helper[k][ones_in_big] > index)
-        --ones_in_big;
-    }
-
-    index -= data.helper[k][ones_in_big];
-
-    size_t ones_in_small = k - ones_in_big;
-
-    uint32_t small_index =
-        binomial15::nr_to_bin(ones_in_small, index % nCrArr[15][ones_in_small]);
-
-    uint32_t big_index =
-        binomial15::nr_to_bin(ones_in_big, index / nCrArr[15][ones_in_small]);
-
-    return (small_index << 16) | big_index;
-  }
-};
 
 ////////////////////////////////////////////////////////////////////////////////
 // Benchmarks
@@ -279,7 +137,7 @@ int main(int argc, char** argv)
                 res != RRR30_Helper::f_binary(k, counter))
             {
               cerr << "!!!!!!!!!!Failed on " << k << " " << counter << "\n";
-              auto [res_a, res_b] = divide(res);
+              // auto [res_a, res_b] = divide(res);
               exit(0);
             }
             ++counter;
