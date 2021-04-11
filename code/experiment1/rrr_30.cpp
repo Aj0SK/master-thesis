@@ -10,11 +10,12 @@
 #include <vector>
 
 using std::cout;
+using std::min;
 using std::next_permutation;
 using std::pair;
 using std::vector;
 
-constexpr bool kTest = true;
+constexpr bool kTest = false;
 constexpr size_t kMaxBinN = 64;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -114,21 +115,34 @@ int main(int argc, char** argv)
 {
   if constexpr (kTest)
   {
-    cout << "Testing 30 bit indexing."
-         << "\n";
+    cout << "Started testing of 30 bit impl...\n";
     for (size_t k = 0; k <= 30; ++k)
     {
       size_t counter = 0;
-      for (size_t ones_in_big = 0; ones_in_big <= k; ++ones_in_big)
+      for (size_t ones_in_big = 0; ones_in_big <= min(k, (size_t)15);
+           ++ones_in_big)
       {
         size_t ones_in_small = k - ones_in_big;
+
+        // cout << k << ":" << ones_in_big << "," << ones_in_small << "\n";
         for (size_t i = 0; i < RRR30_Helper::nCrArr[15][ones_in_big]; ++i)
           for (size_t j = 0; j < RRR30_Helper::nCrArr[15][ones_in_small]; ++j)
           {
             uint16_t small = binomial15::nr_to_bin(ones_in_small, j);
             uint16_t big = binomial15::nr_to_bin(ones_in_big, i);
 
-            uint32_t x = (small << 16) | big;
+            uint32_t x = (small << 15) | big;
+
+            if (auto [ret_k, ret_n] = RRR30_Helper::decode(x);
+                ret_k != k || ret_n != counter)
+            {
+              cout << "Failed on x: ";
+              print_binary(x);
+              cout << "\n";
+              cout << "to je " << ret_k << "," << ret_n << " a spravne je " << k
+                   << "," << counter << "\n";
+              exit(0);
+            }
 
             auto [a, b] = divide(x);
 

@@ -12,6 +12,7 @@
 
 using std::cerr;
 using std::next_permutation;
+using std::pair;
 using std::vector;
 
 // returns vector of all n-bit sequences with c-bits set
@@ -185,6 +186,27 @@ public:
   // compile time
   static constexpr auto nCrArr{BinCoeff<64>::set_data()};
 
+  static inline pair<size_t, uint32_t> decode(uint32_t block)
+  {
+    size_t k = __builtin_popcount(block);
+    uint32_t index = 0;
+    uint32_t left = block >> 15;
+    uint32_t right = block & 32767;
+    size_t count_left = __builtin_popcount(left);
+    size_t count_right =
+        __builtin_popcount(right); // 32767 = 111'1111'1111'1111
+
+    for (size_t i = 0; i < count_right; ++i)
+    {
+      index += nCrArr[15][i] * nCrArr[15][k - i];
+    }
+
+    index += nCrArr[15][count_left] * binomial15::bin_to_nr(right);
+    index += binomial15::bin_to_nr(left);
+
+    return {k, index};
+  }
+
   static inline uint32_t f(size_t k, uint32_t index)
   {
     const size_t ones_in_big_lower = (k > 15) ? (k - 15) : 0;
@@ -212,7 +234,7 @@ public:
     uint32_t big_index =
         binomial15::nr_to_bin(ones_in_big, index / nCrArr[15][ones_in_small]);
 
-    return (small_index << 16) | big_index;
+    return (small_index << 15) | big_index;
   }
 
   static inline uint32_t f_binary(size_t k, uint32_t index)
@@ -237,7 +259,7 @@ public:
     uint32_t big_index =
         binomial15::nr_to_bin(ones_in_big, index / nCrArr[15][ones_in_small]);
 
-    return (small_index << 16) | big_index;
+    return (small_index << 15) | big_index;
   }
 
   static inline uint32_t f_simd(size_t k, uint32_t index)
@@ -286,7 +308,7 @@ public:
     uint32_t big_index =
         binomial15::nr_to_bin(ones_in_big, index / nCrArr[15][ones_in_small]);
 
-    return (small_index << 16) | big_index;
+    return (small_index << 15) | big_index;
   }
 };
 
