@@ -15,7 +15,7 @@ using std::next_permutation;
 using std::pair;
 using std::vector;
 
-constexpr bool kTest = false;
+constexpr bool kTest30 = false, kTest31 = true;
 constexpr size_t kMaxBinN = 64;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -87,6 +87,19 @@ static void BM_SDSL30_BINARY(benchmark::State& state)
   }
 }
 
+static void BM_SDSL31_LINEAR_SIMD(benchmark::State& state)
+{
+  auto test = get_test(31);
+  for (auto _ : state)
+  {
+    for (auto [k, index] : test)
+    {
+      auto x = RRR31_Helper::f(k, index);
+      benchmark::DoNotOptimize(x);
+    }
+  }
+}
+
 template <typename T, size_t N> static void BM_FUNC(benchmark::State& state)
 {
   auto test = get_test(N);
@@ -105,6 +118,7 @@ BENCHMARK(BM_SDSL15);
 BENCHMARK(BM_SDSL30_LINEAR);
 BENCHMARK(BM_SDSL30_LINEAR_SIMD);
 BENCHMARK(BM_SDSL30_BINARY);
+BENCHMARK(BM_SDSL31_LINEAR_SIMD);
 BENCHMARK_TEMPLATE(BM_FUNC, uint32_t, 15);
 BENCHMARK_TEMPLATE(BM_FUNC, uint32_t, 30);
 BENCHMARK_TEMPLATE(BM_FUNC, uint64_t, 63);
@@ -113,7 +127,7 @@ pair<uint16_t, uint16_t> divide(uint32_t x) { return {x >> 16, x}; }
 
 int main(int argc, char** argv)
 {
-  if constexpr (kTest)
+  if constexpr (kTest30)
   {
     cout << "Started testing of 30 bit impl...\n";
     for (size_t k = 0; k <= 30; ++k)
@@ -156,6 +170,26 @@ int main(int argc, char** argv)
             }
             ++counter;
           }
+      }
+    }
+  }
+
+  if constexpr (kTest31)
+  {
+    cout << "Started testing of 31 bit impl...\n";
+    srand(2104);
+
+    for (size_t test_num = 0; test_num < 1'000'000; ++test_num)
+    {
+      uint32_t k = rand() % 32;
+      uint32_t index = rand() % RRR30_Helper::nCrArr[31][k];
+      uint32_t res = RRR31_Helper::f(k, index);
+      auto [ret_k, ret_index] = RRR31_Helper::decode(res);
+      if (ret_k != k || ret_index != index)
+      {
+        cerr << "Problem!"
+             << "\n";
+        exit(1);
       }
     }
   }
