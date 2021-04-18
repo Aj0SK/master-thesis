@@ -312,4 +312,37 @@ public:
   }
 };
 
+class RRR31_Helper
+{
+public:
+  static uint32_t f(uint32_t k, uint32_t index)
+  {
+    const uint32_t threshold = RRR30_Helper::nCrArr[30][k];
+    uint32_t to_or = 0;
+    if (index >= threshold)
+    {
+      --k;
+      index -= threshold;
+      to_or = 1 << 31;
+    }
+    return to_or | RRR30_Helper::f_simd(k, index);
+  }
+
+  static pair<uint32_t, uint32_t> decode(uint32_t x)
+  {
+    uint32_t k = __builtin_popcount(x);
+
+    if (x & (1 << 31))
+    {
+      uint32_t new_x = x & (~(1 << 31));
+      return {k,
+              RRR30_Helper::nCrArr[30][k] + RRR30_Helper::decode(new_x).second};
+    }
+    else
+    {
+      return {k, RRR30_Helper::decode(x).second};
+    }
+  }
+};
+
 #endif
