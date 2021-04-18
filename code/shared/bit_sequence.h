@@ -323,7 +323,7 @@ public:
     {
       --k;
       index -= threshold;
-      to_or = 1 << 31;
+      to_or = 1 << 30;
     }
     return to_or | RRR30_Helper::f_simd(k, index);
   }
@@ -332,9 +332,9 @@ public:
   {
     uint32_t k = __builtin_popcount(x);
 
-    if (x & (1 << 31))
+    if (x & (1 << 30))
     {
-      uint32_t new_x = x & (~(1 << 31));
+      uint32_t new_x = x & (~(1 << 30));
       return {k,
               RRR30_Helper::nCrArr[30][k] + RRR30_Helper::decode(new_x).second};
     }
@@ -342,6 +342,99 @@ public:
     {
       return {k, RRR30_Helper::decode(x).second};
     }
+  }
+};
+
+////////////////////////////////////////////////
+
+class RRR62_Helper
+{
+private:
+  inline static struct impl
+  {
+    std::array<std::array<uint64_t, 32>, 63> to_add;
+    std::array<std::array<uint64_t, 32>, 63> helper;
+    impl()
+    {
+      for (size_t k = 0; k < 63; ++k)
+        for (size_t ones_in_big = 0; ones_in_big < 32; ++ones_in_big)
+        {
+          to_add[k][ones_in_big] =
+              nCrArr[31][ones_in_big] * nCrArr[31][k - ones_in_big];
+        }
+
+      for (size_t k = 0; k < 63; ++k)
+      {
+        std::fill(helper[k].begin(), helper[k].end(), 0);
+        uint64_t total = 0;
+        for (size_t ones_in_big = (k > 31) ? (k - 31) : 0;
+             ones_in_big <= std::min(k, static_cast<size_t>(31)); ++ones_in_big)
+        {
+          helper[k][ones_in_big] = total;
+          total += to_add[k][ones_in_big];
+        }
+      }
+    }
+  } data;
+
+public:
+  // stores C(n, k) for all pairs of n and k and should be computed at the
+  // compile time
+  static constexpr auto nCrArr{BinCoeff<64>::set_data()};
+
+  static inline uint64_t f(size_t k, uint64_t index)
+  {
+    const size_t ones_in_big_lower = (k > 31) ? (k - 31) : 0;
+    const size_t ones_in_big_upper = std::min(k, static_cast<size_t>(31));
+
+    size_t ones_in_big = ones_in_big_lower;
+    for (; ones_in_big < ones_in_big_upper; ++ones_in_big)
+    {
+      if (auto curr_index = data.helper[k][ones_in_big + 1];
+          curr_index >= index)
+      {
+        if (curr_index == index)
+          ++ones_in_big;
+        break;
+      }
+    }
+
+    index -= data.helper[k][ones_in_big];
+
+    size_t ones_in_small = k - ones_in_big;
+
+    uint64_t small_index =
+        RRR31_Helper::f(ones_in_small, index % nCrArr[31][ones_in_small]);
+
+    uint64_t big_index =
+        RRR31_Helper::f(ones_in_big, index / nCrArr[31][ones_in_small]);
+
+    return (small_index << 31) | big_index;
+  }
+
+  static inline uint64_t f_binary(size_t k, uint64_t index)
+  {
+    const size_t ones_in_big_lower = (k > 31) ? (k - 31) : 0;
+    const size_t ones_in_big_upper = std::min(k, static_cast<size_t>(31));
+
+    auto it =
+        std::upper_bound(data.helper[k].begin() + ones_in_big_lower,
+                         data.helper[k].begin() + ones_in_big_upper, index);
+    size_t ones_in_big = std::distance(data.helper[k].begin(), it);
+    if (data.helper[k][ones_in_big] > index)
+      --ones_in_big;
+
+    index -= data.helper[k][ones_in_big];
+
+    size_t ones_in_small = k - ones_in_big;
+
+    uint64_t small_index =
+        RRR31_Helper::f(ones_in_small, index % nCrArr[31][ones_in_small]);
+
+    uint64_t big_index =
+        RRR31_Helper::f(ones_in_big, index / nCrArr[31][ones_in_small]);
+
+    return (small_index << 31) | big_index;
   }
 };
 

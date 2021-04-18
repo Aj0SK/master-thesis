@@ -15,16 +15,16 @@ using std::next_permutation;
 using std::pair;
 using std::vector;
 
-constexpr bool kTest30 = false, kTest31 = true;
+constexpr bool kTest30 = false, kTest31 = false, kTest62 = false;
 constexpr size_t kMaxBinN = 64;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Benchmarks
 
-vector<pair<int, int>> get_test(int N)
+vector<pair<uint64_t, uint64_t>> get_test(int N)
 {
   srand(2104);
-  vector<pair<int, int>> test;
+  vector<pair<uint64_t, uint64_t>> test;
   test.reserve(10'000);
   for (size_t i = 0; i < 10'000; ++i)
   {
@@ -100,6 +100,32 @@ static void BM_SDSL31_LINEAR_SIMD(benchmark::State& state)
   }
 }
 
+static void BM_SDSL62_LINEAR(benchmark::State& state)
+{
+  auto test = get_test(62);
+  for (auto _ : state)
+  {
+    for (auto [k, index] : test)
+    {
+      auto x = RRR62_Helper::f(k, index);
+      benchmark::DoNotOptimize(x);
+    }
+  }
+}
+
+static void BM_SDSL62_BINARY(benchmark::State& state)
+{
+  auto test = get_test(62);
+  for (auto _ : state)
+  {
+    for (auto [k, index] : test)
+    {
+      auto x = RRR62_Helper::f_binary(k, index);
+      benchmark::DoNotOptimize(x);
+    }
+  }
+}
+
 template <typename T, size_t N> static void BM_FUNC(benchmark::State& state)
 {
   auto test = get_test(N);
@@ -119,35 +145,70 @@ BENCHMARK(BM_SDSL30_LINEAR);
 BENCHMARK(BM_SDSL30_LINEAR_SIMD);
 BENCHMARK(BM_SDSL30_BINARY);
 BENCHMARK(BM_SDSL31_LINEAR_SIMD);
+BENCHMARK(BM_SDSL62_LINEAR);
+BENCHMARK(BM_SDSL62_BINARY);
 BENCHMARK_TEMPLATE(BM_FUNC, uint32_t, 15);
 BENCHMARK_TEMPLATE(BM_FUNC, uint32_t, 30);
+BENCHMARK_TEMPLATE(BM_FUNC, uint32_t, 31);
 BENCHMARK_TEMPLATE(BM_FUNC, uint64_t, 63);
-
-pair<uint16_t, uint16_t> divide(uint32_t x) { return {x >> 16, x}; }
 
 int main(int argc, char** argv)
 {
   if constexpr (kTest30)
   {
     cout << "Started testing of 30 bit impl...\n";
-    for (size_t k = 0; k <= 30; ++k)
+    for (size_t i = 0; i < (1 << 30); ++i)
+    {
+      auto [k, index] = RRR30_Helper::decode(i);
+      uint32_t res = RRR30_Helper::f(k, index);
+      if (res != i)
+      {
+        cout << "Problem!\n";
+        exit(1);
+      }
+    }
+  }
+
+  if constexpr (kTest31)
+  {
+    cout << "Started testing of 31 bit impl...\n";
+    for (uint32_t i = 0; i < (1 << 31); ++i)
+    {
+      auto [k, index] = RRR31_Helper::decode(i);
+      uint32_t res = RRR31_Helper::f(k, index);
+      if (res != i)
+      {
+        cout << "Problem na indexe: " << i << "\n";
+        print_binary(i);
+        cout << "\n";
+        print_binary(res);
+        cout << "\n";
+        cout << k << " " << index << "\n";
+        exit(1);
+      }
+    }
+  }
+
+  if constexpr (kTest62)
+  {
+    cout << "Started testing of 62 bit impl...\n";
+    for (size_t k = 0; k <= 62; ++k)
     {
       size_t counter = 0;
-      for (size_t ones_in_big = 0; ones_in_big <= min(k, (size_t)15);
+      for (size_t ones_in_big = 0; ones_in_big <= min(k, (size_t)31);
            ++ones_in_big)
       {
         size_t ones_in_small = k - ones_in_big;
 
-        // cout << k << ":" << ones_in_big << "," << ones_in_small << "\n";
-        for (size_t i = 0; i < RRR30_Helper::nCrArr[15][ones_in_big]; ++i)
-          for (size_t j = 0; j < RRR30_Helper::nCrArr[15][ones_in_small]; ++j)
+        for (size_t i = 0; i < RRR30_Helper::nCrArr[31][ones_in_big]; ++i)
+          for (size_t j = 0; j < RRR30_Helper::nCrArr[31][ones_in_small]; ++j)
           {
-            uint16_t small = binomial15::nr_to_bin(ones_in_small, j);
-            uint16_t big = binomial15::nr_to_bin(ones_in_big, i);
+            uint64_t small = RRR31_Helper::f(ones_in_small, j);
+            uint64_t big = RRR31_Helper::f(ones_in_big, i);
 
-            uint32_t x = (small << 15) | big;
+            uint64_t x = (small << 31) | big;
 
-            if (auto [ret_k, ret_n] = RRR30_Helper::decode(x);
+            /*if (auto [ret_k, ret_n] = RRR62_Helper::decode(x);
                 ret_k != k || ret_n != counter)
             {
               cout << "Failed on x: ";
@@ -156,40 +217,19 @@ int main(int argc, char** argv)
               cout << "to je " << ret_k << "," << ret_n << " a spravne je " << k
                    << "," << counter << "\n";
               exit(0);
-            }
+            }*/
 
-            auto [a, b] = divide(x);
-
-            if (auto res = RRR30_Helper::f(k, counter);
-                x != res || res != RRR30_Helper::f_simd(k, counter) ||
-                res != RRR30_Helper::f_binary(k, counter))
+            if (auto res = RRR62_Helper::f(k, counter); x != res)
             {
               cerr << "!!!!!!!!!!Failed on " << k << " " << counter << "\n";
-              // auto [res_a, res_b] = divide(res);
+              print_binary(x);
+              cout << "\n";
+              print_binary(res);
+              cout << "\n";
               exit(0);
             }
             ++counter;
           }
-      }
-    }
-  }
-
-  if constexpr (kTest31)
-  {
-    cout << "Started testing of 31 bit impl...\n";
-    srand(2104);
-
-    for (size_t test_num = 0; test_num < 1'000'000; ++test_num)
-    {
-      uint32_t k = rand() % 32;
-      uint32_t index = rand() % RRR30_Helper::nCrArr[31][k];
-      uint32_t res = RRR31_Helper::f(k, index);
-      auto [ret_k, ret_index] = RRR31_Helper::decode(res);
-      if (ret_k != k || ret_index != index)
-      {
-        cerr << "Problem!"
-             << "\n";
-        exit(1);
       }
     }
   }
