@@ -15,20 +15,36 @@ using std::next_permutation;
 using std::pair;
 using std::vector;
 
-constexpr bool kTest = false;
+constexpr bool kTest = true;
 constexpr size_t kMaxBinN = 64;
 
 uint32_t f(uint32_t k, uint32_t index)
 {
   const uint32_t threshold = RRR30_Helper::nCrArr[30][k];
   uint32_t to_or = 0;
-  if (index > threshold)
+  if (index >= threshold)
   {
     --k;
     index -= threshold;
     to_or = 1 << 31;
   }
   return to_or | RRR30_Helper::f_simd(k, index);
+}
+
+pair<uint32_t, uint32_t> decode(uint32_t x)
+{
+  uint32_t k = __builtin_popcount(x);
+
+  if (x & (1 << 31))
+  {
+    uint32_t new_x = x & (~(1 << 31));
+    return {k,
+            RRR30_Helper::nCrArr[30][k] + RRR30_Helper::decode(new_x).second};
+  }
+  else
+  {
+    return {k, RRR30_Helper::decode(x).second};
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -114,6 +130,21 @@ int main(int argc, char** argv)
 {
   if constexpr (kTest)
   {
+    srand(2104);
+
+    for (size_t test_num = 0; test_num < 100'000; ++test_num)
+    {
+      uint32_t k = rand() % 32;
+      uint32_t index = rand() % RRR30_Helper::nCrArr[31][k];
+      uint32_t res = f(k, index);
+      auto [ret_k, ret_index] = decode(res);
+      if (ret_k != k || ret_index != index)
+      {
+        cerr << "Problem!"
+             << "\n";
+        exit(1);
+      }
+    }
   }
 
   ::benchmark::Initialize(&argc, argv);
