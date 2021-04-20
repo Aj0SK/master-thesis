@@ -436,6 +436,27 @@ public:
 
     return (small_index << 31) | big_index;
   }
+
+  static inline pair<uint64_t, uint64_t> decode(uint64_t block)
+  {
+    uint64_t k = __builtin_popcountll(block);
+    uint64_t index = 0;
+    uint32_t left = block >> 31;
+    uint32_t right =
+        block & 2147483647; // 2147483647_10 = 1111111111111111111111111111111_2
+    uint32_t count_left = __builtin_popcount(left);
+    uint32_t count_right = __builtin_popcount(right);
+
+    for (size_t i = 0; i < count_right; ++i)
+    {
+      index += nCrArr[31][i] * nCrArr[31][k - i];
+    }
+
+    index += nCrArr[31][count_left] * RRR31_Helper::decode(right).second;
+    index += RRR31_Helper::decode(left).second;
+
+    return {k, index};
+  }
 };
 
 #endif

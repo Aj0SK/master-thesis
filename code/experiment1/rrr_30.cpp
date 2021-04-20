@@ -15,7 +15,7 @@ using std::next_permutation;
 using std::pair;
 using std::vector;
 
-constexpr bool kTest30 = false, kTest31 = false, kTest62 = false;
+constexpr bool kTest30 = false, kTest31 = false, kTest62 = true;
 constexpr size_t kMaxBinN = 64;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -150,6 +150,7 @@ BENCHMARK(BM_SDSL62_BINARY);
 BENCHMARK_TEMPLATE(BM_FUNC, uint32_t, 15);
 BENCHMARK_TEMPLATE(BM_FUNC, uint32_t, 30);
 BENCHMARK_TEMPLATE(BM_FUNC, uint32_t, 31);
+BENCHMARK_TEMPLATE(BM_FUNC, uint64_t, 62);
 BENCHMARK_TEMPLATE(BM_FUNC, uint64_t, 63);
 
 int main(int argc, char** argv)
@@ -191,45 +192,26 @@ int main(int argc, char** argv)
 
   if constexpr (kTest62)
   {
+    std::random_device rd;
+    std::mt19937_64 gen(rd());
+    std::uniform_int_distribution<uint64_t> dis;
     cout << "Started testing of 62 bit impl...\n";
-    for (size_t k = 0; k <= 62; ++k)
+    for (uint32_t i = 0; i < 1'000'000; ++i)
     {
-      size_t counter = 0;
-      for (size_t ones_in_big = 0; ones_in_big <= min(k, (size_t)31);
-           ++ones_in_big)
+      uint64_t r = dis(gen);
+      r %= 1ull << 62;
+
+      auto [k, index] = RRR62_Helper::decode(r);
+      uint64_t res = RRR62_Helper::f(k, index);
+      if (res != r)
       {
-        size_t ones_in_small = k - ones_in_big;
-
-        for (size_t i = 0; i < RRR30_Helper::nCrArr[31][ones_in_big]; ++i)
-          for (size_t j = 0; j < RRR30_Helper::nCrArr[31][ones_in_small]; ++j)
-          {
-            uint64_t small = RRR31_Helper::f(ones_in_small, j);
-            uint64_t big = RRR31_Helper::f(ones_in_big, i);
-
-            uint64_t x = (small << 31) | big;
-
-            /*if (auto [ret_k, ret_n] = RRR62_Helper::decode(x);
-                ret_k != k || ret_n != counter)
-            {
-              cout << "Failed on x: ";
-              print_binary(x);
-              cout << "\n";
-              cout << "to je " << ret_k << "," << ret_n << " a spravne je " << k
-                   << "," << counter << "\n";
-              exit(0);
-            }*/
-
-            if (auto res = RRR62_Helper::f(k, counter); x != res)
-            {
-              cerr << "!!!!!!!!!!Failed on " << k << " " << counter << "\n";
-              print_binary(x);
-              cout << "\n";
-              print_binary(res);
-              cout << "\n";
-              exit(0);
-            }
-            ++counter;
-          }
+        cout << "Problem na indexe: " << r << "\n";
+        print_binary(r);
+        cout << "\n";
+        print_binary(res);
+        cout << "\n";
+        cout << k << " " << index << "\n";
+        exit(1);
       }
     }
   }
