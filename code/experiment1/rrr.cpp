@@ -29,7 +29,7 @@ vector<pair<uint64_t, uint64_t>> get_test(int N)
   for (size_t i = 0; i < 10'000; ++i)
   {
     size_t k = 1 + rand() % (N - 1);
-    size_t index = rand() % RRR30_Helper::nCrArr[N][k];
+    size_t index = rand() % BinCoeff64[N][k];
     test.push_back({k, index});
   }
   return test;
@@ -266,7 +266,7 @@ int main(int argc, char** argv)
   size_t counter = 0;
   for (size_t k = 1; k <= 15; ++k)
   {
-    for (size_t i = 0; i < RRR30_Helper::nCrArr[15][k]; ++i)
+    for (size_t i = 0; i < BinCoeff64[15][k]; ++i)
     {
       auto x = binomial15::nr_to_bin(k, i);
       auto y = get_ith_in_lexicographic_sdsl<uint32_t>(15, k, i + 1);

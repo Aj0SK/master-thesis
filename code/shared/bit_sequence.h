@@ -164,7 +164,7 @@ private:
         for (size_t ones_in_big = 0; ones_in_big < 16; ++ones_in_big)
         {
           to_add[k][ones_in_big] =
-              nCrArr[15][ones_in_big] * nCrArr[15][k - ones_in_big];
+              BinCoeff64[15][ones_in_big] * BinCoeff64[15][k - ones_in_big];
         }
 
       for (size_t k = 0; k < 31; ++k)
@@ -184,7 +184,6 @@ private:
 public:
   // stores C(n, k) for all pairs of n and k and should be computed at the
   // compile time
-  static constexpr auto nCrArr{BinCoeff<64>::set_data()};
 
   static inline pair<size_t, uint32_t> decode(uint32_t block)
   {
@@ -198,10 +197,10 @@ public:
 
     for (size_t i = 0; i < count_right; ++i)
     {
-      index += nCrArr[15][i] * nCrArr[15][k - i];
+      index += BinCoeff64[15][i] * BinCoeff64[15][k - i];
     }
 
-    index += nCrArr[15][count_left] * binomial15::bin_to_nr(right);
+    index += BinCoeff64[15][count_left] * binomial15::bin_to_nr(right);
     index += binomial15::bin_to_nr(left);
 
     return {k, index};
@@ -228,11 +227,11 @@ public:
 
     size_t ones_in_small = k - ones_in_big;
 
-    uint32_t small_index =
-        binomial15::nr_to_bin(ones_in_small, index % nCrArr[15][ones_in_small]);
+    uint32_t small_index = binomial15::nr_to_bin(
+        ones_in_small, index % BinCoeff64[15][ones_in_small]);
 
-    uint32_t big_index =
-        binomial15::nr_to_bin(ones_in_big, index / nCrArr[15][ones_in_small]);
+    uint32_t big_index = binomial15::nr_to_bin(
+        ones_in_big, index / BinCoeff64[15][ones_in_small]);
 
     return (small_index << 15) | big_index;
   }
@@ -253,11 +252,11 @@ public:
 
     size_t ones_in_small = k - ones_in_big;
 
-    uint32_t small_index =
-        binomial15::nr_to_bin(ones_in_small, index % nCrArr[15][ones_in_small]);
+    uint32_t small_index = binomial15::nr_to_bin(
+        ones_in_small, index % BinCoeff64[15][ones_in_small]);
 
-    uint32_t big_index =
-        binomial15::nr_to_bin(ones_in_big, index / nCrArr[15][ones_in_small]);
+    uint32_t big_index = binomial15::nr_to_bin(
+        ones_in_big, index / BinCoeff64[15][ones_in_small]);
 
     return (small_index << 15) | big_index;
   }
@@ -302,11 +301,11 @@ public:
 
     size_t ones_in_small = k - ones_in_big;
 
-    uint32_t small_index =
-        binomial15::nr_to_bin(ones_in_small, index % nCrArr[15][ones_in_small]);
+    uint32_t small_index = binomial15::nr_to_bin(
+        ones_in_small, index % BinCoeff64[15][ones_in_small]);
 
-    uint32_t big_index =
-        binomial15::nr_to_bin(ones_in_big, index / nCrArr[15][ones_in_small]);
+    uint32_t big_index = binomial15::nr_to_bin(
+        ones_in_big, index / BinCoeff64[15][ones_in_small]);
 
     return (small_index << 15) | big_index;
   }
@@ -317,7 +316,7 @@ class RRR31_Helper
 public:
   static uint32_t f(uint32_t k, uint32_t index)
   {
-    const uint32_t threshold = RRR30_Helper::nCrArr[30][k];
+    const uint32_t threshold = BinCoeff64[30][k];
     uint32_t to_or = 0;
     if (index >= threshold)
     {
@@ -335,8 +334,7 @@ public:
     if (x & (1 << 30))
     {
       uint32_t new_x = x & (~(1 << 30));
-      return {k,
-              RRR30_Helper::nCrArr[30][k] + RRR30_Helper::decode(new_x).second};
+      return {k, BinCoeff64[30][k] + RRR30_Helper::decode(new_x).second};
     }
     else
     {
@@ -464,7 +462,7 @@ class RRR63_Helper
 public:
   static uint64_t f(uint64_t k, uint64_t index)
   {
-    const uint64_t threshold = RRR30_Helper::nCrArr[62][k];
+    const uint64_t threshold = BinCoeff64[62][k];
     uint64_t to_or = 0;
     if (index >= threshold)
     {
@@ -482,8 +480,7 @@ public:
     if (x & (1ull << 62))
     {
       uint64_t new_x = x & (~(1ull << 62));
-      return {k,
-              RRR30_Helper::nCrArr[62][k] + RRR62_Helper::decode(new_x).second};
+      return {k, BinCoeff64[62][k] + RRR62_Helper::decode(new_x).second};
     }
     else
     {
