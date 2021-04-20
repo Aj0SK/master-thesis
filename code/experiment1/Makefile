@@ -5,7 +5,7 @@ SDSL = -lsdsl -ldivsufsort -ldivsufsort64
 BENCHMARK = -isystem benchmark/include -Lbenchmark/build/src -lbenchmark -lpthread
 BUILD = build
 
-all: prepare rrr_30 table benchmark
+all: prepare rrr table benchmark
 
 prepare:
 	mkdir -p $(BUILD)
@@ -22,8 +22,8 @@ $(BUILD)/table.out: table.cpp ../shared/*.h
 table: $(BUILD)/table.out
 	$<
 
-$(BUILD)/rrr_30.out: rrr_30.cpp ../shared/*.h
+$(BUILD)/rrr.out: rrr.cpp ../shared/*.h
 	$(CXX) $(CXXFLAGS) $(MY) $< $(BENCHMARK) $(SDSL) -o $@
 
-rrr_30: $(BUILD)/rrr_30.out
+rrr: $(BUILD)/rrr.out
 	$<
