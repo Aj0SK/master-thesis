@@ -459,4 +459,37 @@ public:
   }
 };
 
+class RRR63_Helper
+{
+public:
+  static uint64_t f(uint64_t k, uint64_t index)
+  {
+    const uint64_t threshold = RRR30_Helper::nCrArr[62][k];
+    uint64_t to_or = 0;
+    if (index >= threshold)
+    {
+      --k;
+      index -= threshold;
+      to_or = 1ull << 62;
+    }
+    return to_or | RRR62_Helper::f(k, index);
+  }
+
+  static pair<uint64_t, uint64_t> decode(uint64_t x)
+  {
+    uint64_t k = __builtin_popcountll(x);
+
+    if (x & (1ull << 62))
+    {
+      uint64_t new_x = x & (~(1ull << 62));
+      return {k,
+              RRR30_Helper::nCrArr[62][k] + RRR62_Helper::decode(new_x).second};
+    }
+    else
+    {
+      return {k, RRR62_Helper::decode(x).second};
+    }
+  }
+};
+
 #endif

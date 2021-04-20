@@ -15,7 +15,7 @@ using std::next_permutation;
 using std::pair;
 using std::vector;
 
-constexpr bool kTest30 = false, kTest31 = false, kTest62 = true;
+constexpr bool kTest30 = false, kTest31 = false, kTest62 = true, kTest63 = true;
 constexpr size_t kMaxBinN = 64;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -126,6 +126,19 @@ static void BM_SDSL62_BINARY(benchmark::State& state)
   }
 }
 
+static void BM_SDSL63_LINEAR(benchmark::State& state)
+{
+  auto test = get_test(63);
+  for (auto _ : state)
+  {
+    for (auto [k, index] : test)
+    {
+      auto x = RRR63_Helper::f(k, index);
+      benchmark::DoNotOptimize(x);
+    }
+  }
+}
+
 template <typename T, size_t N> static void BM_FUNC(benchmark::State& state)
 {
   auto test = get_test(N);
@@ -147,6 +160,7 @@ BENCHMARK(BM_SDSL30_BINARY);
 BENCHMARK(BM_SDSL31_LINEAR_SIMD);
 BENCHMARK(BM_SDSL62_LINEAR);
 BENCHMARK(BM_SDSL62_BINARY);
+BENCHMARK(BM_SDSL63_LINEAR);
 BENCHMARK_TEMPLATE(BM_FUNC, uint32_t, 15);
 BENCHMARK_TEMPLATE(BM_FUNC, uint32_t, 30);
 BENCHMARK_TEMPLATE(BM_FUNC, uint32_t, 31);
@@ -195,6 +209,7 @@ int main(int argc, char** argv)
     std::random_device rd;
     std::mt19937_64 gen(rd());
     std::uniform_int_distribution<uint64_t> dis;
+
     cout << "Started testing of 62 bit impl...\n";
     for (uint32_t i = 0; i < 1'000'000; ++i)
     {
@@ -203,6 +218,33 @@ int main(int argc, char** argv)
 
       auto [k, index] = RRR62_Helper::decode(r);
       uint64_t res = RRR62_Helper::f(k, index);
+      if (res != r)
+      {
+        cout << "Problem na indexe: " << r << "\n";
+        print_binary(r);
+        cout << "\n";
+        print_binary(res);
+        cout << "\n";
+        cout << k << " " << index << "\n";
+        exit(1);
+      }
+    }
+  }
+
+  if constexpr (kTest63)
+  {
+    std::random_device rd;
+    std::mt19937_64 gen(rd());
+    std::uniform_int_distribution<uint64_t> dis;
+
+    cout << "Started testing of 63 bit impl...\n";
+    for (uint32_t i = 0; i < 1'000'000; ++i)
+    {
+      uint64_t r = dis(gen);
+      r %= 1ull << 63;
+
+      auto [k, index] = RRR63_Helper::decode(r);
+      uint64_t res = RRR63_Helper::f(k, index);
       if (res != r)
       {
         cout << "Problem na indexe: " << r << "\n";
