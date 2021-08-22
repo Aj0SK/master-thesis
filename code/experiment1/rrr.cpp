@@ -1,12 +1,14 @@
-#include "bin_helper.h"
-#include "bit_sequence.h"
+#include "binary_helpers.h"
+#include "rrr_convert.h"
+
+#include <sdsl/rrr_helper.hpp>
+#include <sdsl/rrr_vector_15.hpp>
+
+#include <benchmark/benchmark.h>
 
 #include <algorithm>
 #include <array>
-#include <benchmark/benchmark.h>
 #include <iostream>
-#include <sdsl/rrr_helper.hpp>
-#include <sdsl/rrr_vector_15.hpp>
 #include <vector>
 
 using std::cout;
@@ -15,18 +17,24 @@ using std::next_permutation;
 using std::pair;
 using std::vector;
 
-constexpr bool kTest30 = false, kTest31 = false, kTest62 = true, kTest63 = true;
+constexpr bool kTest30 = true, kTest31 = true, kTest62 = true, kTest63 = true;
 constexpr size_t kMaxBinN = 64;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Benchmarks
 
+constexpr size_t kPerTestQueries = 10'000;
+
+// Returns vector of random pairs. Each pair represents
+// (k, index) where k is number of set bits in the block
+// and index is an index into sequence of all k-bits blocks
+// in some particular order.
 vector<pair<uint64_t, uint64_t>> get_test(int N)
 {
   srand(2104);
   vector<pair<uint64_t, uint64_t>> test;
-  test.reserve(10'000);
-  for (size_t i = 0; i < 10'000; ++i)
+  test.reserve(kPerTestQueries);
+  for (size_t i = 0; i < kPerTestQueries; ++i)
   {
     size_t k = 1 + rand() % (N - 1);
     size_t index = rand() % BinCoeff64[N][k];
@@ -147,7 +155,6 @@ template <typename T, size_t N> static void BM_FUNC(benchmark::State& state)
     for (auto [k, index] : test)
     {
       auto x = sdsl::rrr_helper<N>::decode_bit(k, index, N - 1);
-      // auto x = get_ith_in_lexicographic_sdsl<T>(N, k, index + 1);
       benchmark::DoNotOptimize(x);
     }
   }
@@ -172,36 +179,33 @@ int main(int argc, char** argv)
   if constexpr (kTest30)
   {
     cout << "Started testing of 30 bit impl...\n";
-    for (size_t i = 0; i < (1 << 30); ++i)
+    for (size_t i = 0; i < (1ull << 30); ++i)
     {
       auto [k, index] = RRR30_Helper::decode(i);
       uint32_t res = RRR30_Helper::f(k, index);
       if (res != i)
       {
-        cout << "Problem!\n";
-        exit(1);
+        cout << "Problem with 30-bit impl!\n";
+        return 1;
       }
     }
+    std::cout << "Successfully tested for block size " << 30 << "\n";
   }
 
   if constexpr (kTest31)
   {
     cout << "Started testing of 31 bit impl...\n";
-    for (uint32_t i = 0; i < (1 << 31); ++i)
+    for (uint32_t i = 0; i < (1ull << 31); ++i)
     {
       auto [k, index] = RRR31_Helper::decode(i);
       uint32_t res = RRR31_Helper::f(k, index);
       if (res != i)
       {
-        cout << "Problem na indexe: " << i << "\n";
-        print_binary(i);
-        cout << "\n";
-        print_binary(res);
-        cout << "\n";
-        cout << k << " " << index << "\n";
-        exit(1);
+        cout << "Problem with 31-bit impl!\n";
+        return 1;
       }
     }
+    std::cout << "Successfully tested for block size " << 31 << "\n";
   }
 
   if constexpr (kTest62)
@@ -220,15 +224,11 @@ int main(int argc, char** argv)
       uint64_t res = RRR62_Helper::f(k, index);
       if (res != r)
       {
-        cout << "Problem na indexe: " << r << "\n";
-        print_binary(r);
-        cout << "\n";
-        print_binary(res);
-        cout << "\n";
-        cout << k << " " << index << "\n";
-        exit(1);
+        cout << "Problem with 62-bit impl!\n";
+        return 1;
       }
     }
+    std::cout << "Successfully tested for block size " << 62 << "\n";
   }
 
   if constexpr (kTest63)
@@ -247,15 +247,11 @@ int main(int argc, char** argv)
       uint64_t res = RRR63_Helper::f(k, index);
       if (res != r)
       {
-        cout << "Problem na indexe: " << r << "\n";
-        print_binary(r);
-        cout << "\n";
-        print_binary(res);
-        cout << "\n";
-        cout << k << " " << index << "\n";
-        exit(1);
+        cout << "Problem with 63-bit impl!\n";
+        return 1;
       }
     }
+    std::cout << "Successfully tested for block size " << 63 << "\n";
   }
 
   ::benchmark::Initialize(&argc, argv);
@@ -280,11 +276,5 @@ int main(int argc, char** argv)
       ++counter;
     }
   }
-
-  cout << "Performed " << counter << " 15-bit tests."
-       << "\n";
-
-  // auto cnk = sdsl::binomial_coefficients<128>::data.table[128][64];
-
   return 0;
 }

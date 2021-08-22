@@ -13,20 +13,6 @@ using std::cerr;
 using std::cout;
 using std::vector;
 
-double calculate_entropy(const vector<bool>& input)
-{
-  double c0 = 0, c1 = 0;
-  for (bool x : input)
-  {
-    if (x)
-      ++c0;
-    else
-      ++c1;
-  }
-  double n = input.size();
-  return (c0 / n) * log2(n / c0) + (c1 / n) * log2(n / c1);
-}
-
 bit_vector get_bit_vector(size_t n, size_t density)
 {
   vector<bool> vec;
@@ -178,18 +164,3 @@ int main(int argc, char** argv)
     return 1;
   ::benchmark::RunSpecifiedBenchmarks();
 }
-
-/*int main()
-{
-  auto bv = get_bit_vector(kN, kDensity);
-  rrr_vector<kB, int_vector<>, kSB> rrr(bv);
-
-  cout << "Bit-vector of size " << rrr.size() << "\n";
-  cout << calculate_entropy(vec) << "\n";
-
-  cout << "Size is " << 8 * size_in_bytes(rrr) << "\n";
-  double ratio = 8.0 * size_in_bytes(rrr) / static_cast<double>(kN);
-  cout << "Ratio is " << ratio << "\n";
-
-  return 0;
-}*/

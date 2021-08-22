@@ -1,5 +1,5 @@
-#ifndef BIN_COEFF_H
-#define BIN_COEFF_H
+#ifndef BINOMIAL_COEFFICIENT_H
+#define BINOMIAL_COEFFICIENT_H
 
 #include <array>
 #include <cstddef>
