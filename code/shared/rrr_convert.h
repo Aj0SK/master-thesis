@@ -16,9 +16,8 @@ using std::vector;
 template <typename T>
 T get_ith_in_lexicographic_sdsl(size_t n, size_t c, size_t target)
 {
-  // stores C(n, k) for all pairs of n and k and should be computed at the
+  // Stores C(n, k) for all pairs of n and k and should be computed at the
   // compile time
-
   static constexpr auto nCrArr{BinCoeff<64>::set_data()};
 
   T out = 0;
@@ -38,6 +37,7 @@ T get_ith_in_lexicographic_sdsl(size_t n, size_t c, size_t target)
   return out;
 }
 
+// SDSL's implementation of a 15-bit block in rrr_vector
 // source: sdsl-lite
 // link:
 // https://github.com/simongog/sdsl-lite/blob/master/include/sdsl/rrr_vector_15.hpp
@@ -95,6 +95,10 @@ public:
   }
 };
 
+// Implementation of a 30-bit block size version.
+// 000000000000000|000000000000000
+// ___big_block___|__small_block__
+// (k - number of one's, index - position in all numbers with k-bits set)
 class RRR30_Helper
 {
 private:
@@ -126,88 +130,83 @@ private:
   } data;
 
 public:
-  // stores C(n, k) for all pairs of n and k and should be computed at the
-  // compile time
-
   static inline pair<size_t, uint32_t> decode(uint32_t block)
   {
-    size_t k = __builtin_popcount(block);
+    const size_t k = __builtin_popcount(block);
+    const uint32_t left_block = block >> 15;
+    const uint32_t right_block = block & 32767; // 32767 = 111'1111'1111'1111
+    const size_t set_in_left = __builtin_popcount(left_block);
+    const size_t set_in_right = __builtin_popcount(right_block);
     uint32_t index = 0;
-    uint32_t left = block >> 15;
-    uint32_t right = block & 32767;
-    size_t count_left = __builtin_popcount(left);
-    size_t count_right =
-        __builtin_popcount(right); // 32767 = 111'1111'1111'1111
 
-    for (size_t i = 0; i < count_right; ++i)
+    for (size_t i = 0; i < set_in_right; ++i)
     {
       index += BinCoeff64[15][i] * BinCoeff64[15][k - i];
     }
 
-    index += BinCoeff64[15][count_left] * binomial15::bin_to_nr(right);
-    index += binomial15::bin_to_nr(left);
+    index += BinCoeff64[15][set_in_left] * binomial15::bin_to_nr(right_block);
+    index += binomial15::bin_to_nr(left_block);
 
     return {k, index};
   }
 
   static inline uint32_t f(size_t k, uint32_t index)
   {
-    const size_t ones_in_big_lower = (k > 15) ? (k - 15) : 0;
-    const size_t ones_in_big_upper = std::min(k, static_cast<size_t>(15));
+    const size_t set_in_big_lower = (k > 15) ? (k - 15) : 0;
+    const size_t set_in_big_upper = std::min(k, static_cast<size_t>(15));
 
-    size_t ones_in_big = ones_in_big_lower;
-    for (; ones_in_big < ones_in_big_upper; ++ones_in_big)
+    size_t set_in_big = set_in_big_lower;
+    for (; set_in_big < set_in_big_upper; ++set_in_big)
     {
-      if (auto curr_index = data.helper[k][ones_in_big + 1];
-          curr_index >= index)
+      if (auto curr_index = data.helper[k][set_in_big + 1]; curr_index >= index)
       {
         if (curr_index == index)
-          ++ones_in_big;
+          ++set_in_big;
         break;
       }
     }
 
-    index -= data.helper[k][ones_in_big];
+    index -= data.helper[k][set_in_big];
 
-    size_t ones_in_small = k - ones_in_big;
+    const size_t set_in_small = k - set_in_big;
 
-    uint32_t small_index = binomial15::nr_to_bin(
-        ones_in_small, index % BinCoeff64[15][ones_in_small]);
+    const uint32_t small_index = binomial15::nr_to_bin(
+        set_in_small, index % BinCoeff64[15][set_in_small]);
 
-    uint32_t big_index = binomial15::nr_to_bin(
-        ones_in_big, index / BinCoeff64[15][ones_in_small]);
+    const uint32_t big_index =
+        binomial15::nr_to_bin(set_in_big, index / BinCoeff64[15][set_in_small]);
 
     return (small_index << 15) | big_index;
   }
 
   static inline uint32_t f_binary(size_t k, uint32_t index)
   {
-    const size_t ones_in_big_lower = (k > 15) ? (k - 15) : 0;
-    const size_t ones_in_big_upper = std::min(k, static_cast<size_t>(15));
+    const size_t set_in_big_lower = (k > 15) ? (k - 15) : 0;
+    const size_t set_in_big_upper = std::min(k, static_cast<size_t>(15));
 
-    auto it =
-        std::upper_bound(data.helper[k].begin() + ones_in_big_lower,
-                         data.helper[k].begin() + ones_in_big_upper, index);
-    size_t ones_in_big = std::distance(data.helper[k].begin(), it);
-    if (data.helper[k][ones_in_big] > index)
-      --ones_in_big;
+    const auto it =
+        std::upper_bound(data.helper[k].begin() + set_in_big_lower,
+                         data.helper[k].begin() + set_in_big_upper, index);
+    size_t set_in_big = std::distance(data.helper[k].begin(), it);
+    if (data.helper[k][set_in_big] > index)
+      --set_in_big;
 
-    index -= data.helper[k][ones_in_big];
+    index -= data.helper[k][set_in_big];
 
-    size_t ones_in_small = k - ones_in_big;
+    const size_t set_in_small = k - set_in_big;
 
-    uint32_t small_index = binomial15::nr_to_bin(
-        ones_in_small, index % BinCoeff64[15][ones_in_small]);
+    const uint32_t small_index = binomial15::nr_to_bin(
+        set_in_small, index % BinCoeff64[15][set_in_small]);
 
-    uint32_t big_index = binomial15::nr_to_bin(
-        ones_in_big, index / BinCoeff64[15][ones_in_small]);
+    const uint32_t big_index =
+        binomial15::nr_to_bin(set_in_big, index / BinCoeff64[15][set_in_small]);
 
     return (small_index << 15) | big_index;
   }
 
   static inline uint32_t f_simd(size_t k, uint32_t index)
   {
-    const size_t ones_in_big_upper = std::min(k, static_cast<size_t>(15));
+    const size_t set_in_big_upper = std::min(k, static_cast<size_t>(15));
 
     const __m128i keys = _mm_set1_epi32(index);
     const __m128i vec1 =
@@ -231,25 +230,25 @@ public:
 
     const uint32_t mask = (mask2 << 16) | mask1;
 
-    size_t ones_in_big = ones_in_big_upper;
+    size_t set_in_big = set_in_big_upper;
 
     if (mask != 0)
     {
-      ones_in_big = (1 + __builtin_ctz(mask)) / 2;
+      set_in_big = (1 + __builtin_ctz(mask)) / 2;
 
-      if (data.helper[k][ones_in_big] > index)
-        --ones_in_big;
+      if (data.helper[k][set_in_big] > index)
+        --set_in_big;
     }
 
-    index -= data.helper[k][ones_in_big];
+    index -= data.helper[k][set_in_big];
 
-    size_t ones_in_small = k - ones_in_big;
+    const size_t set_in_small = k - set_in_big;
 
-    uint32_t small_index = binomial15::nr_to_bin(
-        ones_in_small, index % BinCoeff64[15][ones_in_small]);
+    const uint32_t small_index = binomial15::nr_to_bin(
+        set_in_small, index % BinCoeff64[15][set_in_small]);
 
-    uint32_t big_index = binomial15::nr_to_bin(
-        ones_in_big, index / BinCoeff64[15][ones_in_small]);
+    const uint32_t big_index =
+        binomial15::nr_to_bin(set_in_big, index / BinCoeff64[15][set_in_small]);
 
     return (small_index << 15) | big_index;
   }
@@ -271,18 +270,18 @@ public:
     return to_or | RRR30_Helper::f_simd(k, index);
   }
 
-  static pair<uint32_t, uint32_t> decode(uint32_t x)
+  static pair<uint32_t, uint32_t> decode(uint32_t block)
   {
-    uint32_t k = __builtin_popcount(x);
+    const uint32_t k = __builtin_popcount(block);
 
-    if (x & (1 << 30))
+    if (block & (1 << 30))
     {
-      uint32_t new_x = x & (~(1 << 30));
-      return {k, BinCoeff64[30][k] + RRR30_Helper::decode(new_x).second};
+      const uint32_t new_block = block & (~(1 << 30));
+      return {k, BinCoeff64[30][k] + RRR30_Helper::decode(new_block).second};
     }
     else
     {
-      return {k, RRR30_Helper::decode(x).second};
+      return {k, RRR30_Helper::decode(block).second};
     }
   }
 };
@@ -324,76 +323,72 @@ public:
   // compile time
   static constexpr auto nCrArr{BinCoeff<64>::set_data()};
 
-  static inline uint64_t f(size_t k, uint64_t index)
+  static inline uint64_t f(const size_t k, uint64_t index)
   {
-    const size_t ones_in_big_lower = (k > 31) ? (k - 31) : 0;
-    const size_t ones_in_big_upper = std::min(k, static_cast<size_t>(31));
+    const size_t set_in_big_lower = (k > 31) ? (k - 31) : 0;
+    const size_t set_in_big_upper = std::min(k, static_cast<size_t>(31));
 
-    size_t ones_in_big = ones_in_big_lower;
-    for (; ones_in_big < ones_in_big_upper; ++ones_in_big)
+    size_t set_in_big = set_in_big_lower;
+    for (; set_in_big < set_in_big_upper; ++set_in_big)
     {
-      if (auto curr_index = data.helper[k][ones_in_big + 1];
-          curr_index >= index)
+      if (auto curr_index = data.helper[k][set_in_big + 1]; curr_index >= index)
       {
         if (curr_index == index)
-          ++ones_in_big;
+          ++set_in_big;
         break;
       }
     }
 
-    index -= data.helper[k][ones_in_big];
+    index -= data.helper[k][set_in_big];
 
-    size_t ones_in_small = k - ones_in_big;
+    const size_t set_in_small = k - set_in_big;
 
-    uint64_t small_index =
-        RRR31_Helper::f(ones_in_small, index % nCrArr[31][ones_in_small]);
-
-    uint64_t big_index =
-        RRR31_Helper::f(ones_in_big, index / nCrArr[31][ones_in_small]);
-
-    return (small_index << 31) | big_index;
-  }
-
-  static inline uint64_t f_binary(size_t k, uint64_t index)
-  {
-    const size_t ones_in_big_lower = (k > 31) ? (k - 31) : 0;
-    const size_t ones_in_big_upper = std::min(k, static_cast<size_t>(31));
-
-    auto it =
-        std::upper_bound(data.helper[k].begin() + ones_in_big_lower,
-                         data.helper[k].begin() + ones_in_big_upper, index);
-    size_t ones_in_big = std::distance(data.helper[k].begin(), it);
-    if (data.helper[k][ones_in_big] > index)
-      --ones_in_big;
-
-    index -= data.helper[k][ones_in_big];
-
-    size_t ones_in_small = k - ones_in_big;
-
-    uint64_t small_index =
-        RRR31_Helper::f(ones_in_small, index % nCrArr[31][ones_in_small]);
-
-    uint64_t big_index =
-        RRR31_Helper::f(ones_in_big, index / nCrArr[31][ones_in_small]);
+    const uint64_t small_index =
+        RRR31_Helper::f(set_in_small, index % nCrArr[31][set_in_small]);
+    const uint64_t big_index =
+        RRR31_Helper::f(set_in_big, index / nCrArr[31][set_in_small]);
 
     return (small_index << 31) | big_index;
   }
 
-  static inline pair<uint64_t, uint64_t> decode(uint64_t block)
+  static inline uint64_t f_binary(const size_t k, uint64_t index)
   {
-    uint64_t k = __builtin_popcountll(block);
-    uint64_t index = 0;
-    uint32_t left = block >> 31;
-    uint32_t right =
+    const size_t set_in_big_lower = (k > 31) ? (k - 31) : 0;
+    const size_t set_in_big_upper = std::min(k, static_cast<size_t>(31));
+
+    const auto it =
+        std::upper_bound(data.helper[k].begin() + set_in_big_lower,
+                         data.helper[k].begin() + set_in_big_upper, index);
+    size_t set_in_big = std::distance(data.helper[k].begin(), it);
+    if (data.helper[k][set_in_big] > index)
+      --set_in_big;
+
+    index -= data.helper[k][set_in_big];
+
+    const size_t set_in_small = k - set_in_big;
+
+    const uint64_t small_index =
+        RRR31_Helper::f(set_in_small, index % nCrArr[31][set_in_small]);
+    const uint64_t big_index =
+        RRR31_Helper::f(set_in_big, index / nCrArr[31][set_in_small]);
+
+    return (small_index << 31) | big_index;
+  }
+
+  static inline pair<uint64_t, uint64_t> decode(const uint64_t block)
+  {
+    const uint64_t k = __builtin_popcountll(block);
+    const uint32_t left = block >> 31;
+    const uint32_t right =
         block & 2147483647; // 2147483647_10 = 1111111111111111111111111111111_2
-    uint32_t count_left = __builtin_popcount(left);
-    uint32_t count_right = __builtin_popcount(right);
+    const uint32_t count_left = __builtin_popcount(left);
+    const uint32_t count_right = __builtin_popcount(right);
 
+    uint64_t index = 0;
     for (size_t i = 0; i < count_right; ++i)
     {
       index += nCrArr[31][i] * nCrArr[31][k - i];
     }
-
     index += nCrArr[31][count_left] * RRR31_Helper::decode(right).second;
     index += RRR31_Helper::decode(left).second;
 
@@ -417,18 +412,18 @@ public:
     return to_or | RRR62_Helper::f(k, index);
   }
 
-  static pair<uint64_t, uint64_t> decode(uint64_t x)
+  static pair<uint64_t, uint64_t> decode(const uint64_t block)
   {
-    uint64_t k = __builtin_popcountll(x);
+    const uint64_t k = __builtin_popcountll(block);
 
-    if (x & (1ull << 62))
+    if (block & (1ull << 62))
     {
-      uint64_t new_x = x & (~(1ull << 62));
-      return {k, BinCoeff64[62][k] + RRR62_Helper::decode(new_x).second};
+      const uint64_t new_block = block & (~(1ull << 62));
+      return {k, BinCoeff64[62][k] + RRR62_Helper::decode(new_block).second};
     }
     else
     {
-      return {k, RRR62_Helper::decode(x).second};
+      return {k, RRR62_Helper::decode(block).second};
     }
   }
 };

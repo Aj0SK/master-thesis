@@ -7,21 +7,14 @@
 #include <bitset>
 #include <iostream>
 
-using std::cerr;
 using std::cout;
 using std::random_shuffle;
 using std::vector;
 
-// returns vector of all n-bit sequences with c-bits set
-// in the lexigraphical order
+// Returns the vector of all n-bit sequences with c-bits set.
+// Ordered in the lexigraphical order.
 vector<vector<bool>> sorted_bit_sequences(size_t n, size_t c)
 {
-  if (c > n)
-  {
-    cerr << "Bad c in sorted_bit_sequences."
-         << "\n";
-    exit(0);
-  }
   vector<bool> arr;
   arr.reserve(n);
 
@@ -40,12 +33,11 @@ vector<vector<bool>> sorted_bit_sequences(size_t n, size_t c)
 }
 
 // Find the binary block that is on a position "target" in a lexicographical
-// ordering
+// ordering.
 size_t get_ith_in_lexicographic(size_t n, size_t c, size_t target)
 {
-  // stores C(n, k) for all pairs of n and k and should be computed at the
-  // compile time
-
+  // Stores C(n, k) for all pairs of n and k and should be computed at the
+  // compile time.
   static constexpr auto nCrArr{BinCoeff<64>::set_data()};
 
   size_t out = 0;
@@ -65,7 +57,9 @@ size_t get_ith_in_lexicographic(size_t n, size_t c, size_t target)
   return out;
 }
 
-template <typename T> T generate_bit_sequence(size_t n, size_t k)
+// Generates random bit sequence of length n, with k bits set. Returned as a
+// type T.
+template <typename T> T generate_random_bit_sequence(size_t n, size_t k)
 {
   vector<size_t> indexes;
   indexes.reserve(n);
@@ -83,6 +77,7 @@ template <typename T> T generate_bit_sequence(size_t n, size_t k)
   return out;
 }
 
+// Print binary representation of value (of type T)
 template <typename T> void print_binary(T x)
 {
   cout << std::bitset<8 * sizeof(x)>(x);

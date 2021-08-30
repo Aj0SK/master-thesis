@@ -11,6 +11,7 @@
 #include <iostream>
 #include <vector>
 
+using std::cerr;
 using std::cout;
 using std::min;
 using std::next_permutation;
@@ -182,7 +183,7 @@ int main(int argc, char** argv)
     for (size_t i = 0; i < (1ull << 30); ++i)
     {
       auto [k, index] = RRR30_Helper::decode(i);
-      uint32_t res = RRR30_Helper::f(k, index);
+      uint32_t res = RRR30_Helper::f_simd(k, index);
       if (res != i)
       {
         cout << "Problem with 30-bit impl!\n";
@@ -238,7 +239,7 @@ int main(int argc, char** argv)
     std::uniform_int_distribution<uint64_t> dis;
 
     cout << "Started testing of 63 bit impl...\n";
-    for (uint32_t i = 0; i < 1'000'000; ++i)
+    for (uint32_t i = 0; i < 1'000'000'000; ++i)
     {
       uint64_t r = dis(gen);
       r %= 1ull << 63;

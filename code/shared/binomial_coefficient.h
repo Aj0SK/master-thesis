@@ -4,12 +4,13 @@
 #include <array>
 #include <cstddef>
 
+// Class storing C(n, k) and computing it in a compile time.
 template <size_t kMaxBinN> class BinCoeff
 {
 public:
   using Arr = std::array<std::array<uint64_t, kMaxBinN + 1>, kMaxBinN + 1>;
 
-  // from: https://cp-algorithms.com/combinatorics/binomial-coefficients.html
+  // source: https://cp-algorithms.com/combinatorics/binomial-coefficients.html
   static constexpr Arr set_data()
   {
     Arr C = {};
@@ -26,10 +27,10 @@ public:
   }
 };
 
-// computes and returns C(n, k)
+// Computes and returns C(n, k)
+// source: http://blog.plover.com/math/choose.html
 constexpr uint64_t nCr(uint64_t n, uint64_t k)
 {
-  // from: http://blog.plover.com/math/choose.html
   if (k > n)
     return 0;
   uint64_t r = 1;
