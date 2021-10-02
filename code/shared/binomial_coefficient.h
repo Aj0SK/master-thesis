@@ -13,6 +13,7 @@ public:
   // source: https://cp-algorithms.com/combinatorics/binomial-coefficients.html
   static constexpr Arr set_data()
   {
+    static_assert(kMaxBinN <= 64, "Max n in bin-coeff should be <=64.");
     Arr C = {};
 
     C[0][0] = 1;

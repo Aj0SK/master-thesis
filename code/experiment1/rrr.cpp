@@ -20,7 +20,6 @@ using std::vector;
 
 constexpr bool kTest30 = false, kTest31 = false, kTest62 = false,
                kTest63 = false;
-constexpr size_t kMaxBinN = 64;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Benchmarks
@@ -31,15 +30,15 @@ constexpr size_t kPerTestQueries = 10'000;
 // (k, index) where k is number of set bits in the block
 // and index is an index into sequence of all k-bits blocks
 // in some particular order.
-vector<pair<uint64_t, uint64_t>> get_test(int N)
+vector<pair<uint64_t, uint64_t>> get_test(uint64_t N)
 {
   srand(2104);
   vector<pair<uint64_t, uint64_t>> test;
   test.reserve(kPerTestQueries);
   for (size_t i = 0; i < kPerTestQueries; ++i)
   {
-    size_t k = 1 + rand() % (N - 1);
-    size_t index = rand() % BinCoeff64[N][k];
+    uint64_t k = 1 + rand() % (N - 1);
+    uint64_t index = rand() % BinCoeff64[N][k];
     test.push_back({k, index});
   }
   return test;
@@ -65,8 +64,8 @@ static void BM_SDSL30_LINEAR(benchmark::State& state)
   {
     for (auto [k, index] : test)
     {
-      auto x = RRR30_Helper::f(k, index);
-      benchmark::DoNotOptimize(x);
+      auto block = RRR30_Helper::f(k, index);
+      benchmark::DoNotOptimize(block);
     }
   }
 }
@@ -78,8 +77,8 @@ static void BM_SDSL30_LINEAR_SIMD(benchmark::State& state)
   {
     for (auto [k, index] : test)
     {
-      auto x = RRR30_Helper::f_simd(k, index);
-      benchmark::DoNotOptimize(x);
+      auto block = RRR30_Helper::f_simd(k, index);
+      benchmark::DoNotOptimize(block);
     }
   }
 }
@@ -91,8 +90,8 @@ static void BM_SDSL30_BINARY(benchmark::State& state)
   {
     for (auto [k, index] : test)
     {
-      auto x = RRR30_Helper::f_binary(k, index);
-      benchmark::DoNotOptimize(x);
+      auto block = RRR30_Helper::f_binary(k, index);
+      benchmark::DoNotOptimize(block);
     }
   }
 }
@@ -104,8 +103,8 @@ static void BM_SDSL31_LINEAR_SIMD(benchmark::State& state)
   {
     for (auto [k, index] : test)
     {
-      auto x = RRR31_Helper::f(k, index);
-      benchmark::DoNotOptimize(x);
+      auto block = RRR31_Helper::f(k, index);
+      benchmark::DoNotOptimize(block);
     }
   }
 }
@@ -117,8 +116,8 @@ static void BM_SDSL62_LINEAR(benchmark::State& state)
   {
     for (auto [k, index] : test)
     {
-      auto x = RRR62_Helper::f(k, index);
-      benchmark::DoNotOptimize(x);
+      auto block = RRR62_Helper::f(k, index);
+      benchmark::DoNotOptimize(block);
     }
   }
 }
@@ -130,8 +129,8 @@ static void BM_SDSL62_BINARY(benchmark::State& state)
   {
     for (auto [k, index] : test)
     {
-      auto x = RRR62_Helper::f_binary(k, index);
-      benchmark::DoNotOptimize(x);
+      auto block = RRR62_Helper::f_binary(k, index);
+      benchmark::DoNotOptimize(block);
     }
   }
 }
@@ -143,8 +142,8 @@ static void BM_SDSL63_LINEAR(benchmark::State& state)
   {
     for (auto [k, index] : test)
     {
-      auto x = RRR63_Helper::f(k, index);
-      benchmark::DoNotOptimize(x);
+      auto block = RRR63_Helper::f(k, index);
+      benchmark::DoNotOptimize(block);
     }
   }
 }
@@ -156,8 +155,8 @@ static void BM_SDSL63_33030(benchmark::State& state)
   {
     for (auto [k, index] : test)
     {
-      auto x = RRR63_Alt_Helper::f(k, index);
-      benchmark::DoNotOptimize(x);
+      auto block = RRR63_Alt_Helper::f(k, index);
+      benchmark::DoNotOptimize(block);
     }
   }
 }
@@ -169,8 +168,8 @@ template <typename T, size_t N> static void BM_FUNC(benchmark::State& state)
   {
     for (auto [k, index] : test)
     {
-      auto x = sdsl::rrr_helper<N>::decode_bit(k, index, N - 1);
-      benchmark::DoNotOptimize(x);
+      auto block = sdsl::rrr_helper<N>::decode_bit(k, index, N - 1);
+      benchmark::DoNotOptimize(block);
     }
   }
 }
@@ -233,8 +232,7 @@ int main(int argc, char** argv)
     cout << "Started testing of 62 bit impl...\n";
     for (uint32_t i = 0; i < 1'000'000; ++i)
     {
-      uint64_t r = dis(gen);
-      r %= 1ull << 62;
+      uint64_t r = dis(gen) % (1ull << 62);
 
       auto [k, index] = RRR62_Helper::decode(r);
       uint64_t res = RRR62_Helper::f(k, index);
@@ -256,18 +254,12 @@ int main(int argc, char** argv)
     cout << "Started testing of 63 bit impl...\n";
     for (uint32_t i = 0; i < 1'000'000'000; ++i)
     {
-      uint64_t r = 0;
-      r = dis(gen);
-      r %= 1ull << 63;
-
+      uint64_t r = dis(gen) % (1ull << 63);
       auto [k, index] = RRR63_Alt_Helper::decode(r);
-      uint64_t res = 0;
-      res = RRR63_Alt_Helper::f(k, index);
+      uint64_t res = RRR63_Alt_Helper::f(k, index);
       if (res != r)
       {
         cout << "Problem with 63-bit impl!\nShould be:";
-        print_binary(r);
-        print_binary(res);
         return 1;
       }
     }

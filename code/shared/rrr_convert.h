@@ -137,13 +137,12 @@ public:
     const uint32_t right_block = block & 32767; // 32767 = 111'1111'1111'1111
     const size_t set_in_left = __builtin_popcount(left_block);
     const size_t set_in_right = __builtin_popcount(right_block);
-    uint32_t index = 0;
 
+    uint32_t index = 0;
     for (size_t i = 0; i < set_in_right; ++i)
     {
       index += BinCoeff64[15][i] * BinCoeff64[15][k - i];
     }
-
     index += BinCoeff64[15][set_in_left] * binomial15::bin_to_nr(right_block);
     index += binomial15::bin_to_nr(left_block);
 
@@ -301,7 +300,7 @@ private:
         for (size_t ones_in_big = 0; ones_in_big < 32; ++ones_in_big)
         {
           to_add[k][ones_in_big] =
-              nCrArr[31][ones_in_big] * nCrArr[31][k - ones_in_big];
+              BinCoeff64[31][ones_in_big] * BinCoeff64[31][k - ones_in_big];
         }
 
       for (size_t k = 0; k < 63; ++k)
@@ -319,10 +318,6 @@ private:
   } data;
 
 public:
-  // stores C(n, k) for all pairs of n and k and should be computed at the
-  // compile time
-  static constexpr auto nCrArr{BinCoeff<64>::set_data()};
-
   static inline uint64_t f(const size_t k, uint64_t index)
   {
     const size_t set_in_big_lower = (k > 31) ? (k - 31) : 0;
@@ -344,9 +339,9 @@ public:
     const size_t set_in_small = k - set_in_big;
 
     const uint64_t small_index =
-        RRR31_Helper::f(set_in_small, index % nCrArr[31][set_in_small]);
+        RRR31_Helper::f(set_in_small, index % BinCoeff64[31][set_in_small]);
     const uint64_t big_index =
-        RRR31_Helper::f(set_in_big, index / nCrArr[31][set_in_small]);
+        RRR31_Helper::f(set_in_big, index / BinCoeff64[31][set_in_small]);
 
     return (small_index << 31) | big_index;
   }
@@ -368,9 +363,9 @@ public:
     const size_t set_in_small = k - set_in_big;
 
     const uint64_t small_index =
-        RRR31_Helper::f(set_in_small, index % nCrArr[31][set_in_small]);
+        RRR31_Helper::f(set_in_small, index % BinCoeff64[31][set_in_small]);
     const uint64_t big_index =
-        RRR31_Helper::f(set_in_big, index / nCrArr[31][set_in_small]);
+        RRR31_Helper::f(set_in_big, index / BinCoeff64[31][set_in_small]);
 
     return (small_index << 31) | big_index;
   }
@@ -387,9 +382,9 @@ public:
     uint64_t index = 0;
     for (size_t i = 0; i < count_right; ++i)
     {
-      index += nCrArr[31][i] * nCrArr[31][k - i];
+      index += BinCoeff64[31][i] * BinCoeff64[31][k - i];
     }
-    index += nCrArr[31][count_left] * RRR31_Helper::decode(right).second;
+    index += BinCoeff64[31][count_left] * RRR31_Helper::decode(right).second;
     index += RRR31_Helper::decode(left).second;
 
     return {k, index};
@@ -431,7 +426,6 @@ public:
 class RRR63_Alt_Helper
 {
 private:
-  static constexpr auto nCrArr63{BinCoeff<64>::set_data()};
   inline static struct impl
   {
     std::array<std::array<uint64_t, 31>, 64> to_add;
@@ -442,7 +436,7 @@ private:
         for (size_t ones_in_big = 0; ones_in_big < 31; ++ones_in_big)
         {
           to_add[k][ones_in_big] =
-              nCrArr63[30][ones_in_big] * nCrArr63[30][k - ones_in_big];
+              BinCoeff64[30][ones_in_big] * BinCoeff64[30][k - ones_in_big];
         }
 
       for (size_t k = 0; k < 64; ++k)
@@ -472,24 +466,24 @@ public:
     // x011
     // x100
     uint64_t to_or = 0;
-    const bool first_bit = (index >= (nCrArr63[62][k]));
+    const bool first_bit = (index >= (BinCoeff64[62][k]));
     if (first_bit)
     {
-      index -= nCrArr63[62][k];
+      index -= BinCoeff64[62][k];
       --k;
       to_or |= 1ull << 62;
     }
-    const bool second_bit = (index >= (nCrArr63[61][k]));
+    const bool second_bit = (index >= (BinCoeff64[61][k]));
     if (second_bit)
     {
-      index -= nCrArr63[61][k];
+      index -= BinCoeff64[61][k];
       --k;
       to_or |= 1ull << 61;
     }
-    const bool third_bit = (index >= (nCrArr63[60][k]));
+    const bool third_bit = (index >= (BinCoeff64[60][k]));
     if (third_bit)
     {
-      index -= nCrArr63[60][k];
+      index -= BinCoeff64[60][k];
       --k;
       to_or |= 1ull << 60;
     }
@@ -512,10 +506,10 @@ public:
 
     const size_t set_in_small = k - set_in_big;
 
-    const uint64_t small_index =
-        RRR30_Helper::f_simd(set_in_small, index % nCrArr63[30][set_in_small]);
+    const uint64_t small_index = RRR30_Helper::f_simd(
+        set_in_small, index % BinCoeff64[30][set_in_small]);
     const uint64_t big_index =
-        RRR30_Helper::f_simd(set_in_big, index / nCrArr63[30][set_in_small]);
+        RRR30_Helper::f_simd(set_in_big, index / BinCoeff64[30][set_in_small]);
 
     return to_or | (small_index << 30) | big_index;
   }
@@ -527,9 +521,9 @@ public:
     bool second_bit = block & (1ull << 61);
     bool third_bit = block & (1ull << 60);
 
-    uint64_t index = first_bit * nCrArr63[62][k] +
-                     second_bit * nCrArr63[61][k - first_bit] +
-                     third_bit * nCrArr63[60][k - first_bit - second_bit];
+    uint64_t index = first_bit * BinCoeff64[62][k] +
+                     second_bit * BinCoeff64[61][k - first_bit] +
+                     third_bit * BinCoeff64[60][k - first_bit - second_bit];
 
     const uint64_t rem_k = k - first_bit - second_bit - third_bit;
 
@@ -541,9 +535,9 @@ public:
 
     for (size_t i = 0; i < count_right; ++i)
     {
-      index += nCrArr63[30][i] * nCrArr63[30][rem_k - i];
+      index += BinCoeff64[30][i] * BinCoeff64[30][rem_k - i];
     }
-    index += nCrArr63[30][count_left] * RRR30_Helper::decode(right).second;
+    index += BinCoeff64[30][count_left] * RRR30_Helper::decode(right).second;
     index += RRR30_Helper::decode(left).second;
     return {k, index};
   }
