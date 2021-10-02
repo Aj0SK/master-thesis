@@ -18,7 +18,8 @@ using std::next_permutation;
 using std::pair;
 using std::vector;
 
-constexpr bool kTest30 = true, kTest31 = true, kTest62 = true, kTest63 = true;
+constexpr bool kTest30 = false, kTest31 = false, kTest62 = false,
+               kTest63 = false;
 constexpr size_t kMaxBinN = 64;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -148,6 +149,19 @@ static void BM_SDSL63_LINEAR(benchmark::State& state)
   }
 }
 
+static void BM_SDSL63_33030(benchmark::State& state)
+{
+  auto test = get_test(63);
+  for (auto _ : state)
+  {
+    for (auto [k, index] : test)
+    {
+      auto x = RRR63_Alt_Helper::f(k, index);
+      benchmark::DoNotOptimize(x);
+    }
+  }
+}
+
 template <typename T, size_t N> static void BM_FUNC(benchmark::State& state)
 {
   auto test = get_test(N);
@@ -169,6 +183,7 @@ BENCHMARK(BM_SDSL31_LINEAR_SIMD);
 BENCHMARK(BM_SDSL62_LINEAR);
 BENCHMARK(BM_SDSL62_BINARY);
 BENCHMARK(BM_SDSL63_LINEAR);
+BENCHMARK(BM_SDSL63_33030);
 BENCHMARK_TEMPLATE(BM_FUNC, uint32_t, 15);
 BENCHMARK_TEMPLATE(BM_FUNC, uint32_t, 30);
 BENCHMARK_TEMPLATE(BM_FUNC, uint32_t, 31);
@@ -241,14 +256,18 @@ int main(int argc, char** argv)
     cout << "Started testing of 63 bit impl...\n";
     for (uint32_t i = 0; i < 1'000'000'000; ++i)
     {
-      uint64_t r = dis(gen);
+      uint64_t r = 0;
+      r = dis(gen);
       r %= 1ull << 63;
 
-      auto [k, index] = RRR63_Helper::decode(r);
-      uint64_t res = RRR63_Helper::f(k, index);
+      auto [k, index] = RRR63_Alt_Helper::decode(r);
+      uint64_t res = 0;
+      res = RRR63_Alt_Helper::f(k, index);
       if (res != r)
       {
-        cout << "Problem with 63-bit impl!\n";
+        cout << "Problem with 63-bit impl!\nShould be:";
+        print_binary(r);
+        print_binary(res);
         return 1;
       }
     }

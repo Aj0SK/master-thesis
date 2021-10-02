@@ -1,11 +1,14 @@
-CXX = g++
-CXXFLAGS = -std=c++17 -O3 -Wall -Wextra -march=native -I ~/include -L ~/lib
+CXX = clang++
+CXXFLAGS = -O3 -march=native -std=c++17 -Wall -Wextra -pedantic -I ~/include -L ~/lib
 MY = -I../shared
 SDSL = -lsdsl -ldivsufsort -ldivsufsort64
 BENCHMARK = -isystem benchmark/include -Lbenchmark/build/src -lbenchmark -lpthread
 BUILD = build
 
-all: prepare rrr table benchmark
+all: clean prepare rrr table benchmark
+
+clean:
+	rm -r -f $(BUILD)
 
 prepare:
 	mkdir -p $(BUILD)
