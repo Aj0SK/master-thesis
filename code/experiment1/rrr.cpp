@@ -19,7 +19,7 @@ using std::pair;
 using std::vector;
 
 constexpr bool kTest30 = false, kTest31 = false, kTest62 = false,
-               kTest63 = false;
+               kTest63 = false, kTest127 = true;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Benchmarks
@@ -161,6 +161,19 @@ static void BM_SDSL63_33030(benchmark::State& state)
   }
 }
 
+static void BM_SDSL127(benchmark::State& state)
+{
+  auto test = get_test(63);
+  for (auto _ : state)
+  {
+    for (auto [k, index] : test)
+    {
+      auto block = RRR127_Helper::f(k, index);
+      benchmark::DoNotOptimize(block);
+    }
+  }
+}
+
 template <typename T, size_t N> static void BM_FUNC(benchmark::State& state)
 {
   auto test = get_test(N);
@@ -183,6 +196,7 @@ BENCHMARK(BM_SDSL62_LINEAR);
 BENCHMARK(BM_SDSL62_BINARY);
 BENCHMARK(BM_SDSL63_LINEAR);
 BENCHMARK(BM_SDSL63_33030);
+BENCHMARK(BM_SDSL127);
 BENCHMARK_TEMPLATE(BM_FUNC, uint32_t, 15);
 BENCHMARK_TEMPLATE(BM_FUNC, uint32_t, 30);
 BENCHMARK_TEMPLATE(BM_FUNC, uint32_t, 31);
@@ -264,6 +278,29 @@ int main(int argc, char** argv)
       }
     }
     std::cout << "Successfully tested for block size " << 63 << "\n";
+  }
+
+  if constexpr (kTest127)
+  {
+    std::random_device rd;
+    std::mt19937_64 gen(rd());
+    std::uniform_int_distribution<uint64_t> dis;
+
+    cout << "Started testing of 128 bit impl...\n";
+    for (uint32_t i = 0; i < 1'000'000'000; ++i)
+    {
+      uint64_t r1 = dis(gen);
+      uint64_t r2 = dis(gen);
+      __uint128_t r = (r1 << 62) + r2;
+      auto [k, index] = RRR127_Helper::decode(r);
+      auto res = RRR127_Helper::f(k, index);
+      if (res != r)
+      {
+        cout << "Problem with 127-bit impl!\nShould be:";
+        return 1;
+      }
+    }
+    std::cout << "Successfully tested for block size " << 127 << "\n";
   }
 
   ::benchmark::Initialize(&argc, argv);

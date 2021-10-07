@@ -38,7 +38,7 @@ size_t get_ith_in_lexicographic(size_t n, size_t c, size_t target)
 {
   // Stores C(n, k) for all pairs of n and k and should be computed at the
   // compile time.
-  static constexpr auto nCrArr{BinCoeff<64>::set_data()};
+  static constexpr auto nCrArr{BinCoeff<64, uint64_t>::set_data()};
 
   size_t out = 0;
   for (size_t i = 0; i < n; ++i)

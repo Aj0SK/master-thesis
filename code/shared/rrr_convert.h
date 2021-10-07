@@ -18,7 +18,7 @@ T get_ith_in_lexicographic_sdsl(size_t n, size_t c, size_t target)
 {
   // Stores C(n, k) for all pairs of n and k and should be computed at the
   // compile time
-  static constexpr auto nCrArr{BinCoeff<64>::set_data()};
+  static constexpr auto nCrArr{BinCoeff<64, uint64_t>::set_data()};
 
   T out = 0;
   for (size_t i = 0; i < n; ++i)
@@ -104,7 +104,7 @@ class RRR30_Helper
 private:
   inline static struct impl
   {
-    std::array<std::array<size_t, 16>, 31> to_add;
+    std::array<std::array<uint32_t, 16>, 31> to_add;
     std::array<std::array<uint32_t, 16>, 31> helper;
     impl()
     {
@@ -539,6 +539,119 @@ public:
     }
     index += BinCoeff64[30][count_left] * RRR30_Helper::decode(right).second;
     index += RRR30_Helper::decode(left).second;
+    return {k, index};
+  }
+};
+
+class RRR127_Helper
+{
+private:
+  inline static struct impl
+  {
+    std::array<std::array<__uint128_t, 64>, 128> to_add;
+    std::array<std::array<__uint128_t, 64>, 128> helper;
+    impl()
+    {
+      for (size_t k = 0; k < 128; ++k)
+        for (size_t ones_in_big = 0; ones_in_big < 64; ++ones_in_big)
+        {
+          to_add[k][ones_in_big] =
+              BinCoeff128[63][ones_in_big] * BinCoeff128[63][k - ones_in_big];
+        }
+
+      for (size_t k = 0; k < 128; ++k)
+      {
+        std::fill(helper[k].begin(), helper[k].end(), 0);
+        __uint128_t total = 0;
+        for (size_t ones_in_big = (k > 63) ? (k - 63) : 0;
+             ones_in_big <= std::min(k, static_cast<size_t>(63)); ++ones_in_big)
+        {
+          helper[k][ones_in_big] = total;
+          total += to_add[k][ones_in_big];
+        }
+      }
+    }
+  } data;
+
+public:
+  static inline __uint128_t f(size_t k, __uint128_t index)
+  {
+    // x000
+    // pozicia: 4 -> 63
+    // shiftov: 3 -> 62
+    // pocet kombinacii pred: 8 (1<<3)
+    // pocet shiftov
+    // x001
+    // x010
+    // x011
+    // x100
+    __uint128_t to_or = 0;
+    constexpr __uint128_t one = 1;
+    const bool first_bit = (index >= (BinCoeff128[126][k]));
+    if (first_bit)
+    {
+      index -= BinCoeff128[126][k];
+      --k;
+      to_or |= one << 126;
+    }
+
+    const size_t set_in_big_lower = (k > 63) ? (k - 63) : 0;
+    const size_t set_in_big_upper = std::min(k, static_cast<size_t>(63));
+
+    size_t set_in_big = set_in_big_lower;
+    for (; set_in_big < set_in_big_upper; ++set_in_big)
+    {
+      if (auto curr_index = data.helper[k][set_in_big + 1]; curr_index >= index)
+      {
+        if (curr_index == index)
+          ++set_in_big;
+        break;
+      }
+    }
+
+    index -= data.helper[k][set_in_big];
+
+    const size_t set_in_small = k - set_in_big;
+
+    const __uint128_t small_index =
+        RRR63_Helper::f(set_in_small, index % BinCoeff128[63][set_in_small]);
+    const __uint128_t big_index =
+        RRR63_Helper::f(set_in_big, index / BinCoeff128[63][set_in_small]);
+
+    return to_or | (small_index << 63) | big_index;
+  }
+
+  static size_t popcountllll(__uint128_t n)
+  {
+    const size_t cnt_hi = __builtin_popcountll(n >> 64);
+    const size_t cnt_lo = __builtin_popcountll(n);
+    return cnt_hi + cnt_lo;
+  }
+
+  static pair<uint64_t, __uint128_t> decode(const __uint128_t block)
+  {
+    const size_t k = popcountllll(block);
+    const __uint128_t one = 1;
+    bool first_bit = block & (one << 126);
+
+    __uint128_t index = first_bit * BinCoeff128[126][k];
+
+    const uint64_t rem_k = k - first_bit;
+
+    // 1073741823_10 = 111111111111111111111111111111_2
+    const __uint128_t low_end = 9223372036854775807ull;
+    const uint64_t left = (block >> 63) & low_end;
+    const uint64_t right = block & low_end;
+    const uint64_t count_left = __builtin_popcountll(left);
+    const uint64_t count_right = __builtin_popcountll(right);
+
+    for (size_t i = 0; i < count_right; ++i)
+    {
+      index += BinCoeff128[63][i] * BinCoeff128[63][rem_k - i];
+    }
+    index += BinCoeff128[63][count_left] *
+             static_cast<__uint128_t>(RRR63_Helper::decode(right).second);
+    index += RRR63_Helper::decode(left).second;
     return {k, index};
   }
 };
