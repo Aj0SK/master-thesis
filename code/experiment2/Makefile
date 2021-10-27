@@ -1,5 +1,6 @@
 CXX := clang++
-CXXFLAGS := -std=c++17 -O3 -march=native -DNDEBUG -Wall -Wextra -pedantic -Wshadow -Wcast-align -Wnon-virtual-dtor -I ~/include -L ~/lib
+CXXFLAGS := -std=c++17 -O3 -march=native -DNDEBUG -Wall -Wextra -Wfatal-errors -pedantic -Wshadow -Wcast-align -Wnon-virtual-dtor -I ~/include -L ~/lib
+CXXFLAGS_DEBUG := -fsanitize=address -std=c++17 -g -Wall -Wextra -Wfatal-errors -pedantic -Wshadow -Wcast-align -Wnon-virtual-dtor -I ~/include -L ~/lib
 SDSL := -lsdsl -ldivsufsort -ldivsufsort64
 BENCHMARK = -isystem benchmark/include -Lbenchmark/build/src -lbenchmark -lpthread
 
@@ -16,3 +17,9 @@ before_benchmark:
 
 after_benchmark:
 	sudo cpupower frequency-set --governor powersave
+
+sdsl_debug: sdsl_debug.out
+	./$<
+
+sdsl_debug.out: sdsl_debug.cpp
+	$(CXX) $(CXXFLAGS_DEBUG) $< $(SDSL) -o $@
