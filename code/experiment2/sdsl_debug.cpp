@@ -6,6 +6,10 @@ using std::pair;
 using std::vector;
 using namespace sdsl;
 
+std::random_device rd;
+std::seed_seq sd{0};
+std::mt19937 randomizer(sd);
+
 std::pair<vector<bool>, vector<size_t>>
 get_test(size_t size, size_t queries_count, int density)
 {
@@ -18,7 +22,7 @@ get_test(size_t size, size_t queries_count, int density)
     else
       v[i] = false;
   }
-  random_shuffle(v.begin(), v.end());
+  std::shuffle(v.begin(), v.end(), randomizer);
 
   std::vector<size_t> queries(queries_count);
   for (auto& q : queries)
@@ -35,14 +39,9 @@ int main(int argc, char** argv)
   // vector<bool> data;
   // vector<size_t> queries;
 
-  size_t density = 60;
+  size_t density = 99;
 
-  auto [data, queries] = get_test(10'000, 40, density);
-
-  for (size_t q : queries)
-  {
-    data[q] = !data[q];
-  }
+  auto [data, queries] = get_test(1024, 10, density);
 
   bit_vector bv(data.size());
   for (size_t i = 0; i < data.size(); ++i)
@@ -56,11 +55,10 @@ int main(int argc, char** argv)
   {
     if (data[i] != rrr_vector[i])
     {
-      std::cout << "Problem\n";
+      std::cout << "Problem on " << i << "\n";
       exit(1);
     }
   }
-
   std::cout << "successfully ended!\n";
 
   // rrr_select_type rrr_sel(&rrr_vector);

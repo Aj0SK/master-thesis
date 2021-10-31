@@ -6,6 +6,9 @@ BENCHMARK = -isystem benchmark/include -Lbenchmark/build/src -lbenchmark -lpthre
 
 all: sdsl_rrr_vector_test
 
+clear:
+	rm -f *.out
+
 sdsl_rrr_vector_test: sdsl_rrr_vector_test.out before_benchmark 
 	./$<
 
@@ -18,8 +21,8 @@ before_benchmark:
 after_benchmark:
 	sudo cpupower frequency-set --governor powersave
 
-sdsl_debug: sdsl_debug.out
-	./$<
+sdsl_debug: clear sdsl_debug.out
+	./sdsl_debug.out
 
 sdsl_debug.out: sdsl_debug.cpp
 	$(CXX) $(CXXFLAGS_DEBUG) $< $(SDSL) -o $@
