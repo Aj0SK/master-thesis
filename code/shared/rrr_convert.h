@@ -104,17 +104,9 @@ class RRR30_Helper
 private:
   inline static struct impl
   {
-    std::array<std::array<uint32_t, 16>, 31> to_add;
     std::array<std::array<uint32_t, 16>, 31> helper;
     impl()
     {
-      for (size_t k = 0; k < 31; ++k)
-        for (size_t ones_in_big = 0; ones_in_big < 16; ++ones_in_big)
-        {
-          to_add[k][ones_in_big] =
-              BinCoeff64[15][ones_in_big] * BinCoeff64[15][k - ones_in_big];
-        }
-
       for (size_t k = 0; k < 31; ++k)
       {
         std::fill(helper[k].begin(), helper[k].end(), 0);
@@ -123,7 +115,8 @@ private:
              ones_in_big <= std::min(k, static_cast<size_t>(15)); ++ones_in_big)
         {
           helper[k][ones_in_big] = total;
-          total += to_add[k][ones_in_big];
+          total +=
+              BinCoeff64[15][ones_in_big] * BinCoeff64[15][k - ones_in_big];
         }
       }
     }
@@ -133,16 +126,13 @@ public:
   static inline pair<size_t, uint32_t> decode(uint32_t block)
   {
     const size_t k = __builtin_popcount(block);
-    const uint32_t left_block = block >> 15;
-    const uint32_t right_block = block & 32767; // 32767 = 111'1111'1111'1111
+    const uint32_t left_block = block >> 15;     // upper 15 bits
+    const uint32_t right_block = block & 0x7fff; // lower 15 bits
     const size_t set_in_left = __builtin_popcount(left_block);
     const size_t set_in_right = __builtin_popcount(right_block);
 
     uint32_t index = 0;
-    for (size_t i = 0; i < set_in_right; ++i)
-    {
-      index += BinCoeff64[15][i] * BinCoeff64[15][k - i];
-    }
+    index += data.helper[k][set_in_right];
     index += BinCoeff64[15][set_in_left] * binomial15::bin_to_nr(right_block);
     index += binomial15::bin_to_nr(left_block);
 
@@ -292,17 +282,9 @@ class RRR62_Helper
 private:
   inline static struct impl
   {
-    std::array<std::array<uint64_t, 32>, 63> to_add;
     std::array<std::array<uint64_t, 32>, 63> helper;
     impl()
     {
-      for (size_t k = 0; k < 63; ++k)
-        for (size_t ones_in_big = 0; ones_in_big < 32; ++ones_in_big)
-        {
-          to_add[k][ones_in_big] =
-              BinCoeff64[31][ones_in_big] * BinCoeff64[31][k - ones_in_big];
-        }
-
       for (size_t k = 0; k < 63; ++k)
       {
         std::fill(helper[k].begin(), helper[k].end(), 0);
@@ -311,7 +293,8 @@ private:
              ones_in_big <= std::min(k, static_cast<size_t>(31)); ++ones_in_big)
         {
           helper[k][ones_in_big] = total;
-          total += to_add[k][ones_in_big];
+          total +=
+              BinCoeff64[31][ones_in_big] * BinCoeff64[31][k - ones_in_big];
         }
       }
     }
@@ -380,10 +363,7 @@ public:
     const uint32_t count_right = __builtin_popcount(right);
 
     uint64_t index = 0;
-    for (size_t i = 0; i < count_right; ++i)
-    {
-      index += BinCoeff64[31][i] * BinCoeff64[31][k - i];
-    }
+    index += data.helper[k][count_right];
     index += BinCoeff64[31][count_left] * RRR31_Helper::decode(right).second;
     index += RRR31_Helper::decode(left).second;
 
@@ -428,17 +408,9 @@ class RRR63_Alt_Helper
 private:
   inline static struct impl
   {
-    std::array<std::array<uint64_t, 31>, 64> to_add;
     std::array<std::array<uint64_t, 31>, 64> helper;
     impl()
     {
-      for (size_t k = 0; k < 64; ++k)
-        for (size_t ones_in_big = 0; ones_in_big < 31; ++ones_in_big)
-        {
-          to_add[k][ones_in_big] =
-              BinCoeff64[30][ones_in_big] * BinCoeff64[30][k - ones_in_big];
-        }
-
       for (size_t k = 0; k < 64; ++k)
       {
         std::fill(helper[k].begin(), helper[k].end(), 0);
@@ -447,7 +419,8 @@ private:
              ones_in_big <= std::min(k, static_cast<size_t>(30)); ++ones_in_big)
         {
           helper[k][ones_in_big] = total;
-          total += to_add[k][ones_in_big];
+          total +=
+              BinCoeff64[30][ones_in_big] * BinCoeff64[30][k - ones_in_big];
         }
       }
     }
@@ -533,10 +506,7 @@ public:
     const uint32_t count_left = __builtin_popcount(left);
     const uint32_t count_right = __builtin_popcount(right);
 
-    for (size_t i = 0; i < count_right; ++i)
-    {
-      index += BinCoeff64[30][i] * BinCoeff64[30][rem_k - i];
-    }
+    index += data.helper[rem_k][count_right];
     index += BinCoeff64[30][count_left] * RRR30_Helper::decode(right).second;
     index += RRR30_Helper::decode(left).second;
     return {k, index};
@@ -548,17 +518,9 @@ class RRR127_Helper
 private:
   inline static struct impl
   {
-    std::array<std::array<__uint128_t, 64>, 128> to_add;
     std::array<std::array<__uint128_t, 64>, 128> helper;
     impl()
     {
-      for (size_t k = 0; k < 128; ++k)
-        for (size_t ones_in_big = 0; ones_in_big < 64; ++ones_in_big)
-        {
-          to_add[k][ones_in_big] =
-              BinCoeff128[63][ones_in_big] * BinCoeff128[63][k - ones_in_big];
-        }
-
       for (size_t k = 0; k < 128; ++k)
       {
         std::fill(helper[k].begin(), helper[k].end(), 0);
@@ -567,7 +529,8 @@ private:
              ones_in_big <= std::min(k, static_cast<size_t>(63)); ++ones_in_big)
         {
           helper[k][ones_in_big] = total;
-          total += to_add[k][ones_in_big];
+          total +=
+              BinCoeff128[63][ones_in_big] * BinCoeff128[63][k - ones_in_big];
         }
       }
     }
@@ -645,10 +608,7 @@ public:
     const uint64_t count_left = __builtin_popcountll(left);
     const uint64_t count_right = __builtin_popcountll(right);
 
-    for (size_t i = 0; i < count_right; ++i)
-    {
-      index += BinCoeff128[63][i] * BinCoeff128[63][rem_k - i];
-    }
+    index += data.helper[rem_k][count_right];
     index += BinCoeff128[63][count_left] *
              static_cast<__uint128_t>(RRR63_Helper::decode(right).second);
     index += RRR63_Helper::decode(left).second;

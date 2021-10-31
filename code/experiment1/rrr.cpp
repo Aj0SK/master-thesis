@@ -19,7 +19,7 @@ using std::pair;
 using std::vector;
 
 constexpr bool kTest30 = false, kTest31 = false, kTest62 = false,
-               kTest63 = false, kTest127 = true;
+               kTest63 = false, kTest127 = false;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Benchmarks
@@ -273,7 +273,7 @@ int main(int argc, char** argv)
       uint64_t res = RRR63_Alt_Helper::f(k, index);
       if (res != r)
       {
-        cout << "Problem with 63-bit impl!\nShould be:";
+        cout << "Problem with 63-bit impl!\n:";
         return 1;
       }
     }
@@ -286,7 +286,7 @@ int main(int argc, char** argv)
     std::mt19937_64 gen(rd());
     std::uniform_int_distribution<uint64_t> dis;
 
-    cout << "Started testing of 128 bit impl...\n";
+    cout << "Started testing of 127 bit impl...\n";
     for (uint32_t i = 0; i < 1'000'000'000; ++i)
     {
       uint64_t r1 = dis(gen);
