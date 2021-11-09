@@ -7,7 +7,7 @@ using std::vector;
 using namespace sdsl;
 
 std::random_device rd;
-std::seed_seq sd{0};
+std::seed_seq sd{45};
 std::mt19937 randomizer(sd);
 
 std::pair<vector<bool>, vector<size_t>>
@@ -39,7 +39,7 @@ int main(int argc, char** argv)
   // vector<bool> data;
   // vector<size_t> queries;
 
-  size_t density = 99;
+  size_t density = 50;
 
   auto [data, queries] = get_test(1024, 10, density);
 
@@ -50,6 +50,11 @@ int main(int argc, char** argv)
   }
 
   rrr_vec_type rrr_vector(bv);
+
+  std::cout << "Expected: ";
+  for (size_t i = 0; i < 31; ++i)
+    std::cout << data[i];
+  std::cout << "\n";
 
   for (size_t i = 0; i < data.size(); ++i)
   {
