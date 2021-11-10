@@ -9,6 +9,12 @@ all: sdsl_rrr_vector_test
 clear:
 	rm -f *.out
 
+sdsl_block_type_stat: sdsl_block_type_stat.out
+	./$<
+
+sdsl_block_type_stat.out: sdsl_block_type_stat.cpp
+	$(CXX) $(CXXFLAGS) $< -o $@
+
 sdsl_rrr_vector_test: sdsl_rrr_vector_test.out before_benchmark 
 	./$<
 

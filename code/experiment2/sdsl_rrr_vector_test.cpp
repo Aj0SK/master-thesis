@@ -106,42 +106,64 @@ static void BM_FUNC(benchmark::State& state)
   state.counters["Space"] = ratio;
 }
 
-BENCHMARK_TEMPLATE(BM_FUNC, Operation::Access, AccessPattern::Random, 10'000,
+BENCHMARK_TEMPLATE(BM_FUNC, Operation::Access, AccessPattern::Random, 100'000,
                    15, 20);
-BENCHMARK_TEMPLATE(BM_FUNC, Operation::Access, AccessPattern::Random, 10'000,
+BENCHMARK_TEMPLATE(BM_FUNC, Operation::Access, AccessPattern::Random, 100'000,
                    31, 20);
-BENCHMARK_TEMPLATE(BM_FUNC, Operation::Access, AccessPattern::Random, 10'000,
+BENCHMARK_TEMPLATE(BM_FUNC, Operation::Access, AccessPattern::Random, 100'000,
                    63, 20);
-BENCHMARK_TEMPLATE(BM_FUNC, Operation::Access, AccessPattern::Random, 10'000,
+BENCHMARK_TEMPLATE(BM_FUNC, Operation::Access, AccessPattern::Random, 100'000,
                    127, 20);
-BENCHMARK_TEMPLATE(BM_FUNC, Operation::Rank, AccessPattern::Random, 10'000, 15,
+BENCHMARK_TEMPLATE(BM_FUNC, Operation::Rank, AccessPattern::Random, 100'000, 15,
                    20);
-BENCHMARK_TEMPLATE(BM_FUNC, Operation::Rank, AccessPattern::Random, 10'000, 31,
+BENCHMARK_TEMPLATE(BM_FUNC, Operation::Rank, AccessPattern::Random, 100'000, 31,
                    20);
-BENCHMARK_TEMPLATE(BM_FUNC, Operation::Rank, AccessPattern::Random, 10'000, 63,
+BENCHMARK_TEMPLATE(BM_FUNC, Operation::Rank, AccessPattern::Random, 100'000, 63,
                    20);
-BENCHMARK_TEMPLATE(BM_FUNC, Operation::Rank, AccessPattern::Random, 10'000, 127,
-                   20);
+BENCHMARK_TEMPLATE(BM_FUNC, Operation::Rank, AccessPattern::Random, 100'000,
+                   127, 20);
 
 BENCHMARK_TEMPLATE(BM_FUNC, Operation::Access, AccessPattern::ContinuousRandom,
-                   10'000, 15, 20);
+                   100'000, 15, 20);
 BENCHMARK_TEMPLATE(BM_FUNC, Operation::Access, AccessPattern::ContinuousRandom,
-                   10'000, 31, 20);
+                   100'000, 31, 20);
 BENCHMARK_TEMPLATE(BM_FUNC, Operation::Access, AccessPattern::ContinuousRandom,
-                   10'000, 63, 20);
+                   100'000, 63, 20);
 BENCHMARK_TEMPLATE(BM_FUNC, Operation::Access, AccessPattern::ContinuousRandom,
-                   10'000, 127, 20);
+                   100'000, 127, 20);
 BENCHMARK_TEMPLATE(BM_FUNC, Operation::Rank, AccessPattern::ContinuousRandom,
-                   10'000, 15, 20);
+                   100'000, 15, 20);
 BENCHMARK_TEMPLATE(BM_FUNC, Operation::Rank, AccessPattern::ContinuousRandom,
-                   10'000, 31, 20);
+                   100'000, 31, 20);
 BENCHMARK_TEMPLATE(BM_FUNC, Operation::Rank, AccessPattern::ContinuousRandom,
-                   10'000, 63, 20);
+                   100'000, 63, 20);
 BENCHMARK_TEMPLATE(BM_FUNC, Operation::Rank, AccessPattern::ContinuousRandom,
-                   10'000, 127, 20);
+                   100'000, 127, 20);
 
 int main(int argc, char** argv)
 {
+
+  /*using rrr_vec_type = rrr_vector<31, int_vector<>, 32>;
+  using rrr_select_type = typename rrr_vec_type::select_1_type;
+  using rrr_rank_type = typename rrr_vec_type::rank_1_type;
+
+  for (int i = 0; i < 1000; ++i)
+  {
+    auto [data, queries] = get_test<AccessPattern::Random>(1'000, 10'000, 20);
+
+    bit_vector bv(data.size());
+    for (size_t i = 0; i < data.size(); ++i)
+    {
+      bv[i] = data[i];
+    }
+
+    rrr_vec_type rrr_vector(bv);
+    rrr_select_type rrr_sel(&rrr_vector);
+    rrr_rank_type rrr_rank(&rrr_vector);
+
+    std::cout << "Size is " << size_in_bytes(rrr_vector) << "\n";
+  }*/
+
   ::benchmark::Initialize(&argc, argv);
   if (::benchmark::ReportUnrecognizedArguments(argc, argv))
     return 1;
