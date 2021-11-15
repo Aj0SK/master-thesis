@@ -25,8 +25,8 @@ def return_results(path):
     return results
 
 
-old_version_path = "./results/all.txt"
-new_version_path = "./new_results/all.txt"
+old_version_path = "./res1.txt"
+new_version_path = "./res2.txt"
 
 res1 = return_results(old_version_path)
 res2 = return_results(new_version_path)

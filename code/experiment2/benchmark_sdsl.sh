@@ -1,19 +1,24 @@
 #!/bin/bash
-git clone https://github.com/Aj0SK/sdsl-lite.git
+REPOSRC=https://github.com/Aj0SK/sdsl-lite.git
+
+rm -f res1.txt res2.txt
+git clone "$REPOSRC" 2> /dev/null || (cd "sdsl-lite" ; git pull ; cd ..)
 cd sdsl-lite/build
 
-git checkout fix_rrr_benchmark
+git checkout benchmark_original
 ./build.sh
 cd ../benchmark/rrr_vector
+make clean-build
+make clean_results
 make timing
 cp ./results/all.txt ../../../res1.txt
 
-make clean-build
-make clean-results
 cd ../../build
 
-git checkout fix_rrr_benchmark
+git checkout refactor
 ./build.sh
 cd ../benchmark/rrr_vector
+make clean-build
+make clean_results
 make timing
 cp ./results/all.txt ../../../res2.txt
