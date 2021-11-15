@@ -41,11 +41,12 @@ int main(int argc, char** argv)
 
   size_t density = 50;
 
-  auto [data, queries] = get_test(1024, 10, density);
+  auto [data, queries] = get_test(1024000, 10, density);
 
   bit_vector bv(data.size());
   for (size_t i = 0; i < data.size(); ++i)
   {
+    // data[i] = 1;
     bv[i] = data[i];
   }
 
@@ -64,6 +65,7 @@ int main(int argc, char** argv)
       exit(1);
     }
   }
+
   std::cout << "successfully ended!\n";
 
   // rrr_select_type rrr_sel(&rrr_vector);
