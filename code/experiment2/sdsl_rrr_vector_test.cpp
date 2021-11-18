@@ -9,9 +9,7 @@ using namespace sdsl;
 using namespace std::chrono;
 using timer = std::chrono::high_resolution_clock;
 
-std::random_device rd;
-std::seed_seq sd{2, 1, 7, 2, 19, 20, 3, 5, 67, 111};
-std::mt19937 randomizer(sd);
+constexpr int kDensity = 30;
 
 enum Operation
 {
@@ -29,6 +27,10 @@ template <AccessPattern ap>
 std::pair<vector<bool>, vector<size_t>>
 get_test(size_t size, size_t queries_count, int density)
 {
+  std::random_device rd;
+  std::seed_seq sd{2, 1, 7, 2, 19, 20, 3, 5, 67, 111};
+  std::mt19937 randomizer(sd);
+
   std::vector<bool> v(size);
   size_t ones = static_cast<double>(size * density) / 100.0;
   for (size_t i = 0; i < size; ++i)
@@ -62,11 +64,12 @@ get_test(size_t size, size_t queries_count, int density)
 }
 
 template <Operation op, AccessPattern ap, size_t kN,
-          short unsigned int BLOCK_SIZE, int density,
+          short unsigned int BLOCK_SIZE, int density, bool hybrid = false,
           size_t RANK_SAMPLE_DENS = 32>
 static void BM_FUNC(benchmark::State& state)
 {
-  using rrr_vec_type = rrr_vector<BLOCK_SIZE, int_vector<>, RANK_SAMPLE_DENS>;
+  using rrr_vec_type =
+      rrr_vector<BLOCK_SIZE, int_vector<>, RANK_SAMPLE_DENS, hybrid>;
   using rrr_select_type = typename rrr_vec_type::select_1_type;
   using rrr_rank_type = typename rrr_vec_type::rank_1_type;
 
@@ -107,63 +110,50 @@ static void BM_FUNC(benchmark::State& state)
 }
 
 BENCHMARK_TEMPLATE(BM_FUNC, Operation::Access, AccessPattern::Random, 100'000,
-                   15, 20);
+                   15, kDensity);
 BENCHMARK_TEMPLATE(BM_FUNC, Operation::Access, AccessPattern::Random, 100'000,
-                   31, 20);
+                   31, kDensity);
 BENCHMARK_TEMPLATE(BM_FUNC, Operation::Access, AccessPattern::Random, 100'000,
-                   63, 20);
+                   31, kDensity, true);
 BENCHMARK_TEMPLATE(BM_FUNC, Operation::Access, AccessPattern::Random, 100'000,
-                   127, 20);
+                   63, kDensity);
+BENCHMARK_TEMPLATE(BM_FUNC, Operation::Access, AccessPattern::Random, 100'000,
+                   127, kDensity);
+
 BENCHMARK_TEMPLATE(BM_FUNC, Operation::Rank, AccessPattern::Random, 100'000, 15,
-                   20);
+                   kDensity);
 BENCHMARK_TEMPLATE(BM_FUNC, Operation::Rank, AccessPattern::Random, 100'000, 31,
-                   20);
+                   kDensity);
+BENCHMARK_TEMPLATE(BM_FUNC, Operation::Rank, AccessPattern::Random, 100'000, 31,
+                   kDensity, true);
 BENCHMARK_TEMPLATE(BM_FUNC, Operation::Rank, AccessPattern::Random, 100'000, 63,
-                   20);
+                   kDensity);
 BENCHMARK_TEMPLATE(BM_FUNC, Operation::Rank, AccessPattern::Random, 100'000,
-                   127, 20);
+                   127, kDensity);
 
 BENCHMARK_TEMPLATE(BM_FUNC, Operation::Access, AccessPattern::ContinuousRandom,
-                   100'000, 15, 20);
+                   100'000, 15, kDensity);
 BENCHMARK_TEMPLATE(BM_FUNC, Operation::Access, AccessPattern::ContinuousRandom,
-                   100'000, 31, 20);
+                   100'000, 31, kDensity);
 BENCHMARK_TEMPLATE(BM_FUNC, Operation::Access, AccessPattern::ContinuousRandom,
-                   100'000, 63, 20);
+                   100'000, 31, kDensity, true);
 BENCHMARK_TEMPLATE(BM_FUNC, Operation::Access, AccessPattern::ContinuousRandom,
-                   100'000, 127, 20);
+                   100'000, 63, kDensity);
+BENCHMARK_TEMPLATE(BM_FUNC, Operation::Access, AccessPattern::ContinuousRandom,
+                   100'000, 127, kDensity);
 BENCHMARK_TEMPLATE(BM_FUNC, Operation::Rank, AccessPattern::ContinuousRandom,
-                   100'000, 15, 20);
+                   100'000, 15, kDensity);
 BENCHMARK_TEMPLATE(BM_FUNC, Operation::Rank, AccessPattern::ContinuousRandom,
-                   100'000, 31, 20);
+                   100'000, 31, kDensity);
 BENCHMARK_TEMPLATE(BM_FUNC, Operation::Rank, AccessPattern::ContinuousRandom,
-                   100'000, 63, 20);
+                   100'000, 31, kDensity, true);
 BENCHMARK_TEMPLATE(BM_FUNC, Operation::Rank, AccessPattern::ContinuousRandom,
-                   100'000, 127, 20);
+                   100'000, 63, kDensity);
+BENCHMARK_TEMPLATE(BM_FUNC, Operation::Rank, AccessPattern::ContinuousRandom,
+                   100'000, 127, kDensity);
 
 int main(int argc, char** argv)
 {
-
-  /*using rrr_vec_type = rrr_vector<31, int_vector<>, 32>;
-  using rrr_select_type = typename rrr_vec_type::select_1_type;
-  using rrr_rank_type = typename rrr_vec_type::rank_1_type;
-
-  for (int i = 0; i < 1000; ++i)
-  {
-    auto [data, queries] = get_test<AccessPattern::Random>(1'000, 10'000, 20);
-
-    bit_vector bv(data.size());
-    for (size_t i = 0; i < data.size(); ++i)
-    {
-      bv[i] = data[i];
-    }
-
-    rrr_vec_type rrr_vector(bv);
-    rrr_select_type rrr_sel(&rrr_vector);
-    rrr_rank_type rrr_rank(&rrr_vector);
-
-    std::cout << "Size is " << size_in_bytes(rrr_vector) << "\n";
-  }*/
-
   ::benchmark::Initialize(&argc, argv);
   if (::benchmark::ReportUnrecognizedArguments(argc, argv))
     return 1;
