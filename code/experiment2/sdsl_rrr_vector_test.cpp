@@ -9,7 +9,7 @@ using namespace sdsl;
 using namespace std::chrono;
 using timer = std::chrono::high_resolution_clock;
 
-constexpr int kDensity = 30;
+constexpr int kDensity = 10;
 
 enum Operation
 {
@@ -69,10 +69,9 @@ template <Operation op, AccessPattern ap, size_t kN,
 static void BM_FUNC(benchmark::State& state)
 {
   using rrr_vec_type =
-      rrr_vector<BLOCK_SIZE, int_vector<>, RANK_SAMPLE_DENS, hybrid>;
+      rrr_vector<BLOCK_SIZE, int_vector<>, RANK_SAMPLE_DENS>; //, hybrid>;
   using rrr_select_type = typename rrr_vec_type::select_1_type;
   using rrr_rank_type = typename rrr_vec_type::rank_1_type;
-
   // vector<bool> data;
   // vector<size_t> queries;
 
