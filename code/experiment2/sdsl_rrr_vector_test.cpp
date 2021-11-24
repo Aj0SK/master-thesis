@@ -64,16 +64,13 @@ get_test(size_t size, size_t queries_count, int density)
 }
 
 template <Operation op, AccessPattern ap, size_t kN,
-          short unsigned int BLOCK_SIZE, int density, bool hybrid = false,
+          short unsigned int BLOCK_SIZE, int density,
           size_t RANK_SAMPLE_DENS = 32>
 static void BM_FUNC(benchmark::State& state)
 {
-  using rrr_vec_type =
-      rrr_vector<BLOCK_SIZE, int_vector<>, RANK_SAMPLE_DENS>; //, hybrid>;
+  using rrr_vec_type = rrr_vector<BLOCK_SIZE, int_vector<>, RANK_SAMPLE_DENS>;
   using rrr_select_type = typename rrr_vec_type::select_1_type;
   using rrr_rank_type = typename rrr_vec_type::rank_1_type;
-  // vector<bool> data;
-  // vector<size_t> queries;
 
   auto [data, queries] = get_test<ap>(kN, 10'000, density);
 
@@ -113,8 +110,6 @@ BENCHMARK_TEMPLATE(BM_FUNC, Operation::Access, AccessPattern::Random, 100'000,
 BENCHMARK_TEMPLATE(BM_FUNC, Operation::Access, AccessPattern::Random, 100'000,
                    31, kDensity);
 BENCHMARK_TEMPLATE(BM_FUNC, Operation::Access, AccessPattern::Random, 100'000,
-                   31, kDensity, true);
-BENCHMARK_TEMPLATE(BM_FUNC, Operation::Access, AccessPattern::Random, 100'000,
                    63, kDensity);
 BENCHMARK_TEMPLATE(BM_FUNC, Operation::Access, AccessPattern::Random, 100'000,
                    127, kDensity);
@@ -123,8 +118,6 @@ BENCHMARK_TEMPLATE(BM_FUNC, Operation::Rank, AccessPattern::Random, 100'000, 15,
                    kDensity);
 BENCHMARK_TEMPLATE(BM_FUNC, Operation::Rank, AccessPattern::Random, 100'000, 31,
                    kDensity);
-BENCHMARK_TEMPLATE(BM_FUNC, Operation::Rank, AccessPattern::Random, 100'000, 31,
-                   kDensity, true);
 BENCHMARK_TEMPLATE(BM_FUNC, Operation::Rank, AccessPattern::Random, 100'000, 63,
                    kDensity);
 BENCHMARK_TEMPLATE(BM_FUNC, Operation::Rank, AccessPattern::Random, 100'000,
@@ -135,17 +128,14 @@ BENCHMARK_TEMPLATE(BM_FUNC, Operation::Access, AccessPattern::ContinuousRandom,
 BENCHMARK_TEMPLATE(BM_FUNC, Operation::Access, AccessPattern::ContinuousRandom,
                    100'000, 31, kDensity);
 BENCHMARK_TEMPLATE(BM_FUNC, Operation::Access, AccessPattern::ContinuousRandom,
-                   100'000, 31, kDensity, true);
-BENCHMARK_TEMPLATE(BM_FUNC, Operation::Access, AccessPattern::ContinuousRandom,
                    100'000, 63, kDensity);
 BENCHMARK_TEMPLATE(BM_FUNC, Operation::Access, AccessPattern::ContinuousRandom,
                    100'000, 127, kDensity);
+
 BENCHMARK_TEMPLATE(BM_FUNC, Operation::Rank, AccessPattern::ContinuousRandom,
                    100'000, 15, kDensity);
 BENCHMARK_TEMPLATE(BM_FUNC, Operation::Rank, AccessPattern::ContinuousRandom,
                    100'000, 31, kDensity);
-BENCHMARK_TEMPLATE(BM_FUNC, Operation::Rank, AccessPattern::ContinuousRandom,
-                   100'000, 31, kDensity, true);
 BENCHMARK_TEMPLATE(BM_FUNC, Operation::Rank, AccessPattern::ContinuousRandom,
                    100'000, 63, kDensity);
 BENCHMARK_TEMPLATE(BM_FUNC, Operation::Rank, AccessPattern::ContinuousRandom,

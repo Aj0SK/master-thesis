@@ -40,7 +40,7 @@ for result_index in range(len(results)):
 
 fig.tight_layout(pad=3.0)
 
-plt.savefig("vysledky1.png", bbox_inches='tight')
+plt.savefig("vysledky_nase.png", bbox_inches='tight')
 plt.clf()
 
 #
