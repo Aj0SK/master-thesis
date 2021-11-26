@@ -4,10 +4,10 @@ import matplotlib.pyplot as plt
 
 plt.rcParams["figure.figsize"] = (10,12)
 
-file_paths = ["old_output.txt", "new_output.txt"]
+file_paths = ["special.txt"]
 
 results = []
-markers = ["s", "o"]
+markers = ["s", "x"]
 
 for file_path in file_paths:
     tests = []
@@ -28,12 +28,14 @@ print(results)
 fig, axs = plt.subplots(4)
 fig.suptitle('Vertically stacked subplots')
 
-for result_index in range(len(results)):
+isHybrid = [True, False]
+
+for result_index in range(2):
     for (index1, operation) in enumerate(["Operation::Access", "Operation::Rank"]):
         for (index2, access_pattern) in enumerate(["AccessPattern::Random", "AccessPattern::ContinuousRandom"]):
             for block_size in [15, 31, 63, 127]:
-                x = [res[1] for (par, res) in results[result_index] if par[0] == operation and par[1] == access_pattern and int(par[3]) == block_size]
-                y = [res[0] for (par, res) in results[result_index] if par[0] == operation and par[1] == access_pattern and int(par[3]) == block_size]
+                x = [res[1] for (par, res) in results[0] if par[0] == operation and par[1] == access_pattern and int(par[3]) == block_size and (isHybrid[result_index] == ("true>" in par))]
+                y = [res[0] for (par, res) in results[0] if par[0] == operation and par[1] == access_pattern and int(par[3]) == block_size and (isHybrid[result_index] == ("true>" in par))]
                 axs[2*index1+index2].scatter(x, y, label = str(result_index) + "-" + str(block_size), marker = markers[result_index])
             axs[2*index1+index2].legend(loc='center left', bbox_to_anchor=(1, 0.5))
             axs[2*index1+index2].set_title(operation + " " + access_pattern)

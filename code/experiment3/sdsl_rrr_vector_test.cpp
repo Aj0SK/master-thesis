@@ -9,7 +9,7 @@ using namespace sdsl;
 using namespace std::chrono;
 using timer = std::chrono::high_resolution_clock;
 
-constexpr int kDensity = 5;
+constexpr int kDensity = 10;
 
 enum Operation
 {
