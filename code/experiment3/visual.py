@@ -2,7 +2,7 @@ import json
 import re
 import matplotlib.pyplot as plt
 
-plt.rcParams["figure.figsize"] = (10,12)
+plt.rcParams["figure.figsize"] = (10,15)
 
 file_paths = ["special.txt"]
 
@@ -25,13 +25,13 @@ for file_path in file_paths:
 
 print(results)
 
-fig, axs = plt.subplots(4)
+fig, axs = plt.subplots(6)
 fig.suptitle('Vertically stacked subplots')
 
 isHybrid = [True, False]
 
 for result_index in range(2):
-    for (index1, operation) in enumerate(["Operation::Access", "Operation::Rank"]):
+    for (index1, operation) in enumerate(["Operation::Access", "Operation::Rank", "Operation::Select"]):
         for (index2, access_pattern) in enumerate(["AccessPattern::Random", "AccessPattern::ContinuousRandom"]):
             for block_size in [15, 31, 63, 127]:
                 x = [res[1] for (par, res) in results[0] if par[0] == operation and par[1] == access_pattern and int(par[3]) == block_size and (isHybrid[result_index] == ("true>" in par))]
