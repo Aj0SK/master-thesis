@@ -22,10 +22,10 @@ def return_results(path):
     results.pop()
     return results
 
-contains = [["COMPILE_ID", "NOSSE"], ["IDX_ID", "FM_HUFF_RRR15", "FM_HUFF_RRR63", "FM_HUFF_RRR127"]]
+contains = [["IDX_ID", "FM_HUFF", "FM_HUFF_RRR15", "FM_HUFF_RRR63", "FM_HUFF_RRR127"], ["COMPILE_ID", "SSE"]]
 
-old_version_path = "./res1.txt"
-new_version_path = "./res2.txt"
+old_version_path = "./res1-count.txt"
+new_version_path = "./res2-count.txt"
 
 res1 = return_results(old_version_path)
 res2 = return_results(new_version_path)
@@ -40,6 +40,7 @@ for r in res:
             datasets.append(dataset_name)
 
 fig, axs = plt.subplots(len(datasets))
+pts = [set() for i in range(len(datasets))]
 fig.suptitle('Vertically stacked subplots')
 
 for r in range(len(res)):
@@ -60,7 +61,12 @@ for r in range(len(res)):
         axs[dataset_index].scatter(x, y, label = str(r) + "-" + str(type), marker = markers[r])
         axs[dataset_index].legend(loc='center left', bbox_to_anchor=(1, 0.5))
         axs[dataset_index].set_title(dataset_name)
-    
+        for yy in y:
+            pts[dataset_index].add(yy)
+
+for i in range(len(datasets)):
+    axs[i].set_yticks(list(pts[i]))
+
 fig.tight_layout(pad=3.0)
 
 plt.savefig("vysledky_sdsl.png", bbox_inches='tight')

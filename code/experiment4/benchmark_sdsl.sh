@@ -1,9 +1,9 @@
 #!/bin/bash
 REPOSRC=https://github.com/Aj0SK/sdsl-lite.git
 
-rm -f res1.txt res2.txt
-git clone "$REPOSRC" 2> /dev/null || (cd "sdsl-lite" ; git pull ; cd ..)
-cd sdsl-lite/build
+rm -f res1-count.txt res2-count.txt
+git clone "$REPOSRC" sdsl-old 2> /dev/null || (cd "sdsl-old" ; git pull ; cd ..)
+cd sdsl-old/build
 
 git checkout benchmark_original
 ./build.sh
@@ -11,9 +11,11 @@ cd ../benchmark/indexing_count
 make clean-build
 make cleanresults
 make timing
-cp ./results/all.txt ../../../res1.txt
+cp ./results/all.txt ../../../res1-count.txt
 
-cd ../../build
+cd ../../../
+git clone "$REPOSRC" sdsl-new 2> /dev/null || (cd "sdsl-new" ; git pull ; cd ..)
+cd sdsl-new/build
 
 git checkout refactor
 ./build.sh
@@ -21,4 +23,4 @@ cd ../benchmark/indexing_count
 make clean-build
 make cleanresults
 make timing
-cp ./results/all.txt ../../../res2.txt
+cp ./results/all.txt ../../../res2-count.txt
