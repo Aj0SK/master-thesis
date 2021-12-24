@@ -56,7 +56,7 @@ for r in range(len(res)):
         size_in_bytes = k["Index_size_in_bytes"]
         text_size = k["text_size"]
         dataset_index = datasets.index(dataset_name)
-        x = [float(size_in_bytes)/float(text_size)]#x = [int(type[-2:])]
+        x = [float(size_in_bytes)/float(text_size)]
         y = [float(k["Count_time_in_milli_sec"])]
         axs[dataset_index].scatter(x, y, label = str(r) + "-" + str(type), marker = markers[r])
         axs[dataset_index].legend(loc='center left', bbox_to_anchor=(1, 0.5))
@@ -69,7 +69,7 @@ for i in range(len(datasets)):
 
 fig.tight_layout(pad=3.0)
 
-plt.savefig("vysledky_sdsl.png", bbox_inches='tight')
+plt.savefig("vysledky_sdsl_count.png", bbox_inches='tight')
 plt.clf()
 
 
