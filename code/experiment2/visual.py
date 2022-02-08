@@ -14,8 +14,10 @@ plt.rcParams["figure.figsize"] = (10,12)
 file_paths = ["old_output.txt", "new_output.txt"]
 
 results = []
-markers = ["s", "o"]
+markers = ["o", "x"]
 names = ["sdsl", "my"]
+colors = ['r', 'g', 'b', 'darkorange']
+NUM_OF_QUERIES = 10000.0
 
 for file_path in file_paths:
     tests = []
@@ -39,14 +41,14 @@ fig.suptitle('Prístup, rank, select na postupnosti dĺžky 100 000 prvkov (10% 
 for result_index in range(len(results)):
     for (index1, access_pattern) in enumerate(["AccessPattern::Random", "AccessPattern::ContinuousRandom"]):
         for (index2, operation) in enumerate(["Operation::Access", "Operation::Rank"]):
-            for block_size in [15, 31, 63, 127]:
+            for (index3, block_size) in enumerate([15, 31, 63, 127]):
                 x = [res[1] for (par, res) in results[result_index] if par[0] == operation and par[1] == access_pattern and int(par[3]) == block_size]
-                y = [res[0] for (par, res) in results[result_index] if par[0] == operation and par[1] == access_pattern and int(par[3]) == block_size]
-                axs[2*index1+index2].scatter(x, y, label = names[result_index] + "-" + str(block_size), marker = markers[result_index])
+                y = [res[0]/NUM_OF_QUERIES for (par, res) in results[result_index] if par[0] == operation and par[1] == access_pattern and int(par[3]) == block_size]
+                axs[2*index1+index2].scatter(x, y, label = names[result_index] + "-" + str(block_size), marker = markers[result_index], c = colors[index3])
             axs[2*index1+index2].legend(loc='center left', bbox_to_anchor=(1, 0.5))
             axs[2*index1+index2].set_title(translate(operation + " " + access_pattern))
             axs[2*index1+index2].set_xlabel("bitov/bit")
-            axs[2*index1+index2].set_ylabel("čas")
+            axs[2*index1+index2].set_ylabel("čas (ns)")
 
 fig.tight_layout(pad=3.0)
 

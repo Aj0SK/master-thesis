@@ -28,6 +28,8 @@ def return_results(path):
 old_version_path = "./res1.txt"
 new_version_path = "./res2.txt"
 
+colors = ['r', 'g', 'b', 'darkorange']
+
 res1 = return_results(old_version_path)
 res2 = return_results(new_version_path)
 
@@ -66,6 +68,9 @@ for file, block_size in res2.keys():
     axs[file_index][0].scatter(block_size, access, c='r', marker='+')
     axs[file_index][1].scatter(block_size, rank, c='g', marker='+')
     axs[file_index][2].scatter(block_size, select, c='b', marker='+')
+
+for i in range(len(test_cases)):
+    axs[i][0].set_ylabel("čas")
 
 fig.set_size_inches(8, 8)
 plt.tight_layout()
