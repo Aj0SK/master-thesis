@@ -15,7 +15,6 @@ enum Operation
 {
   Access,
   Rank,
-  Support
 };
 enum AccessPattern
 {

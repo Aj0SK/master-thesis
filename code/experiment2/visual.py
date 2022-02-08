@@ -2,12 +2,20 @@ import json
 import re
 import matplotlib.pyplot as plt
 
+def translate(str):
+    preklady = [["Operation", "Operácia"], ["AccessPattern", "PrístupovýTyp"],
+    ["Access", "Prístup"], ["ContinuousRandom", "NáhodnýLineárny"], ["Random", "Náhodný"]]
+    for preklad in preklady:
+        str = str.replace(preklad[0], preklad[1])
+    return str
+
 plt.rcParams["figure.figsize"] = (10,12)
 
 file_paths = ["old_output.txt", "new_output.txt"]
 
 results = []
 markers = ["s", "o"]
+names = ["sdsl", "my"]
 
 for file_path in file_paths:
     tests = []
@@ -26,22 +34,21 @@ for file_path in file_paths:
 print(results)
 
 fig, axs = plt.subplots(4)
-fig.suptitle('Vertically stacked subplots')
+fig.suptitle('Prístup, rank, select na postupnosti dĺžky 100 000 prvkov')
 
 for result_index in range(len(results)):
-    for (index1, operation) in enumerate(["Operation::Access", "Operation::Rank"]):
-        for (index2, access_pattern) in enumerate(["AccessPattern::Random", "AccessPattern::ContinuousRandom"]):
+    for (index1, access_pattern) in enumerate(["AccessPattern::Random", "AccessPattern::ContinuousRandom"]):
+        for (index2, operation) in enumerate(["Operation::Access", "Operation::Rank"]):
             for block_size in [15, 31, 63, 127]:
                 x = [res[1] for (par, res) in results[result_index] if par[0] == operation and par[1] == access_pattern and int(par[3]) == block_size]
                 y = [res[0] for (par, res) in results[result_index] if par[0] == operation and par[1] == access_pattern and int(par[3]) == block_size]
-                axs[2*index1+index2].scatter(x, y, label = str(result_index) + "-" + str(block_size), marker = markers[result_index])
+                axs[2*index1+index2].scatter(x, y, label = names[result_index] + "-" + str(block_size), marker = markers[result_index])
             axs[2*index1+index2].legend(loc='center left', bbox_to_anchor=(1, 0.5))
-            axs[2*index1+index2].set_title(operation + " " + access_pattern)
+            axs[2*index1+index2].set_title(translate(operation + " " + access_pattern))
+            axs[2*index1+index2].set_xlabel("bitov/bit")
+            axs[2*index1+index2].set_ylabel("čas")
 
 fig.tight_layout(pad=3.0)
 
 plt.savefig("vysledky_nase.png", bbox_inches='tight')
 plt.clf()
-
-#
-#axs[1].plot(x, -y)
