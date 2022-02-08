@@ -22,3 +22,5 @@ make clean-build
 make clean_results
 make timing
 cp ./results/all.txt ../../../res2.txt
+
+python3 sdsl_helper.py

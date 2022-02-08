@@ -34,7 +34,7 @@ for file_path in file_paths:
 print(results)
 
 fig, axs = plt.subplots(4)
-fig.suptitle('Prístup, rank, select na postupnosti dĺžky 100 000 prvkov')
+fig.suptitle('Prístup, rank, select na postupnosti dĺžky 100 000 prvkov (10% jednotiek - 0.47)')
 
 for result_index in range(len(results)):
     for (index1, access_pattern) in enumerate(["AccessPattern::Random", "AccessPattern::ContinuousRandom"]):
