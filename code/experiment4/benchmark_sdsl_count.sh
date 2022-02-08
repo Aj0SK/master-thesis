@@ -1,7 +1,7 @@
 #!/bin/bash
 REPOSRC=https://github.com/Aj0SK/sdsl-lite.git
 
-rm -f res1-count.txt res2-count.txt
+rm -f res1-count.txt res2-count.txt vysledky_sdsl_count.png
 git clone "$REPOSRC" sdsl-old 2> /dev/null || (cd "sdsl-old" ; git pull ; cd ..)
 cd sdsl-old/build
 

@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 
 plt.rcParams["figure.figsize"] = (10,12)
 markers = ["s", "o"]
+names = ["sdsl", "my"]
 
 def return_results(path):
     results = [{}]
@@ -41,7 +42,7 @@ for r in res:
 
 fig, axs = plt.subplots(len(datasets))
 pts = [set() for i in range(len(datasets))]
-fig.suptitle('Vertically stacked subplots')
+fig.suptitle('FM-index spočítaj')
 
 for r in range(len(res)):
     for k in res[r]:
@@ -58,7 +59,7 @@ for r in range(len(res)):
         dataset_index = datasets.index(dataset_name)
         x = [float(size_in_bytes)/float(text_size)]
         y = [float(k["Count_time_in_milli_sec"])]
-        axs[dataset_index].scatter(x, y, label = str(r) + "-" + str(type), marker = markers[r])
+        axs[dataset_index].scatter(x, y, label = names[r] + "-" + str(type), marker = markers[r])
         axs[dataset_index].legend(loc='center left', bbox_to_anchor=(1, 0.5))
         axs[dataset_index].set_title(dataset_name)
         for yy in y:
