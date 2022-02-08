@@ -57,7 +57,7 @@ for r in range(len(res)):
         text_size = k["text_size"]
         dataset_index = datasets.index(dataset_name)
         x = [float(size_in_bytes)/float(text_size)]
-        y = [float(k["(Load_time+Extract_time)/Num_chars_extracted"])]
+        y = [float(k["Extract_time_in_sec"])]
         axs[dataset_index].scatter(x, y, label = str(r) + "-" + str(type), marker = markers[r])
         axs[dataset_index].legend(loc='center left', bbox_to_anchor=(1, 0.5))
         axs[dataset_index].set_title(dataset_name)
@@ -66,6 +66,8 @@ for r in range(len(res)):
 
 for i in range(len(datasets)):
     axs[i].set_yticks(list(pts[i]))
+    axs[i].set_ylabel("čas (s)")
+    axs[i].set_xlabel("bitov na bit")
 
 fig.tight_layout(pad=3.0)
 

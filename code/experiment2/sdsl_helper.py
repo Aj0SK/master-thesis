@@ -71,8 +71,11 @@ for file, block_size in res2.keys():
 
 for i in range(len(test_cases)):
     axs[i][0].set_ylabel("čas")
+    axs[i][0].set_xlabel("veľkosť bloku")
+    axs[i][1].set_xlabel("veľkosť bloku")
+    axs[i][2].set_xlabel("veľkosť bloku")
 
-fig.set_size_inches(8, 8)
+fig.set_size_inches(8, 10)
 plt.tight_layout()
 plt.savefig("vysledky_sdsl.png")
 plt.clf()

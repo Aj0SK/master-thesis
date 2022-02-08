@@ -67,6 +67,8 @@ for r in range(len(res)):
 
 for i in range(len(datasets)):
     axs[i].set_yticks(list(pts[i]))
+    axs[i].set_ylabel("čas (ms)")
+    axs[i].set_xlabel("bitov na bit")
 
 fig.tight_layout(pad=3.0)
 
