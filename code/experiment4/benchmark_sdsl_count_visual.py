@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 plt.rcParams["figure.figsize"] = (10,12)
-markers = ["s", "o"]
+markers = ["s", "x"]
 names = ["sdsl", "my"]
 
 def return_results(path):

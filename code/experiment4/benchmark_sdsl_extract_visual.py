@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 plt.rcParams["figure.figsize"] = (10,12)
-markers = ["s", "o"]
+markers = ["s", "x"]
 
 def return_results(path):
     results = [{}]
@@ -41,7 +41,7 @@ for r in res:
 
 fig, axs = plt.subplots(len(datasets))
 pts = [set() for i in range(len(datasets))]
-fig.suptitle('Vertically stacked subplots')
+fig.suptitle('FM-index vyber')
 
 for r in range(len(res)):
     for k in res[r]:
