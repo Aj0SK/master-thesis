@@ -1,0 +1,78 @@
+\chapter{Binary sequence representation}
+\label{kap:kap2}
+
+Basic building block of many succinct data structures is array. Data structure
+used to represent the sequence of characters over some alphabet $\Sigma$. As we
+shown in the refWavelet, Wavelet tree can be used to build vector for general
+alphabet from the bit-vector. This is, why it is of utmost importance to dedicate
+time to efficient and fast bit-vector implementation. There are more ways to represent
+binary sequence. One of the widely used technique is RRR named by its inventors
+Rajeev Raman, Venkatesh Raman, S. Srinivasa Rao that proposed this data structure.
+We look at the first working RRR proposal of bit-vector and then the subsequent
+improvements over it.
+
+\section{Division to blocks and access}
+
+The main idea behind RRR is to split bit sequence into blocks of constant length $b$.
+Then instead of storing the bit sequence we store the block encoded as a pair of
+numbers $(c, o)$ where $c$ labels the class of this block and $o$ an offset into
+the sequence of all blocks in this particular class. Most of the time, the $c$
+will be equal to number of ones in the block. Offset on the other hand, is the
+lexicographical order of block in the sequence of all the blocks with $c$ number
+of ones. Note that class $c$ has size
+
+                    $${b\choose c}$$.
+
+The offset will be bounded by:
+
+					$$0 \leq o < {b\choose c}$$.
+
+We now look at how the access is supported using this encoding/decoding scheme.
+It is reasonable to store all the classes and offsets in separate arrays $C$ and
+$O$. The array $C$ is usually implemented as a array of fixed length elements of
+length $\lceil \log_2(b)\rceil$. The array $O$ is implemented as an array of
+variable length elements and the size needed to store $i$-th element $O[i]$ is
+$\log_2({b\choose C[i]})$. To decode the $i$-th block, we at first need to get
+$C[i]$ and $O[i]$ and then we can use a precomputed table $T$ that matches $(c_i, o_i)$
+to the original block. Obtaining $C[i]$ is trivial as it is at a fixed offset in
+memory. Getting value of $O[i]$ is harder as it's generally on a index that can
+be expressed as
+
+                    $$\sum_{j=1}^{i-1} \log_2({b\choose C[i]})$$.
+
+We need basically to one by one skip elements before $O[i]$ that have a variable
+length. To speed up this process, we will store the pointers into every $k$-th
+element of $O$ efectively dividing the process of locating $O[i]$ into two parts.
+The first is to find the nearest pointer leading to element before $i$ and then
+moving at most $k$ places. Note that to move in $O$ we need only successive
+information from $C$ so these are very cache friendly. To support the access in
+time $O(k)$ we need to store the arrays $C, O$, helper table for decoding $T$.
+We shall now argue about the size of these structures. The size of these structures
+are as follows:
+
+$C$ is array of $\lceil n/b \rceil$ elements of fixed size $\lceil \log(b+1) \rceil$.
+
+For array $O$ we argue that its size is bounded by
+
+$$\sum_{i=1}^{n/b} \bigg\lceil{\log b\choose c_i}\bigg\rceil =
+\sum_{i=1}^{\lceil n/b \rceil} \log {b\choose c_i} + \lceil n/b \rceil =$$
+$$=\log\prod_{i=1}^{\lceil n/b \rceil} \log {b\choose c_i} + \lceil n/b \rceil \leq $$
+$$\log{n\choose \#_1} +  \lceil n/b \rceil \leq nH_o(B) +  \lceil n/b \rceil$$.
+
+$T$ can be imagined as numerous tables $T_c$ each with ${b\choose c}$ entries.
+Number of  all of the entries is $2^b$ and each entry is using $b$ bits of storage.
+The total space used is then $nH_o(B) +  \lceil n/b \rceil + \lceil \log(b+1) \rceil + b2^b$.
+
+\section{Rank}
+
+\section{Practical considerations}
+
+\subsection{Block size}
+
+First and one of the most important parameters of RRR implementation is the block
+size $b$ used. For small the values of $b$ it is possible to store the whole table
+$T$ that helps us encode and decode the values. For bigger $b$ it is not practical
+and many times impossible to store huge helper table. On the other hand, the bigger
+blocks yield a better compression because of smaller per block overhead. This was
+something that the authors of Fast, Small, Simple Rank/Select on Bitmaps tried to
+achieve and came up with something called on the fly-decoding. This works by
