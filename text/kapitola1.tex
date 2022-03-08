@@ -63,7 +63,6 @@ of symbols smaller than $c$.
 
 \begin{figure}
 	\centerline{
-
 	\begin{tabular}{l|c|ccccc|c|}
 	\cline{2-8}
 	  & \multicolumn{1}{l|}{\textbf{F}}    & \multicolumn{5}{l|}{}                                                                                                                                                                                                         & \multicolumn{1}{l|}{\textbf{L}}    \\ \cline{2-8} 
@@ -75,7 +74,6 @@ of symbols smaller than $c$.
 	6 & {\color[HTML]{333333} \textbf{n}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} a}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \$}} & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} b}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} a}}  & {\color[HTML]{C0C0C0} n}  & {\color[HTML]{000000} \textbf{a}}  \\ \cline{2-8} 
 	7 & {\color[HTML]{333333} \textbf{n}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} a}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} n}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} a}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \$}} & {\color[HTML]{C0C0C0} b}  & {\color[HTML]{000000} \textbf{a}}  \\ \cline{2-8} 
 	\end{tabular}
-
 	}
 	\caption[TODO]{All the cyclic rotations of sequence $S = banana\$$. BWT is a last column. Note that we are not storing information about data with grey color.}
 	\label{obr:BWT}
@@ -151,13 +149,11 @@ see how it can be implemented efficiently.
 
 \begin{figure}
 	\centerline{
-
 	\begin{tabular}{l|l|l|l|l|l|l|l|l|l|l|}
 	\cline{2-11}
 	\textbf{Raw binary representation} & 1          & 1 & 0 & 1 & 1          & 1 & 1          & 0 & 1 & 0          \\ \cline{2-11} 
 	\textbf{Helper bit array}          & \textbf{1} & 0 & 0 & 0 & \textbf{1} & 0 & \textbf{1} & 0 & 0 & \textbf{1} \\ \cline{2-11} 
 	\end{tabular}
-
 	}
 	\caption[TODO]{Raw binary representation of elements 1101, 11, 101 and 0 stored one after another.
 	Note the helper bit array that is of the same size with ones on the positions where new element begins.}
