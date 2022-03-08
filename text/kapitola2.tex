@@ -38,7 +38,7 @@ to the original block. Obtaining $C[i]$ is trivial as it is at a fixed offset in
 memory. Getting value of $O[i]$ is harder as it's generally on a index that can
 be expressed as
 
-                    $$\sum_{j=1}^{i-1} \log_2({b\choose C[i]})$$.
+                    $$\sum_{j=1}^{i-1} \log_2{b\choose C[i]}$$.
 
 We need basically to one by one skip elements before $O[i]$ that have a variable
 length. To speed up this process, we will store the pointers into every $k$-th
@@ -65,14 +65,41 @@ The total space used is then $nH_o(B) +  \lceil n/b \rceil + \lceil \log(b+1) \r
 
 \section{Rank}
 
+We would like to achieve a fast rank, yet adding only sublinear number of space on top of the
+current access supporting bit vector. There are two extremes we can begin with. The first is to
+add zero additional space and every time we are asked to query for $rank_c(i)$. We run through
+all blocks that are before $i/b$-th. Nice property is that we do not need to decode all the blocks
+as the number of ones is stored as class and is easily accessible.
+Another extreme is to store rank up to that point for every block. This is fast as answering rank
+query consists at most from one constant lookup and then decoding of one block.
+Very good solution, that is used in practice is to join these two extreme ideas. We will store the
+precomputed rank, but not for every block. Instead we choose a constant $k$ and divide
+the bit-vector into nonoverlaping superblocks consisting of $k$ successive blocks. If the number of
+blocks in the bit-vector is not dividible by $k$ we simply left the last superblock shorter.
+We now compute the rank value only for the blocks that are on beginning of some superblock.
+
 \section{Practical considerations}
 
 \subsection{Block size}
 
 First and one of the most important parameters of RRR implementation is the block
-size $b$ used. For small the values of $b$ it is possible to store the whole table
-$T$ that helps us encode and decode the values. For bigger $b$ it is not practical
+size $b$ used. For small values of $b$ it is possible to store the whole table
+$T$ that helps us encode and decode the block. For bigger $b$ it is not practical
 and many times impossible to store huge helper table. On the other hand, the bigger
-blocks yield a better compression because of smaller per block overhead. This was
+block size yields a better compression because of smaller per block overhead. This was
 something that the authors of Fast, Small, Simple Rank/Select on Bitmaps tried to
-achieve and came up with something called on the fly-decoding. This works by
+achieve and came up with something called on the fly-decoding. This works by encoding
+and decoding without the need of helper table. Instead, it relies on a bit by bit decoding
+of block thus taking $\mathcal{O}(b)$ time insead of constant time with the use of table.
+
+Idea is that we decode the block from the beginning. On every bit, we consider putting a
+zero bit on this position and count $comb$ - number of all combinations how the block can
+look in this scenario. If the sequence number of the block - $o$ is bigger than this number,
+we know that the decoded block will have one bit on this place. We proceed by subtracting
+number $comb$ from $o$ and proceed sequentionally further.
+
+This approach has some advantages and disadvantages. The biggest advantage is that it allows
+us to use bigger block size $b$. The disadvantage is that it takes $O(b)$ steps to decode the
+block. Furthermore, the decoding contains branching and it is hard to parallelize the steps
+in some meaningful way. Note that decoding is faster if we want to access the element
+close to the beginning of the block as we can stop the process when we obtain this bit.

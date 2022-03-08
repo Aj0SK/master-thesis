@@ -7,11 +7,12 @@ as we use them to store the ever-growing amount of data and information. In many
 applications, the amount of data is so significant that we optimise how much storage
 these structures use. The field of succinct data structures focuses on representing
 data using as little space as possible while trying not to hurt the runtime of methods
-that these data structures support. In this field, many interesting data structures
+that these data structures support. In this field, data structures for many varied problems
 have been already devised. While many of these give some solid theoretical bounds on
-the used space, others look into real-world space usage and performance. The problem
-is that these structures are often more advanced than their space non-efficient alternatives
-and contain concepts and patterns that are slow on modern computers.
+the used space, others look into real-world space usage and performance. Common
+disadvantage is that these structures are often more complicated than their space
+non-efficient alternatives as they contain concepts and computation patterns that are
+slower on modern computers.
 
 The primary use case of these structures comes in two flavours. The first case is
 that we have so much data and are trying to implement some useful methods working
@@ -22,7 +23,7 @@ we instead use a succinct representation that may enable us to store the data in
 a faster type of memory (e.g. fast RAM instead of the slower disk) thus even if we
 use more advanced concepts, the overall runtime may decrease.
 
-The work in this field turns more and more actively now at the dynamic succinct
+The work in this field turns more and more actively towards the dynamic succinct
 data structures. These are structures where the underlying data may change after
 constructing the structure. However, in this work, we will only consider static
 succinct data structures. These are the ones where we get the data, then construct
@@ -44,40 +45,72 @@ character \$ only at the end that is contained in $\Sigma$ and lexicographically
 
 \subsection{Burrows-Wheeler transformation}
 
-Burrows-Wheeler transformation (BWT) lies at the heart of the FM index, so we will
-look into how it is constructed. We shall consider the sequence $S$ of symbols over
-some alphabet $\Sigma$. Now we take all rotations $S_1, S_2, \ldots S_n$ of the
-sequence $S$ in a lexicographically sorted order and name the concatenation of
-first(last) symbols $F$ ($L$). Note that $F$ can be stored using one integer per
-symbol of the alphabet as $F$ contains only runs of sequence symbols. These runs
-are sorted according to the lexicographical ordering of alphabet symbols. We will
-use helper sequence $Count$ where $Count[c]$ is number of occurrences of $c\in\Sigma$ in $S$.
+Burrows-Wheeler transformation (BWT) lies at the heart of the FM index, so we shall
+look into how it is constructed. We consider the sequence $S$ of symbols over
+some alphabet $\Sigma$. Now we put all the cyclical rotations $S_1, S_2, \ldots S_n$ of the
+sequence $S$ into the rows of table by their lexicographical order as seen in Fig. \ref{obr:BWT}.
+We name the sequence
+created by the concatenation of symbols in first and last column $F$ and $L$ respectively.
+Last column $L$ is what we name the BWT. Computing BWT is useful step before compressing
+the text as this operation is reversible and most of the time $T_{BWT}$ is more compressible
+than $S$. We will show how to get $S$ from $T_{BWT}$ in the next section. $F$ can be obtained
+from $L$ just by sorting all the characters in $T_{BWT}$. Note that $F$ has some nice properties.
+It consists of of runs of symbols that are sorted according to the lexicographical
+ordering of alphabet symbols. We will use the helper sequence $Count$ where $Count[c]$ is
+number of occurrences of $c\in\Sigma$ in $S$. Although $Count$ uniquely represents $F$ we will
+find also useful array $CountSmaller$ where $CountSmaller[c]$ is a total number of occurrences
+of symbols smaller than $c$.
 
-\subsection{LF mapping}
+\begin{figure}
+	\centerline{
 
-The main idea behind the FM index is how to obtain what we call LF mapping. This
-is a mapping that maps $i$-th row in $L$ to the corresponding row in $F$ so that
-$L[i] = F[j]$. Although $Count$ uniquely represents $F$ we will find also useful
-array $StartofRun$ where $StartofRun[c]$ is a total number of occurrences of symbols
-smaller than $c$. We note that $StartofRun[c]+1$ is index where run of symbol $c$
-will begin in $F$. We need now a fast implementation of LF mapping. At first, we
-assume that every symbol is in sequence at most once. It is now easier to implement
-LF mapping. It is good to note that now all the runs in $F$ vector will be of length 1.
-How do we find $LF(i)$? We will simply look at $i$-th element in $L$. The run of
-symbol $L[i]$ begins on the index $StartOfRun[L[i]] + 1$ so the formula can be written as:
+	\begin{tabular}{l|c|ccccc|c|}
+	\cline{2-8}
+	  & \multicolumn{1}{l|}{\textbf{F}}    & \multicolumn{5}{l|}{}                                                                                                                                                                                                         & \multicolumn{1}{l|}{\textbf{L}}    \\ \cline{2-8} 
+	1 & {\color[HTML]{333333} \textbf{\$}} & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} b}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} a}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} n}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} a}}  & {\color[HTML]{C0C0C0} n}  & {\color[HTML]{000000} \textbf{a}}  \\ \cline{2-8} 
+	2 & {\color[HTML]{333333} \textbf{a}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \$}} & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} b}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} a}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} n}}  & {\color[HTML]{C0C0C0} a}  & {\color[HTML]{000000} \textbf{n}}  \\ \cline{2-8} 
+	3 & {\color[HTML]{333333} \textbf{a}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} n}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} a}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \$}} & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} b}}  & {\color[HTML]{C0C0C0} a}  & {\color[HTML]{000000} \textbf{n}}  \\ \cline{2-8} 
+	4 & {\color[HTML]{333333} \textbf{a}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} n}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} a}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} n}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} a}}  & {\color[HTML]{C0C0C0} \$} & {\color[HTML]{000000} \textbf{b}}  \\ \cline{2-8} 
+	5 & {\color[HTML]{333333} \textbf{b}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} a}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} n}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} a}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} n}}  & {\color[HTML]{C0C0C0} a}  & {\color[HTML]{000000} \textbf{\$}} \\ \cline{2-8} 
+	6 & {\color[HTML]{333333} \textbf{n}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} a}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \$}} & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} b}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} a}}  & {\color[HTML]{C0C0C0} n}  & {\color[HTML]{000000} \textbf{a}}  \\ \cline{2-8} 
+	7 & {\color[HTML]{333333} \textbf{n}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} a}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} n}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} a}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \$}} & {\color[HTML]{C0C0C0} b}  & {\color[HTML]{000000} \textbf{a}}  \\ \cline{2-8} 
+	\end{tabular}
 
-$$LF(i) = StartOfRun[L[i]] + 1$$.
+	}
+	\caption[TODO]{All the cyclic rotations of sequence $S = banana\$$. BWT is a last column. Note that we are not storing information about data with grey color.}
+	\label{obr:BWT}
+\end{figure}
 
-If we drop our requirement that every symbol is at most once in the sequence $S$
+\subsection{LF-mapping}
+
+Useful information, that will be needed in the future is something what we call LF-mapping.
+This is a mapping that for a symbol on $i$-th row in $L$, gives us a corresponding row in $F$
+where this exact symbol is located. This is quite easy to obtain if the underlying sequence $S$
+does not contain duplicate symbols. Now all the runs in $F$ vector will be of length 1.
+To find $LF(i)$, we will simply look what is the $i$-th symbol in $L$. The run of
+symbol $L[i]$ begins on the index $CountSmaller[L[i]] + 1$ so the formula can be written as:
+
+$$LF(i) = CountSmaller[L[i]] + 1$$.
+
+If we drop our requirement that every symbol is contained in the sequence $S$ at most once
 we are seemingly in a more complicated situation. The problem may seem that even
 though we still easily identify the beginning of the run of $L[i]$, we do not
-know which occurrence of symbol $L[i]$ corresponds to this occurrence of $L[i]$.
-Nice property is that $i$-th occurrence of symbol $c$ in $L$ corresponds to the
-$i$-th occurrence of $c$ in $F$. So we can just change the final formula to:
+know which occurrence of symbol $L[i]$ corresponds to occurrence of $L[i]$ in $i$-th row.
+Helpful property is that $i$-th occurrence of symbol $c$ in $L$ corresponds to the
+$i$-th occurrence of $c$ in $F$. So we can just change the final formula to
 
-				$$LF(i) = StartOfRun[L[i]] + rank_{L[i]}(i)$$
+				$$LF(i) = CountSmaller[L[i]] + rank_{L[i]}(i)$$
 
-where $rank_c(i)$ represents the number of occurences of $c$ up to $i$-th index.
+where $rank_c(i)$ represents the number of occurences of $c$ up to $i$-th index inclusive.
+
+\subsection{Reverse Burrows-Wheeler transformation}
+
+We already stated that the BWT is reversible. So from the $T_{BWT}$ we are able to reconstruct
+$T$. We do it by first obtaining $F$ from $T_{BWT}$. Now, we will iteratively reconstruct $S$
+from the end to the beginning. First, we look to the first position in $F$ where last symbol
+of $S$ - \$ - is located. We see what symbol is preceding \$ in $S$. This is a symbol
+$L[1]$. Using the LF-mapping we find where $L[1]$ is located in $F$ and then repeat this process
+until $L[i]$ is equal to \$.
 
 \subsection{Supported methods}
 
@@ -106,7 +139,6 @@ another in memory. Then alongside this raw sequence of bits, we have another hel
 bit-vector of the same size. This bit vector has ones on places where the representation
 of the element starts and ones on the other places.
 
-
 In the first row, we can see the elements stacked one after another. These elements
 are of variable size as they need 4, 4, 2, 1 and 2 bits respectively to be stored.
 Under the elements from the main vector, there is another helper bit-vector. Every
@@ -117,9 +149,24 @@ To find the beginning of $i$-th element, we now transformed this task to find th
 $i$-th one in the helper array. We shall call this method $select_c(i)$ and later
 see how it can be implemented efficiently.
 
+\begin{figure}
+	\centerline{
+
+	\begin{tabular}{l|l|l|l|l|l|l|l|l|l|l|}
+	\cline{2-11}
+	\textbf{Raw binary representation} & 1          & 1 & 0 & 1 & 1          & 1 & 1          & 0 & 1 & 0          \\ \cline{2-11} 
+	\textbf{Helper bit array}          & \textbf{1} & 0 & 0 & 0 & \textbf{1} & 0 & \textbf{1} & 0 & 0 & \textbf{1} \\ \cline{2-11} 
+	\end{tabular}
+
+	}
+	\caption[TODO]{Raw binary representation of elements 1101, 11, 101 and 0 stored one after another.
+	Note the helper bit array that is of the same size with ones on the positions where new element begins.}
+	\label{obr:VariableSizedElements}
+\end{figure}
+
 \section{Wavelet tree}
 We shall assume for a moment that we have a bit-vector implementation supporting
-access, rank and select methods. We will now see how this may be used to create
+access, rank and select methods. We show how this may be used to create
 a more general version of this implementation representing sequence over arbitrary
 alphabet still supporting access, rank and select queries in reasonable time complexity.
 
@@ -128,14 +175,28 @@ length $n$ over some alphabet $\Sigma$ and recursively splits the alphabet into
 two subsets creating a hierarchical partitioning of an alphabet. In the top node
 of the tree, it splits the alphabet $\Sigma$ into two subsets of the roughly same
 size $\Sigma_1, \Sigma_2$. It then stores a bit vector $B$ of size $n$ in this node
-where $B[i] = 0 if S[i] \in \Sigma_1 else 1$. It then recursively applies the same
-idea on a subsequence of $S$ that is created from symbols of $Sigma_1$ ($Sigma_2$)
-to create the left (right) child node.
+where
+\[
+    B[i]= 
+\begin{cases}
+    0,& \text{if } S[i]\in \Sigma_1\\
+    1,              & \text{otherwise}
+\end{cases}
+\]
 
 
-We can see how the recursive partitioning of the alphabet works. In every node,
-we see also the subsequence represented in the subtree of the node even if this
-sequence is not stored. 
+It then recursively applies the same idea on a subsequence of $S$ that is created
+from symbols of $\Sigma_1$ ($\Sigma_2$) to create the left (right) child nodes.
+
+\begin{figure}
+	\centerline{
+	%TODO: figure
+	}
+	\caption[TODO]{We can see how the recursive partitioning of the alphabet works. In every node,
+	we see also the subsequence represented in the subtree of the node even if this
+	sequence is not stored.}
+	\label{obr:WaveletTreeExample}
+\end{figure}
 
 Rank and select methods on the original sequence can be implemented using the tree
 traversal and rank/select methods on the individual bit-vectors. Another modification
@@ -151,12 +212,12 @@ structure on actual data that the structure could encounter in our use case. How
 many succinct data structures are trying to achieve some upper bounds and express
 the used space in terms of the information contained in the data. There are many
 models how to measure the information contained in sequences of characters. One
-of the most used models in the field of succinct data structures, yet still quite
-simple, is entropy or zeroth-order entropy:
+of the most commonly used models in the field of succinct data structures, yet still
+quite simple, is entropy or more specifically zeroth-order entropy:
 
 $$H(S)=\sum_{c\in\Sigma} \frac{n_c}{n} \lg \frac{n}{n_c}$$.
 
-Many times, the stored sequence is compressible using the sole fact that some symbols
-have a bigger frequency than others.
+In many scenarios, where succinct data structures are used, the stored sequence
+is compressible using the sole fact that some symbols have a bigger frequency than others.
 
 \cite{raman2007succinct}
