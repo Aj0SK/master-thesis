@@ -45,6 +45,22 @@ character \$ only at the end that is contained in $\Sigma$ and lexicographically
 
 \subsection{Burrows-Wheeler transformation}
 
+Burrows-Wheeler transformation (BWT) lies at the heart of the FM index, so we shall
+look into how it is constructed. We consider the sequence $S$ of symbols over
+some alphabet $\Sigma$. Now we put all the cyclical rotations $S_1, S_2, \ldots S_n$ of the
+sequence $S$ into the rows of table by their lexicographical order as seen in Fig. \ref{obr:BWT}.
+We name the sequence
+created by the concatenation of symbols in first and last column $F$ and $L$ respectively.
+Last column $L$ is what we name the BWT. Computing BWT is useful step before compressing
+the text as this operation is reversible and most of the time $T_{BWT}$ is more compressible
+than $S$. We will show how to get $S$ from $T_{BWT}$ in the next section. $F$ can be obtained
+from $L$ just by sorting all the characters in $T_{BWT}$. Note that $F$ has some nice properties.
+It consists of of runs of symbols that are sorted according to the lexicographical
+ordering of alphabet symbols. We will use the helper sequence $Count$ where $Count[c]$ is
+number of occurrences of $c\in\Sigma$ in $S$. Although $Count$ uniquely represents $F$ we will
+find also useful array $CountSmaller$ where $CountSmaller[c]$ is a total number of occurrences
+of symbols smaller than $c$.
+
 \begin{figure}
 	\centerline{
 
@@ -64,22 +80,6 @@ character \$ only at the end that is contained in $\Sigma$ and lexicographically
 	\caption[TODO]{All the cyclic rotations of sequence $S = banana\$$. BWT is a last column. Note that we are not storing information about data with grey color.}
 	\label{obr:BWT}
 \end{figure}
-
-Burrows-Wheeler transformation (BWT) lies at the heart of the FM index, so we shall
-look into how it is constructed. We consider the sequence $S$ of symbols over
-some alphabet $\Sigma$. Now we put all the cyclical rotations $S_1, S_2, \ldots S_n$ of the
-sequence $S$ into the rows of table by their lexicographical order as seen in Fig. \ref{obr:BWT}.
-We name the sequence
-created by the concatenation of symbols in first and last column $F$ and $L$ respectively.
-Last column $L$ is what we name the BWT. Computing BWT is useful step before compressing
-the text as this operation is reversible and most of the time $T_{BWT}$ is more compressible
-than $S$. We will show how to get $S$ from $T_{BWT}$ in the next section. $F$ can be obtained
-from $L$ just by sorting all the characters in $T_{BWT}$. Note that $F$ has some nice properties.
-It consists of of runs of symbols that are sorted according to the lexicographical
-ordering of alphabet symbols. We will use the helper sequence $Count$ where $Count[c]$ is
-number of occurrences of $c\in\Sigma$ in $S$. Although $Count$ uniquely represents $F$ we will
-find also useful array $CountSmaller$ where $CountSmaller[c]$ is a total number of occurrences
-of symbols smaller than $c$.
 
 \subsection{LF-mapping}
 
