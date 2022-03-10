@@ -1,37 +1,58 @@
 \chapter{Binary sequence representation}
 \label{kap:kap2}
 
-Basic building block of many succinct data structures is array. Data structure
+Basic building block of many succinct data structures is \textit{vector}. Data structure
 used to represent the sequence of characters over some alphabet $\Sigma$. As we
-shown in the refWavelet, Wavelet tree can be used to build vector for general
-alphabet from the bit-vector. This is, why it is of utmost importance to dedicate
-time to efficient and fast bit-vector implementation. There are more ways to represent
-binary sequence. One of the widely used technique is RRR named by its inventors
-Rajeev Raman, Venkatesh Raman, S. Srinivasa Rao that proposed this data structure.
-We look at the first working RRR proposal of bit-vector and then the subsequent
-improvements over it.
+have shown in the section \ref{section:WaweletTree}, Wavelet tree can be used to
+build vector for general alphabet from the bit-vector specialization. This is, why
+it is of utmost importance to dedicate time to efficient and fast bit-vector
+implementation. There are more ways to represent binary sequence. One of the widely
+used technique is called \textit{RRR}. Named by its inventors Rajeev Raman, Venkatesh Raman,
+S. Srinivasa Rao that proposed this data structure\cite{raman2007succinct}. We will look
+at the first working RRR proposal of bit-vector\cite{claude2008practical}. Then we
+shall look at the subsequent improvements over it \cite{navarro2012fast}.
 
 \section{Division to blocks and access}
 
-The main idea behind RRR is to split bit sequence into blocks of constant length $b$.
-Then instead of storing the bit sequence we store the block encoded as a pair of
-numbers $(c, o)$ where $c$ labels the class of this block and $o$ an offset into
-the sequence of all blocks in this particular class. Most of the time, the $c$
-will be equal to number of ones in the block. Offset on the other hand, is the
-lexicographical order of block in the sequence of all the blocks with $c$ number
-of ones. Note that class $c$ has size
+The main idea of RRR is to split the bit sequence into blocks of some constant
+length $b$. This length is a parameter of algorithm and we will look at the consequences
+of different choices of $b$. Then instead of storing the bit sequence we store the
+block encoded as a pair of numbers $(c, o)$ where $c$ labels the class of this
+block and $o$ an offset into the sequence of all blocks in this particular class.
+Most of the time, the $c$ is equal to the number of ones in the block. Offset on
+the other hand, is the index of block in the sequence of all the blocks with $c$ number
+of ones, lexicographically sorted. Note that class $c$ has size
 
                     $${b\choose c}$$.
 
-The offset will be bounded by:
+The offset is then be bounded by:
 
 					$$0 \leq o < {b\choose c}$$.
 
-We now look at how the access is supported using this encoding/decoding scheme.
-It is reasonable to store all the classes and offsets in separate arrays $C$ and
-$O$. The array $C$ is usually implemented as a array of fixed length elements of
-length $\lceil \log_2(b)\rceil$. The array $O$ is implemented as an array of
-variable length elements and the size needed to store $i$-th element $O[i]$ is
+The process of obtaining $c$ and $o$ from block is called \textit{encoding}.
+The opposite process is called \textit{decoding}. Although we would like both
+processes to be fast. We do the encoding just once, at the initial construction
+of bit-vector. On the other hand, decoding is done any time we are interested in
+block's particular bit so it is more important for us to optimise so that decoding
+is as fast as possible.
+
+For smaller block sizes, such as $b\leq 15$, it was in most cases reasonable to
+generate two helper tables. One named $T_e$ used for the encoding, where we can
+index using the block casted as a number and get this particular block's offset.
+The class can be computed trivially by counting number of ones. The other table
+named $T_d$ is two dimensional. In position $T_d[c][o]$ we store the block that
+is associated with $(c, o)$. In other words, this is block containing $c$ ones
+and at the same time being $o$-th in the sequence of all lexicographically sorted
+blocks containing $c$ ones. Both these tables $T_e$ and $T_d$ can be computed
+by generating all the possible blocks in lexicographical order before we even
+obtain the sequence that we will want to represent. After this precomputation,
+the encoding and decoding of a block takes constant time.
+
+After slicing the sequence $S$ to blocks, we need to find a way how to store
+pairs $(c, o)$. It is reasonable to store all the classes and offsets in separate
+arrays $C$ and $O$. The array $C$ is usually implemented as a array of fixed length
+elements of length $\lceil \log_2(b)\rceil$. The array $O$ is implemented as an
+array of variable length elements and the size needed to store $i$-th element $O[i]$ is
 $\log_2({b\choose C[i]})$. To decode the $i$-th block, we at first need to get
 $C[i]$ and $O[i]$ and then we can use a precomputed table $T$ that matches $(c_i, o_i)$
 to the original block. Obtaining $C[i]$ is trivial as it is at a fixed offset in

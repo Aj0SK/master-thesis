@@ -2,60 +2,63 @@
 \label{kap:kap1}
 
 \section{Motivation}
-Data structures are one of the key concepts in computer science. They are essential
-as we use them to store the ever-growing amount of data and information. In many
-applications, the amount of data is so significant that we optimise how much storage
-these structures use. The field of succinct data structures focuses on representing
-data using as little space as possible while trying not to hurt the runtime of methods
-that these data structures support. In this field, data structures for many varied problems
-have been already devised. While many of these give some solid theoretical bounds on
-the used space, others look into real-world space usage and performance. Common
-disadvantage is that these structures are often more complicated than their space
-non-efficient alternatives as they contain concepts and computation patterns that are
-slower on modern computers.
+
+In many applications, the amount of data is so significant that we optimise how much
+storage these structures use. The field of \textit{succinct data structures focuses}
+on representing data using as little space as possible while trying not to hurt the
+runtime of methods that these data structures support. In this field, data structures
+for many varied problems have been already devised. While many of these give some solid
+theoretical bounds on the used space, others look into real-world space usage and
+performance. The common disadvantage is that these structures are often more complicated
+than their space non-efficient alternatives as they contain concepts and computation
+patterns that are slower on modern computers.
 
 The primary use case of these structures comes in two flavours. The first case is
-that we have so much data and are trying to implement some useful methods working
+that we have a lot of data and are trying to implement some useful methods working
 with them. The problem we face with regular data structures supporting these
 operations is that they may not even fit into our entire physical memory. The
-second use case may be that even if we have data that could fit into our computer,
-we instead use a succinct representation that may enable us to store the data in
-a faster type of memory (e.g. fast RAM instead of the slower disk) thus even if we
-use more advanced concepts, the overall runtime may decrease.
+second use case may be that even if we have an amount of data that could fit
+into our computer, we instead use a succinct representation. This may enable us
+to store the data in a faster type of memory (e.g. fast RAM instead of the
+slower disk). Thus, even if we use more advanced concepts, the overall runtime
+may decrease.
 
 The work in this field turns more and more actively towards the dynamic succinct
 data structures. These are structures where the underlying data may change after
 constructing the structure. However, in this work, we will only consider static
 succinct data structures. These are the ones where we get the data, then construct
 the succinct data structure and then only support methods that do not alter the
-underlying data in any way.  
+underlying data in any way.
 
 \section{FM-index}
 
-One particularly useful succinct data structure is FM-index. Let us consider the
-problem of representing a text that we want to store effectively. On top of that,
-we want to efficiently count or locate occurrences of pattern $P$ in this text.
-FM index is able to do this in time complexity $\mathcal{O}(|P|)$ after preprocessing the
-original text. On top of this, the resulting data structure is for many applications
-smaller than the original text. This makes it particularly useful for searching in
-long texts of DNA where FM-index many times takes just 30-40\% of the space needed
-for the representation of original text. We shall now look at how the FM-index
-is obtained for the text $T$. For simplicity, we assume that $T$ contains a special
-character \$ only at the end that is contained in $\Sigma$ and lexicographically smallest.
+One particularly useful succinct data structure is \textit{FM-index} proposed by Ferragina
+and Manzini\cite{ferragina2000opportunistic}. It found a heavy use in the field of
+Bioinformatics. Let us consider the problem of representing a text $T$ that we want to
+store effectively. We can represent the text as a sequence over some alphabet $\Sigma$.
+On top of that, we want to efficiently count or locate occurrences of pattern $P$
+in this text. FM-index can find the pattern in time complexity $\mathcal{O}(|P|)$
+after preprocessing the original text. On top of this, the resulting
+space used by FM-index is for many applications smaller than the space used for the
+original text $T$. This makes FM-index particularly useful for searching in very long sequences
+of DNA where FM-index many times takes just 30-40\% of the space needed for the representation
+of original DNA sequence. We shall now look at how the FM-index is obtained for the text $T$.
+For simplicity, we assume that text $T$ contains a special character \$ located at the end
+that is contained in $\Sigma$ and lexicographically smallest.
 
 \subsection{Burrows-Wheeler transformation}
 
-Burrows-Wheeler transformation (BWT) lies at the heart of the FM index, so we shall
-look into how it is constructed. We consider the sequence $S$ of symbols over
-some alphabet $\Sigma$. Now we put all the cyclical rotations $S_1, S_2, \ldots S_n$ of the
-sequence $S$ into the rows of table by their lexicographical order as seen in Fig. \ref{obr:BWT}.
-We name the sequence
-created by the concatenation of symbols in first and last column $F$ and $L$ respectively.
-Last column $L$ is what we name the BWT. Computing BWT is useful step before compressing
-the text as this operation is reversible and most of the time $T_{BWT}$ is more compressible
-than $S$. We will show how to get $S$ from $T_{BWT}$ in the next section. $F$ can be obtained
-from $L$ just by sorting all the characters in $T_{BWT}$. Note that $F$ has some nice properties.
-It consists of of runs of symbols that are sorted according to the lexicographical
+\textit{Burrows-Wheeler transformation} (BWT) lies at the heart of the FM-index, so we show
+how it is constructed. We consider the sequence $S$ of symbols over
+some alphabet $\Sigma$. Now we take all the cyclical rotations $S_1, S_2, \ldots S_n$ of the
+sequence $S$ and put them into the rows of table sorted by their lexicographical order as
+seen in Fig. \ref{obr:BWT}. We name the sequence created by the concatenation of symbols
+in first and last column $F$ and $L$ respectively. Last column $L$ is what we also call
+the BWT transformation of $S$. Computing BWT is useful step before compressing
+the text as this operation is reversible and most of the time $S_{BWT}$ is more compressible
+than $S$. We will show how to get $S$ from $S_{BWT}$ in the next section. The sequence $F$ can
+be obtained from $L$ just by sorting all the characters in $S_{BWT}$. Note that $F$ has some
+nice properties. It consists of of runs of symbols that are sorted according to the lexicographical
 ordering of alphabet symbols. We will use the helper sequence $Count$ where $Count[c]$ is
 number of occurrences of $c\in\Sigma$ in $S$. Although $Count$ uniquely represents $F$ we will
 find also useful array $CountSmaller$ where $CountSmaller[c]$ is a total number of occurrences
@@ -81,7 +84,7 @@ of symbols smaller than $c$.
 
 \subsection{LF-mapping}
 
-Useful information, that will be needed in the future is something what we call LF-mapping.
+Useful information, that will be needed in the future is something what we call \textit{LF-mapping}.
 This is a mapping that for a symbol on $i$-th row in $L$, gives us a corresponding row in $F$
 where this exact symbol is located. This is quite easy to obtain if the underlying sequence $S$
 does not contain duplicate symbols. Now all the runs in $F$ vector will be of length 1.
@@ -161,12 +164,14 @@ see how it can be implemented efficiently.
 \end{figure}
 
 \section{Wavelet tree}
+\label{section:WaweletTree}
+
 We shall assume for a moment that we have a bit-vector implementation supporting
 access, rank and select methods. We show how this may be used to create
 a more general version of this implementation representing sequence over arbitrary
 alphabet still supporting access, rank and select queries in reasonable time complexity.
 
-Wavelet tree uses a divide-and-conquer approach. It takes the sequence $S$ of
+\textit{Wavelet tree} uses a divide-and-conquer approach. It takes the sequence $S$ of
 length $n$ over some alphabet $\Sigma$ and recursively splits the alphabet into
 two subsets creating a hierarchical partitioning of an alphabet. In the top node
 of the tree, it splits the alphabet $\Sigma$ into two subsets of the roughly same
@@ -180,9 +185,9 @@ where
 \end{cases}
 \]
 
-
 It then recursively applies the same idea on a subsequence of $S$ that is created
-from symbols of $\Sigma_1$ ($\Sigma_2$) to create the left (right) child nodes.
+from $S$ by taking just symbols of $\Sigma_1$ ($\Sigma_2$) to create the left (right)
+child nodes.
 
 \begin{figure}
 	\centerline{
@@ -215,5 +220,3 @@ $$H(S)=\sum_{c\in\Sigma} \frac{n_c}{n} \lg \frac{n}{n_c}$$.
 
 In many scenarios, where succinct data structures are used, the stored sequence
 is compressible using the sole fact that some symbols have a bigger frequency than others.
-
-\cite{raman2007succinct}
