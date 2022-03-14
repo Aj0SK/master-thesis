@@ -2,7 +2,8 @@
 \label{kap:kap2}
 
 Basic building block of many succinct data structures is \textit{vector}. Data structure
-used to represent the sequence of characters over some alphabet $\Sigma$. As we
+used to represent the sequence of characters over some alphabet $\Sigma$ with the
+methods rank and select. As we
 have shown in the section \ref{section:WaweletTree}, Wavelet tree can be used to
 build vector for general alphabet from the bit-vector specialization. This is, why
 it is of utmost importance to dedicate time to efficient and fast bit-vector
@@ -23,11 +24,11 @@ Most of the time, the $c$ is equal to the number of ones in the block. Offset on
 the other hand, is the index of block in the sequence of all the blocks with $c$ number
 of ones, lexicographically sorted. Note that class $c$ has size
 
-                    $${b\choose c}$$.
+                $${b\choose c}$$.
 
 The offset is then be bounded by:
 
-					$$0 \leq o < {b\choose c}$$.
+				$$0 \leq o < {b\choose c}$$.
 
 The process of obtaining $c$ and $o$ from block is called \textit{encoding}.
 The opposite process is called \textit{decoding}. Although we would like both
@@ -50,26 +51,24 @@ the encoding and decoding of a block takes constant time.
 
 After slicing the sequence $S$ to blocks, we need to find a way how to store
 pairs $(c, o)$. It is reasonable to store all the classes and offsets in separate
-arrays $C$ and $O$. The array $C$ is usually implemented as a array of fixed length
-elements of length $\lceil \log_2(b)\rceil$. The array $O$ is implemented as an
+arrays $C$ and $O$. The array $C$ is usually implemented as an array of fixed length
+elements with length equal to $\lceil \log_2(b)\rceil$. The array $O$ is implemented as an
 array of variable length elements and the size needed to store $i$-th element $O[i]$ is
 $\log_2({b\choose C[i]})$. To decode the $i$-th block, we at first need to get
-$C[i]$ and $O[i]$ and then we can use a precomputed table $T$ that matches $(c_i, o_i)$
+$C[i]$ and $O[i]$ and then we can use a precomputed table $T_d$ that matches $(c_i, o_i)$
 to the original block. Obtaining $C[i]$ is trivial as it is at a fixed offset in
-memory. Getting value of $O[i]$ is harder as it's generally on a index that can
-be expressed as
+memory. Getting value of $O[i]$ is harder as it is not at a known offset but generally
+on an offset that can be expressed as
 
-                    $$\sum_{j=1}^{i-1} \log_2{b\choose C[i]}$$.
+                $$\sum_{j=1}^{i-1} \log_2{b\choose C[i]}$$.
 
-We need basically to one by one skip elements before $O[i]$ that have a variable
-length. To speed up this process, we will store the pointers into every $k$-th
-element of $O$ efectively dividing the process of locating $O[i]$ into two parts.
-The first is to find the nearest pointer leading to element before $i$ and then
-moving at most $k$ places. Note that to move in $O$ we need only successive
-information from $C$ so these are very cache friendly. To support the access in
-time $O(k)$ we need to store the arrays $C, O$, helper table for decoding $T$.
-We shall now argue about the size of these structures. The size of these structures
-are as follows:
+We need to basically one by one skip over elements that come before $O[i]$.
+Note that to move in $O$ we need only successive information from $C$ so these
+are quite cache friendly. However, to access the $i$-th block, we need in worst
+case to look at all the elements of $C$ and this takes $\mathcal{O}(n/b)$ time. To support
+the access, we need to store the arrays $C, O$ and helper table $T_d$. We shall
+now argue about the size of these structures. The size of these structures are
+as follows:
 
 $C$ is array of $\lceil n/b \rceil$ elements of fixed size $\lceil \log(b+1) \rceil$.
 
@@ -80,24 +79,45 @@ $$\sum_{i=1}^{n/b} \bigg\lceil{\log b\choose c_i}\bigg\rceil =
 $$=\log\prod_{i=1}^{\lceil n/b \rceil} \log {b\choose c_i} + \lceil n/b \rceil \leq $$
 $$\log{n\choose \#_1} +  \lceil n/b \rceil \leq nH_o(B) +  \lceil n/b \rceil$$.
 
-$T$ can be imagined as numerous tables $T_c$ each with ${b\choose c}$ entries.
-Number of  all of the entries is $2^b$ and each entry is using $b$ bits of storage.
-The total space used is then $nH_o(B) +  \lceil n/b \rceil + \lceil \log(b+1) \rceil + b2^b$.
+$T_d$ is storing $2^b$ entries and each entry is using $b$ bits of storage.
+The total space used is then $nH_0(B) +  \lceil n/b \rceil + \lceil \log(b+1) \rceil + b2^b$.
+
+To speed up the process of accessing block, we will store the pointers into every
+$k$-th element of $O$. Efectively dividing the process of locating $O[i]$ into two
+parts. The first is to find the nearest pointer leading to element before $i$ and
+then moving at most $k$ places. This additional structure of roughly $n/bk$ integers
+takes the space $\mathcal{O}(\log(n)\cdot n/bk)$.
 
 \section{Rank}
+\label{section:rank}
 
-We would like to achieve a fast rank, yet adding only sublinear number of space on top of the
-current access supporting bit vector. There are two extremes we can begin with. The first is to
-add zero additional space and every time we are asked to query for $rank_c(i)$. We run through
-all blocks that are before $i/b$-th. Nice property is that we do not need to decode all the blocks
-as the number of ones is stored as class and is easily accessible.
-Another extreme is to store rank up to that point for every block. This is fast as answering rank
-query consists at most from one constant lookup and then decoding of one block.
-Very good solution, that is used in practice is to join these two extreme ideas. We will store the
-precomputed rank, but not for every block. Instead we choose a constant $k$ and divide
-the bit-vector into nonoverlaping superblocks consisting of $k$ successive blocks. If the number of
-blocks in the bit-vector is not dividible by $k$ we simply left the last superblock shorter.
-We now compute the rank value only for the blocks that are on beginning of some superblock.
+We would like to achieve a fast rank, yet we want to only add sublinear amount of
+space on top of the current access supporting bit vector. There are two straightforward
+solutions we can begin with. The first is to add zero additional space. Every
+time we are asked to query for $rank_c(i)$, we run through all blocks that are
+before $i/b$-th. This solution is very slow but it does not need any aditional space.
+Nice property is that we do not need to decode all the blocks as the number of ones
+is stored as class and is easily accessible.
+The second approach is to precompute rank up to every block. This enables us to be very
+fast in answering rank query as it consists at most from one constant lookup and then
+decoding of one block. Widely used solution consists of these two approaches being merged
+into idea of solution based on superblocks. We will store the precomputed rank, but not
+for every block. Instead we choose a constant $k$ and divide the bit-vector into nonoverlaping
+parts consisting of $k$ successive blocks named superblocks. If the number of blocks in
+the bit-vector is not dividible by $k$ we simply left the last superblock shorter. We
+now compute the rank value only for the beginnings of superblocks.
+
+\section{Select}
+
+Important property of select method is that it works like an invers to rank. In a sense that
+
+                $$rank_c(select_c(i)) = i$$.
+
+Thanks to rank being nondecreasing function, it is possible to binary search for the result
+of $select_c(j)$. This can be nicely combined with the superblock solution from the previous
+section \ref{section:rank}. At first, we binary search for the solution in the samples of rank
+on the beginnings of superblocks. When we identify the right superblock, where the answer is
+located, we simply linearly scan for the solution.
 
 \section{Practical considerations}
 
@@ -120,7 +140,7 @@ we know that the decoded block will have one bit on this place. We proceed by su
 number $comb$ from $o$ and proceed sequentionally further.
 
 This approach has some advantages and disadvantages. The biggest advantage is that it allows
-us to use bigger block size $b$. The disadvantage is that it takes $O(b)$ steps to decode the
+us to use bigger block size $b$. The disadvantage is that it takes $\mathcal{O}(b)$ steps to decode the
 block. Furthermore, the decoding contains branching and it is hard to parallelize the steps
 in some meaningful way. Note that decoding is faster if we want to access the element
 close to the beginning of the block as we can stop the process when we obtain this bit.

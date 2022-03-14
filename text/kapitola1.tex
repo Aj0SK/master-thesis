@@ -23,7 +23,7 @@ to store the data in a faster type of memory (e.g. fast RAM instead of the
 slower disk). Thus, even if we use more advanced concepts, the overall runtime
 may decrease.
 
-The work in this field turns more and more actively towards the dynamic succinct
+The work in this field turns focus more and more towards the dynamic succinct
 data structures. These are structures where the underlying data may change after
 constructing the structure. However, in this work, we will only consider static
 succinct data structures. These are the ones where we get the data, then construct
@@ -84,7 +84,7 @@ of symbols smaller than $c$.
 
 \subsection{LF-mapping}
 
-Useful information, that will be needed in the future is something what we call \textit{LF-mapping}.
+Useful information, that will be used in the future is something what we call \textit{LF-mapping}.
 This is a mapping that for a symbol on $i$-th row in $L$, gives us a corresponding row in $F$
 where this exact symbol is located. This is quite easy to obtain if the underlying sequence $S$
 does not contain duplicate symbols. Now all the runs in $F$ vector will be of length 1.
@@ -132,13 +132,13 @@ does not store the original sequence $T$ - at least not in an easily readable fo
 \section{Storing elements of non-uniform size}
 
 When trying to optimise the space used, it may be beneficial to use variable-length
-code such as Huffman code. The problem is that even storing elements like this in
-the array is problematic. With the variable-length elements, we do not have a trivial
-and fast way to tell where $i$-th element is located. Even though there are many
-solutions, one of them that is used quite often is storing these elements one after
-another in memory. Then alongside this raw sequence of bits, we have another helper
-bit-vector of the same size. This bit vector has ones on places where the representation
-of the element starts and ones on the other places.
+code for symbols such as Huffman code. The problem is that even storing elements
+like this in the array is problematic. With the variable-length elements, we do not
+have a trivial and fast way to tell where $i$-th element is located. Even though
+there are many solutions, one of them that is used quite often is storing these
+elements one after another in memory. Then alongside this raw sequence of bits,
+we have another helper bit-vector of the same size. This bit vector has ones on
+places where the representation of the element starts and ones on the other places.
 
 In the first row, we can see the elements stacked one after another. These elements
 are of variable size as they need 4, 4, 2, 1 and 2 bits respectively to be stored.
@@ -162,6 +162,22 @@ see how it can be implemented efficiently.
 	Note the helper bit array that is of the same size with ones on the positions where new element begins.}
 	\label{obr:VariableSizedElements}
 \end{figure}
+
+\section{Space efficiency}
+
+There are many ways to measure the space efficiency of a data structure. From the
+practical point of view, we may be interested in the memory usage by the data
+structure on actual data that the structure could encounter in our use case. However,
+many succinct data structures are trying to achieve some upper bounds and express
+the used space in terms of the information contained in the data. There are many
+models how to measure the information contained in sequences of characters. One
+of the most commonly used models in the field of succinct data structures, yet still
+quite simple, is entropy or more specifically zeroth-order entropy:
+
+$$H(S)=\sum_{c\in\Sigma} \frac{n_c}{n} \lg \frac{n}{n_c}$$.
+
+In many scenarios, where succinct data structures are used, the stored sequence
+is compressible using the sole fact that some symbols have a bigger frequency than others.
 
 \section{Wavelet tree}
 \label{section:WaweletTree}
@@ -191,32 +207,20 @@ child nodes.
 
 \begin{figure}
 	\centerline{
-	%TODO: figure
+		\includegraphics[width=0.9\textwidth, height=0.3\textheight]{images/wavelet_tree}
 	}
-	\caption[TODO]{We can see how the recursive partitioning of the alphabet works. In every node,
-	we see also the subsequence represented in the subtree of the node even if this
-	sequence is not stored.}
+	\caption[TODO]{Wavelet tree representation of text $S=aabadacdc$. We can see how the
+	recursive partitioning of the alphabet works. In every node, we also show the
+	subsequence represented (grey text) in the subtree of the node. The stored data can be
+	recognized as they are in bold and black.
+	}
 	\label{obr:WaveletTreeExample}
+	% based on https://simongog.github.io/assets/data/sdsl-slides/tutorial#23
+	% source at https://docs.google.com/drawings/d/1cJyda3bdTluajr3iXu1x1iL5HF0JPZqAHw6jwct9KLI/edit
 \end{figure}
 
 Rank and select methods on the original sequence can be implemented using the tree
 traversal and rank/select methods on the individual bit-vectors. Another modification
-studied in [WaveletTreeHuffman] is to shape the binary tree in a way that a Huffman
+studied by M{\"a}kinen et. al.\cite{makinen2005succinct} is to shape the binary tree in a way that a Huffman
 tree of the sequence symbols is shaped. Huffman tree is a tree constructed in the
 process of creating Huffman encoding of the characters contained in the sequence.
-
-\section{Space efficiency}
-
-There are many ways to measure the space efficiency of a data structure. From the
-practical point of view, we may be interested in the memory usage by the data
-structure on actual data that the structure could encounter in our use case. However,
-many succinct data structures are trying to achieve some upper bounds and express
-the used space in terms of the information contained in the data. There are many
-models how to measure the information contained in sequences of characters. One
-of the most commonly used models in the field of succinct data structures, yet still
-quite simple, is entropy or more specifically zeroth-order entropy:
-
-$$H(S)=\sum_{c\in\Sigma} \frac{n_c}{n} \lg \frac{n}{n_c}$$.
-
-In many scenarios, where succinct data structures are used, the stored sequence
-is compressible using the sole fact that some symbols have a bigger frequency than others.
