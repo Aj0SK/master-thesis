@@ -31,6 +31,7 @@ the succinct data structure and then only support methods that do not alter the
 underlying data in any way.
 
 \section{FM-index}
+% sources to help understand https://www.dcc.uchile.cl/TR/2005/TR_DCC-2005-004.pdf
 
 One particularly useful succinct data structure is \textit{FM-index} proposed by Ferragina
 and Manzini\cite{ferragina2000opportunistic}. It found a heavy use in the field of
@@ -60,9 +61,7 @@ than $S$. We will show how to get $S$ from $S_{BWT}$ in the next section. The se
 be obtained from $L$ just by sorting all the characters in $S_{BWT}$. Note that $F$ has some
 nice properties. It consists of of runs of symbols that are sorted according to the lexicographical
 ordering of alphabet symbols. We will use the helper sequence $Count$ where $Count[c]$ is
-number of occurrences of $c\in\Sigma$ in $S$. Although $Count$ uniquely represents $F$ we will
-find also useful array $CountSmaller$ where $CountSmaller[c]$ is a total number of occurrences
-of symbols smaller than $c$.
+number of occurrences of symbols smaller than $c$.
 
 \begin{figure}
 	\centerline{
@@ -78,20 +77,20 @@ of symbols smaller than $c$.
 	7 & {\color[HTML]{333333} \textbf{n}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} a}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} n}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} a}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \$}} & {\color[HTML]{C0C0C0} b}  & {\color[HTML]{000000} \textbf{a}}  \\ \cline{2-8} 
 	\end{tabular}
 	}
-	\caption[TODO]{All the cyclic rotations of sequence $S = banana\$$. BWT is a last column. Note that we are not storing information about data with grey color.}
+	\caption[TODO]{All the cyclic rotations of sequence $S = banana\$$. BWT is a $L$ - last column. Note that we are not storing this whole table.}
 	\label{obr:BWT}
 \end{figure}
 
 \subsection{LF-mapping}
 
-Useful information, that will be used in the future is something what we call \textit{LF-mapping}.
+Useful information, that will be used in the future is \textit{LF-mapping}.
 This is a mapping that for a symbol on $i$-th row in $L$, gives us a corresponding row in $F$
 where this exact symbol is located. This is quite easy to obtain if the underlying sequence $S$
 does not contain duplicate symbols. Now all the runs in $F$ vector will be of length 1.
 To find $LF(i)$, we will simply look what is the $i$-th symbol in $L$. The run of
-symbol $L[i]$ begins on the index $CountSmaller[L[i]] + 1$ so the formula can be written as:
+symbol $L[i]$ begins on the index $Count[L[i]] + 1$ so the formula can be written as:
 
-$$LF(i) = CountSmaller[L[i]] + 1$$.
+$$LF(i) = Count[L[i]] + 1$$.
 
 If we drop our requirement that every symbol is contained in the sequence $S$ at most once
 we are seemingly in a more complicated situation. The problem may seem that even
@@ -100,7 +99,7 @@ know which occurrence of symbol $L[i]$ corresponds to occurrence of $L[i]$ in $i
 Helpful property is that $i$-th occurrence of symbol $c$ in $L$ corresponds to the
 $i$-th occurrence of $c$ in $F$. So we can just change the final formula to
 
-				$$LF(i) = CountSmaller[L[i]] + rank_{L[i]}(i)$$
+				$$LF(i) = Count[L[i]] + rank_{L[i]}(i)$$
 
 where $rank_c(i)$ represents the number of occurences of $c$ up to $i$-th index inclusive.
 
@@ -119,15 +118,36 @@ As we already stated, FM-index is used for searching in the preprocessed text.
 It does this using three methods:
 
 \begin{itemize}
-\item $locate(P)$ returns all positions of pattern $P$ in text $T$
-\item $count(P)$ counts the number of occurences of $P$ in text $T$
-\item $extract(i, j)$ returns the subsequence $T[i..j]$
+	\item $count(P)$ counts the number of occurences of $P$ in text $T$
+	\item $locate(P)$ returns all positions of pattern $P$ in text $T$
+	\item $extract(i, j)$ returns the subsequence $T[i..j]$
 \end{itemize}
 
 The reason that the $extract$ method is useful and non-trivial is that FM-index
 does not store the original sequence $T$ - at least not in an easily readable form.
 
-%TODO: Implementacia operacii
+The counting of occurences of $P$ in $S$ is based on the observation that in $M$,
+all the suffix are contained and come in sorted order. Occurences of $P$ in $M$
+are contained in a consecutive subsequence of $M$'s rows. The identification of
+rows where $P$ is located will proceed gradually by finding rows where $P[n-1..],
+P[n-2..]$ etc. is located. This will in general be some continuous subsequence of
+rows of $M$ so we will store its beginning and end.
+
+\begin{itemize}
+	\item We find where $P[n-1]$ is located in $M$. This means setting $b_{n-1}$ to
+	$Count[P[n-1]]+1$ and $e_{n-1}$ to $Count[P[n-1]+1]$.
+	\item Now, to found where $P[n-2..]$ is located in $M$, we would like to locate
+	occurences of $P[n-1]$ that are preceded by $P[n-2]$. We would like to find all
+	occurences of $P[n-2]$ in $L[b_{n-1}..e_{n-1}]$. Hovewer, this is not easy to do
+	as they can be at arbitrary places in this subsequence, even not in a continuous
+	sequence. Instead we look at the occurences of $P[n-2]$ in $F$. Here they are
+	sorted and it is easy to tell, which of these are followed by $P[n-1]$ as $i$-th
+	occurence of character $P[n-1]$ in $L$ corresponds to $i$-th occurence of $P[n-1]$
+	in $F$. Using this fact, we set
+	$b_{n-2} = Count[P[n-2]] + rank_{P[n-2]}(b_{n-1})$ and
+	$e_{n-2} = Count[P[n-2]] + rank_{P[n-2]}(e_{n-1})$.
+	\item We continue until we compute $b_1$ and $e_1$ or until $b_i\neq e_i$.
+\end{itemize}
 
 \section{Storing elements of non-uniform size}
 
@@ -189,7 +209,7 @@ alphabet still supporting access, rank and select queries in reasonable time com
 
 \textit{Wavelet tree} uses a divide-and-conquer approach. It takes the sequence $S$ of
 length $n$ over some alphabet $\Sigma$ and recursively splits the alphabet into
-two subsets creating a hierarchical partitioning of an alphabet. In the top node
+two subsets creating a hierarchical partitioning of an alphabet. In the root node
 of the tree, it splits the alphabet $\Sigma$ into two subsets of the roughly same
 size $\Sigma_1, \Sigma_2$. It then stores a bit vector $B$ of size $n$ in this node
 where
@@ -201,9 +221,9 @@ where
 \end{cases}
 \]
 
-It then recursively applies the same idea on a subsequence of $S$ that is created
-from $S$ by taking just symbols of $\Sigma_1$ ($\Sigma_2$) to create the left (right)
-child nodes.
+Then it creates two strings $S_1$ and $S_2$ from $S$ by taking just symbols
+from $\Sigma_1$ and $\Sigma_2$ respectively. The left and right children of the root node
+are then built by recursively applying the same idea on a subsequences $S_1$ and $S_2$.
 
 \begin{figure}
 	\centerline{
