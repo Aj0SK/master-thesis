@@ -7,11 +7,10 @@ methods rank and select. As we
 have shown in the section \ref{section:WaweletTree}, Wavelet tree can be used to
 build vector for general alphabet from the bit-vector specialization. This is, why
 it is of utmost importance to dedicate time to efficient and fast bit-vector
-implementation. There are more ways to represent binary sequence. One of the
-used technique is called \textit{RRR}. Named by its inventors Rajeev Raman, Venkatesh Raman,
-S. Srinivasa Rao that proposed this data structure\cite{raman2007succinct}. We will look
-at the first working RRR proposal of bit-vector\cite{claude2008practical}. Then we
-shall look at the subsequent improvements over it \cite{navarro2012fast}.
+implementation. There are more ways to represent binary sequence. \cite{raman2007succinct}
+invented method called \textit{RRR}. We will look at the first working RRR proposal
+of bit-vector made by \cite{claude2008practical}. \cite{navarro2012fast} then introduced
+mainly practical improvements to this solution bringing it to current state.
 
 \section{Division to blocks and access}
 
@@ -77,7 +76,7 @@ For array $O$ we argue that its size is bounded by
 $$\sum_{i=1}^{n/b} \bigg\lceil{\log b\choose c_i}\bigg\rceil =
 \sum_{i=1}^{\lceil n/b \rceil} \log {b\choose c_i} + \lceil n/b \rceil =$$
 $$=\log\prod_{i=1}^{\lceil n/b \rceil} \log {b\choose c_i} + \lceil n/b \rceil \leq $$
-$$\log{n\choose \#_1} +  \lceil n/b \rceil \leq nH_o(B) +  \lceil n/b \rceil$$.
+$$\log{n\choose \#_1} +  \lceil n/b \rceil \leq nH_0(B) +  \lceil n/b \rceil$$.
 
 $T_d$ is storing $2^b$ entries and each entry is using $b$ bits of storage.
 The total space used is then $nH_0(B) +  \lceil n/b \rceil + \lceil \log(b+1) \rceil + b2^b$.
