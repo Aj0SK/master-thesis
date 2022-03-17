@@ -5,11 +5,11 @@ Basic building block of many succinct data structures is \textit{vector}. Data s
 used to represent the sequence of characters over some alphabet $\Sigma$ supporting the
 methods rank and select. As we
 have shown in the section \ref{section:WaweletTree}, Wavelet tree can be used to
-build vector for general alphabet from the bit-vector specialization. This is, why
-it is of utmost importance to dedicate time to efficient and fast bit-vector
+build vector for general alphabet from the bit vector specialization. This is, why
+it is of utmost importance to dedicate time to efficient and fast bit vector
 implementation. There are more ways to represent binary sequence. \cite{raman2007succinct}
 invented method called \textit{RRR}. We will look at the first working RRR proposal
-of bit-vector made by \cite{claude2008practical}. \cite{navarro2012fast} then introduced
+of bit vector made by \cite{claude2008practical}. \cite{navarro2012fast} then introduced
 mainly practical improvements to this solution bringing it to current state.
 
 \section{Division to blocks and access}
@@ -32,7 +32,7 @@ The offset is then be bounded by:
 The process of obtaining $c$ and $o$ from block is called \textit{encoding}.
 The opposite process is called \textit{decoding}. Although we would like both
 processes to be fast. We do the encoding just once, at the initial construction
-of bit-vector. On the other hand, decoding is done any time we are interested in
+of bit vector. On the other hand, decoding is done any time we are interested in
 block's particular bit so it is more important for us to optimise so that decoding
 is as fast as possible.
 
@@ -73,10 +73,14 @@ $C$ is array of $\lceil n/b \rceil$ elements of fixed size $\lceil \log(b+1) \rc
 
 For array $O$ we argue that its size is bounded by
 
-$$\sum_{i=1}^{n/b} \bigg\lceil{\log b\choose c_i}\bigg\rceil =
-\sum_{i=1}^{\lceil n/b \rceil} \log {b\choose c_i} + \lceil n/b \rceil =$$
-$$=\log\prod_{i=1}^{\lceil n/b \rceil} \log {b\choose c_i} + \lceil n/b \rceil \leq $$
-$$\log{n\choose \#_1} +  \lceil n/b \rceil \leq nH_0(B) +  \lceil n/b \rceil$$.
+\begin{align}
+    \sum_{i=1}^{n/b} \bigg\lceil{\log b\choose c_i}\bigg\rceil &\leq \\ 
+    \sum_{i=1}^{\lceil n/b \rceil} \log {b\choose c_i} + \lceil n/b \rceil &= \\ 
+    \log\prod_{i=1}^{\lceil n/b \rceil} {b\choose c_i} + \lceil n/b \rceil &\leq \\
+    \log{n\choose \#_1(B)} +  \lceil n/b \rceil &\leq nH_0(B) +  \lceil n/b \rceil
+\end{align}
+
+where $\#_1(B)$ denotes the total number of ones in $B$. 
 
 $T_d$ is storing $2^b$ entries and each entry is using $b$ bits of storage.
 The total space used is then $nH_0(B) +  \lceil n/b \rceil + \lceil \log(b+1) \rceil + b2^b$.
@@ -101,9 +105,9 @@ The second approach is to precompute rank up to every block. This enables us to 
 fast in answering rank query as it consists at most from one constant lookup and then
 decoding of one block. Widely used solution consists of these two approaches being merged
 into idea of solution based on superblocks. We will store the precomputed rank, but not
-for every block. Instead we choose a constant $k$ and divide the bit-vector into nonoverlaping
+for every block. Instead we choose a constant $k$ and divide the bit vector into nonoverlaping
 parts consisting of $k$ successive blocks named superblocks. If the number of blocks in
-the bit-vector is not dividible by $k$ we simply left the last superblock shorter. We
+the bit vector is not dividible by $k$ we simply left the last superblock shorter. We
 now compute the rank value only for the beginnings of superblocks.
 
 \section{Select}

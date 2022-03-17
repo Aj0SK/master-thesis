@@ -32,11 +32,11 @@ succinct data structures. These are the ones where we get the data, then constru
 the succinct data structure and then only support methods that do not alter the
 underlying data in any way.
 
-In this work, we are mainly concerned about the \textit{bit-vector}. One of the simplest
+In this work, we are mainly concerned about the \textit{bit vector}. One of the simplest
 succinct data structures that represents the sequence of zeroes and ones. The reason
-behind this is that bit-vector is one of the main building blocks of many succinct data
+behind this is that bit vector is one of the main building blocks of many succinct data
 structures and can be useful in a lot of use cases. We shall now look onto some interesting
-and useful applications of the bit-vector. 
+and useful applications of the bit vector. 
 
 \section{Storing elements of non-uniform size}
 
@@ -48,7 +48,7 @@ is not trivial. Even though we can store these elements one after another in mem
 the variable-length elements, we do not have an easy and fast way to tell at which offset
 from the beginning of the array $i$-th element is located. Even though there are many
 solutions, one of them that is used quite often is as follows. Alongside this raw sequence
-of bits that store the elements one after another, we have another helper bit-vector of
+of bits that store the elements one after another, we have another helper bit vector of
 the same size. This bit vector has ones on places where the representation of some element
 starts and zeroes on the other places.
 
@@ -74,7 +74,7 @@ implemented efficiently.
 % sources to help understand https://www.dcc.uchile.cl/TR/2005/TR_DCC-2005-004.pdf
 
 Let us now consider another interesting problem. As we will see, solution to this problem
-also uses bit-vector and other building blocks commonly used in succinct data strucutes.
+also uses bit vector and other building blocks commonly used in succinct data strucutes.
 This time, we have a text $T$ and are interested in indexing it. This means if we get some
 pattern $P$, we would like to answer how many times is $P$ contained in $T$ and also where
 in $T$ this occurrences are located. This is particularly interesting problem in bioinformatics,
@@ -106,7 +106,7 @@ compressible. We show how it is constructed and why it has these properties used
 the sequence $S$ of symbols over
 some alphabet $\Sigma$. Now we take all the cyclical rotations $S_1, S_2, \ldots S_n$ of the
 sequence $S$ and imagine putting them into the rows of table $M$ sorted by their lexicographical
-order as seen in Fig. \ref{obr:BWT}. We name the sequence created by the concatenation of symbols
+order as seen in Fig.~\ref{obr:BWT}. We name the sequence created by the concatenation of symbols
 in first and last column $F$ and $L$ respectively. Last column $L$ is what we also call
 the BWT transformation of $S$. We will show how to get $S$ from $S_{BWT}$ in the next section. The sequence $F$ can
 be obtained from $L$ just by sorting all the characters in $S_{BWT}$. Note that $F$ has some
@@ -225,10 +225,24 @@ is compressible using the sole fact that some symbols have a bigger frequency th
 \section{Wavelet tree}
 \label{section:WaweletTree}
 
-We shall assume for a moment that we have a bit-vector implementation supporting
+We shall assume for a moment that we have a bit vector implementation supporting
 access, rank and select methods. We show how this may be used to create
 a more general version of this implementation representing sequence over arbitrary
 alphabet still supporting access, rank and select queries in reasonable time complexity.
+
+The most straightforward approach is to store one bit vector of size $|S|$,
+per every character of the alphabet $\Sigma$. Let us call these bitvectors $B_1,
+B_2, \ldots B_{\sigma}$. Each of them stores one on places where the symbol corresponding
+to this bit vector is located, according to formula
+
+\[
+    B_i[j]= 
+\begin{cases}
+	1,& \text{if } S[j]=i \\
+    0,& \text{otherwise}
+\end{cases}
+\].
+
 
 \textit{Wavelet tree} uses a divide-and-conquer approach. It takes the sequence $S$ of
 length $n$ over some alphabet $\Sigma$ and recursively splits the alphabet into
@@ -263,7 +277,7 @@ are then built by recursively applying the same idea on the subsequences $S_1$ a
 \end{figure}
 
 Rank and select methods on the original sequence can be implemented using the tree
-traversal and rank/select methods on the individual bit-vectors. Another modification
+traversal and rank/select methods on the individual bit vectors. Another modification
 studied by \cite{makinen2005succinct} is to shape the binary tree in a way that a Huffman
 tree of the sequence symbols is shaped. Huffman tree is a tree constructed in the
 process of creating Huffman encoding of the characters contained in the sequence.
