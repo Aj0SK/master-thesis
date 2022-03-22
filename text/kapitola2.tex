@@ -3,11 +3,11 @@
 
 This chapter is dedicated to the previous work on the implementation of the bit vector, data
 structure that stores binary sequence supporting methods access, rank and select. As we have
-shown in section~\ref{section:WaweletTree}, Wavelet tree can be used to build a vector
+shown in section~\ref{section:WaweletTree}, the Wavelet tree can be used to build a vector
 for the general alphabet from the bit vector implementation. This is, why it is of utmost
 importance to dedicate time to efficient and fast bit vector implementation. In this
 chapter, we shall describe the currently available implementations. Let us start with
-the simple representation of bit vector, in which we simply store bits one after another.
+the simple representation of a bit vector, in which we simply store bits one after another.
 Then we shall look at the succinct representation.
 
 \section{Bit vector implementation}
@@ -21,14 +21,14 @@ $rank_1(i)$. It is easy to observe that following equation holds:
                     $$rank_1(i) = i - rank_0(i)$$
 
 so it is enough to provide only the implementation of $rank_1(i)$.
-There are two straightforward solutions we can begin with to support rank on bit vector
+There are two straightforward solutions we can begin with to support rank on a bit vector
 $B$. The first is to store no additional information. Every time we are asked
 for $rank_c(i)$, we run through all bits preceding $i$-th. This solution is not very
 practical for longer bit vectors but it does not add any additional space. The second
 approach is to precompute rank up to every bit. This enables us to answer rank in constant
 time as it consists of only one constant lookup. However, the space needed to support this
 solution is $(|B|\cdot\log |B|)$. These two solutions can be combined together to obtain an
-idea of the practically sound solution. We will store the precomputed rank, but not for every
+idea of a practically sound solution. We will store the pre-computed rank, but not for every
 bit. Instead, we choose a constant $k$ and precompute rank only for every $k$-th bit. This
 enables answering rank in time $\mathcal{O}(k)$ and uses $\mathcal{O}((n/k)\log(n))$ of memory.
 
@@ -68,7 +68,7 @@ The offset is then be bounded by:
 The process of obtaining $c$ and $o$ from the raw representation of block is called
 \textit{encoding}. The opposite process is called \textit{decoding}. Although we would
 like both processes to be fast. We do the encoding just once, at the initial construction
-of the bit vector. On the other hand, decoding is done any time we are accessing particular
+of the bit vector. On the other hand, decoding is done any time we are accessing a particular
 bit in $B$ so it is more important for us to optimise so that decoding is as fast as possible.
 
 For smaller block sizes, such as $b\leq 15$, it is in most cases reasonable to
@@ -98,16 +98,16 @@ combinations how the block can look in this scenario. If the sequence number of 
 $o$ is bigger than this number, we know that the decoded block will have one bit on this place.
 We proceed by subtracting the number $comb$ from $o$ and proceed sequentially further.
 
-After slicing the sequence $B$ to blocks, we need to find a way how to store pairs $(c, o)$.
+After slicing the sequence $B$ into blocks, we need to find a way how to store pairs $(c, o)$.
 We shall store all the classes and offsets in separate arrays $C$ and $O$. The array $C$ shall
 be implemented as an array of fixed length elements with a length equal to
 $\lceil \log_2(b)\rceil$. The array $O$ shall be on the other hand implemented as an array of
 variable length elements with the size needed to store $i$-th element $O[i]$ being
 $\lceil \log_2{b\choose C[i]}\rceil$.
 
-To provide access to concrete bit, we need at first find out at which block this bit is located.
+To provide access to the concrete bit, we need to first find out at which block this bit is located.
 Let this be $i$-th block. To decode the block we at first need to get corresponding $C[i]$ and
-$O[i]$ and then we can use a precomputed table $T_d$ that matches $(c_i, o_i)$ to the original
+$O[i]$ and then we can use a pre-computed table $T_d$ that matches $(c_i, o_i)$ to the original
 block. Obtaining $C[i]$ is trivial as it is at a fixed offset in memory. Getting the value of
 $O[i]$ is harder as it is not at a known offset but generally on an offset that can be computed
 as
@@ -137,16 +137,15 @@ For array $O$ we argue that its size is bounded by
 
 where $\#_1(B)$ denotes the total number of ones in $B$. We obtained (someref) using the
 observation that ${b\choose c_i} {b\choose c_j} \leq {2b\choose c_i+c_j}$. This can be seen
-when we interpet the left side of the equation as number of ways we can choose $c_i$ elements
-from $b$ elements and $c_j$ elements from another $b$ elements. This is all contained in the
-right side of equation that definitely includes all these combinations.
+when we interpret the left side of the equation as a number of ways we can choose $c_i$ elements
+from $b$ elements and $c_j$ elements from another $b$ elements. This is all contained on the
+right side of the equation that definitely includes all these combinations.
 
 $T_d$ is storing $2^b$ entries and each entry is using $b$ bits of storage.
-The total space used is then $nH_0(B) +  \lceil n/b \rceil + \lceil \log(b+1) \rceil + b2^b$.
+The total space used is then $nH_0(B) + \lceil n/b \rceil + \lceil n/b \rceil \cdot \lceil \log(b+1) \rceil + b2^b$.
 
-To speed up the process of accessing block, we will help ourselves
-store the pointers into every
-$k$-th element of $O$. Effectively dividing the process of locating $O[i]$ into two
+To speed up the process of accessing block, we will help ourselves store the pointers
+into every $k$-th element of $O$. Effectively dividing the process of locating $O[i]$ into two
 parts. The first is to find the nearest pointer leading to element before $i$ and
 then move at most $k$ places. This additional structure of roughly $\frac{n}{bk}$ integers
 takes the space $\mathcal{O}(\log(n)\cdot \frac{n}{bk})$.
@@ -158,28 +157,57 @@ takes the space $\mathcal{O}(\log(n)\cdot \frac{n}{bk})$.
 	\caption[TODO]{RRR implementation. $B$ shows the original bit sequence cut to
     blocks. $C$ stores the class which is in this case number of ones in the block.
     $O$ uses variable number of bits per entry, in general $i$-th entry uses
-    $\lceil \log_2{b\choose C[i]}\rceil$ bits. For $k=2$ we can see a helper array $P$
+    $\lceil \log_2{b\choose C[i]}\rceil$ bits and stores the lexicographical order
+    of this block in the class $C[i]$. For $k=2$ we can see a helper array $P$
     storing bit offsets into every $k$-th element namely $0, 2, 4\ldots$
 	}
 	\label{obr:RRRFinal}
 	% source at https://docs.google.com/drawings/d/1f1M7e-dZIiIZh1RdgqnmptF3xWZBKqjms3f_aQwVMhg/edit
 \end{figure}
 
+To obtain interesting practical results, setting $b=\frac{\log(n)}{2}$ we get the total space
+$nH_0(B) + o(n)$. So we are storing only a sublinear amount of data on top of the compressed
+data.
+
 \section{Practical considerations}
 
 \subsection{Block size}
 
-First and one of the most important parameters of RRR implementation is the block
-size $b$ used. The on the fly decoding has some advantages and disadvantages. The
-biggest advantage is that it allows us to use a bigger block size $b$. The disadvantage
+One of the most important parameters of RRR implementation is the block
+size $b$ used. A bigger block size is better because of lower per bit overhead. Not
+all block sizes are hovewer used in practice. Very often, we are only interested in
+block sizes of the form $2^n-1$. This is because number of ones in block of size $2^n-1$
+can be anywhere between $0$ and $2^n-1$ making this in total $2^n$ options. Then, storing
+this number in the fixed buckets of size $\log_2(2^n)$ makes us use all the available space.
+So in practice, the commonly used bucket sizes are 15, 31, 63 and 127. However, there are
+other limiting factors that come into play. For $b=15$ the encoding and decoding table
+occupy roughly 64kB of space each. This is because there are $2^{15}$ of entries each taking
+2 bytes of storage. For $b=31$ these two tables would consume roughly $2^{31}\cdot 4$ bytes
+of storage which amounts to roughly 8.5GB of space. This makes this approach impossible in
+practice and forces us to use the on the fly decoding for $b>15$. The disadvantage
 is that it takes $\mathcal{O}(b)$ steps to decode the block. Furthermore, the decoding
 contains branching and it is hard to parallelize the steps in some meaningful way.
 Note that decoding is faster if we want to access the element close to the beginning of
-the block as we can stop the process when we obtain this bit.
+the block as we can stop the process when we obtain this bit. Overall, this makes the block
+size a parameter that we can adjust to balance between better space efficiency and faster
+runtime performance.
 
-%%% OTHER STUFF
+% Random stuff follows
 
-divide the bit vector into nonoverlaping parts consisting of $k$
-successive bits and name this \textit{superblock}. If the number of bits in the bit vector
-is not divisible by $k$ we simply left the last superblock shorter. We now compute the rank
-value only for the beginnings of superblocks.
+\subsection{Alternatives?}
+
+RRR is best to use on sequences with low entropy, where the frequency of zeroes/ones is
+strongly shifted to one or the other side such as 5-20\% percent of all bits are the same.
+Where RRR stands out to some of its alternatives is that it is also very competitive in
+cases where the global frequencies are very similar, but the bit sequence has a lot of places
+where locally zeroes/ones are over-represented.
+
+\subsection{Implementation improvements}
+
+There are several used implementation speedups and improvements. They impact the run time in a
+significant way. The first trick, being one of the most important for the real
+life performance is taking care of special case when the number of ones in the block is zero
+or equal to the length of the block $b$. These blocks are often called \textit{trivial}. In this
+case, no decoding is necessary and we can immediately tell what the result is only from looking
+into the helper array $C$. This may seem like not that important change. However, in many places
+where RRR is used, the frequency of trivial blocks is high.

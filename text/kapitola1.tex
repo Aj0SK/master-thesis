@@ -25,12 +25,12 @@ running time as they may enable us to store the data in a faster type of memory
 (e.g. fast RAM instead of the slower disk). Thus, even if they use slower, more
 advanced concepts, the overall runtime may decrease.
 
-The work in this field turns focus more and more towards the \textit{dynamic succinct
-data structures}. These are structures where the underlying data may change after
-constructing the data structure. However, in this work, we only consider static
-succinct data structures. These are the ones where we get the data, then build
-the succinct data structure and then we support only methods that do not alter the
-underlying data in any way.
+%The work in this field turns focus more and more towards the \textit{dynamic succinct
+%data structures}. These are structures where the underlying data may change after
+%constructing the data structure. However, in this work, we only consider static
+%succinct data structures. These are the ones where we get the data, then build
+%the succinct data structure and then we support only methods that do not alter the
+%underlying data in any way.
 
 In this work, we are mainly concerned about the \textit{bit vector}. One of the simplest
 succinct data structures that represents the sequence of zeroes and ones with some
@@ -38,24 +38,54 @@ useful method. The reason behind this is that bit vector is one of the main buil
 of many succinct data structures and can be useful in a lot of use cases. We shall now look
 onto some interesting and useful applications of the bit vector. 
 
+\section{Sparse array}
+
+Bit vector can be used to provide us with an implementation of sparse array as was shown
+by \cite{grossi2013design}. Let $A$ be an array of $n$ elements. Let us assume that every
+element is stored using $k$ bits. To store this array we need in simple case $n\cdot k$ bits
+of space. However, if most of the array is empty, such there is some default value that we can
+imagine is on the places where we do not store anything, we can use a more space efficient
+approach. This can be the case if we are storing an array of numbers, but most of them are
+zeroes. The better approach can be that we only store non default elements in array $A'$.
+Alongside $A'$ we store a bit vector $B$ filled up using such as
+
+\[
+    B[i]= 
+\begin{cases}
+	1,& \text{if } A[j]\neq \text{default} \\
+    0,& \text{otherwise}
+\end{cases}
+\].
+
+Using this representation of $A$, if we want to access $i$-th element in $A$, we first check for
+the value of $B[i]$. If it is zero, we return the default element. If it is one, we need to find
+how many ones are precedeing this particular one to know, where in array $A'$ our non default
+value is exactly located. We shall name the number of ones before $i$-th index $rank_1(i)$. If
+we are provided with bit vector implementation along with access and rank methods we are able to
+reduce the total space used from $k\cdot n$ to $n+k*|A'|+R$ where $R$ is space needed to support
+efficient rank query. If we can make $R$ small, let us say $R\in o(n)$, this solution shall give
+us significant reduction of space used.
+
 \section{Storing elements of non-uniform size}
 
 When trying to optimise the space used, it is often beneficial to use variable-length
 code for individual symbols. The example of this is a \textit{Huffman code} that constructs
-the code for symbols based on the frequencies with which the symbols occur. Although working
-with these symbols may save space, even storing these elements and allowing vector like
-functionality (such as accessing $i$-th element) is not trivial. Even though we can store
-these elements one after another in memory, with the variable-length elements, we do not have
-an easy and fast way to tell at which offset from the beginning of the array is $i$-th element
-located. Even though there are many solutions, one of them that is used quite often is using
-the bit vector. Alongside the raw sequence of bits that store the elements one after another,
-we create a helper bit vector of the same size. This bit vector has ones on places where the
-representation of some element starts and zeroes on the other places.
+the code for symbols based on the frequencies with which the symbols occur. This works in a way
+that more frequent symbols are assigned bit code that is shorter while less frequent symbols
+get a longer code. Although working with these symbols may save space, even storing these
+elements and allowing vector like functionality (such as accessing $i$-th element) is not
+trivial. Even though we can store these elements one after another in memory, with the
+variable-length elements, we do not have an easy and fast way to tell at which offset from the
+beginning of the array the $i$-th is element located. Even though there are many solutions, one
+of them that is used quite often is using the helper bit vector. Alongside the raw sequence of
+bits that store the elements one after another, we create a helper bit vector of the same size.
+This bit vector has ones on places where the representation of some element starts and zeroes on
+the other places.
 
 Identifying the beginning of $i$-th element now boils down to efficiently finding the
-$i$-th one in the helper array. We shall call this method \textit{select} and mark the
-answer to this query - finding the position of $i$-th one - $select_1(i)$. In
-chapter~\ref{kap:kap2}, we shall see how this method can be implemented efficiently.
+$i$-th one in the helper array. We shall call the method \textit{select} and mark the
+answer to this query - the position of $i$-th one - $select_1(i)$. In chapter~\ref{kap:kap2},
+we shall see how this method can be implemented efficiently.
 
 \begin{figure}
 	\centerline{
@@ -73,49 +103,51 @@ chapter~\ref{kap:kap2}, we shall see how this method can be implemented efficien
 \section{FM-index}
 % sources to help understand https://www.dcc.uchile.cl/TR/2005/TR_DCC-2005-004.pdf
 
-Let us now consider another practically interesting problem. As we will see, solution
+Let us now consider another practically interesting problem. As we shall see, solution
 to this problem also uses bit vector and other building blocks commonly used in succinct
 data strucutes. This time, we have a text $T$ and are interested in \textit{indexing} it.
-This means if we get some pattern $P$, we would like to quickly answer how many times is
-$P$ contained in $T$ and also where in $T$ this occurrences are located. This is particularly
-interesting problem in bioinformatics, where we have very long sequence of DNA and are
-interested in searching some interesting subsequences in it. One of the solutions that is
-reasonable and may be used is constructing \textit{suffix array}. This is data structure
-that for text $T$, stores information about the lexicograpical order of its suffixes. More
-precisely, on $i$-th position of suffix array $S$, it stores the starting position of suffix
-that is $i$-th in lexicographical order. If $P$ is contained in $T$ it will be at the
-beginning of some suffixes that make up a continuous subsequence of $S$. Succinct data
-structure that is in some aspects similar to suffix array was proposed by
-\cite{ferragina2000opportunistic} and is called \textit{FM-index}. FM-index can find the
-pattern in the preprocessed text in time complexity $\mathcal{O}(|P|)$. On top of this, the
-resulting space used by FM-index can be smaller than the space used for the original text
-$T$. This makes FM-index particularly useful for searching in very long DNA sequences where
-FM-index many times takes just 30-40\% of the space needed for the representation of original
-text $T$ as was demonstrated by \cite{ferragina2001experimental}. We shall now look at how the
-FM-index is obtained for the text $T$.
+This means if we get some pattern $P$, we would like to quickly answer questions such as
+how many times is $P$ contained in $T$ and also where in $T$ this occurrences are located.
+This is particularly interesting problem in bioinformatics, where we have very long sequence
+of DNA and are interested in searching for some subsequences in it. One of the solutions that
+is reasonable and may be used is constructing \textit{suffix array} of $T$. Suffix array is
+data structure that for text $T$, stores information about the lexicograpical order of its
+suffixes. More precisely, on $i$-th position of suffix array $S$, it stores the starting
+position of suffix that comes $i$-th in lexicographical order. Searching for $P$ in suffix
+array of $T$ uses fact that if $P$ is contained in $T$ it will be at the beginning of some
+suffixes that make up a continuous subsequence of $S$. Succinct data structure that is in
+some aspects similar to suffix array was proposed by \cite{ferragina2000opportunistic} and
+is called \textit{FM-index}. FM-index can find the pattern in the preprocessed text in time
+complexity $\mathcal{O}(|P|)$. On top of this, the resulting space used by FM-index can be
+smaller than the space used for the original text $T$. This makes FM-index particularly useful
+for searching in very long DNA sequences where FM-index many times takes just 30-40\% of the
+space needed for the representation of original text $T$ as was demonstrated by
+\cite{ferragina2001experimental}. We shall now look at how the FM-index is obtained for the text
+$T$.
 
 \subsection{Burrows-Wheeler transformation}
 
 For simplicity, we assume that the original text $T$ contains a special character \$
-located at its end that is contained in $\Sigma$ and lexicographically smallest.
+located at its end that was not contained in $\Sigma$ and is lexicographically smallest.
 
 \textit{Burrows-Wheeler transformation~(BWT)} lies at the heart of the FM-index.
 BWT of a text $T$ gives us a sequence $T_{BWT}$ of the same length. Furthermore, this
 operation is reversible in a sense that only using $T_{BWT}$ we are able to reconstruct the
 original text $T$. This transformation is used as a preprocessing step of some compression
 algorithms such as \textit{bzip2} introduced by \cite{seward1996bzip2}. This is because
-BWT is oftentimes easier to compress. We show how it is constructed and why it has
-these properties. We consider the sequence $T$ of symbols over some alphabet $\Sigma$.
-Now we take all the cyclical rotations $T_1, T_2, \ldots T_n$ of the sequence $S$ and
-imagine putting them sorted by their lexicographical order into the rows of table $M$
-as seen in Fig.~\ref{obr:BWT}. We name the sequence created by the concatenation of symbols
-in first and last column $F$ and $L$ respectively. Last column $L$ is called the BWT
-of $T$. Note that the sequence $F$ can be obtained from $L$ just by sorting all the
-characters in $T_{BWT}$ and has some nice properties. $F$ consists of runs of symbols
-that are sorted according to the lexicographical ordering of alphabet symbols. We will
-use the helper sequence $Count$ where $Count[c]$ is number of occurrences of symbols
-smaller than $c$. We can also see, that the matrix $M$ also contains all the suffixes
-sorted according to their lexicographical order. 
+BWT is oftentimes easier to compress. We shall show how it is constructed and then give 
+intuition why it has these properties. We consider the sequence $T$ of symbols over some
+alphabet $\Sigma$. Now we take all the cyclical rotations $T_1, T_2, \ldots T_n$ of
+the sequence $T$ and imagine putting them sorted by their lexicographical order into the
+rows of table $M$ as seen in Fig.~\ref{obr:BWT}. We name the sequence created by the
+concatenation of symbols in first and last column $F$ and $L$ respectively. Last column $L$
+is what we call the BWT of $T$. Note that the sequence $F$ can be obtained from $L$ just by
+sorting all the characters in $T_{BWT}$ and has some nice properties. $F$ consists of runs of
+symbols that are sorted according to the lexicographical ordering of alphabet symbols.
+We shall use the helper sequence $Count$ where $Count[c]$ is number of occurrences of symbols
+smaller than $c$. We note that the run of symbol $c$ in $F$ starts at the index $Count[c]+1$.
+We can also see, that the matrix $M$ contains all the suffixes sorted according to their
+lexicographical order.
 
 \begin{figure}
 	\centerline{
@@ -136,48 +168,17 @@ sorted according to their lexicographical order.
 	\label{obr:BWT}
 \end{figure}
 
-The reason that BWT is better compressible is that it frequently contains runs of the same
+The reason that BWT is more compressible is that it frequently contains runs of the same
 symbol. This can be better explained on an example. Let us create BWT of a text containing
 a lot of mentions of word computer. All the rotations prefixed with omputer will form a
 continuous subsequence of rows of $M$. If we assume, that word computer is very frequent in the
 text, most of these rows will end in c as this is the most common symbol preceding word omputer.
-This will create the run of symbol c in BWT.
+This will for example create the common run of symbol c in BWT.
 
 \subsection{Searching in an FM-index}
 
-In order to support searching in the FM-index, we will find useful the \textit{LF-mapping}.
-This is a mapping that for a symbol on $i$-th row in $L$, gives us a corresponding row in $F$
-where this exact symbol is located. This is quite easy to obtain if the underlying text $T$
-does not contain duplicate symbols. Now all the runs in $F$ vector will be of length 1.
-To find $LF(i)$, we will simply look what is the $i$-th symbol in $L$. The run of
-symbol $L[i]$ begins on the index $Count[L[i]] + 1$ so the formula can be written as:
-
-$$LF(i) = Count[L[i]] + 1$$.
-
-If we drop our requirement that every symbol is contained in the sequence $T$ at most once
-we are seemingly in a more complicated situation. The problem may seem that even
-though we still easily identify the beginning of the run of $L[i]$, we do not
-know which occurrence of symbol $L[i]$ corresponds to the occurrence of $L[i]$ in $i$-th row.
-Helpful property is that $i$-th occurrence of symbol $c$ in $L$ corresponds to the
-$i$-th occurrence of $c$ in $F$. So we can just change the final formula to
-
-				$$LF(i) = Count[L[i]] + rank_{L[i]}(i)$$
-
-where $rank_c(i)$ represents the number of occurrences of $c$ up to $i$-th index inclusive.
-
-%\subsection{Reverse Burrows-Wheeler transformation}
-
-%We already stated that the BWT is reversible. So from the $T_{BWT}$ we are able to reconstruct
-%$T$. We do it by first obtaining $F$ from $T_{BWT}$. Now, we will iteratively reconstruct $S$
-%from the end to the beginning. First, we look to the first position in $F$ where last symbol
-%of $S$ - \$ - is located. We see what symbol is preceding \$ in $S$. This is a symbol
-%$L[1]$. Using the LF-mapping we find where $L[1]$ is located in $F$ and then repeat this process
-%until $L[i]$ is equal to \$.
-
-\subsection{Supported methods}
-
 As we already stated, FM-index is used for searching in the preprocessed text.
-It does this using three methods:
+It provides us with the following three methods:
 
 \begin{itemize}
 	\item $count(P)$ counts the number of occurrences of $P$ in text $T$
@@ -188,28 +189,38 @@ It does this using three methods:
 The reason that the $extract$ method is useful and non-trivial is that FM-index
 does not store the original sequence $T$ - at least not in an easily readable form.
 
-The counting of occurrences of $P$ in $S$ is based on the observation that in $M$,
+The counting of occurrences of $P$ in $T$ is based on the observation that in $M$,
 all the suffix are contained and come in sorted order. Occurrences of $P$ in $M$
-are contained in a consecutive subsequence of $M$'s rows. The identification of
-rows where $P$ is located will proceed gradually by finding rows where $P[n-1..],
-P[n-2..]$ etc. is located. This will in general be some continuous subsequence of
-rows of $M$ so we will store its beginning and end.
+are contained in a consecutive subsequence of $M$'s rows. This is the same fact that
+enabled searching in suffix array. The search for rows where $P$ is located will proceed
+from the end of $P$, gradually by finding rows where $P[n-1..], P[n-2..]$ etc. is located.
+At every step, these rows will form a continuous subsequence of rows of $M$ so we will store
+only its beginning and end. The process will work in these steps:
 
 \begin{itemize}
 	\item We find where $P[n-1]$ is located in $M$. This means setting $b_{n-1}$ to
 	$Count[P[n-1]]+1$ and $e_{n-1}$ to $Count[P[n-1]+1]$.
-	\item Now, to found where $P[n-2..]$ is located in $M$, we would like to locate
-	occurrences of $P[n-1]$ that are preceded by $P[n-2]$. We would like to find all
+	\item Now, to found where $P[n-2..]$ is located in $M$, we would like to locate occurrences
+	of $P[n-1]$ that are preceded by $P[n-2]$. In other words, would like to find all
 	occurrences of $P[n-2]$ in $L[b_{n-1}..e_{n-1}]$. Hovewer, this is not easy to do
 	as they can be at arbitrary places in this subsequence, even not in a continuous
-	sequence. Instead we look at the occurrences of $P[n-2]$ in $F$. Here they are
-	sorted and it is easy to tell, which of these are followed by $P[n-1]$ as $i$-th
-	occurence of character $P[n-1]$ in $L$ corresponds to $i$-th occurence of $P[n-1]$
-	in $F$. Using this fact, we set
+	subsequence. Instead of searching in $L$ we look at the occurrences of $P[n-2]$ in
+	$F$. Here, they are sorted and it is easy to tell, which of these are followed by
+	$P[n-1]$ as $i$-th occurence of character $P[n-1]$ in $L$ corresponds to $i$-th
+	occurence of $P[n-1]$ in $F$. Using this fact, we set
 	$b_{n-2} = Count[P[n-2]] + rank_{P[n-2]}(b_{n-1})$ and
-	$e_{n-2} = Count[P[n-2]] + rank_{P[n-2]}(e_{n-1})$.
-	\item We continue until we compute $b_1$ and $e_1$ or until $b_i\neq e_i$.
+	$e_{n-2} = Count[P[n-2]] + rank_{P[n-2]}(e_{n-1})$. Here $Count[P[n-2]]$ is the index
+	where run of character $Count[P[n-2]]$ starts. $rank_{P[n-2]}(b_{n-1})$ is number
+	that gives us number of occurrences of character $Count[P[n-2]]$ in $L$ that preceded
+	the index $b_{n-1}$ (starting index of the previous subsequence).
+	\item We continue and repeat this process until we compute $b_1$ and $e_1$ or until
+	$b_i\neq e_i$.
 \end{itemize}
+
+As we could see, we are not only interested in rank over a bit vector but also over an arbitrary
+alphabet that we would like to use in the FM-index. This seems like a even harder task but in
+the next section, we shall see, that for a little overhead we can reduce this problem and use
+the bit vector implementation also for the rank and select over general alphabet.
 
 \section{Wavelet tree}
 \label{section:WaweletTree}
@@ -220,9 +231,9 @@ a more general version of this implementation representing sequence over arbitra
 alphabet still supporting access, rank and select queries in reasonable time complexity.
 
 The most straightforward approach is to store one bit vector of size $|S|$,
-per every character of the alphabet $\Sigma$. Let us call these bitvectors $B_1,
+per every character of the alphabet $\Sigma$. Let us call these bit vectors $B_1,
 B_2, \ldots B_{\sigma}$. Each of them stores one on places where the symbol corresponding
-to this bit vector is located, according to formula
+to this bit vector is located, according to the formula
 
 \[
     B_i[j]= 
