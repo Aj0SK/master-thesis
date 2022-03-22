@@ -3,19 +3,19 @@
 
 This chapter is dedicated to the previous work on the implementation of the bit vector, data
 structure that stores binary sequence supporting methods access, rank and select. As we have
-shown in section~\ref{section:WaweletTree}, the Wavelet tree can be used to build a vector
+shown in Section~\ref{section:WaweletTree}, wavelet tree can be used to build a vector
 for the general alphabet from the bit vector implementation. This is, why it is of utmost
 importance to dedicate time to efficient and fast bit vector implementation. In this
 chapter, we shall describe the currently available implementations. Let us start with
-the simple representation of a bit vector, in which we simply store bits one after another.
-Then we shall look at the succinct representation.
+the succinct representation of a bit vector, in which we simply store bits one after another.
+Then we shall look at the compressed representation.
 
 \section{Bit vector implementation}
 
 \subsection{Rank}
 \label{section:rank}
 
-Regarding rank, we are concerned in fact in two different methods namely $rank_0(i)$ and
+Regarding rank, we are concerned in fact with two different methods namely $rank_0(i)$ and
 $rank_1(i)$. It is easy to observe that following equation holds:
 
                     $$rank_1(i) = i - rank_0(i)$$
@@ -23,14 +23,15 @@ $rank_1(i)$. It is easy to observe that following equation holds:
 so it is enough to provide only the implementation of $rank_1(i)$.
 There are two straightforward solutions we can begin with to support rank on a bit vector
 $B$. The first is to store no additional information. Every time we are asked
-for $rank_c(i)$, we run through all bits preceding $i$-th. This solution is not very
+for $rank_1(i)$, we run through all bits preceding $i$-th. This solution is not
 practical for longer bit vectors but it does not add any additional space. The second
-approach is to precompute rank up to every bit. This enables us to answer rank in constant
-time as it consists of only one constant lookup. However, the space needed to support this
-solution is $(|B|\cdot\log |B|)$. These two solutions can be combined together to obtain an
-idea of a practically sound solution. We will store the pre-computed rank, but not for every
+approach is to precompute rank of very bit. This enables us to answer rank in constant
+time -- a single table lookup. However, the space needed to support this
+solution is $(|B|\cdot\log |B|)$ bits. These two solutions can be combined together to obtain an
+idea of a more practical solution. We will store the pre-computed rank, but not for every
 bit. Instead, we choose a constant $k$ and precompute rank only for every $k$-th bit. This
-enables answering rank in time $\mathcal{O}(k)$ and uses $\mathcal{O}((n/k)\log(n))$ of memory.
+enables answering rank in time $\mathcal{O}(k)$ and uses $\mathcal{O}((n/k)\log(n))$ bits of
+memory.
 
 \subsection{Select}
 \label{section:select}
@@ -48,10 +49,10 @@ the answer is located, we simply linearly scan for the solution. This solution i
 for any additional memory on top of the space used for rank. The answer can be given in time
 $\mathcal{O}(\log(n/k)+k)$.
 
-\section{Succinct representation}
+\section{Compressed representation}
 
 The main idea of \textit{RRR} is to split the bit sequence into blocks of constant length $b$.
-This length is a parameter of the algorithm and can be chosen. After this, instead
+This length is a parameter of the algorithm. After this, instead
 of storing a single block as a bit sequence, we store each block encoded as a pair
 of numbers $(c, o)$. Here, $c$ labels the class of the block and $o$ an offset into
 the sequence of all blocks in this particular class. Most of the time, the $c$ is equal
@@ -112,7 +113,7 @@ block. Obtaining $C[i]$ is trivial as it is at a fixed offset in memory. Getting
 $O[i]$ is harder as it is not at a known offset but generally on an offset that can be computed
 as
 
-                $$\sum_{j=1}^{i-1} \lceil\log_2{b\choose C[i]}\rceil$$
+                $$\sum_{j=1}^{i-1} \ceil{\log_2{b\choose C[i]}}$$
 
 but is not known previously. To compute it without any precomputed information,
 we need to basically one by one skip over elements that come before $O[i]$.
@@ -123,22 +124,22 @@ this version of access, we need to store the arrays $C, O$ and helper table $T_d
 now argue about the size of these structures. The size of these structures is
 as follows:
 
-$C$ is array of $\lceil n/b \rceil$ elements of fixed size $\lceil \log(b+1) \rceil$.
+$C$ is array of $\ceil{n/b}$ elements of fixed size $\ceil{\log(b+1)}$.
 
 For array $O$ we argue that its size is bounded by
 
 % TODO: pridat vysvetlenie
 \begin{align*}
-    \sum_{i=1}^{n/b} \bigg\lceil{\log b\choose c_i}\bigg\rceil
-    &\leq \sum_{i=1}^{\lceil n/b \rceil} \log {b\choose c_i} + \lceil n/b \rceil \\
-    &= \log\prod_{i=1}^{\lceil n/b \rceil} {b\choose c_i} + \lceil n/b \rceil \\
-    &\leq \log{n\choose \#_1(B)} + \lceil n/b \rceil &\leq nH_0(B) + \lceil n/b \rceil
+    \sum_{i=1}^{n/b} \ceil{{\log b\choose c_i}}
+    &\leq \sum_{i=1}^{\ceil{n/b}} \log {b\choose c_i} + \ceil{n/b} \\
+    &= \log\prod_{i=1}^{\ceil{n/b}} {b\choose c_i} + \ceil{n/b} \\
+    &\leq \log{n\choose \#_1(B)} + \ceil{n/b} &\leq nH_0(B) + \ceil{n/b}
 \end{align*}
 
 where $\#_1(B)$ denotes the total number of ones in $B$. We obtained (someref) using the
-observation that ${b\choose c_i} {b\choose c_j} \leq {2b\choose c_i+c_j}$. This can be seen
-when we interpret the left side of the equation as a number of ways we can choose $c_i$ elements
-from $b$ elements and $c_j$ elements from another $b$ elements. This is all contained on the
+observation that ${n\choose k} {m\choose \ell} \leq {n+m\choose k+\ell}$. This can be seen
+when we interpret the left side of the equation as a number of ways we can choose $k$ elements
+from $n$ elements and $\ell$ elements from another $m$ elements. This is all contained on the
 right side of the equation that definitely includes all these combinations.
 
 $T_d$ is storing $2^b$ entries and each entry is using $b$ bits of storage.
