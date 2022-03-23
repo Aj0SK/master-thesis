@@ -61,7 +61,7 @@ Using this representation of $A$, if we want to access $i$-th element in $A$, we
 the value of $B[i]$. If it is zero, we return the default element. If it is one, we need to find
 how many ones are preceding this particular one to know, where in array $A'$ our non-default
 value is exactly located. We shall name the number of ones before $i$-th index
-$\mathit{rank}_1(i)$. If we are provided with bit vector implementation along with access and
+$\rank_1(i)$. If we are provided with bit vector implementation along with access and
 rank methods we are able to reduce the total space used from $k\cdot N$ to $N+k\cdot n+R$ where
 $R$ is space needed to support efficient rank query. If we can make $R$ small, let us say
 $R\in o(N)$, this solution shall give us a significant reduction of space used.
@@ -84,7 +84,7 @@ the other places.
 
 Identifying the beginning of $i$-th element now boils down to efficiently finding the
 $i$-th one in the helper array. We shall call the method \textit{select} and mark the
-answer to this query -- the position of $i$-th one -- $\mathit{select}_1(i)$. In
+answer to this query -- the position of $i$-th one -- $\select_1(i)$. In
 Chapter~\ref{kap:kap2}, we shall see how this method can be implemented efficiently.
 
 \begin{figure}
@@ -208,9 +208,9 @@ only its beginning and end. The process will work in these steps:
 	$F$. Here, they are sorted and it is easy to tell, which of these are followed by
 	$P[n-1]$ as $i$-th occurence of character $P[n-1]$ in $L$ corresponds to $i$-th
 	occurence of $P[n-1]$ in $F$. Using this fact, we set
-	$b_{n-2} = mathit{Count}[P[n-2]] + mathit{rank}_{P[n-2]}(b_{n-1})$ and
-	$e_{n-2} = mathit{Count}[P[n-2]] + mathit{rank}{P[n-2]}(e_{n-1})$. Here $mathit{Count}[P[n-2]]$
-	is the index where run of character $mathit{Count}[P[n-2]]$ starts. $rank_{P[n-2]}(b_{n-1})$
+	$b_{n-2} = mathit{Count}[P[n-2]] + \rank_{P[n-2]}(b_{n-1})$ and
+	$e_{n-2} = mathit{Count}[P[n-2]] + \rank_{P[n-2]}(e_{n-1})$. Here $mathit{Count}[P[n-2]]$
+	is the index where run of character $mathit{Count}[P[n-2]]$ starts. $\rank_{P[n-2]}(b_{n-1})$
 	is number that gives us number of occurrences of character $Count[P[n-2]]$ in $L$ that
 	preceded the index $b_{n-1}$ (starting index of the previous subsequence).
 	\item We continue and repeat this process until we compute $b_1$ and $e_1$ or until

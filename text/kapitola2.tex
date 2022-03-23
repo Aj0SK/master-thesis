@@ -15,15 +15,15 @@ Then we shall look at the compressed representation.
 \subsection{Rank}
 \label{section:rank}
 
-Regarding rank, we are concerned in fact with two different methods namely $rank_0(i)$ and
-$rank_1(i)$. It is easy to observe that following equation holds:
+Regarding rank, we are concerned in fact with two different methods namely $\rank_0(i)$ and
+$\rank_1(i)$. It is easy to observe that following equation holds:
 
-                    $$rank_1(i) = i - rank_0(i)$$
+                    $$\rank_1(i) = i - \rank_0(i)$$
 
-so it is enough to provide only the implementation of $rank_1(i)$.
+so it is enough to provide only the implementation of $\rank_1(i)$.
 There are two straightforward solutions we can begin with to support rank on a bit vector
 $B$. The first is to store no additional information. Every time we are asked
-for $rank_1(i)$, we run through all bits preceding $i$-th. This solution is not
+for $\rank_1(i)$, we run through all bits preceding $i$-th. This solution is not
 practical for longer bit vectors but it does not add any additional space. The second
 approach is to precompute rank of very bit. This enables us to answer rank in constant
 time -- a single table lookup. However, the space needed to support this
@@ -33,21 +33,27 @@ bit. Instead, we choose a constant $k$ and precompute rank only for every $k$-th
 enables answering rank in time $\mathcal{O}(k)$ and uses $\mathcal{O}((n/k)\log(n))$ bits of
 memory.
 
+% TODO: ... depends on model... can be O(k/w) if we consider RAM model with w-bit registers
+% that supports popcount
+% TODO: teoria, succinct rank, dvojurovnove riesenie
+
 \subsection{Select}
 \label{section:select}
 
 It is important that the select method is working much like an inverse to rank. This is given
 by the fact that
 
-                $$rank_c(select_c(i)) = i$$.
+                $$\rank_c(\select_c(i)) = i$$.
 
 Thanks to rank being a nondecreasing function, it is possible to binary search for the result
-of $select_c(i)$. This can be nicely combined with the solution from the previous
+of $\select_c(i)$. This can be nicely combined with the solution from the previous
 section~\ref{section:rank}. At first, we binary search for the solution in the samples of rank
 on the beginnings of every $k$-th bit. When we identify the correct block of $k$ bits, where
 the answer is located, we simply linearly scan for the solution. This solution is not asking
 for any additional memory on top of the space used for rank. The answer can be given in time
 $\mathcal{O}(\log(n/k)+k)$.
+
+% TODO: sem odcitovat zname teoreticke vysledky pre select
 
 \section{Compressed representation}
 
@@ -73,13 +79,13 @@ of the bit vector. On the other hand, decoding is done any time we are accessing
 bit in $B$ so it is more important for us to optimise so that decoding is as fast as possible.
 
 For smaller block sizes, such as $b\leq 15$, it is in most cases reasonable to
-generate two helper tables. One is named $T_e$ used for the encoding, where we can
+generate two helper tables. One is named $E$ used for the encoding, where we can
 index using the block casted to a number and get this particular block's offset.
 The class can be computed trivially by counting a number of ones. The other table
-named $T_d$ is two dimensional. In position $T_d[c][o]$ we store the block that
+named $D$ is two dimensional. In position $D[c][o]$ we store the block that
 is associated with $(c, o)$. In other words, this is a block containing $c$ ones
 and at the same time being $o$-th in the sequence of all lexicographically sorted
-blocks containing $c$ ones. Both these tables $T_e$ and $T_d$ can be computed
+blocks containing $c$ ones. Both these tables $E$ and $D$ can be computed
 by generating all the possible blocks in lexicographical order before we even
 obtain the sequence that we will want to represent. After this precomputation,
 the encoding and decoding of a block takes constant time.
@@ -102,13 +108,13 @@ We proceed by subtracting the number $comb$ from $o$ and proceed sequentially fu
 After slicing the sequence $B$ into blocks, we need to find a way how to store pairs $(c, o)$.
 We shall store all the classes and offsets in separate arrays $C$ and $O$. The array $C$ shall
 be implemented as an array of fixed length elements with a length equal to
-$\lceil \log_2(b)\rceil$. The array $O$ shall be on the other hand implemented as an array of
+$\ceil{\log_2(b)}$. The array $O$ shall be on the other hand implemented as an array of
 variable length elements with the size needed to store $i$-th element $O[i]$ being
-$\lceil \log_2{b\choose C[i]}\rceil$.
+$\ceil{\log_2{b\choose C[i]}}$.
 
 To provide access to the concrete bit, we need to first find out at which block this bit is located.
 Let this be $i$-th block. To decode the block we at first need to get corresponding $C[i]$ and
-$O[i]$ and then we can use a pre-computed table $T_d$ that matches $(c_i, o_i)$ to the original
+$O[i]$ and then we can use a pre-computed table $D$ that matches $(c_i, o_i)$ to the original
 block. Obtaining $C[i]$ is trivial as it is at a fixed offset in memory. Getting the value of
 $O[i]$ is harder as it is not at a known offset but generally on an offset that can be computed
 as
@@ -120,7 +126,7 @@ we need to basically one by one skip over elements that come before $O[i]$.
 Note that to compute the previous sum, we need only successive information from $C$ so these
 accesses are quite cache-friendly and fast. However, to access the $i$-th block, we need in the
 worst case to look at all the elements of $C$ and this takes $\mathcal{O}(n/b)$ time. To support
-this version of access, we need to store the arrays $C, O$ and helper table $T_d$. We shall
+this version of access, we need to store the arrays $C, O$ and helper table $D$. We shall
 now argue about the size of these structures. The size of these structures is
 as follows:
 
@@ -142,8 +148,8 @@ when we interpret the left side of the equation as a number of ways we can choos
 from $n$ elements and $\ell$ elements from another $m$ elements. This is all contained on the
 right side of the equation that definitely includes all these combinations.
 
-$T_d$ is storing $2^b$ entries and each entry is using $b$ bits of storage.
-The total space used is then $nH_0(B) + \lceil n/b \rceil + \lceil n/b \rceil \cdot \lceil \log(b+1) \rceil + b2^b$.
+$D$ is storing $2^b$ entries and each entry is using $b$ bits of storage.
+The total space used is then $nH_0(B) + \ceil{n/b} + \ceil{n/b} \cdot \ceil{\log(b+1)} + b2^b$.
 
 To speed up the process of accessing block, we will help ourselves store the pointers
 into every $k$-th element of $O$. Effectively dividing the process of locating $O[i]$ into two
@@ -158,7 +164,7 @@ takes the space $\mathcal{O}(\log(n)\cdot \frac{n}{bk})$.
 	\caption[TODO]{RRR implementation. $B$ shows the original bit sequence cut to
     blocks. $C$ stores the class which is in this case number of ones in the block.
     $O$ uses variable number of bits per entry, in general $i$-th entry uses
-    $\lceil \log_2{b\choose C[i]}\rceil$ bits and stores the lexicographical order
+    $\ceil{\log_2{b\choose C[i]}}$ bits and stores the lexicographical order
     of this block in the class $C[i]$. For $k=2$ we can see a helper array $P$
     storing bit offsets into every $k$-th element namely $0, 2, 4\ldots$
 	}
