@@ -29,9 +29,58 @@ approach is to precompute rank of very bit. This enables us to answer rank in co
 time -- a single table lookup. However, the space needed to support this
 solution is $(|B|\cdot\log |B|)$ bits. These two solutions can be combined together to obtain an
 idea of a more practical solution. We will store the pre-computed rank, but not for every
-bit. Instead, we choose a constant $k$ and precompute rank only for every $k$-th bit. This
-enables answering rank in time $\mathcal{O}(k)$ and uses $\mathcal{O}((n/k)\log(n))$ bits of
-memory.
+bit. At first, we choose a constant $k$ and split bit vector into non-overlaping subsequences
+of length $k$. We shall call one this subsequence \textit{superblock}. We then precompute rank
+only for beginning of every superblock. This enables answering rank in time $\BigO(k)$ and
+uses $\BigO((n/k)\log n)$ bits of memory.
+
+Although this solution works well in practice, it is possible to answer rank in constant time
+and sublinear space overhead. We start as in previous solution with setting length of the
+superblock $k$ to $k=\log^2 n$ and precomputing rank for every $k$-th bit or as we call it for
+every beginning of superblock. Every superblock we further divide into parts of size
+$\frac{\log n}{2}$. We precompute the rank for all of these small blocks. To save space we only
+precompute the rank from the beginning of the superblock. Now, when asked about the $\rank_1$ of
+some position, we know in which superblock this number is located, so we know what is the number
+of ones up to the superblock where this position is located. We also precomputed what is the
+number of ones from the beginning of the superblock up to this block. The last think is to
+find out the number of ones that are before this index in this superblock. This would be easy
+to do linearly in time $\BigO(\log n)$. Hovewer, we are aiming for constant time so we need
+also to precompute every possible rank query inside of the block. Thanks to block being short
+there are not that many possible ways what the block can be, and what is the position in this
+block we want to compute rank for. We shall now look at the space overhead that this solution
+adds. The space overhead consists of three parts. The first part is precomputed rank for
+every superblock. Number of superblocks is $\BigO(\frac{n}{\log^2 n})$ and we need
+$\BigO(\log n)$ of space to store the rank so the total amount is
+
+\begin{equation}
+    \BigO(\frac{n}{\log^2 n}\cdot \log n).
+    \label{eq:rank_space_1}
+\end{equation}
+
+Number of smaller blocks is $\BigO(\frac{n}{\frac{\log n}{2}})$ but now, every block stores only rank
+from the beginning of superblock so this number is of size at most $\BigO(\log n)$ so we need
+at most $\BigO(\log\log n)$ of bits to store it. The total amount of space for the smaller
+blocks is then
+
+\begin{equation}
+    \BigO(\frac{n}{\lg n}\cdot \log\log n).
+    \label{eq:rank_space_2}
+\end{equation}
+
+The third part is the precomputed table where we store for every possible block and every
+possible rank query over it the result of the rank query. The number of different ways for
+what the block can be is $2^{k} = 2^{\frac{\log n}{2}} = \sqrt{n}$. Number of possible rank queries
+over it is $\BigO(\log n)$ so this makes the table with the total size 
+
+\begin{equation}
+    \BigO(\sqrt{n}\log n\log\log n)
+    \label{eq:rank_space_3}
+\end{equation}
+
+as every entry is of size $\BigO(\log\log n)$. The total space used for this solution of rank
+is therefore sum of \ref{eq:rank_space_1}, \ref{eq:rank_space_2} and \ref{eq:rank_space_3}.
+As every one of these is using $o(n)$ bits we can see that the solution uses just sublinear
+number of space.
 
 % TODO: ... depends on model... can be O(k/w) if we consider RAM model with w-bit registers
 % that supports popcount
@@ -51,7 +100,7 @@ section~\ref{section:rank}. At first, we binary search for the solution in the s
 on the beginnings of every $k$-th bit. When we identify the correct block of $k$ bits, where
 the answer is located, we simply linearly scan for the solution. This solution is not asking
 for any additional memory on top of the space used for rank. The answer can be given in time
-$\mathcal{O}(\log(n/k)+k)$.
+$\BigO(\log(n/k)+k)$.
 
 % TODO: sem odcitovat zname teoreticke vysledky pre select
 
@@ -97,7 +146,7 @@ yields a better compression because of the smaller per block overhead. This was
 something that \cite{navarro2012fast} tried to achieve and came up with the method
 we shall call \textit{on the fly-decoding}. This works by encoding and decoding without
 the need for the helper table. Instead, it relies on a bit by bit decoding of the block
-thus taking $\mathcal{O}(b)$ time instead of constant time with the use of table.
+thus taking $\BigO(b)$ time instead of constant time with the use of table.
 
 Idea is that we decode the block from the beginning, bit by bit until the end. On every bit,
 we consider putting a zero bit on this position and count $comb$ -- the number of all
@@ -125,7 +174,7 @@ but is not known previously. To compute it without any precomputed information,
 we need to basically one by one skip over elements that come before $O[i]$.
 Note that to compute the previous sum, we need only successive information from $C$ so these
 accesses are quite cache-friendly and fast. However, to access the $i$-th block, we need in the
-worst case to look at all the elements of $C$ and this takes $\mathcal{O}(n/b)$ time. To support
+worst case to look at all the elements of $C$ and this takes $\BigO(n/b)$ time. To support
 this version of access, we need to store the arrays $C, O$ and helper table $D$. We shall
 now argue about the size of these structures. The size of these structures is
 as follows:
@@ -134,7 +183,6 @@ $C$ is array of $\ceil{n/b}$ elements of fixed size $\ceil{\log(b+1)}$.
 
 For array $O$ we argue that its size is bounded by
 
-% TODO: pridat vysvetlenie
 \begin{align*}
     \sum_{i=1}^{n/b} \ceil{{\log b\choose c_i}}
     &\leq \sum_{i=1}^{\ceil{n/b}} \log {b\choose c_i} + \ceil{n/b} \\
@@ -155,7 +203,7 @@ To speed up the process of accessing block, we will help ourselves store the poi
 into every $k$-th element of $O$. Effectively dividing the process of locating $O[i]$ into two
 parts. The first is to find the nearest pointer leading to element before $i$ and
 then move at most $k$ places. This additional structure of roughly $\frac{n}{bk}$ integers
-takes the space $\mathcal{O}(\log(n)\cdot \frac{n}{bk})$.
+takes the space $\BigO(\log(n)\cdot \frac{n}{bk})$.
 
 \begin{figure}
 	\centerline{
@@ -192,7 +240,7 @@ occupy roughly 64kB of space each. This is because there are $2^{15}$ of entries
 2 bytes of storage. For $b=31$ these two tables would consume roughly $2^{31}\cdot 4$ bytes
 of storage which amounts to roughly 8.5GB of space. This makes this approach impossible in
 practice and forces us to use the on the fly decoding for $b>15$. The disadvantage
-is that it takes $\mathcal{O}(b)$ steps to decode the block. Furthermore, the decoding
+is that it takes $\BigO(b)$ steps to decode the block. Furthermore, the decoding
 contains branching and it is hard to parallelize the steps in some meaningful way.
 Note that decoding is faster if we want to access the element close to the beginning of
 the block as we can stop the process when we obtain this bit. Overall, this makes the block

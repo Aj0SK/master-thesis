@@ -118,7 +118,7 @@ array of $T$ uses fact that if $P$ is contained in $T$ it will be at the beginni
 suffixes that make up a continuous subsequence of $S$. Succinct data structure that is in
 some aspects similar to suffix array was proposed by \cite{ferragina2000opportunistic} and
 is called \textit{FM-index}. FM-index can find the pattern in the preprocessed text in time
-complexity $\mathcal{O}(|P|)$. On top of this, the resulting space used by FM-index can be
+complexity $\BigO(|P|)$. On top of this, the resulting space used by FM-index can be
 smaller than the space used for the original text $T$. This makes FM-index particularly useful
 for searching in very long DNA sequences where FM-index many times takes just 30-40\% of the
 space needed for the representation of original text $T$ as was demonstrated by
@@ -134,7 +134,8 @@ located at its end that was not contained in $\Sigma$ and is lexicographically s
 BWT of a text $T$ gives us a sequence $\mathit{T_{BWT}}$ of the same length. Furthermore, this
 operation is reversible in a sense that only using $\mathit{T_{BWT}}$ we are able to reconstruct
 the original text $T$. This transformation is used as a preprocessing step of some compression
-algorithms such as \textit{bzip2} introduced by \cite{seward1996bzip2}. This is because
+algorithms such as \textit{bzip2} introduced by \cite{seward1996bzip2} and studied more by
+\cite{manzini2001analysis}. This is because
 BWT is oftentimes easier to compress. We shall show how it is constructed and then give 
 intuition why it has these properties. We consider the sequence $T$ of symbols over some
 alphabet $\Sigma$. Now we take all the cyclical rotations $T_1, T_2, \ldots T_n$ of
