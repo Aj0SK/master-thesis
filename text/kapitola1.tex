@@ -145,9 +145,9 @@ concatenation of symbols in first and last column $F$ and $L$ respectively. Last
 is what we call the BWT of $T$. Note that the sequence $F$ can be obtained from $L$ just by
 sorting all the characters in $\mathit{T_{BWT}}$ and has some nice properties. $F$ consists of
 runs of symbols that are sorted according to the lexicographical ordering of alphabet symbols.
-We shall use the helper sequence $\mathit{Count}$ where $\mathit{Count}[c]$ is number of
+We shall use the helper sequence $\Count$ where $\Count[c]$ is number of
 occurrences of symbols smaller than $c$. We note that the run of symbol $c$ in $F$ starts at
-the index $\mathit{Count}[c]+1$. We can also see, that the matrix $M$ contains all the suffixes
+the index $\Count[c]+1$. We can also see, that the matrix $M$ contains all the suffixes
 sorted according to their lexicographical order.
 
 \begin{figure}
@@ -200,7 +200,7 @@ only its beginning and end. The process will work in these steps:
 
 \begin{itemize}
 	\item We find where $P[n-1]$ is located in $M$. This means setting $b_{n-1}$ to
-	$mathit{Count}[P[n-1]]+1$ and $e_{n-1}$ to $\mathit{Count}[P[n-1]+1]$.
+	$\Count[P[n-1]]+1$ and $e_{n-1}$ to $\Count[P[n-1]+1]$.
 	\item Now, to found where $P[n-2..]$ is located in $M$, we would like to locate occurrences
 	of $P[n-1]$ that are preceded by $P[n-2]$. In other words, would like to find all
 	occurrences of $P[n-2]$ in $L[b_{n-1}..e_{n-1}]$. However, this is not easy to do
@@ -209,9 +209,9 @@ only its beginning and end. The process will work in these steps:
 	$F$. Here, they are sorted and it is easy to tell, which of these are followed by
 	$P[n-1]$ as $i$-th occurence of character $P[n-1]$ in $L$ corresponds to $i$-th
 	occurence of $P[n-1]$ in $F$. Using this fact, we set
-	$b_{n-2} = mathit{Count}[P[n-2]] + \rank_{P[n-2]}(b_{n-1})$ and
-	$e_{n-2} = mathit{Count}[P[n-2]] + \rank_{P[n-2]}(e_{n-1})$. Here $mathit{Count}[P[n-2]]$
-	is the index where run of character $mathit{Count}[P[n-2]]$ starts. $\rank_{P[n-2]}(b_{n-1})$
+	$b_{n-2} = \Count[P[n-2]] + \rank_{P[n-2]}(b_{n-1})$ and
+	$e_{n-2} = \Count[P[n-2]] + \rank_{P[n-2]}(e_{n-1})$. Here $\Count[P[n-2]]$
+	is the index where run of character $\Count[P[n-2]]$ starts. $\rank_{P[n-2]}(b_{n-1})$
 	is number that gives us number of occurrences of character $Count[P[n-2]]$ in $L$ that
 	preceded the index $b_{n-1}$ (starting index of the previous subsequence).
 	\item We continue and repeat this process until we compute $b_1$ and $e_1$ or until
