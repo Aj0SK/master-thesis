@@ -1,0 +1,25 @@
+\chapter{Our work}
+\label{kap:kap3}
+
+In this chapter, we shall look into our new proposals to enhance the existing implementation of RRR.
+
+\section{Block encoding}
+
+As we already discussed in Section~\ref{section:compressed_bv}, there are two possible ways how to
+decode the block. The problem with the table decoding version is the space it is using and the inability to
+support a bigger block size. On the other hand, the on-the-fly decoding can be used to support a bigger
+block size with the downside being longer encoding and decoding times. We shall now propose our new
+way of encoding and decoding the block. The objective of the new method is to create an alternative to
+the previous methods that enables a longer block size while not hurting the runtime so significantly.
+
+To facilitate our solution, we need to alter the respective order of blocks in the same class. The
+previous solutions used the lexicographical ordering for the blocks that shared the same class or
+the number of ones in the block. In our solution, we also use the number of ones to identify 
+the class of block. However, to compare two blocks $A$ and $B$, we at first split the blocks into
+halves with $A$ being split into $A_1$ and $A_2$ and $B$ into $B_1$ and $B_2$. We shall for a moment
+assume that $b$ -- the length of the blocks $A$ and $B$ -- is divisible by two. After splitting the blocks,
+we at first compare based on the number of ones in the first halves ($A_1$ and $B_1$). As smaller, we
+declare the block containing a lower number of ones in the first half. If the number of ones in the first
+block matches in $B_1$ and $B_2$, we then decide based on the lexicographical ordering of   
+
+\section{Hybrid encoding}
