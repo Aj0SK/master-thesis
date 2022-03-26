@@ -20,6 +20,7 @@ halves with $A$ being split into $A_1$ and $A_2$ and $B$ into $B_1$ and $B_2$. W
 assume that $b$ -- the length of the blocks $A$ and $B$ -- is divisible by two. After splitting the blocks,
 we at first compare based on the number of ones in the first halves ($A_1$ and $B_1$). As smaller, we
 declare the block containing a lower number of ones in the first half. If the number of ones in the first
-block matches in $B_1$ and $B_2$, we then decide based on the lexicographical ordering of   
+block matches in $A_1$ and $B_1$, we then decide based on the lexicographical order of $A_1$ and $B_1$.
+If these two are equal, we proceed and compare $A$ and $B$ by the lexicographical order of $A_2$ and $B_2$.
 
 \section{Hybrid encoding}
