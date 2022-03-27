@@ -11,14 +11,10 @@ this field, data structures for many varied problems have been already devised. 
 many of these give some solid theoretical bounds on the used space, others look into
 real-world space usage and performance.
 
-The most common use case for succinct data structures comes in a situation when we
-have a huge amount of data and are trying to implement some useful methods working
-with them. The problem we face with regular data structures supporting these
-operations is that their representation may not fit into our entire physical
-memory. As succinct data structures need to do the work of regular data structures but
-with additional constraints on memory usage, the common disadvantage is that
-they are often slower and more complicated than their space non-efficient
-alternatives. This is mainly because they do more work and at the same time contain
+As succinct data structures need to do the work of regular data structures but
+with additional constraints on memory usage, they are often slower and more
+complicated than the alternatives using more space.  This is mainly because they
+do more work and at the same time contain
 concepts and computation patterns that are slow on modern computers. However, there
 are cases in which usage of space-efficient data structures may speed up the overall
 running time as they may enable us to store the data in a faster type of memory
@@ -32,41 +28,48 @@ advanced concepts, the overall runtime may decrease.
 %the succinct data structure and then we support only methods that do not alter the
 %underlying data in any way.
 
-In this work, we are mainly concerned about the \textit{bit vector}. One of the simplest
-succinct data structures that represents the sequence of zeroes and ones with some
-useful method. The reason behind this is that bit vector is one of the main building blocks
-of many succinct data structures and can be useful in a lot of use cases. We shall now look
-onto some interesting and useful applications of the bit vector. 
+In this work, we are mainly concerned with \textit{bit vector}. One of the simplest
+succinct data structures that represent the sequence of zeroes and ones supporting
+the methods $\rank$ and $\select$. The reason behind this is that bit vector is one
+of the main building blocks of many succinct data structures and can be useful in a
+lot of use cases. We shall now look onto some interesting and useful applications of
+the bit vector. 
 
-\section{Sparse array}
+% TODO: vymenovat use case-y bit vectoru
 
-Bit vector can be used to provide us with an implementation of sparse array as was shown
-by \cite{grossi2013design}. Let $A$ be an array of $N$ elements. Let us assume that every
-element is stored using $k$ bits. To store this array we need in simple case $N\cdot k$ bits
-of space. However, imagine a scenario that most of the array is empty, just handful of elements
-are filled in. This can be a case for an array of numbers where many of numbers are set to
-some default let us say 0 and $n$ of them are arbitrary values. Then we can use a more space
-efficient approach. The better approach can be that we only store non-default elements in array
-$A'$ of size $n$. Alongside $A'$ we store a bit vector $B$ of size $N$ filled up such that
+\section{Application 1: Sparse array}
+
+Let $A$ be an array of $N$ elements each taking $k$ bits. We shall be interested in
+accessing the $i$-th element and for simplicity assume that array may not change
+after construction. A straightforward representation of this array takes $N\cdot k$
+bits of space. However, imagine a scenario where most of the array is empty, just a handful
+of elements are filled in. Take for example a sparse vector of numbers, where most of the
+elements are 0. Then we can use a more space-efficient approach. Bit vector can be used
+to provide us with an implementation of a sparse array as was shown by \cite{grossi2013design}.
+At first, one approach not using bit vector is to store only the non-default elements as
+pairs $(\text{position}, \text{value})$. This uses $\BigO(n\cdot (k+\log n))$ bits of space.
+If we just store the pairs sorted by the position, accessing $i$-th element takes logarithmic
+time. The better approach might be that we only store non-default elements in packed array
+$P$ of size $n$. Alongside $P$ we store a bit vector $B$ of size $N$ where
 
 \[
-    B[i]= 
+   B[i]=
 \begin{cases}
-	1,& \text{if } A[j]\neq \text{default} \\
-    0,& \text{otherwise}
+   1,& \text{if $A[j]$ is occupied} \\
+   0,& \text{if $A[j]$ is empty/default value}
 \end{cases}
 \].
 
 Using this representation of $A$, if we want to access $i$-th element in $A$, we first check for
 the value of $B[i]$. If it is zero, we return the default element. If it is one, we need to find
-how many ones are preceding this particular one to know, where in array $A'$ our non-default
+how many ones are preceding this particular one to know, where in array $P$ our non-default
 value is exactly located. We shall name the number of ones before $i$-th index
 $\rank_1(i)$. If we are provided with bit vector implementation along with access and
 rank methods we are able to reduce the total space used from $k\cdot N$ to $N+k\cdot n+R$ where
-$R$ is space needed to support efficient rank query. If we can make $R$ small, let us say
+$R$ is space needed to support an efficient rank query. If we can make $R$ small, let us say
 $R\in o(N)$, this solution shall give us a significant reduction of space used.
 
-\section{Storing elements of non-uniform size}
+\section{Application 2: Storing elements of non-uniform size}
 
 When trying to optimise the space used, it is often beneficial to use variable-length
 code for individual symbols. The example of this is a \textit{Huffman code} that constructs
@@ -92,7 +95,7 @@ Chapter~\ref{kap:kap2}, we shall see how this method can be implemented efficien
 	\begin{tabular}{l|l|l|l|l|l|l|l|l|l|l|}
 	\cline{2-11}
 	\textbf{Raw binary representation} & 1          & 1 & 0 & 1 & 1          & 1 & 1          & 0 & 1 & 0          \\ \cline{2-11} 
-	\textbf{Helper bit array}          & \textbf{1} & 0 & 0 & 0 & \textbf{1} & 0 & \textbf{1} & 0 & 0 & \textbf{1} \\ \cline{2-11} 
+	\textbf{Beginning of a codeword/an element}          & \textbf{1} & 0 & 0 & 0 & \textbf{1} & 0 & \textbf{1} & 0 & 0 & \textbf{1} \\ \cline{2-11} 
 	\end{tabular}
 	}
 	\caption[TODO]{Raw binary representation of elements 1101, 11, 101 and 0 stored one after another.
@@ -100,7 +103,7 @@ Chapter~\ref{kap:kap2}, we shall see how this method can be implemented efficien
 	\label{obr:VariableSizedElements}
 \end{figure}
 
-\section{FM-index}
+\section{Application 3: FM-index}
 % sources to help understand https://www.dcc.uchile.cl/TR/2005/TR_DCC-2005-004.pdf
 
 Let us now consider another practically interesting problem. As we shall see, solution
@@ -154,18 +157,20 @@ sorted according to their lexicographical order.
 	\centerline{
 	\begin{tabular}{l|c|ccccc|c|}
 	\cline{2-8}
-	  & \multicolumn{1}{l|}{\textbf{F}}    & \multicolumn{5}{l|}{}                                                                                                                                                                                                         & \multicolumn{1}{l|}{\textbf{L}}    \\ \cline{2-8} 
-	1 & {\color[HTML]{333333} \textbf{\$}} & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} b}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} a}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} n}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} a}}  & {\color[HTML]{C0C0C0} n}  & {\color[HTML]{000000} \textbf{a}}  \\ \cline{2-8} 
-	2 & {\color[HTML]{333333} \textbf{a}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \$}} & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} b}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} a}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} n}}  & {\color[HTML]{C0C0C0} a}  & {\color[HTML]{000000} \textbf{n}}  \\ \cline{2-8} 
-	3 & {\color[HTML]{333333} \textbf{a}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} n}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} a}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \$}} & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} b}}  & {\color[HTML]{C0C0C0} a}  & {\color[HTML]{000000} \textbf{n}}  \\ \cline{2-8} 
-	4 & {\color[HTML]{333333} \textbf{a}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} n}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} a}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} n}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} a}}  & {\color[HTML]{C0C0C0} \$} & {\color[HTML]{000000} \textbf{b}}  \\ \cline{2-8} 
-	5 & {\color[HTML]{333333} \textbf{b}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} a}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} n}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} a}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} n}}  & {\color[HTML]{C0C0C0} a}  & {\color[HTML]{000000} \textbf{\$}} \\ \cline{2-8} 
-	6 & {\color[HTML]{333333} \textbf{n}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} a}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \$}} & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} b}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} a}}  & {\color[HTML]{C0C0C0} n}  & {\color[HTML]{000000} \textbf{a}}  \\ \cline{2-8} 
-	7 & {\color[HTML]{333333} \textbf{n}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} a}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} n}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} a}}  & \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \$}} & {\color[HTML]{C0C0C0} b}  & {\color[HTML]{000000} \textbf{a}}  \\ \cline{2-8} 
+	  & \multicolumn{1}{l|}{$F$} & \multicolumn{5}{l|}{} & \multicolumn{1}{l|}{$L$}    \\ \cline{2-8} 
+	1 & {\color[HTML]{333333} \tt \$}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt b}}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt n}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}	& {\color[HTML]{C0C0C0} \tt n}  & {\color[HTML]{000000} \tt a}  \\ \cline{2-8} 
+	2 & {\color[HTML]{333333} \tt a}  		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt \$}} 	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt b}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt n}}	& {\color[HTML]{C0C0C0} \tt a}  & {\color[HTML]{000000} \tt n}  \\ \cline{2-8} 
+	3 & {\color[HTML]{333333} \tt a}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt n}}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt \$}}& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt b}}	& {\color[HTML]{C0C0C0} \tt a}	& {\color[HTML]{000000} \tt n}  \\ \cline{2-8} 
+	4 & {\color[HTML]{333333} \tt a}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt n}}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt n}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}	& {\color[HTML]{C0C0C0} \tt \$}	& {\color[HTML]{000000} \tt b}  \\ \cline{2-8} 
+	5 & {\color[HTML]{333333} \tt b}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt n}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt n}}	& {\color[HTML]{C0C0C0} \tt a}  & {\color[HTML]{000000} \tt \$} \\ \cline{2-8} 
+	6 & {\color[HTML]{333333} \tt n}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt \$}}& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt b}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}	& {\color[HTML]{C0C0C0} \tt n}  & {\color[HTML]{000000} \tt a}  \\ \cline{2-8} 
+	7 & {\color[HTML]{333333} \tt n}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt n}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt \$}}& {\color[HTML]{C0C0C0} \tt b}  & {\color[HTML]{000000} \tt a}  \\ \cline{2-8} 
 	\end{tabular}
 	}
-	\caption[TODO]{All the cyclic rotations of sequence $S = \mathit{banana\$}$. BWT is 
-	$L$ -- last column. Note that we are not storing this whole table.}
+	\caption[TODO]{All cyclic rotations of sequence $S = \mathtt{banana\$}$.
+	The Burrows-Wheeler transformation of $S$ is string $L=\mathtt{annb\$aa}$ -- the last column.
+	Note that in practice, we do not need to construct the whole table as more efficient algorithms exist.
+	}
 	\label{obr:BWT}
 \end{figure}
 
