@@ -5,22 +5,89 @@ In this chapter, we shall look into our new proposals to enhance the existing im
 
 \section{Block encoding}
 
-As we already discussed in Section~\ref{section:compressed_bv}, there are two possible ways how to
-decode the block. The problem with the table decoding version is the space it is using and the inability to
-support a bigger block size. On the other hand, the on-the-fly decoding can be used to support a bigger
-block size with the downside being longer encoding and decoding times. We shall now propose our new
-way of encoding and decoding the block. The objective of the new method is to create an alternative to
-the previous methods that enables a longer block size while not hurting the runtime so significantly.
+As we already discussed in Section~\ref{section:compressed_bv}, there are to the best of our knowledge two
+widely used algorithms to encode/decode the block. The problem with the table decoding algorithm is the space
+it is using and the inability to support a bigger block size resulting from the huge table sizes for bigger
+block length. On the other hand, the on-the-fly decoding can be used to support a bigger block size with the
+downside being longer encoding and decoding times. We shall now propose new way of encoding and decoding the blocks.
+The objective of the new method is to create an alternative to the previous methods that enables a longer block size
+while not hurting the runtime so significantly.
 
-To facilitate our solution, we need to alter the respective order of blocks in the same class. The
-previous solutions used the lexicographical ordering for the blocks that shared the same class or
-the number of ones in the block. In our solution, we also use the number of ones to identify 
-the class of block. However, to compare two blocks $A$ and $B$, we at first split the blocks into
-halves with $A$ being split into $A_1$ and $A_2$ and $B$ into $B_1$ and $B_2$. We shall for a moment
-assume that $b$ -- the length of the blocks $A$ and $B$ -- is divisible by two. After splitting the blocks,
-we at first compare based on the number of ones in the first halves ($A_1$ and $B_1$). As smaller, we
-declare the block containing a lower number of ones in the first half. If the number of ones in the first
-block matches in $A_1$ and $B_1$, we then decide based on the lexicographical order of $A_1$ and $B_1$.
-If these two are equal, we proceed and compare $A$ and $B$ by the lexicographical order of $A_2$ and $B_2$.
+The main idea of our solution is to break the problem of finding the order of the block $B$ along the class $c$ in a
+divide-and-conquer manner. This will in turn enable us to use the original table method to solve the smaller subproblems.
+To facilitate our solution, we need to alter the respective order of the blocks in the same class. The previous solutions
+used the lexicographical ordering for the blocks that shared the same class. In our solution, we also use the number of
+ones to identify the class of block. However, the ordering of the blocks along the class will be slightly altered.
+Let us take two blocks $A$ and $B$ that share the same class. The original solution would compare these two blocks
+by their lexicographical order and ordered them accordingly. We shall instead imagine splitting both blocks $A$ and $B$
+into half, creating two smaller blocks $A_1$ and $A_2$ and $B_1$ and $B_2$ respectively. Now, the original block
+with smaller number of ones in the first half is declared as smaller. If $A$ and $B$ have the same number of ones in the first
+blocks~($A_1$ and $B_1$), the order will be given according to the original lexicographical ordering of the first blocks --
+$A_1$ and $B_1$. If $A_1 = B_1$, the tie will be eventually broken by the order of the second blocks in the lexicographical
+ordering. Note that if two blocks $A$ and $B$ share the class and they have equal first blocks, then their second blocks are
+also in the same class so their order is given. The example of the ordering can be found on Figure~\ref{obr:lexicographicalVsUs}.
+
+\begin{figure}
+	\centerline{
+        \begin{tabular}{l c}
+            \small 0&   \tt 000 011\\
+            \small 1&   \tt 000 101\\
+            \small 2&   \tt 000 110\\
+            \small 3&   \tt 001 001\\
+            \small 4&   \tt 001 010\\
+            \small 5&   \tt 001 100\\
+            \small 6&   \tt 010 001\\
+            \small 7&   \tt 010 010\\
+        \end{tabular}
+        \hspace{3em}
+        \begin{tabular}{l c}
+            \small 8&   \tt 010 100\\
+            \small 9&   \tt 100 001\\
+            \small 10&  \tt 100 010\\
+            \small 11&  \tt 100 100\\
+            \small 12&  \tt 011 000\\
+            \small 13&  \tt 101 000\\
+            \small 14&  \tt 110 000\\
+        \end{tabular}
+	}
+	\caption[TODO]{
+        Example of our new ordering for the block size of six and class two~($b=6$ and $c=2$).
+        Note that this may resemble a lexicographical ordering, there are differences
+        after row twelve.
+    }
+	\label{obr:lexicographicalVsUs}
+\end{figure}
+
+We shall now show how we use this new ordering and that it is convenient to encode and decode $B$ in a divide and conquer manner.
+
+\paragraph{Encoding}
+
+To explain how the process of encoding works, we will take the table solution for the block size $b_t=15$ as the underlying
+scheme we use to solve the basic subproblem. With this subroutine, we shall obtain the solution for the block size of $b=30$.
+Consider a block $B$ of length $b$. The first step is to count the number of ones in $B$ as this is the class of the block $c$.
+After computing class, our next objective is to find out the sequence number of the first and second block, this can be easily
+done using the table algorithm. This algorithm gives us for a two blocks $B_1$ and $B_2$ their respective class $c_1$ and $c_2$
+but also offsets $o_1$ and $o_2$. Now we shall count the number of blocks preceding $B$. There are three types of blocks preceding
+$B$:
+
+\begin{itemize}
+    \item Blocks with the same first sub-block but smaller second sub-block. \label{chapter3:encoding:1}
+    \item Blocks with the first sub-block being from the same class as is $B_1$ but with smaller second block. \label{chapter3:encoding:2}
+    \item Blocks with the first sub-block being from the smaller class as is $B_1$. \label{chapter3:encoding:3}
+\end{itemize}
+
+The number of items that satisfy property~\ref{chapter3:encoding:1} is $o_2$. The number of blocks with the
+property~\ref{chapter3:encoding:2} is ${15\choose c_1}$. Finally, the number of items with property~\ref{chapter3:encoding:3}
+is $\sum_{i=0}^{c_1-1} {15\choose i} {15\choose c-i}$. Identifying the number of blocks preceding $B$ gives us the offset
+$o$ of the block $B$. Together with the class number $c$ we can encode $B$ standardly as a pair $(c, o)$.
+
+\paragraph{Decoding}
+
+Decoding is a process of obtaining block $B$ from pair $(c, o)$. Obtaining $c$ is trivial as we need only to count the
+number of ones in $B$. Then, we start to obtain more and more information about the $B$. The first information is what
+is the number of ones -- $c_1$ -- in the first block $B_1$. $c_1$ together with $c$ of course gives us a number of
+ones in the second block $B_2$. First we will define $C_i$ to be a number of blocks of length $b$ with less or equal than
+$i$ ones in the first block. We then compute the values of $C_i$ for every $i$ ($0\leq i\leq c$). Note that from definition
+$C_i = \sum_{j=0}^{i} {15 \choose j} {15 \choose c-j}$.
 
 \section{Hybrid encoding}

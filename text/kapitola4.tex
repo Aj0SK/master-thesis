@@ -4,3 +4,14 @@
 \section{Implementation}
 
 \section{Benchmarking}
+
+Most of the FM-index implementations provide at least methods:
+
+\begin{itemize}
+	\item $\mathit{count}(P)$ counts the number of occurrences of $P$ in text $T$
+	\item $\mathit{locate}(P)$ returns all positions of pattern $P$ in text $T$
+	\item $\mathit{extract}(i, j)$ returns the subsequence $T[i..j]$
+\end{itemize}
+
+The reason that the $\mathit{extract}$ method is useful and non-trivial is that FM-index
+does not store the original sequence $T$ -- at least not in an easily readable form.

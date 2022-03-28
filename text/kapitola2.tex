@@ -35,7 +35,7 @@ only for beginning of every superblock. This enables answering rank in time $\Bi
 uses $\BigO((n/k)\log n)$ bits of memory.
 
 Although this solution works well in practice, it is possible to answer rank in constant time
-and sublinear space overhead. We start as in previous solution with setting length of the
+with sublinear space overhead. We start as in previous solution with setting length of the
 superblock $k$ to $k=\log^2 n$ and precomputing rank for every $k$-th bit or as we call it for
 every beginning of superblock. Every superblock we further divide into parts of size
 $\frac{\log n}{2}$. We precompute the rank for all of these small blocks. To save space we only
@@ -79,8 +79,8 @@ over it is $\BigO(\log n)$ so this makes the table with the total size
 
 as every entry is of size $\BigO(\log\log n)$. The total space used for this solution of rank
 is therefore sum of \ref{eq:rank_space_1}, \ref{eq:rank_space_2} and \ref{eq:rank_space_3}.
-As every one of these is using $o(n)$ bits we can see that the solution uses just sublinear
-number of space.
+As every one of these is using sublinear number of bits we can see that the solution uses just
+sublinear space.
 
 % TODO: ... depends on model... can be O(k/w) if we consider RAM model with w-bit registers
 % that supports popcount
