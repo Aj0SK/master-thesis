@@ -114,11 +114,7 @@ of numbers $(c, o)$. Here, $c$ labels the class of the block and $o$ an offset i
 the sequence of all blocks in this particular class. Most of the time, the $c$ is equal
 to the number of ones in the block. Offset, on the other hand, is the index of block in
 the sequence of all the blocks with $c$ ones, lexicographically sorted. Note that
-class $c$ has a size
-
-                $${b\choose c}$$.
-
-The offset is then be bounded by:
+class $c$ has a size ${b\choose c}$. The offset is then be bounded by:
 
 				$$0 \leq o < {b\choose c}$$.
 
@@ -198,7 +194,9 @@ from $n$ elements and $\ell$ elements from another $m$ elements. This is all con
 right side of the equation that definitely includes all these combinations.
 
 $D$ is storing $2^b$ entries and each entry is using $b$ bits of storage.
-The total space used is then $nH_0(B) + \ceil{n/b} + \ceil{n/b} \cdot \ceil{\log(b+1)} + b2^b$.
+The total space used is then
+
+$$nH_0(B) + \ceil{n/b} + \ceil{n/b} \cdot \ceil{\log(b+1)} + b2^b$$.
 
 To speed up the process of accessing block, we will help ourselves store the pointers
 into every $k$-th element of $O$. Effectively dividing the process of locating $O[i]$ into two
