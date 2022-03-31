@@ -63,26 +63,27 @@ We shall now show how we use this new ordering and that it is convenient to enco
 
 \paragraph{Encoding}
 
-At first, we shall look at the example of the encoding and then we will the generalize the ideas behind
-the process. Imagine a block {\tt 100 010} we want to encode. We can easily see that the class of this
-block is $c=2$ as there are two ones in the block. Obtaining the offset is harder. We will enumerate the
-number of smaller blocks in the class $c=2$. There are three categories of blocks preceding {\tt 100 010}:
+Before providing the general encoding stratedy, we shall look with the concrete example and then generalize
+the ideas behind the process. Imagine a block {\tt 100 010} we want to encode. We can easily see that the
+class of this block is $c=2$ as there are two ones in the block. Obtaining the offset is harder. We will
+enumerate the number of smaller blocks in the class $c=2$. There are three categories of blocks
+preceding {\tt 100 010}:
 
 \begin{itemize}
     \item Blocks with the smaller number of ones in the first sub-block.
     (There are 3 such blocks -- those beginning with {\tt 000}.)
-    \item Blocks with the same number of ones in the first sub-block, but smaller first and second sub-block.
+    \item Blocks with the same number of ones in the first sub-block, but smaller first sub-block.
     (There are 6 blocks with this property -- those beginning with {\tt 010} or {\tt 001}.)
-    \item Blocks with the same first sub-block , but smaller second sub-block.
+    \item Blocks with the same first sub-block, but smaller second sub-block.
     (There is 1 such block, namely {\tt 100 001}.)
 \end{itemize}
 
 Summing up, we get that there are 10 blocks preceding {\tt 100 010} so it has the offset $o=10$. Together
 with class we would encode this block as a pair $(2, 10)$. 
 
-In general, consider a block $B$ of length $b$. The first step is to obtain $c$ -- the class of the block,
-this can be easily done by counting ones in $B$. To obtain the sequence number of $B$ in class $c$, we shall
-count the number of blocks preceding $B$. There are three groups of blocks preceding $B$:
+In general, consider a block $B$ of length $b$. The first step is to obtain $c$ -- the class of the block.
+This can be easily done by counting ones in $B$. To obtain the sequence number of $B$, we shall count the
+number of blocks preceding $B$ along the class $c$. There are three types of blocks preceding $B$:
 
 \begin{enumerate}
     \item Blocks with the first sub-block having smaller class than $B_1$. \label{chapter3:encoding:1}
@@ -101,7 +102,7 @@ The number of blocks in the group~\ref{chapter3:encoding:2} is equal to the numb
 share classes of sub-blocks, but are smaller than $B$. Number of these blocks is $o_1\times {15\choose c_1}$.
 
 The number of blocks in the group~\ref{chapter3:encoding:3} is equal to the number of blocks smaller 
-than $B_2$. This is identical to the offset $o_2$. 
+than $B_2$. This is identical to the offset $o_2$.
 
 So everything we need to obtain the offset of $B$ is $(c_1, o_1)$ and $(c_2, o_2)$ -- this can be computed
 recursively.
@@ -110,8 +111,26 @@ recursively.
 
 Decoding is a process of obtaining block $B$ from pair $(c, o)$. Obtaining $c$ is trivial as we need
 only to count the number of ones in $B$. Then, we would like to use our sub-routines for the blocks
-of size $b/2$. Hovewer to use these we need to find what the classes and offsets are of the smaller
-blocks. Namely, we need to find what the pairs $(c_1, o_1)$ and $(c_2, o_2)$ are. To obtain these
+of size $b/2$. However, to use these we need to find the classes and offsets of the smaller
+blocks. Namely, we need to find what the pairs $(c_1, o_1)$ and $(c_2, o_2)$ are. We shall again
+present this process on a previous example block {\tt 100 010} encoded as $(2, 10)$. To obtain the
+number of ones in the first sub-block only from the offset of the block, we can look into
+the table and see that there are 3 blocks with zero ones in the first sub-block. Then there are 9
+blocks with one 1 in the first sub-block. As $3+9$ is bigger than 12, we discovered that the number
+of ones in the first block is 1 and it follows that the number of ones in the second sub-block is also 1.
+There are however 9 blocks with this property, the smallest one being {\tt 001 001} and largest
+{\tt 100 100}. 
+
+Now we would like to identify what is the offset of the first sub-block. There are ${3 \choose 1} = 3$
+possibilities ({\tt 001}, {\tt 010}, {\tt 100}) how the first and also the second block may look.
+As we know, that blocks are sorted according to the first sub-block and then second sub-block. As
+all the combinations of the first block and second block are possible, all possible second sub-blocks
+will be cyclically repeating again and again with the increasing first sub-block. Each cycle will
+be of length 3 (number of possible second sub-blocks) and the number of these cycles will be 3
+(number of possible first sub-blocks). 
+
+% TODO: finish this
+
 pairs we need to find out what are the number of blocks in the groups \ref{chapter3:encoding:1},
 \ref{chapter3:encoding:2} and \ref{chapter3:encoding:3}. To simplify, we will define $C_i$ to be a 
 number of blocks of length $b$ with less than or equal number of ones in the first block than $i$.
@@ -120,7 +139,7 @@ $C_i = \sum_{j=0}^{i} {15 \choose j} {15 \choose c-j}$. To found $c_1$ we need t
 biggest $C_{max}$ such that $o<C_{max}$. After finding it, we know that $c_1 = max+1$ and that
 $c_2 = c - c_1$. Problem is that number of elements from group~\ref{chapter3:encoding:2} and
 \ref{chapter3:encoding:3} is in total equal to $C_{max}-o$ but we do not know the exact number
-of the elements in the respective group yet. Hovewer, we know the number of ones in each sub-block,
+of the elements in the respective group yet. However, we know the number of ones in each sub-block,
 so we need to just get a respective $o_1$ and $o_2$ to again use our table decoding subroutine. We
 know that $C_{max}-o = {15 \choose c_2} + x$.
 
