@@ -158,7 +158,7 @@ suffixes.
 
 More precisely, on $i$-th position of suffix array $S$, it stores the starting position of
 suffix that comes $i$-th in lexicographical order. The example of suffix array is on
-Fig.~\ref{obr:suffixArray} Searching for $P$ in suffix
+Fig.~\ref{obr:suffixArray} Searching for pattern $P$ in suffix
 array of $T$ uses fact that if $P$ is contained in $T$ it will be at the beginning of some
 suffixes that make up a continuous subsequence of $S$. Succinct data structure that is in
 some aspects similar to suffix array was proposed by \cite{ferragina2000opportunistic} and
@@ -237,28 +237,57 @@ word {\tt omputer}. This will for example create the common run of symbol {\tt \
 \paragraph{Searching in an FM-index}
 
 As we already stated, FM-index is used for searching in the preprocessed text.
-The counting of occurrences of $P$ in $T$ is based on the observation that in $M$,
-all the suffix are contained and come in sorted order. Occurrences of $P$ in $M$
-are contained in a consecutive subsequence of $M$'s rows. This is the same fact that
-enabled searching in suffix array. The search for rows where $P$ is located will proceed
-from the end of $P$, gradually by finding rows where $P[n-1..], P[n-2..]$ etc. is located.
-At every step, these rows will form a continuous subsequence of rows of $M$ so we will store
-only its beginning and end. The process will work in these steps:
+Searching in FM-index is mainly based on the two important properties:
+
+\begin{enumerate}
+	\item Suffixes containing word $W$ as a prefix form a consecutive subsequence of rows in $M$.
+	\label{chapter1:fmindexprop:prop1}
+	\item The $i$-th occurence of character $c$ in $F$ corresponds to the $i$-th occurence of $c$ in $L$.
+	\label{chapter1:fmindexprop:prop2}
+\end{enumerate}
+
+First property was also the fact that enabled us to search for a pattern in a suffix array.
+The second property is less trivial to observe. Let us take two rows in $M$, $T_i$ and $T_j$
+such that $i<j$ of the form $T_i = cxA$ and $T_j = cyB$. As $i<j$ it follows that either
+$x<y$ or $A<B$ but this also means that after rotating these two rows we get $xAc$ and $yBc$
+and it follows that $xAc$ will also preceed $yBc$.
+
+The search for rows where $P$ is located will proceed from the end of $P$, gradually by finding
+rows where $P[n-1..], P[n-2..]$ etc. is located. At every step, these rows will form a continuous
+subsequence of rows of $M$ so we will store only its beginning and end. Let us assume that we are
+looking for a word {\tt house} and we already found the range of rows in $M$ that have {\tt ouse}
+as their prefix. If we look to the last column that corresponds to the symbols precedeing {\tt ouse}
+we can see there in arbitrary order symbols like {\tt m} for ({\tt mouse}) but also {\tt h} for
+({\tt house}). To search for the range of rows in $M$ that have as a prefix word ({\tt house})
+we shall look into the range of all prefixes beginning with {\tt h}. Locating this range is easy
+thanks to the $\Count$ helper array. These lines are sorted according to the second character so
+there will be some lines continuing with {\tt a} if the text contained for example word {\tt hashtag}
+or {\tt e} if the word {\tt head} was mentioned in the text. Somewhere the lines starting with 
+{\tt house} will be located, but we do not store anything except for $T_{BWT}$ and $\Count$.
+However, we already located the range where suffixes starting with {\tt ouse} are located in.
+We can also look how many times {\tt h} is located before this range in $T_{BWT}$. Thanks to this
+number and the property \label{chapter1:fmindexprop:prop2}, we know where in $F$ the subsequence
+containing the prefix {\tt house} begins. 
+
+% TODO: mozno obrazok
+
+The process will in general proceed in these steps:
 
 \begin{itemize}
-	\item We find where $P[n-1]$ is located in $M$. This means setting $b_{n-1}$ to
-	$\Count[P[n-1]]+1$ and $e_{n-1}$ to $\Count[P[n-1]+1]$.
+	\item We find where $P[n-1]$ is located in $M$. This means setting beginning~($b_{n-1}$) and
+	the end~($e_{n-1}$) of the current subsequence to $\Count[P[n-1]]+1$ and $\Count[P[n-1]+1]$
+	respectively.
 	\item Now, to found where $P[n-2..]$ is located in $M$, we would like to locate occurrences
 	of $P[n-1]$ that are preceded by $P[n-2]$. In other words, would like to find all
-	occurrences of $P[n-2]$ in $L[b_{n-1}..e_{n-1}]$. However, this is not easy to do
+	occurrences of symbol $P[n-2]$ in $L[b_{n-1}..e_{n-1}]$. However, this is not trivial
 	as they can be at arbitrary places in this subsequence, even not in a continuous
-	subsequence. Instead of searching in $L$ we look at the occurrences of $P[n-2]$ in
+	subsequence. Instead of searching in $L$ we look at the occurrences of symbol $P[n-2]$ in
 	$F$. Here, they are sorted and it is easy to tell, which of these are followed by
 	$P[n-1]$ as $i$-th occurence of character $P[n-1]$ in $L$ corresponds to $i$-th
 	occurence of $P[n-1]$ in $F$. Using this fact, we set
 	$b_{n-2} = \Count[P[n-2]] + \rank_{P[n-2]}(b_{n-1})$ and
 	$e_{n-2} = \Count[P[n-2]] + \rank_{P[n-2]}(e_{n-1})$. Here $\Count[P[n-2]]$
-	is the index where run of character $\Count[P[n-2]]$ starts. $\rank_{P[n-2]}(b_{n-1})$
+	is the index where run of character $P[n-2]$ starts. $\rank_{P[n-2]}(b_{n-1})$
 	is number that gives us number of occurrences of character $Count[P[n-2]]$ in $L$ that
 	preceded the index $b_{n-1}$ (starting index of the previous subsequence).
 	\item We continue and repeat this process until we compute $b_1$ and $e_1$ or until
