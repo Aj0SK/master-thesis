@@ -121,17 +121,44 @@ this method can be implemented efficiently.
 \section{Application 3: FM-index}
 % sources to help understand https://www.dcc.uchile.cl/TR/2005/TR_DCC-2005-004.pdf
 
+For simplicity, most of the time we shall assume in this section that the every text
+$T$ contains a special character {\tt \$} located only at its end that is lexicographically
+smallest.
+
 Let us now consider another practically interesting problem. As we shall see, solution
 to this problem also uses bit vector and other building blocks commonly used in succinct
-data strucutes. This time, we have a text $T$ and are interested in \textit{indexing} it.
+data structures. This time, we have a text $T$ and are interested in \textit{indexing} it.
 This means if we get some pattern $P$, we would like to quickly answer questions such as
 how many times is $P$ contained in $T$ and also where in $T$ this occurrences are located.
-This is particularly interesting problem in bioinformatics, where we have very long sequence
+This is particularly useful in bioinformatics, where we have very long sequence
 of DNA and are interested in searching for some subsequences in it. One of the solutions that
 is reasonable and may be used is constructing \textit{suffix array} of $T$. Suffix array is
 data structure that for text $T$, stores information about the lexicograpical order of its
-suffixes. More precisely, on $i$-th position of suffix array $S$, it stores the starting
-position of suffix that comes $i$-th in lexicographical order. Searching for $P$ in suffix
+suffixes.
+
+\begin{figure}
+	\centerline{
+        \begin{tabular}{l l l}
+            i  & $S$ & suffix\\
+        \hline
+            \small 0& 7	& \tt \$ \\
+            \small 1& 6 & \tt a\$ \\
+            \small 2& 4 & \tt ana\$ \\
+            \small 3& 2 & \tt anana\$ \\
+            \small 4& 1 & \tt banana\$ \\
+            \small 5& 5 & \tt na\$ \\
+            \small 6& 3 & \tt nana\$ \\
+        \end{tabular}
+	}
+	\caption[TODO]{
+        Suffix array $S$ of $T = \mathtt{banana\$}$
+    }
+	\label{obr:suffixArray}
+\end{figure}
+
+More precisely, on $i$-th position of suffix array $S$, it stores the starting position of
+suffix that comes $i$-th in lexicographical order. The example of suffix array is on
+Fig.~\ref{obr:suffixArray} Searching for $P$ in suffix
 array of $T$ uses fact that if $P$ is contained in $T$ it will be at the beginning of some
 suffixes that make up a continuous subsequence of $S$. Succinct data structure that is in
 some aspects similar to suffix array was proposed by \cite{ferragina2000opportunistic} and
@@ -145,15 +172,12 @@ $T$.
 
 \paragraph{Burrows-Wheeler transformation}
 
-For simplicity, we assume that the original text $T$ contains a special character {\tt \$}
-located at its end that was not contained in $\Sigma$ and is lexicographically smallest.
-
-\textit{Burrows-Wheeler transformation~(BWT)} lies at the heart of the FM-index.
-BWT of a text $T$ gives us a sequence $\mathit{T_{BWT}}$ of the same length. Furthermore, this
-operation is reversible in a sense that only using $\mathit{T_{BWT}}$ we are able to reconstruct
-the original text $T$. This transformation is used as a preprocessing step of some compression
-algorithms such as \textit{bzip2} introduced by \cite{seward1996bzip2} and studied more by
-\cite{manzini2001analysis}. This is because
+\textit{Burrows-Wheeler transformation~(BWT)} proposed by \cite{burrows1994block} lies at the
+heart of the FM-index. BWT of a text $T$ gives us a sequence $\mathit{T_{BWT}}$ of the same
+length. Furthermore, this operation is reversible in a sense that only using $\mathit{T_{BWT}}$
+we are able to reconstruct the original text $T$. This transformation is used as a
+preprocessing step of compression algorithms such as in \textit{bzip2} introduced by
+\cite{seward1996bzip2} and was studied more by \cite{manzini2001analysis}. This is because
 BWT is oftentimes easier to compress. We shall show how it is constructed and then give 
 intuition why it has these properties. We consider the sequence $T$ of symbols over some
 alphabet $\Sigma$. Now we take all the cyclical rotations $T_1, T_2, \ldots T_n$ of
@@ -164,27 +188,41 @@ is what we call the BWT of $T$. Note that the sequence $F$ can be obtained from 
 sorting all the characters in $\mathit{T_{BWT}}$ and has some nice properties. $F$ consists of
 runs of symbols that are sorted according to the lexicographical ordering of alphabet symbols.
 We shall use the helper sequence $\Count$ where $\Count[c]$ is number of
-occurrences of symbols smaller than $c$. We note that the run of symbol $c$ in $F$ starts at
-the index $\Count[c]+1$. We can also see, that the matrix $M$ contains all the suffixes
-sorted according to their lexicographical order.
+occurrences of symbols smaller than $c$. Note that the run of symbol $c$ in $F$ starts at
+the index $\Count[c]+1$. The matrix $M$ contains all the suffixes sorted according to their
+lexicographical order.
 
 \begin{figure}
 	\centerline{
 	\begin{tabular}{l|c|ccccc|c|}
 	\cline{2-8}
-	  & \multicolumn{1}{l|}{$F$} & \multicolumn{5}{l|}{} & \multicolumn{1}{l|}{$L$}    \\ \cline{2-8} 
-	1 & {\color[HTML]{333333} \tt \$}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt b}}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt n}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}	& {\color[HTML]{C0C0C0} \tt n}  & {\color[HTML]{000000} \tt a}  \\ \cline{2-8} 
-	2 & {\color[HTML]{333333} \tt a}  		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt \$}} 	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt b}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt n}}	& {\color[HTML]{C0C0C0} \tt a}  & {\color[HTML]{000000} \tt n}  \\ \cline{2-8} 
-	3 & {\color[HTML]{333333} \tt a}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt n}}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt \$}}& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt b}}	& {\color[HTML]{C0C0C0} \tt a}	& {\color[HTML]{000000} \tt n}  \\ \cline{2-8} 
-	4 & {\color[HTML]{333333} \tt a}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt n}}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt n}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}	& {\color[HTML]{C0C0C0} \tt \$}	& {\color[HTML]{000000} \tt b}  \\ \cline{2-8} 
-	5 & {\color[HTML]{333333} \tt b}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt n}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt n}}	& {\color[HTML]{C0C0C0} \tt a}  & {\color[HTML]{000000} \tt \$} \\ \cline{2-8} 
-	6 & {\color[HTML]{333333} \tt n}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt \$}}& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt b}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}	& {\color[HTML]{C0C0C0} \tt n}  & {\color[HTML]{000000} \tt a}  \\ \cline{2-8} 
-	7 & {\color[HTML]{333333} \tt n}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt n}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt \$}}& {\color[HTML]{C0C0C0} \tt b}  & {\color[HTML]{000000} \tt a}  \\ \cline{2-8} 
+	  & $F$ & \multicolumn{5}{l|}{} & $L$   \\ \cline{2-8} 
+	1 & {\tt \$}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt b}}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt n}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}	& {\color[HTML]{C0C0C0} \tt n}  & {\tt a}  \\ \cline{2-8} 
+	2 & {\tt a}  		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt \$}} 	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt b}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt n}}	& {\color[HTML]{C0C0C0} \tt a}  & {\tt n}  \\ \cline{2-8} 
+	3 & {\tt a}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt n}}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt \$}}& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt b}}	& {\color[HTML]{C0C0C0} \tt a}	& {\tt n}  \\ \cline{2-8} 
+	4 & {\tt a}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt n}}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt n}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}	& {\color[HTML]{C0C0C0} \tt \$}	& {\tt b}  \\ \cline{2-8} 
+	5 & {\tt b}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt n}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt n}}	& {\color[HTML]{C0C0C0} \tt a}  & {\tt \$} \\ \cline{2-8} 
+	6 & {\tt n}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt \$}}& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt b}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}	& {\color[HTML]{C0C0C0} \tt n}  & {\tt a}  \\ \cline{2-8} 
+	7 & {\tt n}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt n}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt \$}}& {\color[HTML]{C0C0C0} \tt b}  & {\tt a}  \\ \cline{2-8} 
+	\end{tabular}
+	\hspace{4em}
+	\begin{tabular}{l l l}
+		sorted suffixes\\
+	\hline
+		\tt \$ \\
+		\tt a\$ \\
+		\tt ana\$ \\
+		\tt anana\$ \\
+		\tt banana\$ \\
+		\tt na\$ \\
+		\tt nana\$ \\
 	\end{tabular}
 	}
-	\caption[TODO]{All cyclic rotations of sequence $S = \mathtt{banana\$}$.
-	The Burrows-Wheeler transformation of $S$ is string $L=\mathtt{annb\$aa}$ -- the last column.
+	\caption[TODO]{On the left we can see the matrix $M$ full of cyclic rotations of sequence
+	$S = \mathtt{banana\$}$. On the right, we can see the sorted suffixes (content of suffix array). The
+	Burrows-Wheeler transformation of $S$ is string $L=\mathtt{annb\$aa}$ -- the last column of $M$.
 	Note that in practice, we do not need to construct the whole table as more efficient algorithms exist.
+	It is also notable that matrix $M$ includes very similar information to suffix array.
 	}
 	\label{obr:BWT}
 \end{figure}
