@@ -71,10 +71,10 @@ the value of $B[i]$. If it is zero, we return the default value. If it is one, w
 how many ones are preceding this particular one in $B$ to locate where in array $P$ our non-default
 value is placed. For this, we may use the $\rank_1$ method. Note, that method $\select_1$ can
 be used to obtain the position of $i$-th non-default value in $A$. The total space used by this
-representaton is $N+n\cdot k+R$ where $R$ is the space needed to support an efficient rank query.
+representaton is $N+n\cdot k+R$ where $R$ is the space needed to support an efficient $\rank$ query.
 As we shall show in Section~\ref{section:rank} there is an implementation supporting constant time
-rank with the space overhead used -- $R$ -- being sublinear from $N$ ($R\in o(N)$). If we are provided
-with bit vector implementation along with access and rank methods we are able to reduce the total
+$\rank$ with the space overhead used -- $R$ -- being sublinear from $N$ ($R\in o(N)$). If we are provided
+with bit vector implementation along with access and $\rank$ methods we are able to reduce the total
 space used from $k\cdot N$ to $N+n\cdot k+o(N)$ bits, which can be in some cases better than
 $n\cdot (k+\log n)$, especially if we need to use the hash table to get the constant time solution.
 
@@ -294,18 +294,18 @@ The process will in general proceed in these steps:
 	$b_i=e_i$.
 \end{itemize}
 
-As we can see, we are not only interested in rank over a bit vector but also over an arbitrary
+As we can see, we are not only interested in $\rank$ over a bit vector but also over an arbitrary
 alphabet that we would like to use in the FM-index. This seems like an even harder task.
 In the next section, we shall see how we can reduce this problem and use the bit vector
-implementation also for the rank and select over general alphabet.
+implementation also for the $\rank$ and $\select$ over general alphabet.
 
 \paragraph{Wavelet tree}
 \label{section:WaweletTree}
 
 We shall assume for a moment that we have a bit vector implementation supporting
-access, rank and select methods. We show how this may be used to create
+$\access$, $\rank$ and $\select$ methods. We show how this may be used to create
 a more general version of this implementation representing sequence over arbitrary
-alphabet still supporting access, rank and select queries in reasonable time complexity.
+alphabet still supporting $\access$, $\rank$ and $\select$ queries in reasonable time complexity.
 
 The most straightforward approach is to store one bit vector of size $|S|$,
 per every character of the alphabet $\Sigma$. Let us call these bit vectors $B_1,
@@ -320,8 +320,8 @@ to this bit vector is located, according to the formula
 \end{cases}
 \].
 
-This is indeed very fast because we support rank and select in the exact same time
-that our bit vector implementation of rank and select is running in. However, we use
+This is indeed very fast because we support $\rank$ and $\select$ in the exact same time
+that our bit vector implementation of $\rank$ and $\select$ is running in. However, we use
 roughly $|\Sigma|$ times more space.
 
 \textit{Wavelet tree} uses a divide-and-conquer approach. It takes the sequence $S$ of
@@ -356,8 +356,8 @@ are then built by recursively applying the same idea on the subsequences $S_1$ a
 	% source at https://docs.google.com/drawings/d/1cJyda3bdTluajr3iXu1x1iL5HF0JPZqAHw6jwct9KLI/edit
 \end{figure}
 
-Rank and select methods on the original sequence can be implemented using the tree
-traversal and rank/select methods on the individual bit vectors. Another modification
+$\Rank$ and $\select$ methods on the original sequence can be implemented using the tree
+traversal and $\rank$/$\select$ methods on the individual bit vectors. Another modification
 studied by \cite{makinen2005succinct} is to shape the binary tree in a way that a Huffman
 tree of the sequence symbols is shaped. Huffman tree is a tree constructed in the
 process of creating Huffman encoding of the characters contained in the sequence.

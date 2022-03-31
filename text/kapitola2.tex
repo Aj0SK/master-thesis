@@ -1,12 +1,11 @@
 \chapter{Binary sequence representation}
 \label{kap:kap2}
 
-This chapter is dedicated to the previous work on the implementation of the bit vector, data
-structure that stores binary sequence supporting methods access, rank and select. As we have
+This chapter is dedicated to the current state of the implementation of the bit vector, data
+structure that stores binary sequence supporting methods $\access$, $\rank$ and $\select$. As we have
 shown in Section~\ref{section:WaweletTree}, wavelet tree can be used to build a vector
 for the general alphabet from the bit vector implementation. This is, why it is of utmost
-importance to dedicate time to efficient and fast bit vector implementation. In this
-chapter, we shall describe the currently available implementations. Let us start with
+importance to dedicate time to efficient and fast bit vector implementation. Let us start with
 the succinct representation of a bit vector, in which we simply store bits one after another.
 Then we shall look at the compressed representation.
 
@@ -15,49 +14,49 @@ Then we shall look at the compressed representation.
 \subsection{Rank}
 \label{section:rank}
 
-Regarding rank, we are concerned in fact with two different methods namely $\rank_0(i)$ and
+Regarding $\rank$, we are concerned in fact with two different methods namely $\rank_0(i)$ and
 $\rank_1(i)$. It is easy to observe that following equation holds:
 
                     $$\rank_1(i) = i - \rank_0(i)$$
 
-so it is enough to provide only the implementation of $\rank_1(i)$.
-There are two straightforward solutions we can begin with to support rank on a bit vector
-$B$. The first is to store no additional information. Every time we are asked
+so it is common to provide only the implementation of $\rank_1(i)$.
+There are two straightforward solutions we can begin with to support $\rank$ on a bit vector
+$B$. The first is to not precompute any additional information. Every time we are asked
 for $\rank_1(i)$, we run through all bits preceding $i$-th. This solution is not
 practical for longer bit vectors but it does not add any additional space. The second
-approach is to precompute rank of very bit. This enables us to answer rank in constant
+approach is to precompute $\rank$ of every bit. This enables us to answer $\rank$ in constant
 time -- a single table lookup. However, the space needed to support this
 solution is $(|B|\cdot\log |B|)$ bits. These two solutions can be combined together to obtain an
-idea of a more practical solution. We will store the pre-computed rank, but not for every
+idea of a more practical solution. We shall store the pre-computed $\rank$ values, but not for every
 bit. At first, we choose a constant $k$ and split bit vector into non-overlaping subsequences
-of length $k$. We shall call one this subsequence \textit{superblock}. We then precompute rank
-only for beginning of every superblock. This enables answering rank in time $\BigO(k)$ and
+of length $k$. We shall call these subsequences \textit{superblocks}. We then precompute $\rank$
+only for the beginning of every superblock. This enables answering $\rank$ in time $\BigO(k)$ and
 uses $\BigO((n/k)\log n)$ bits of memory.
 
-Although this solution works well in practice, it is possible to answer rank in constant time
+Although this solution works well in practice, it is possible to answer $\rank$ in constant time
 with sublinear space overhead. We start as in previous solution with setting length of the
-superblock $k$ to $k=\log^2 n$ and precomputing rank for every $k$-th bit or as we call it for
-every beginning of superblock. Every superblock we further divide into parts of size
-$\frac{\log n}{2}$. We precompute the rank for all of these small blocks. To save space we only
-precompute the rank from the beginning of the superblock. Now, when asked about the $\rank_1$ of
+superblock to $k=\log^2 n$ and precomputing $\rank$ for every $k$-th bit or as we call it for
+every beginning of superblock. Every superblock we further divide into parts of size $\frac{\log n}{2}$.
+We precompute the $\rank$ for all of these smaller blocks but to save space we only precompute the
+$\rank$ from the beginning of the corresponding superblock. Now, when asked about the $\rank_1$ of
 some position, we know in which superblock this number is located, so we know what is the number
 of ones up to the superblock where this position is located. We also precomputed what is the
 number of ones from the beginning of the superblock up to this block. The last think is to
 find out the number of ones that are before this index in this superblock. This would be easy
 to do linearly in time $\BigO(\log n)$. Hovewer, we are aiming for constant time so we need
-also to precompute every possible rank query inside of the block. Thanks to block being short
+also to precompute every possible $\rank$ query inside of the block. Thanks to block being short
 there are not that many possible ways what the block can be, and what is the position in this
-block we want to compute rank for. We shall now look at the space overhead that this solution
-adds. The space overhead consists of three parts. The first part is precomputed rank for
+block we want to compute $\rank$ for. We shall now look at the space overhead that this solution
+adds. The space overhead consists of three parts. The first part is precomputed $\rank$ for
 every superblock. Number of superblocks is $\BigO(\frac{n}{\log^2 n})$ and we need
-$\BigO(\log n)$ of space to store the rank so the total amount is
+$\BigO(\log n)$ of space to store the $\rank$ so the total amount is
 
 \begin{equation}
     \BigO(\frac{n}{\log^2 n}\cdot \log n).
     \label{eq:rank_space_1}
 \end{equation}
 
-Number of smaller blocks is $\BigO(\frac{n}{\frac{\log n}{2}})$ but now, every block stores only rank
+Number of smaller blocks is $\BigO(\frac{n}{\frac{\log n}{2}})$ but now, every block stores only $\rank$
 from the beginning of superblock so this number is of size at most $\BigO(\log n)$ so we need
 at most $\BigO(\log\log n)$ of bits to store it. The total amount of space for the smaller
 blocks is then
@@ -68,8 +67,8 @@ blocks is then
 \end{equation}
 
 The third part is the precomputed table where we store for every possible block and every
-possible rank query over it the result of the rank query. The number of different ways for
-what the block can be is $2^{k} = 2^{\frac{\log n}{2}} = \sqrt{n}$. Number of possible rank queries
+possible $\rank$ query over it the result of the $\rank$ query. The number of different ways for
+what the block can be is $2^{k} = 2^{\frac{\log n}{2}} = \sqrt{n}$. Number of possible $\rank$ queries
 over it is $\BigO(\log n)$ so this makes the table with the total size 
 
 \begin{equation}
@@ -77,7 +76,7 @@ over it is $\BigO(\log n)$ so this makes the table with the total size
     \label{eq:rank_space_3}
 \end{equation}
 
-as every entry is of size $\BigO(\log\log n)$. The total space used for this solution of rank
+as every entry is of size $\BigO(\log\log n)$. The total space used for this solution of $\rank$
 is therefore sum of \ref{eq:rank_space_1}, \ref{eq:rank_space_2} and \ref{eq:rank_space_3}.
 As every one of these is using sublinear number of bits we can see that the solution uses just
 sublinear space.
@@ -89,17 +88,17 @@ sublinear space.
 \subsection{Select}
 \label{section:select}
 
-It is important that the select method is working much like an inverse to rank. This is given
+It is important that the $\select$ method is working much like an inverse to $\rank$. This is given
 by the fact that
 
                 $$\rank_c(\select_c(i)) = i$$.
 
-Thanks to rank being a nondecreasing function, it is possible to binary search for the result
+Thanks to $\rank$ being a nondecreasing function, it is possible to binary search for the result
 of $\select_c(i)$. This can be nicely combined with the solution from the previous
-section~\ref{section:rank}. At first, we binary search for the solution in the samples of rank
+section~\ref{section:rank}. At first, we binary search for the solution in the samples of $\rank$
 on the beginnings of every $k$-th bit. When we identify the correct block of $k$ bits, where
 the answer is located, we simply linearly scan for the solution. This solution is not asking
-for any additional memory on top of the space used for rank. The answer can be given in time
+for any additional memory on top of the space used for $\rank$. The answer can be given in time
 $\BigO(\log(n/k)+k)$.
 
 % TODO: sem odcitovat zname teoreticke vysledky pre select
