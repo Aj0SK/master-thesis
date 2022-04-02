@@ -14,6 +14,8 @@ by \cite{claude2010extended} that finds usage in web graphs. While many of the r
 structures give some solid theoretical bounds on the used space, others look into
 real-world space usage and performance.
 
+% TODO: rework and add more DS
+
 Succinct data structures are very helpful in scenarios where we work with massive
 amounts of data. In this case, using the ordinary data structures may limit us to place
 some of our metadata onto the slower type of memory storage. As succinct data structures
@@ -28,11 +30,11 @@ runtime may decrease due to lower amount of slow I/O operations.
 
 In this work, we are mainly concerned with \textit{bit vector}. One of the simplest
 data structures that represents the sequence of zeroes and ones while supporting the
-methods $access$, $\rank$ and $\select$. Let us have a binary sequence $S$ and a bit
-vector $B$ corresponding to $S$. Using method $access(i)$ over the $B$ simply returns
+methods $\access$, $\rank$ and $\select$. Let us have a binary sequence $S$ and a bit
+vector $B$ corresponding to $S$. Using method $\access(i)$ over the $B$ simply returns
 the $i$-th symbol in $S$. Method $\rank_c(i)$ returns the number of occurrences of
 symbol $c$ in $S$ up to the $i$-th index. Method $\select_c(i)$ on the other hand
-returns the index of $i$-th occurence of symbol $c$ in $S$.
+returns the index of $i$-th occurrence of symbol $c$ in $S$.
 
 The reason behind our focus on bit vector and particularly its compressed version of it
 is that it is one of the main building blocks of many succinct data structures and can be
@@ -49,14 +51,14 @@ after the construction. A straightforward representation of this array takes $N\
 bits of space. However, imagine a scenario where significant portion of the array is empty
 and just a handful of elements are filled in. Take for example a sparse vector of numbers,
 where most of the elements are 0. Then we could maybe use a more space-efficient approach.
-Let us assume that from $N$ elements only $n$ are non-default/non-zero and also that $n<<N$.
+Let us assume that from $N$ elements only $n$ are non-default/non-zero and also that $n\ll N$.
 First approach using the sparseness of an array is to store only the non-default elements as
 pairs $(\text{position}, \text{value})$ where $\text{position}$ is a index where $\text{value}$
-is located in $A$. This representation of pairs consumes $\BigO(n\cdot (k+\log n))$ bits of space.
-If we just store the pairs sorted by the position, accessing $i$-th element takes time $O(n)$.
+is located in $A$. This representation of pairs consumes $n\cdot (k+\log n)$ bits of space.
+If we just store the pairs sorted by the position, accessing $i$-th element takes time $O(\log n)$.
 We may use the hash table to obtain the constant time solution but this comes with additional
 memory overhead. The alternative approach using the bit vector is to store non-default elements in
-a packed array $P$ of size $n$. Alongside $P$ we shall store a bit vector $B$ of size $N$ where
+a packed array $P$ of size $n$. Alongside $P$ we store a bit vector $B$ of size $N$ where
 
 \[
    B[i]=
@@ -72,11 +74,11 @@ how many ones are preceding this particular one in $B$ to locate where in array 
 value is placed. For this, we may use the $\rank_1$ method. Note, that method $\select_1$ can
 be used to obtain the position of $i$-th non-default value in $A$. The total space used by this
 representaton is $N+n\cdot k+R$ where $R$ is the space needed to support an efficient $\rank$ query.
-As we shall show in Section~\ref{section:rank} there is an implementation supporting constant time
-$\rank$ with the space overhead used -- $R$ -- being sublinear from $N$ ($R\in o(N)$). If we are provided
-with bit vector implementation along with access and $\rank$ methods we are able to reduce the total
-space used from $k\cdot N$ to $N+n\cdot k+o(N)$ bits, which can be in some cases better than
-$n\cdot (k+\log n)$, especially if we need to use the hash table to get the constant time solution.
+As we shall show in Section~\ref{section:rank}, $\rank$ can be implemented in constant time with
+sublinear space overhead, i.e., $R = o(N)$. If we are provided with bit vector implementation along
+with $\access$ and $\rank$ methods we are able to reduce the total space used from $k\cdot N$ to
+$N+n\cdot k+o(N)$ bits, which can be in some cases better than $n\cdot (k+\log n)$, especially if
+we need to use the hash table to get the constant time solution.
 
 \section{Application 2: Storing elements of non-uniform size}
 
@@ -89,12 +91,12 @@ symbols are assigned bit code that is shorter while less frequent symbols get a 
 Even though we can store these elements one after another in memory, with the variable-length
 elements, we do not have an easy and fast way to tell at which offset from the beginning of the
 array the $i$-th is element located. Let us assume that we have $n$ elements of variable length.
-First solution is to allocate the array of length $n*k_{MAX}$ bits where $k_{MAX}$ is the number
+First solution is to allocate the array of length $nk_{MAX}$ bits where $k_{MAX}$ is the number
 of bits used for the element with the longest bit representation. This enables constant time access
 but wastes a lot of space. The second possible solution is to allocate a bit array $R$ where
 the elements are stored one after another in their raw bit representation. To locate the $i$-th element
-we will store alongside this a helper array $H$ where on $i$-th position is the index where the $i$-th
-element begins in $R$. However, this helper array consumes at least $O(n*\log n)$ bits as every entry
+we will store alongside this a helper array $P$ where on $i$-th position is the index where the $i$-th
+element begins in $R$. However, this helper array consumes at least $O(n\log n)$ bits as every entry
 contains the number that is the index into the array $R$. This helper array can be swapped for bit vector.
 The solution is to store the raw sequence of bits that store the elements one after another as in previous
 solution. On top of that, we shall use a helper bit vector of the same size. This bit vector has ones on
@@ -110,7 +112,7 @@ this method can be implemented efficiently.
 	\begin{tabular}{l|l|l|l|l|l|l|l|l|l|l|}
 	\cline{2-11}
 	\textbf{Raw binary representation} & 1          & 1 & 0 & 1 & 1          & 1 & 1          & 0 & 1 & 0          \\ \cline{2-11} 
-	\textbf{Beginning of a codeword/an element}          & \textbf{1} & 0 & 0 & 0 & \textbf{1} & 0 & \textbf{1} & 0 & 0 & \textbf{1} \\ \cline{2-11} 
+	\textbf{Beginning of an element}          & \textbf{1} & 0 & 0 & 0 & \textbf{1} & 0 & \textbf{1} & 0 & 0 & \textbf{1} \\ \cline{2-11} 
 	\end{tabular}
 	}
 	\caption[TODO]{Raw binary representation of elements 1101, 11, 101 and 0 stored one after another.
