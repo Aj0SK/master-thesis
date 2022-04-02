@@ -8,13 +8,12 @@ the used data structured is heavily influenced by their space usage. The field
 of \textit{succinct data structures} focuses on representing data using as little
 space as possible but at the same time tries not to hurt the time complexity and
 runtime of methods that these structures support. In this field, data structures for many
-varied problems have been already devised such as various succinct tree representations
-summarised by \cite{raman2013succinct} or work on succinct representation of general graphs
-by \cite{claude2010extended} that finds usage in web graphs. While many of the resulting
-structures give some solid theoretical bounds on the used space, others look into
-real-world space usage and performance.
+varied problems have been already devised such as succinct dictionaries~\citep{raman2007succinct},
+fenwick tree~\citep{bille2017succinct}. While many of the resulting structures
+give some solid theoretical bounds on the used space, others look into real-world space
+usage and performance.
 
-% TODO: rework and add more DS
+% TODO: add more DS
 
 Succinct data structures are very helpful in scenarios where we work with massive
 amounts of data. In this case, using the ordinary data structures may limit us to place
@@ -268,7 +267,7 @@ or {\tt e} if the word {\tt head} was mentioned in the text. Somewhere the lines
 {\tt house} will be located, but we do not store anything except for $T_{BWT}$ and $\Count$.
 However, we already located the range where suffixes starting with {\tt ouse} are located in.
 We can also look how many times {\tt h} is located before this range in $T_{BWT}$. Thanks to this
-number and the property \label{chapter1:fmindexprop:prop2}, we know where in $F$ the subsequence
+number and the property \ref{chapter1:fmindexprop:prop2}, we know where in $F$ the subsequence
 containing the prefix {\tt house} begins. 
 
 % TODO: mozno obrazok

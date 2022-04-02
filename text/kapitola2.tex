@@ -48,9 +48,8 @@ also to precompute every possible $\rank$ query inside of the block. Thanks to b
 there are not that many possible ways what the block can be, and what is the position in this
 block we want to compute $\rank$ for. We shall now look at the space overhead that this solution
 adds. The space overhead consists of three parts. The first part is precomputed $\rank$ for
-every superblock. Number of superblocks is $\BigO(n/\log^2 n)$ and we need
-$\BigO(\log n)$ of space to store the $\rank$ so the total amount is
-
+every superblock. Number of superblocks is $\BigO(n/\log^2 n)$ and we need $\BigO(\log n)$
+of space to store the every single $\rank$ value so the total amount is
 \begin{equation}
     \BigO\left(\frac{n}{\log^2 n}\cdot \log n\right).
     \label{eq:rank_space_1}
@@ -216,7 +215,7 @@ takes the space $\BigO(\log(n)\cdot \frac{n}{bk})$.
 	% source at https://docs.google.com/drawings/d/1f1M7e-dZIiIZh1RdgqnmptF3xWZBKqjms3f_aQwVMhg/edit
 \end{figure}
 
-To obtain interesting practical results, setting $b=\frac{\log(n)}{2}$ we get the total space
+To obtain interesting practical results, setting $b=\log(n)/2$ we get the total space
 $nH_0(B) + o(n)$. So we are storing only a sublinear amount of data on top of the compressed
 data.
 
