@@ -3,7 +3,7 @@
 
 This chapter is dedicated to the current state of the implementation of the bit vector, data
 structure that stores binary sequence supporting methods $\access$, $\rank$ and $\select$. As we have
-shown in Section~\ref{section:WaweletTree}, wavelet tree can be used to build a vector
+shown in section~\ref{section:WaweletTree}, wavelet tree can be used to build a vector
 for the general alphabet from the bit vector implementation. This is, why it is of utmost
 importance to dedicate time to efficient and fast bit vector implementation. Let us start with
 the succinct representation of a bit vector, in which we simply store bits one after another.
@@ -110,7 +110,7 @@ of numbers $(c, o)$. Here, $c$ labels the class of the block and $o$ an offset i
 the sequence of all blocks in this particular class. Most of the time, the $c$ is equal
 to the number of ones in the block. Offset, on the other hand, is the index of block in
 the sequence of all the blocks with $c$ ones, lexicographically sorted. Note that
-class $c$ has a size ${b\choose c}$. The offset is then be bounded by:
+class $c$ has a size ${b\choose c}$. The offset is then bounded by:
 
 				$$0 \leq o < {b\choose c}$$.
 
@@ -222,21 +222,22 @@ data.
 \section{Practical considerations}
 
 \subsection{Block size}
+\label{subsection:block_size}
 
 One of the most important parameters of RRR implementation is the block
 size $b$ used. A bigger block size is better because of lower per bit overhead. Not
 all block sizes are However used in practice. Very often, we are only interested in
 block sizes of the form $2^n-1$. This is because number of ones in block of size $2^n-1$
-can be anywhere between $0$ and $2^n-1$ making this in total $2^n$ options. Then, storing
-this number in the fixed buckets of size $\log_2(2^n)$ makes us use all the available space.
+can be anywhere between 0 and $2^n-1$ making this in total $2^n$ possibilities. Then, storing
+this number in the fixed buckets of size $\log_2 2^n$ makes use of all the available space.
 So in practice, the commonly used bucket sizes are 15, 31, 63 and 127. However, there are
-other limiting factors that come into play. For $b=15$ the encoding and decoding table
+other limiting factors that come into play. For block size of 15 the encoding and decoding table
 occupy roughly 64kB of space each. This is because there are $2^{15}$ of entries each taking
-2 bytes of storage. For $b=31$ these two tables would consume roughly $2^{31}\cdot 4$ bytes
-of storage which amounts to roughly 8.5GB of space. This makes this approach impossible in
-practice and forces us to use the on the fly decoding for $b>15$. The disadvantage
-is that it takes $\BigO(b)$ steps to decode the block. Furthermore, the decoding
-contains branching and it is hard to parallelize the steps in some meaningful way.
+2 bytes of storage. However, for block size of 31 these two tables would consume roughly
+$2^{31}\cdot 4$ bytes of storage. That amounts to roughly 8.5GB of space and makes this approach
+unreasonable in practice. These problems force us to use the on the fly decoding for block sizes
+bigger than 15. The disadvantage is that it takes $\BigO(b)$ steps to decode the block. Furthermore,
+the decoding contains branching and it is hard to parallelize the steps in some meaningful way.
 Note that decoding is faster if we want to access the element close to the beginning of
 the block as we can stop the process when we obtain this bit. Overall, this makes the block
 size a parameter that we can adjust to balance between better space efficiency and faster

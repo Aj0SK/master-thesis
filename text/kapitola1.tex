@@ -73,7 +73,7 @@ how many ones are preceding this particular one in $B$ to locate where in array 
 value is placed. For this, we may use the $\rank_1$ method. Note, that method $\select_1$ can
 be used to obtain the position of $i$-th non-default value in $A$. The total space used by this
 representaton is $N+n\cdot k+R$ where $R$ is the space needed to support an efficient $\rank$ query.
-As we shall show in Section~\ref{section:rank}, $\rank$ can be implemented in constant time with
+As we shall show in section~\ref{section:rank}, $\rank$ can be implemented in constant time with
 sublinear space overhead, i.e., $R = o(N)$. If we are provided with bit vector implementation along
 with $\access$ and $\rank$ methods we are able to reduce the total space used from $k\cdot N$ to
 $N+n\cdot k+o(N)$ bits, which can be in some cases better than $n\cdot (k+\log n)$, especially if
