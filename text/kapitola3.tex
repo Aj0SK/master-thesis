@@ -226,9 +226,31 @@ encoding. The complete order of the blocks in this example appears in Fig.~\ref{
 
 \section{Hybrid encoding}
 
-Let us now consider a randomly generated bit sequence $B$ of length $n$ with the $p\%$
-of ones in it. We shall make some general observations about the distribution of block
-classes of this bit sequence. If we consider a block size $b$ then the random variable
+The main space saving in RRR happens in the way how the block is stored. If we have
+a block of length $b$, then storing it in a raw bit representation takes $b$ bits.
+Storing it in block compressed form depends on the blocks class. If the block
+has class $c$ then compressed representation takes $\log_2(b)$ bits to store the
+class and $\log_2({b\choose c})$ to store the offset. Let us now consider a randomly
+generated bit sequence $B$ of length $n$ with the $p\%$ of ones in it. In
+fig.~\ref{rrrSpaceSavings} we can see for different block sizes how the space saved
+per block depends on the blocks class.
+
+\begin{figure}
+	\centerline{
+		\includegraphics[width=\textwidth]{images/rrr_space_savings}
+	}
+	\caption[TODO]{In this figure, we can see the ratio of space used by the compressed
+    block representation of blocks class and offset to the space used by storing the raw
+    block. First, second and third graph represent how the ratio is dependent on the blocks
+    class for 3 different block sizes 31, 63 and 127 respectively. Black numbers on the x-axis
+    are denoting the start and the end of the interval where compressed version is even worse
+    in the space usage (ratio over 1).
+	}
+	\label{obr:rrrSpaceSavings}
+\end{figure}
+
+We shall make some general observations about the space distribution of block
+classes of the random bit sequence. If we consider a block size $b$ then the random variable
 $X$ denoting number of ones in the block follows a binomial distribution:
             $$X \sim Bin(b,p)$$.
 
