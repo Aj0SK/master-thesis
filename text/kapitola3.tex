@@ -229,11 +229,13 @@ encoding. The complete order of the blocks in this example appears in Fig.~\ref{
 The main space saving in RRR happens in the way how the block is stored. If we have
 a block of length $b$, then storing it in a raw bit representation takes $b$ bits.
 Storing it in block compressed form depends on the blocks class. If the block
-has class $c$ then compressed representation takes $\log_2(b)$ bits to store the
-class and $\log_2({b\choose c})$ to store the offset. Let us now consider a randomly
+has class $c$ then compressed representation takes $\log_2 b$ bits to store the
+class and $\log_2{b\choose c}$ to store the offset. Let us now consider a randomly
 generated bit sequence $B$ of length $n$ with the $p\%$ of ones in it. In
-fig.~\ref{rrrSpaceSavings} we can see for different block sizes how the space saved
-per block depends on the blocks class.
+fig.~\ref{obr:rrrSpaceSavings} we can see for different block sizes how the space saved
+per block depends on the blocks class. We can see RRR saves most of the memory on the
+sparse blocks, those with small number of ones. Let us now study how often blocks
+with big number of ones arrise in a sequence with small number of ones in it.
 
 \begin{figure}
 	\centerline{
@@ -246,13 +248,18 @@ per block depends on the blocks class.
     are denoting the start and the end of the interval where compressed version is even worse
     in the space usage (ratio over 1).
 	}
+    % can be found on https://github.com/Aj0SK/master-thesis/blob/main/text/images/rrr_space_savings.png
 	\label{obr:rrrSpaceSavings}
 \end{figure}
 
 We shall make some general observations about the space distribution of block
-classes of the random bit sequence. If we consider a block size $b$ then the random variable
-$X$ denoting number of ones in the block follows a binomial distribution:
-            $$X \sim Bin(b,p)$$.
+classes of the random bit sequence containing $p\%$ of ones. If we consider a
+block size $b$ then the random variable $X$ denoting number of ones in the
+block follows a binomial distribution $$X \sim Bin(b,p)$$. As we may observe
+on the fig.~\ref{obr:hybridEncodingDistribution}, the probability of blocks
+with containing big amount of ones in the sequence containing only 5\% of ones
+is really small. Even in very long sequences, these blocks will be represented
+very sparsely. This led us to a solution that we shall name a \textit{hybrid encoding}.
 
 \begin{figure}
 	\centerline{
@@ -264,11 +271,38 @@ $X$ denoting number of ones in the block follows a binomial distribution:
     25 mark the place up to which 99\% of probability distribution lies for
     the block sizes 31, 63, 127 respectively.
 	}
+    % Can be found on https://github.com/Aj0SK/master-thesis/blob/main/text/images/hybrid_encoding_motivation.png
 	\label{obr:hybridEncodingDistribution}
 \end{figure}
 
-RRR saves most of the memory on the sparse blocks, those with small number of
-As we may observe on the Fig.~TODO, the probability of dense blocks in the sequence
-containing only 5\% of ones is really small. Even in very long sequences, dense blocks
-will be represented very sparse. This leads us to a solution that we called a
-\textit{hybrid encoding}. Idea of this encoding is to encode 
+Hybrid encoding uses a fact that in some sequences blocks with the big number
+of ones are very rare. Encoding these blocks is not that helpful as their
+compressed representation may take even more bits than the original raw
+representation. Storing the whole block may waste memory if the number of
+ones is big but there are not many possibilities how the block may look.
+Although we shall waste some memory by this from time to time (for every
+block that is almost completely filled with ones), we can save some small
+amount on memory by decreasing the number of bits that we use to store
+classes. So every block with its class bigger than some threshold will
+have its class set to this threshold and this will mean that the block
+is stored using full $b$ bits instead of $\log_2{b\choose c_i}$ bits.
+So let us choose a $c_k$ as a value for cut off. Blocks with bigger or
+equal classes than $c_k$ will not be encoded but just copied with
+the class set to $c_k$. We shall now compare these two representation.
+Let $n$ be a length of the sequence, $b$ the block size and $C_i$
+number of blocks with class $i$. First representation is then consuming
+$$(n/b)\log (b+1) + \sum_{i=0}^{i\leq b} C_i\log {b\choose i}$$
+bits of space with the first and second term being the number of bits that
+is used by the classes and offsets respectively. The second representation
+using the cutoff $c_k$ shall consume
+$$(n/b)\log (c_k+1)+\sum_{i=0}^{i<c_k}C_i\log {b\choose i} + \sum_{i=c_k}^{i\leq b}C_i b$$
+bits of space. We would like to see what is the space that we save so we
+try to calculate the mean value of the difference 
+
+% My mathematical guesswork
+\begin{align*}
+E\left((n/b)(\log (b+1) - \log (c_k+1)) + \sum_{i=c_k}^{i\leq b}C_i\cdot \left({b\choose i} - b\right)\right)\\
+=(n/b)(\log (b+1) - \log (c_k+1)) + \sum_{i=c_k}^{i\leq b}E\left(C_i\cdot \left({b\choose i} - b\right)\right)\\
+=(n/b)(\log (b+1) - \log (c_k+1)) + \sum_{i=c_k}^{i\leq b}E(C_i)\cdot \left({b\choose i} - b\right)\\
+E(C_i) = (n/b)\cdot {b\choose i}\cdot p^i\cdot (1-p)^{b-i}
+\end{align*}
