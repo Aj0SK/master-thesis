@@ -137,26 +137,33 @@ $(c_1, o_1)$ and $(c_2, o_2)$ that can be computed recursively.
 \paragraph{Decoding}
 
 Decoding is a process of obtaining block representation $B$ from the encoded
-representation $(c, o)$. Obtaining $c$ is trivial as we need only to count the number of ones in $B$. Then, we would like to use our sub-routines for the blocks
-of size $b/2$. However, to use these we need to find the classes and offsets of the smaller
-blocks. Namely, we need to find what the pairs $(c_1, o_1)$ and $(c_2, o_2)$ are. We shall again
-present this process on a previous example block {\tt 100 010} encoded as $(2, 10)$. To obtain the
-number of ones in the first sub-block only from the offset of the block, we can look into
-the table and see that there are 3 blocks with zero ones in the first sub-block. Then there are 9
-blocks with one 1 in the first sub-block. As $3+9$ is bigger than 12, we discovered that the number
-of ones in the first block is 1 and it follows that the number of ones in the second sub-block is also 1.
-There are however 9 blocks with this property, the smallest one being {\tt 001 001} and largest
-{\tt 100 100}. 
-
-Now we would like to identify what is the offset of the first sub-block. There are ${3 \choose 1} = 3$
-possibilities ({\tt 001}, {\tt 010}, {\tt 100}) how the first and also the second block may look.
-As we know, that blocks are sorted according to the first sub-block and then second sub-block. As
-all the combinations of the first block and second block are possible, all possible second sub-blocks
-will be cyclically repeating again and again with the increasing first sub-block. Each cycle will
-be of length 3 (number of possible second sub-blocks) and the number of these cycles will be 3
-(number of possible first sub-blocks). 
+representation $(c, o)$. We would like to use our sub-routines for the blocks
+of size $b/2$. However, to use these we need to find the classes and offsets of
+the smaller blocks. Namely, we need to find what the pairs $(c_1, o_1)$ and
+$(c_2, o_2)$ are. We shall again present this process on a example and decode
+the block from previous encoding example {\tt 100 010} encoded as $(2, 10)$.
+To obtain the number of ones in the first sub-block only from the offset of the
+block, we can look into the table and see that there are 3 blocks with zero ones
+in the first sub-block. As the offset of our block is ten, we need to look for this
+block between blocks with more than 0 ones. There are 9 blocks with one 1 in the first
+sub-block. As $3+9$ is bigger than 10, we discovered that the number of ones in the
+first block is 1 and it follows that the number of ones in the second sub-block is
+also 1 as we know the total number of ones in the block. There are 9 blocks with
+this exact same property, the smallest one being {\tt 001 001} and largest one
+{\tt 100 100}. We now focus on identifying what is the offset of the first and second
+sub-block. There are ${3 \choose 1} = 3$ possibilities (namely {\tt 001}, {\tt 010},
+{\tt 100}) how the first and also the second block may look. Blocks are sorted according
+to the first sub-block and then second sub-block. As all the combinations of the first
+block and second block are possible, all possible second sub-blocks will be cyclically
+repeating again and again with the increasing first sub-block. Cycle through
+the sub-blocks will be of length 3 (number of possible second sub-blocks) and will repeat
+3 times (number of possible first sub-blocks). Along these ordering of 9 blocks we are
+looking for the 7th. The first sub-block will change exactly 2 times to {\tt 100} and on the
+7th iteration through this ordering the second sub-block is {\tt 010}.
 
 % TODO: finish this
+
+In general,
 
 pairs we need to find out what are the number of blocks in the groups \ref{chapter3:encoding:1},
 \ref{chapter3:encoding:2} and \ref{chapter3:encoding:3}. To simplify, we will define $C_i$ to be a 
@@ -225,4 +232,21 @@ classes of this bit sequence. If we consider a block size $b$ then the random va
 $X$ denoting number of ones in the block follows a binomial distribution:
             $$X \sim Bin(b,p)$$.
 
-% TODO: chystam graf kumulativnych funkcii pre nejake klasicke hodnoty 5, 10, 15\% a bloky 31, 63, 127
+\begin{figure}
+	\centerline{
+		\includegraphics[width=\textwidth]{images/hybrid_encoding_motivation}
+	}
+	\caption[TODO]{On these 3 graphs, we can see the cummulative distribution
+    of blocks classes for the block sizes of 31, 63, 127. The frequency of ones is
+    fixed to 5\%. Note the marked classes on x-axis. Numbers 6, 12 and
+    25 mark the place up to which 99\% of probability distribution lies for
+    the block sizes 31, 63, 127 respectively.
+	}
+	\label{obr:hybridEncodingDistribution}
+\end{figure}
+
+RRR saves most of the memory on the sparse blocks, those with small number of
+As we may observe on the Fig.~TODO, the probability of dense blocks in the sequence
+containing only 5\% of ones is really small. Even in very long sequences, dense blocks
+will be represented very sparse. This leads us to a solution that we called a
+\textit{hybrid encoding}. Idea of this encoding is to encode 
