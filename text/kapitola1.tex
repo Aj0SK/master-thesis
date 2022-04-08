@@ -1,41 +1,41 @@
 \chapter{Introduction to succinct data structures}
 \label{kap:kap1}
 
+% TODOs: fixnut indexovanie, pridat viac prikladov pre succinct DS 
+
 \section{Motivation}
 
-In many applications, the amount of data is so significant that the choice for
-the used data structured is heavily influenced by their space usage. The field
+In many applications, the amount of data is so significant that the choice of
+the used data structures is heavily influenced by their space usage. The field
 of \textit{succinct data structures} focuses on representing data using as little
 space as possible but at the same time tries not to hurt the time complexity and
 runtime of methods that these structures support. In this field, data structures for many
 varied problems have been already devised such as succinct dictionaries~\citep{raman2007succinct},
-fenwick tree~\citep{bille2017succinct}. While many of the resulting structures
-give some solid theoretical bounds on the used space, others look into real-world space
-usage and performance.
-
-% TODO: add more DS
+fenwick tree~\citep{bille2017succinct} or trie~\citep{grossi2015fast}. While many of
+the resulting structures give some solid theoretical bounds on the used space, others look
+into real-world space usage and performance.
 
 Succinct data structures are very helpful in scenarios where we work with massive
-amounts of data. In this case, using the ordinary data structures may limit us to place
-some of our metadata onto the slower type of memory storage. As succinct data structures
-need to do the work of regular data structures but with additional constraints on memory
-usage, they are often slower and more complicated than the alternatives using more space.
-This is mainly because they do more work behind the scene and at the same time contain
+amounts of data. In these scenarios, using the ordinary data structures may limit us to place
+the entire representation of data structure onto the slower type of memory storage. As succinct
+data structures need to do the work of regular data structures but with additional constraints
+on memory usage, they are often slower and more complicated than the alternatives using more
+space. This is mainly because they do more work behind the scene and at the same time contain
 concepts and computation patterns that are slow on modern computers. However, as we hinted
 there are cases in which usage of space-efficient data structures speeds up the overall
 running time as they enable us to store the data in a faster type of memory (e.g. fast RAM
 instead of the slower disk). Thus, even if they use slower, more advanced concepts, the overall
-runtime may decrease due to lower amount of slow I/O operations.
+runtime may decrease due to lower amount of slow \textit{I/O operations}.
 
 In this work, we are mainly concerned with \textit{bit vector}. One of the simplest
 data structures that represents the sequence of zeroes and ones while supporting the
-methods $\access$, $\rank$ and $\select$. Let us have a binary sequence $S$ and a bit
-vector $B$ corresponding to $S$. Using method $\access(i)$ over the $B$ simply returns
+methods $\access$, $\rank$ and $\select$. Let us have a bit sequence $S$ and a bit
+vector $B$ built on top of $S$. Using method $\access(i)$ over the $B$ simply returns
 the $i$-th symbol in $S$. Method $\rank_c(i)$ returns the number of occurrences of
 symbol $c$ in $S$ up to the $i$-th index. Method $\select_c(i)$ on the other hand
 returns the index of $i$-th occurrence of symbol $c$ in $S$.
 
-The reason behind our focus on bit vector and particularly its compressed version of it
+The reason behind our focus on bit vector and particularly its compressed version
 is that it is one of the main building blocks of many succinct data structures and can be
 useful in a lot of use cases. We shall now look onto some interesting and useful applications
 of the bit vector.
@@ -44,15 +44,15 @@ of the bit vector.
 
 \section{Application 1: Sparse array}
 
-Let $A$ be an array of $N$ elements each taking $k$ bits. We shall be interested in
-accessing the $i$-th element and for simplicity assume that array may not change
-after the construction. A straightforward representation of this array takes $N\cdot k$
+Let $A$ be an array of $N$ elements each taking $k$ bits of space. We shall be interested in
+accessing the $i$-th element of $A$. For simplicity we assume that the elements of array may
+not change after the construction. A straightforward representation of this array takes $N\cdot k$
 bits of space. However, imagine a scenario where significant portion of the array is empty
 and just a handful of elements are filled in. Take for example a sparse vector of numbers,
 where most of the elements are 0. Then we could maybe use a more space-efficient approach.
 Let us assume that from $N$ elements only $n$ are non-default/non-zero and also that $n\ll N$.
 First approach using the sparseness of an array is to store only the non-default elements as
-pairs $(\text{position}, \text{value})$ where $\text{position}$ is a index where $\text{value}$
+pairs $(\text{position}, \text{value})$ where $\text{position}$ is an index where $\text{value}$
 is located in $A$. This representation of pairs consumes $n\cdot (k+\log n)$ bits of space.
 If we just store the pairs sorted by the position, accessing $i$-th element takes time $O(\log n)$.
 We may use the hash table to obtain the constant time solution but this comes with additional
@@ -76,7 +76,7 @@ representaton is $N+n\cdot k+R$ where $R$ is the space needed to support an effi
 As we shall show in section~\ref{section:rank}, $\rank$ can be implemented in constant time with
 sublinear space overhead, i.e., $R = o(N)$. If we are provided with bit vector implementation along
 with $\access$ and $\rank$ methods we are able to reduce the total space used from $k\cdot N$ to
-$N+n\cdot k+o(N)$ bits, which can be in some cases better than $n\cdot (k+\log n)$, especially if
+$N+n\cdot k+o(N)$ bits. This may be in some cases better than $n\cdot (k+\log n)$, especially if
 we need to use the hash table to get the constant time solution.
 
 \section{Application 2: Storing elements of non-uniform size}
@@ -94,16 +94,16 @@ First solution is to allocate the array of length $nk_{MAX}$ bits where $k_{MAX}
 of bits used for the element with the longest bit representation. This enables constant time access
 but wastes a lot of space. The second possible solution is to allocate a bit array $R$ where
 the elements are stored one after another in their raw bit representation. To locate the $i$-th element
-we will store alongside this a helper array $P$ where on $i$-th position is the index where the $i$-th
-element begins in $R$. However, this helper array consumes at least $O(n\log n)$ bits as every entry
-contains the number that is the index into the array $R$. This helper array can be swapped for bit vector.
+we shall store alongside this a helper array $P$. Number on $i$-th position is the index where the $i$-th
+element begins in $R$. This helper array consumes at least $O(n\log n)$ bits as every entry
+contains the number that is the index into the array $R$. This helper array can be replaced by bit vector.
 The solution is to store the raw sequence of bits that store the elements one after another as in previous
 solution. On top of that, we shall use a helper bit vector of the same size. This bit vector has ones on
 places where the representation of some element starts and zeroes on the other places.
 
-Identifying the beginning of $i$-th element now boils down to efficiently finding the
+Identifying the beginning of $i$-th element now boils down to efficiently locating the
 $i$-th one in the helper bit vector. If we are provided with the bit vector implementation,
-we can answer this using the method $\select_1$. In Chapter~\ref{kap:kap2}, we shall see how
+we can answer this using the $\select_1$ method. In chapter~\ref{kap:kap2}, we shall see how
 this method can be implemented efficiently.
 
 \begin{figure}
@@ -133,9 +133,8 @@ This means if we get some pattern $P$, we would like to quickly answer questions
 how many times is $P$ contained in $T$ and also where in $T$ this occurrences are located.
 This is particularly useful in bioinformatics, where we have very long sequence
 of DNA and are interested in searching for some subsequences in it. One of the solutions that
-is reasonable and may be used is constructing \textit{suffix array} of $T$. Suffix array is
-data structure that for text $T$, stores information about the lexicograpical order of its
-suffixes.
+is reasonable and may be used is constructing \textit{suffix array} of $T$. Suffix array of $T$
+is data structure that stores information about the lexicograpical order of suffixes of $T$.
 
 \begin{figure}
 	\centerline{
@@ -238,37 +237,41 @@ word {\tt omputer}. This will for example create the common run of symbol {\tt \
 \paragraph{Searching in an FM-index}
 
 As we already stated, FM-index is used for searching in the preprocessed text.
-Searching in FM-index is mainly based on the two important properties:
+Searching in FM-index is based on the two important properties:
 
 \begin{enumerate}
-	\item Suffixes containing word $W$ as a prefix form a consecutive subsequence of rows in $M$.
+	\item Suffixes containing word $w$ as a prefix form a consecutive subsequence of rows in $M$.
 	\label{chapter1:fmindexprop:prop1}
 	\item The $i$-th occurence of character $c$ in $F$ corresponds to the $i$-th occurence of $c$ in $L$.
 	\label{chapter1:fmindexprop:prop2}
 \end{enumerate}
 
-First property was also the fact that enabled us to search for a pattern in a suffix array.
+First property was also what enabled us to search for a pattern in a suffix array.
 The second property is less trivial to observe. Let us take two rows in $M$, $T_i$ and $T_j$
-such that $i<j$ of the form $T_i = cxA$ and $T_j = cyB$. As $i<j$ it follows that either
-$x<y$ or $A<B$ but this also means that after rotating these two rows we get $xAc$ and $yBc$
-and it follows that $xAc$ will also preceed $yBc$.
+such that $i<j$. Let $T_i$ be of the form $cxA$ and $T_j$ of the form $cyB$ where $c, y$ are
+characters of the text and $A$ and $B$ are sequences of characters. As $i<j$ it follows that
+either $x<y$ or $x=y$ and $A<B$ but this also means that after rotating these two rows we get
+sequences $xAc$ and $yBc$ respectively. It can be observed that $xAc$ will also preceed $yBc$
+in this case. From this it follows that the relative ordering of the same character is maintained
+from $F$ to $L$.
 
-The search for rows where $P$ is located will proceed from the end of $P$, gradually by finding
-rows where $P[n-1..], P[n-2..]$ etc. is located. At every step, these rows will form a continuous
-subsequence of rows of $M$ so we will store only its beginning and end. Let us assume that we are
+The search for rows where pattern $P$ is located will proceed from the end of $P$. This works by
+finding rows where $P[n-1..], P[n-2..]$ etc. is located. At every step, these rows will form a continuous
+subsequence of rows of $M$ so we will store only its beginning and end. This follows from the observation
+\ref{chapter1:fmindexprop:prop1}. Let us assume that we are
 looking for a word {\tt house} and we already found the range of rows in $M$ that have {\tt ouse}
-as their prefix. If we look to the last column that corresponds to the symbols precedeing {\tt ouse}
-we can see there in arbitrary order symbols like {\tt m} for ({\tt mouse}) but also {\tt h} for
-({\tt house}). To search for the range of rows in $M$ that have as a prefix word ({\tt house})
+as their prefix. If we look to the last column that corresponds to the symbols preceding {\tt ouse}
+we can see there in arbitrary order symbols like {\tt m} for word {\tt mouse} or {\tt h} for
+{\tt house}. To search for the range of rows in $M$ that have as a prefix word ({\tt house})
 we shall look into the range of all prefixes beginning with {\tt h}. Locating this range is easy
 thanks to the $\Count$ helper array. These lines are sorted according to the second character so
 there will be some lines continuing with {\tt a} if the text contained for example word {\tt hashtag}
-or {\tt e} if the word {\tt head} was mentioned in the text. Somewhere the lines starting with 
+or {\tt e} if the word {\tt head} was in the text. Somewhere the lines starting with 
 {\tt house} will be located, but we do not store anything except for $T_{BWT}$ and $\Count$.
 However, we already located the range where suffixes starting with {\tt ouse} are located in.
 We can also look how many times {\tt h} is located before this range in $T_{BWT}$. Thanks to this
 number and the property \ref{chapter1:fmindexprop:prop2}, we know where in $F$ the subsequence
-containing the prefix {\tt house} begins. 
+containing the prefix {\tt house} begins.
 
 % TODO: mozno obrazok
 
@@ -357,7 +360,7 @@ are then built by recursively applying the same idea on the subsequences $S_1$ a
 	% source at https://docs.google.com/drawings/d/1cJyda3bdTluajr3iXu1x1iL5HF0JPZqAHw6jwct9KLI/edit
 \end{figure}
 
-$\rank$ and $\select$ methods on the original sequence can be implemented using the tree
+Both $\rank$ and $\select$ methods on the original sequence can be implemented using the tree
 traversal and $\rank$/$\select$ methods on the individual bit vectors. Another modification
 studied by \cite{makinen2005succinct} is to shape the binary tree in a way that a Huffman
 tree of the sequence symbols is shaped. Huffman tree is a tree constructed in the

@@ -1,17 +1,35 @@
 \chapter{Implementation and benchmarking}
 \label{kap:kap4}
 
+In this chapter we shall focus on a implementation of the ideas from the
+previous chapter. We shall at first describe the important parts and
+decisions in our implementation. Then, we shall describe how we benchmarked
+our implementation and the results obtained.
+
 \section{Implementation}
+
+We decided to implement our solution into the SDSL library. One of the most
+matured and versatile libraries implementing the succinct data structures.
+SDSL is heavily tested library that implements structures such as wavelet tree,
+fm-index, bit vector, suffix array and many more. With all these structures,
+very thorough benchmarking framework was devised and used by \cite{gog2014optimized}.
 
 \section{Benchmarking}
 
-Most of the FM-index implementations provide at least methods:
+We benchmarked our code using 3 types of benchmarks. The first type of the bechmarks
+were the micro-benchmarks, focusing on measuring the performance of block encoding
+and decoding in more artificial setting. The second type of benchmarks was based on
+the SDSL benchmarks mainly focusing on the performance of the bit vector but also
+on the performance of fm-index when the bit vector is used inside of the fm-index.
 
+\paragraph{Bit vector in FM-index}
+Most of the FM-index implementations provide at least methods:
 \begin{itemize}
 	\item $\mathit{count}(P)$ counts the number of occurrences of $P$ in text $T$
 	\item $\mathit{locate}(P)$ returns all positions of pattern $P$ in text $T$
 	\item $\mathit{extract}(i, j)$ returns the subsequence $T[i..j]$
 \end{itemize}
-
 The reason that the $\mathit{extract}$ method is useful and non-trivial is that FM-index
 does not store the original sequence $T$ -- at least not in an easily readable form.
+As we have already shown, the bit vector is used in the implementation of the FM-index as it is
+used inside of the wavelet tree as was described in section TODO.

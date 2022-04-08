@@ -16,10 +16,9 @@ after another. Then we shall look at the compressed representation.
 \label{section:rank}
 
 Regarding $\rank$, we are concerned with two different methods namely $\rank_0(i)$
-and $\rank_1(i)$. It is easy to observe that in the binary sequence following equation
-holds:
-                    $$\rank_1(i) = i - \rank_0(i)$$
-so it is common to provide only the implementation of $\rank_1(i)$. There are two
+and $\rank_1(i)$. It can be observed that in binary sequence the equation
+$$\rank_1(i) = i - \rank_0(i)$$ holds. Thus, it is common to only provide
+the implementation of $\rank_1(i)$. There are two
 straightforward solutions we can begin with to support $\rank$ on a bit vector
 $B$. The first is not to precompute any additional information. Every time we want
 to compute $\rank_1(i)$, we run through all bits preceding $i$-th and count all
@@ -41,9 +40,9 @@ Although this solution works well and is commonly used in practice, it is possib
 answer $\rank$ query in constant time only with sublinear space overhead as was first
 shown by \cite{okanohara2007practical}. We start as in the previous solution by splitting
 the bit sequence into superblocks of size $k=\log^2 n$ and precomputing $\rank$ for every
-beginning of superblock. Every superblock we further divide into blocks of size $(\log n)/2$.
+beginning of superblock. We further divide every superblock into blocks of size $(\log n)/2$.
 We precompute the $\rank$ for all of these smaller blocks but to save space we only precompute
-the $\rank$ from the beginning of the corresponding superblock. Now, when queried for $\rank_1$
+it from the beginning of the corresponding superblock. Now, when queried for $\rank_1$
 of some position, we know in which superblock this number is located, so we know what is the
 numberof ones up to the beginning of the superblock where this position is located. We also
 precomputed what is the number of ones from the beginning of the superblock up to this block.
@@ -209,18 +208,13 @@ where $\#_1(B)$ denotes the total number of ones in $B$. We obtained (someref) u
 observation that ${n\choose k} {m\choose \ell} \leq {n+m\choose k+\ell}$. This can be seen
 when we interpret the left side of the equation as a number of ways we can choose $k$ elements
 from $n$ elements and $\ell$ elements from another $m$ elements. This is all contained on the
-right side of the equation that definitely includes all these combinations.
-
-$D$ is storing $2^b$ entries and each entry is using $b$ bits of storage.
-The total space used is then
-
-$$nH_0(B) + \ceil{n/b} + \ceil{n/b} \cdot \ceil{\log(b+1)} + b2^b$$.
-
-To speed up the process of accessing block, we will help ourselves store the pointers
-into every $k$-th element of $O$. Effectively dividing the process of locating $O[i]$ into two
-parts. The first is to find the nearest pointer leading to element before $i$ and
-then move at most $k$ places. This additional structure of roughly $\frac{n}{bk}$ integers
-takes the space $\BigO(\log(n)\cdot \frac{n}{bk})$.
+right side of the equation that includes all these combinations. $D$ is storing $2^b$ entries
+and each entry is using $b$ bits of storage.
+The total space used is then $$nH_0(B) + \ceil{n/b} + \ceil{n/b} \cdot \ceil{\log(b+1)} + b2^b$$.
+To speed up the process of accessing block, we shall store the pointers into every $k$-th element
+of $O$. This divides the process of locating $O[i]$ into two parts. The first is to find the nearest
+pointer leading to element before $i$ and then move at most $k$ places. This additional structure of
+roughly $\frac{n}{bk}$ integers takes the space $\BigO(\log(n)\cdot \frac{n}{bk})$.
 
 \begin{figure}
 	\centerline{
