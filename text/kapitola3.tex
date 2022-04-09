@@ -237,22 +237,24 @@ encoding. The complete order of the blocks in this example appears in Fig.~\ref{
 
 \section{Hybrid encoding}
 
+% TODO: pridat viac kontextu, preco sa zaoberame percentami jednotiek
+
 The main space saving in RRR happens in the way how the block is stored. If we have
 a block of length $b$, then storing it in a raw bit representation takes $b$ bits.
 Storing it in block compressed form depends on the blocks class. If the block
-has class $c$ then compressed representation takes $\log_2 b$ bits to store the
-class and $\log_2{b\choose c}$ to store the offset. Let us now consider a randomly
-generated bit sequence $B$ of length $n$ with the $p\%$ of ones in it. In
-fig.~\ref{obr:rrrSpaceSavings} we can see for different block sizes how the space saved
+has class $c$ then compressed representation takes $\ceil{\log_2 (b+1)}$ bits to store the
+class and $\ceil{\log_2{b\choose c}}$ to store the offset. In
+Fig.~\ref{obr:rrrSpaceSavings} we can see for different block sizes how the space saved
 per block depends on the blocks class. We can see RRR saves most of the memory on the
-sparse blocks, those with small number of ones. Let us now study how often blocks
-with big number of ones arrise in a sequence with small number of ones in it.
+sparse blocks, those with small number of ones. Let us now consider a randomly
+generated bit sequence $B$ of length $n$ containing $p\%$ of ones. We shall study how
+often blocks with big number of ones arise in a sequence with small number of ones in it.
 
 \begin{figure}
 	\centerline{
 		\includegraphics[width=\textwidth]{images/rrr_space_savings}
 	}
-	\caption[TODO]{In this figure, we can see the ratio of space used by the compressed
+	\caption[TODO]{Ratio of space used by the compressed
     block representation of blocks class and offset to the space used by storing the raw
     block. First, second and third graph represent how the ratio is dependent on the blocks
     class for 3 different block sizes 31, 63 and 127 respectively. Black numbers on the $x$-axis
@@ -266,11 +268,11 @@ with big number of ones arrise in a sequence with small number of ones in it.
 We shall make some general observations about the space distribution of block
 classes of the random bit sequence containing $p\%$ of ones. If we consider a
 block size $b$ then the random variable $X$ denoting number of ones in the
-block follows a binomial distribution $$X \sim Bin(b,p)$$. As we may observe
-on the fig.~\ref{obr:hybridEncodingDistribution}, the probability of blocks
-with containing big amount of ones in the sequence containing only 5\% of ones
-is really small. Even in very long sequences, these blocks will be represented
-very sparsely. This led us to a solution that we shall name a \textit{hybrid encoding}.
+block follows a binomial distribution $$X \sim Bin(b,p).$$ As we can see in
+Fig.~\ref{obr:hybridEncodingDistribution}, the probability of blocks
+containing many ones in a sequence containing only 5\% of ones
+decreases exponentially. Even in very long sequences, these blocks will
+occur very rarely. This led us to a solution that we call a \textit{hybrid encoding}.
 
 \begin{figure}
 	\centerline{
@@ -286,7 +288,7 @@ very sparsely. This led us to a solution that we shall name a \textit{hybrid enc
 	\label{obr:hybridEncodingDistribution}
 \end{figure}
 
-Hybrid encoding uses a property that in some sequences blocks with the big number
+Hybrid encoding uses a property that in some sequences blocks with high number
 of ones are very rare. Encoding these blocks is not that helpful as their
 compressed representation may take even more bits than the original raw
 representation. Storing the whole block may waste memory if the number of
@@ -306,19 +308,19 @@ We shall now compare these two representations and the theoretical space savings
 can be obtained. Let $n$ be a length of the sequence, $b$ the block size and $C_i$
 number of blocks with class $i$. For simplicity, we shall assume that $b+1$ is a
 power of 2 and $n$ is divisible by $b$. First representation is then
-consuming $$(n/b)\log_2 (b+1) + \sum_{i=0}^{i\leq b} C_i\log {b\choose i}$$
+consuming $$(n/b)\log_2 (b+1) + \sum_{i=0}^{b} C_i\ceil{\log_2 {b\choose i}}$$
 bits of space with the first and second term being the number of bits that
 is used by the classes and offsets respectively. The second representation
-using the cutoff $c_k$ shall consume $$(n/b)\log (c_k+1)+\sum_{i=0}^{i<c_k}C_i\log {b\choose i} + \sum_{i=c_k}^{i\leq b}C_i b$$
+using the cutoff $c_k$ shall consume $$(n/b)\log (c_k+1)+\sum_{i=0}^{c_k-1}C_i\log {b\choose i} + \sum_{i=c_k}^{b}C_i b$$
 bits of space. We would like to see what is the expected space that we save
 using the hybrid encoding. We start by simplifying the expected value of the
 difference of these representations:
 % My mathematical guesswork
 \begin{align*}
-E\left((n/b)(\log (b+1) - \log (c_k+1)) + \sum_{i=c_k}^{i\leq b}C_i\cdot \left({b\choose i} - b\right)\right)\\
-=(n/b)(\log (b+1) - \log (c_k+1)) + \sum_{i=c_k}^{i\leq b}E\left(C_i\cdot \left({b\choose i} - b\right)\right)\\
-=(n/b)(\log (b+1) - \log (c_k+1)) + \sum_{i=c_k}^{i\leq b}E(C_i)\cdot \left({b\choose i} - b\right)\\
-E(C_i) = (n/b)\cdot {b\choose i}\cdot p^i\cdot (1-p)^{b-i}
+E[space] &= \left[(n/b)(\log (b+1) - \log (c_k+1)) + \sum_{i=c_k}^{i\leq b}C_i\cdot \left({b\choose i} - b\right)\right]\\
+&=(n/b)(\log (b+1) - \log (c_k+1)) + \sum_{i=c_k}^{i\leq b}E\left(C_i\cdot \left({b\choose i} - b\right)\right)\\
+&=(n/b)(\log (b+1) - \log (c_k+1)) + \sum_{i=c_k}^{i\leq b}E(C_i)\cdot \left({b\choose i} - b\right)\\
+E[C_i] &= (n/b)\cdot {b\choose i}\cdot p^i\cdot (1-p)^{b-i}
 \end{align*}
 % some rough numbers from the program:
 % https://github.com/Aj0SK/master-thesis/blob/main/code/experiment3/sdsl_theoretical_stat.py
