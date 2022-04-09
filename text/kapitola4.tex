@@ -1,18 +1,19 @@
 \chapter{Implementation and benchmarking}
 \label{kap:kap4}
 
-In this chapter we shall focus on a implementation of the ideas from the
-previous chapter. We shall at first describe the important parts and
-decisions in our implementation. Then, we shall describe how we benchmarked
-our implementation and the results obtained.
+In this chapter, we focus on implementation of the ideas from the
+previous chapter. First, we describe the important parts and
+decisions in our implementation. Then, we describe how we benchmarked
+our implementation and the results we obtained.
 
 \section{Implementation}
 
-We decided to implement our solution into the SDSL library. One of the most
-matured and versatile libraries implementing the succinct data structures.
-SDSL is heavily tested library that implements structures such as wavelet tree,
-fm-index, bit vector, suffix array and many more. With all these structures,
-very thorough benchmarking framework was devised and used by \cite{gog2014optimized}.
+We decided to make our solution a part of the SDSL library~\citep{gog2014theory}. One
+of the most matured and versatile libraries implementing succinct data structures.
+SDSL is a heavily tested library offering various implementations of succinct
+structures such as wavelet tree, FM-index, bit vectors, suffix array and many more.
+With all these structures, thorough benchmarking framework was devised and used
+by \cite{gog2014optimized}.
 
 \section{Benchmarking}
 
@@ -20,7 +21,7 @@ We benchmarked our code using 3 types of benchmarks. The first type of the bechm
 were the micro-benchmarks, focusing on measuring the performance of block encoding
 and decoding in more artificial setting. The second type of benchmarks was based on
 the SDSL benchmarks mainly focusing on the performance of the bit vector but also
-on the performance of fm-index when the bit vector is used inside of the fm-index.
+on the performance of FM-index when the bit vector is used inside of the FM-index.
 
 \paragraph{Bit vector in FM-index}
 Most of the FM-index implementations provide at least methods:

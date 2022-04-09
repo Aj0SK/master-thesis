@@ -49,44 +49,44 @@ the bit sequence into superblocks of size $k=\log^2 n$ and precomputing $\rank$ 
 beginning of superblock. We further divide every superblock into blocks of size $(\log n)/2$.
 We precompute the $\rank$ for all of these smaller blocks but to save space we only precompute
 it from the beginning of the corresponding superblock. Now, when queried for $\rank_1$
-of some position, we know in which superblock this number is located, so we know what is the
-numberof ones up to the beginning of the superblock where this position is located. We also
+of some position, we know in which superblock this position is located, so we know what is the
+number of ones up to the beginning of the superblock. We also
 precomputed what is the number of ones from the beginning of the superblock up to this block.
 The last step is to find out the number of ones that are located before the index in this
 block. This would be easy to do linearly in time $\BigO(\log n)$. Hovewer, we are aiming for
-constant time $\rank$ so we need to also precompute every possible $\rank$ query inside of the
-block. Thanks to block being short there are not that many possible ways what the block can be,
-and what is the position in this block we want to compute $\rank$ for. The space overhead that
-this solution adds consists of three parts. The first part is precomputed $\rank$ for every
-superblock. Number of superblocks is $\BigO(n/\log^2 n)$ and we need $\BigO(\log n)$
-bits to store the every single $\rank$ value so the total amount is
+constant time $\rank$. Thanks to block being short there are not too many possibilities what
+this block can be so we can precompute every possible $\rank$ query inside of the every possible
+block The space overhead that this solution adds consists of three parts.
+Precomputed $\rank$ for every superblock. Number of superblocks is $\BigO(n/\log^2 n)$ and we
+need $\BigO(\log n)$ bits to store every single $\rank$ value so the total amount is
 \begin{equation}
     \BigO\left(\frac{n}{\log^2 n}\cdot \log n\right).
     \label{eq:rank_space_1}
 \end{equation}
 Number of smaller blocks is $\BigO(n/\log n)$ but now, every block stores precomputed $\rank$
-only from the beginning of superblock so this number is of size at most $\BigO(\log n)$. Thus
-we need at most $\BigO(\log\log n)$ of bits to store it. The total amount of space for the
+only from the beginning of superblock so this number is of size at most $\BigO(\log^2 n)$. Thus
+we need at most $\BigO(\log\log^2 n)$ of bits to store it. The total amount of space for the
 smaller blocks is then
 \begin{equation}
-    \BigO\left(\frac{n}{\lg n}\cdot \log\log n\right).
+    \BigO\left(\frac{n}{\lg n}\cdot \log\log^2 n\right).
     \label{eq:rank_space_2}
 \end{equation}
 The third part is the precomputed table where we store for every possible block and every
-possible $\rank$ query over it the result of the $\rank$ query. The number of different
-ways for what the block can be is $2^{(\log n)/2} = \sqrt{n}$. Number of possible $\rank$
-queries over it is $\BigO(\log n)$ so this makes the table of the size 
+possible $\rank$ query over its result. The number of different ways how the block of length
+$\log(n)/2$ may look is $2^{(\log n)/2} = \sqrt{n}$. Number of possible $\rank$
+queries over it is $\log n$ so this makes the table of the size
 \begin{equation}
     \BigO(\sqrt{n}\log n\log\log n)
     \label{eq:rank_space_3}
 \end{equation}
 as every entry in the table is of size at most $\BigO(\log\log n)$. The total space used for
 this solution of $\rank$ is therefore sum of \ref{eq:rank_space_1}, \ref{eq:rank_space_2} and
-\ref{eq:rank_space_3}. As every one of these is using sublinear number of bits we can see
-that the solution uses just sublinear space. This solution although optimal in time complexity
-is not used in practice that much as it produces 3 cache misses. One for accessing the precomputed
-rank up to the start of the superblock, then another one for the precomputed value of rank to the
-beginning of the block and in the end also one for accessing the precomputed rank value of the block.
+\ref{eq:rank_space_3}. As we may observe, every one of these is using sublinear number of bits so
+we may conclude that this constant time solution for rank poses altogether just sublinear space overhead.
+This solution although optimal in time complexity is not used in practice that much as it produces
+3 cache misses. One for accessing the precomputed rank up to the start of the superblock, then
+another one for the precomputed value of rank to the beginning of the block and in the end also one
+for accessing the precomputed $\rank$ value of the block.
 
 % TODO: ... depends on model... can be O(k/w) if we consider RAM model with w-bit registers
 % that supports popcount
@@ -95,13 +95,13 @@ beginning of the block and in the end also one for accessing the precomputed ran
 \label{section:select}
 
 It is important to note that in bit vector we are again interested in methods $\select_0$
-and $select_1$. Although there is not a way how to convert one to another just like with
-$rank$, we shall be interested mainly in $select_1$ version as the other can be easily
+and $select_1$. Although there is not a simple way how to convert one to another just like with
+$rank$, we shall be interested mainly in $select_1$ version as the other one can be easily
 implemented using the same ideas. Important property of the $\select$ method is that it
 works much like an inverse to $\rank$. This is given by the fact that
                 $$\rank_c(\select_c(i)) = i$$.
 Thanks to $\rank$ being a nondecreasing function, it is possible to binary search for the result
-of $\select_c(i)$ if we have a efficient implementation of $\rank$. This can be nicely combined
+of $\select_c(i)$ if we have an efficient implementation of $\rank$. This can be nicely combined
 with the solution from the previous section~\ref{section:rank}. At first, we binary search for
 the solution in the samples of $\rank$ stored in superblocks. When we identify the correct
 superblock of length $k$ bits, we simply linearly scan for the solution. This solution is not
