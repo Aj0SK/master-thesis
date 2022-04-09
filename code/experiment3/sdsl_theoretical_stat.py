@@ -13,9 +13,11 @@ def theoretical(n, b, cutoff, p):
     for i in range(cutoff, b+1):
         result_hybrid += expected_c_i(n, b, p, i) * b
     rate = result_hybrid/result_classic
-    print("For", n, b, cutoff, p, "the result is", result_classic, "vs", result_hybrid, "=", rate)
+    print("% For {0}, {1}, {2}, {3} the result is {4:.0f} vs {5:.0f} ... rate {6:.2f}".format(n, b,
+        cutoff, p, result_classic, result_hybrid, rate))
 
-for b in [31, 63, 127]:
-    for i in [7, 15, 31, 63]:
-        if i < b:
-            theoretical(b*1000, b, i, 0.05)
+for p in [0.05, 0.10, 0.15, 0.20]:
+    for b in [31, 63, 127]:
+        for i in [7, 15, 31, 63]:
+            if i < b:
+                theoretical(b*1000, b, i, p)
