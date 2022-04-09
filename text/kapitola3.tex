@@ -3,7 +3,7 @@
 
 In this chapter, we shall look into our enhancements to the existing
 implementations of RRR. We shall at first propose a new block encoding
-method. Then, we shall show how we can exploit the assumtions about the
+method. Then, we shall show how we can exploit the assumptions about the
 share of ones in the bit sequence.  
 
 \section{Block encoding}
@@ -162,14 +162,14 @@ the current cycle is on position $o'$. As the cycles are of the same length, thi
 
 % TODO: refactor from here
 
-We shall again present this process on a example and decode the block from previous
+We shall again present this process on an example and decode the block from previous
 encoding example {\tt 100 010} encoded as $(2, 10)$. To obtain the number of ones in
 the first sub-block only from the offset of the block, we can look into the table and
 see that there are 3 blocks with zero ones in the first sub-block. As the offset of our
 block is ten, we need to look for this block between blocks with more than 0 ones. There
 are 9 blocks with one 1 in the first sub-block. As $3+9$ is bigger than 10, we discovered
-that the number of ones in the
-first block is 1 and it follows that the number of ones in the second sub-block is
+that the number of ones in the first block is 1 and it follows that the number of ones in
+the second sub-block is
 also 1 as we know the total number of ones in the block. There are 9 blocks with
 this exact same property, the smallest one being {\tt 001 001} and largest one
 {\tt 100 100}. We had successfully narrowed our search into these 9 blocks and can now
@@ -194,8 +194,8 @@ ends. We know that every 3rd iteration, the second sub-blocks starts, where it b
 Our proposed method can be used to obtain the encoding and decoding scheme for block size $b$
 using only the encoding/decoding scheme for block size of $b/2$. As we already mentioned in
 subsection~\ref{subsection:block_size}, most of the implementations of RRR choose the size
-of the block in the form of $2^k-1$ as the possible number of ones in the block is the power
-of two and it fits exactly into $k$ bits. This is not very convenient for us as combining two
+of the block to be of form $2^k-1$ as the possible number of ones in the block is power of two and
+its representation fits exactly into $k$ bits. This is not very convenient for us as combining two
 solutions of size $2^k-1$ combined together give us only $2(2^k-1)$ what is one bit short of
 a practically desired size. To overcome this, we need to extend the block by one bit. To do
 this, we shall once again alter the order of the blocks along the same class. Let us now look on
@@ -235,10 +235,6 @@ encoding. The complete order of the blocks in this example appears in Fig.~\ref{
 	\label{obr:bitExtension}
 \end{figure}
 
-% Todo: ako toto enkodovat dekodovat
-% mozno TODO: da sa na to pozerat vlastne ako na tu nasu metodu len nespajame
-% bloky polovicnej velkosti ale jeden velkosti 1 a druhy velkosti ostatok
-
 \section{Hybrid encoding}
 
 The main space saving in RRR happens in the way how the block is stored. If we have
@@ -259,7 +255,7 @@ with big number of ones arrise in a sequence with small number of ones in it.
 	\caption[TODO]{In this figure, we can see the ratio of space used by the compressed
     block representation of blocks class and offset to the space used by storing the raw
     block. First, second and third graph represent how the ratio is dependent on the blocks
-    class for 3 different block sizes 31, 63 and 127 respectively. Black numbers on the x-axis
+    class for 3 different block sizes 31, 63 and 127 respectively. Black numbers on the $x$-axis
     are denoting the start and the end of the interval where compressed version is even worse
     in the space usage (ratio over 1).
 	}
@@ -280,11 +276,11 @@ very sparsely. This led us to a solution that we shall name a \textit{hybrid enc
 	\centerline{
 		\includegraphics[width=\textwidth]{images/hybrid_encoding_motivation}
 	}
-	\caption[TODO]{On these 3 graphs, we can see the cummulative distribution
+	\caption[TODO]{On these 3 graphs, we can see the cumulative distribution
     of blocks classes for the block sizes of 31, 63, 127. The frequency of ones is
-    fixed to 5\%. Note the marked classes on x-axis. Numbers 6, 12 and
+    fixed to 5\%. Note the marked classes on the $x$-axis. Numbers 6, 12 and
     25 mark the place up to which 99\% of probability distribution lies for
-    the block sizes 31, 63, 127 respectively.
+    the block sizes 31, 63 and 127 respectively.
 	}
     % Can be found on https://github.com/Aj0SK/master-thesis/blob/main/text/images/hybrid_encoding_motivation.png
 	\label{obr:hybridEncodingDistribution}
@@ -306,15 +302,14 @@ Blocks with bigger or equal class than $c_k$ will not be encoded but just
 copied with the class set to $c_k$. Note that the class of the block
 is a number from 0 to $b$. To possibly save some space on the bit representation
 of the blocks class, we need to choose $c_k$ such that $\ceil{\log_2 c_k+1} < \ceil{\log_2 b+1}$.
-We shall now compare these two representation and the theoretical space savings that
-can be optained. Let $n$ be a length of the sequence, $b$ the block size and $C_i$
+We shall now compare these two representations and the theoretical space savings that
+can be obtained. Let $n$ be a length of the sequence, $b$ the block size and $C_i$
 number of blocks with class $i$. For simplicity, we shall assume that $b+1$ is a
-power of 2 and $n$ is divisible by $b$. First representation is then consuming
-$$(n/b)\log_2 (b+1) + \sum_{i=0}^{i\leq b} C_i\log {b\choose i}$$
+power of 2 and $n$ is divisible by $b$. First representation is then
+consuming $$(n/b)\log_2 (b+1) + \sum_{i=0}^{i\leq b} C_i\log {b\choose i}$$
 bits of space with the first and second term being the number of bits that
 is used by the classes and offsets respectively. The second representation
-using the cutoff $c_k$ shall consume
-$$(n/b)\log (c_k+1)+\sum_{i=0}^{i<c_k}C_i\log {b\choose i} + \sum_{i=c_k}^{i\leq b}C_i b$$
+using the cutoff $c_k$ shall consume $$(n/b)\log (c_k+1)+\sum_{i=0}^{i<c_k}C_i\log {b\choose i} + \sum_{i=c_k}^{i\leq b}C_i b$$
 bits of space. We would like to see what is the expected space that we save
 using the hybrid encoding. We start by simplifying the expected value of the
 difference of these representations:
@@ -325,3 +320,15 @@ E\left((n/b)(\log (b+1) - \log (c_k+1)) + \sum_{i=c_k}^{i\leq b}C_i\cdot \left({
 =(n/b)(\log (b+1) - \log (c_k+1)) + \sum_{i=c_k}^{i\leq b}E(C_i)\cdot \left({b\choose i} - b\right)\\
 E(C_i) = (n/b)\cdot {b\choose i}\cdot p^i\cdot (1-p)^{b-i}
 \end{align*}
+% some rough numbers from the program:
+% https://github.com/Aj0SK/master-thesis/blob/main/code/experiment3/sdsl_theoretical_stat.py
+% length of sequence, b, c_k, p     ->  classic vs hybrid and hybrid/classic
+% For 31000 31 7 0.05 the result is 11653.254688758117 vs 9659.918292221933 = 0.82894595117198
+% For 31000 31 15 0.05 the result is 11653.254688758117 vs 10653.254688770203 = 0.9141870638978985
+% For 63000 63 7 0.05 the result is 21248.30618831436 vs 19469.474145268403 = 0.9162835838640052
+% For 63000 63 15 0.05 the result is 21248.30618831436 vs 19248.312180200774 = 0.9058751323334424
+% For 63000 63 31 0.05 the result is 21248.30618831436 vs 20248.30618831436 = 0.9529374251699199
+% For 127000 127 7 0.05 the result is 40046.90621685971 vs 74354.89928813813 = 1.8566952184894319
+% For 127000 127 15 0.05 the result is 40046.90621685971 vs 37156.94001701246 = 0.9278354691321804
+% For 127000 127 31 0.05 the result is 40046.90621685971 vs 38046.90621686393 = 0.9500585640956758
+% For 127000 127 63 0.05 the result is 40046.90621685971 vs 39046.9062168597 = 0.975029282047785
