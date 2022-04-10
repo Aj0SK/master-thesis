@@ -1,19 +1,19 @@
 \chapter{Implementation and benchmarking}
 \label{kap:kap4}
 
-In this chapter, we focus on implementation of the ideas from the
-previous chapter. First, we describe the important parts and
-decisions in our implementation. Then, we describe how we benchmarked
-our implementation and the results we obtained.
+In this chapter, we focus on implementation of the ideas from previous chapter.
+First, we describe the important parts and decisions in our implementation. Then,
+we describe how we benchmarked our implementation and the results we obtained.
 
 \section{Implementation}
 
-We decided to make our solution a part of the SDSL library~\citep{gog2014theory}. One
-of the most matured and versatile libraries implementing succinct data structures.
+We decided to make our solution a part of the SDSL library~\citep{gog2014theory}. This
+is of the most matured and versatile libraries implementing succinct data structures.
 SDSL is a heavily tested library offering various implementations of succinct
 structures such as wavelet tree, FM-index, bit vectors, suffix array and many more.
-With all these structures, thorough benchmarking framework was devised and used
-by \cite{gog2014optimized}.
+It allows to easily use different building blocks to implement more complex structures,
+i.e. using different bit vector implementations in wavelet tree. On top of this, thorough
+tests and benchmarks were devised and used, mainly by \cite{gog2014optimized}.
 
 \section{Benchmarking}
 

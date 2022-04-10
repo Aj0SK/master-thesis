@@ -16,7 +16,7 @@ in practice because of the huge table sizes for bigger block length. On the
 other hand, the on-the-fly decoding method can be used to support a bigger block size
 with the downside of longer encoding and decoding times. We shall now propose
 new method of encoding and decoding the blocks. The main objective of the new method is
-to create an alternative to the previous methods that enables a use of longer blocks
+to create an alternative to the previous methods that enable a use of longer blocks
 while not hurting the runtime so significantly.
 
 The main idea behind our solution is to use a divide-and-conquer approach to break
@@ -196,7 +196,7 @@ using only the encoding/decoding scheme for block size of $b/2$. As we already m
 subsection~\ref{subsection:block_size}, most of the implementations of RRR choose the size
 of the block to be of form $2^k-1$ as the possible number of ones in the block is power of two and
 its representation fits exactly into $k$ bits. This is not very convenient for us as combining two
-solutions of size $2^k-1$ combined together give us only $2(2^k-1)$ what is one bit short of
+solutions of size $2^k-1$ together gives us only $2(2^k-1)$ what is one bit short of
 a practically desired size. To overcome this, we need to extend the block by one bit. To do
 this, we shall once again alter the order of the blocks along the same class. Let us now look on
 an example how to obtain blocks of length 5 and class 3. There will be two types of blocks
