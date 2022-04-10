@@ -1,8 +1,8 @@
 \chapter{Binary sequence representation}
 \label{kap:kap2}
 
-This chapter is dedicated to showing the current state of the bit vector
-implementation. Bit vector stores binary sequence supporting methods $\access$,
+This chapter is dedicated to showcasing the current state of the bit vector
+implementations. Bit vector stores binary sequence supporting methods $\access$,
 $\rank$ and $\select$. As we have shown in section~\ref{section:WaweletTree}, wavelet
 tree can be used to build a vector for the general alphabet using the bit vector
 implementation. This is, why it is of the utmost importance to dedicate time
@@ -268,7 +268,7 @@ In this case, no decoding is necessary and we can immediately tell what the resu
 looking into the helper array $C$. This may seem like not that important change. However, in many
 places where RRR is used, the frequency of trivial blocks is high.
 
-\subsection{Alternatives}
+\paragraph{Alternatives}
 % https://github.com/simongog/sdsl-lite/blob/master/include/sdsl/sd_vector.hpp
 
 So far we have provided just one example of the bit vector implementation.
@@ -276,10 +276,10 @@ RRR is used on sequences with low entropy, where the frequency of zeroes/ones
 is shifted to one or the other side such as 20-40\% percent of all bits are the same.
 There is also second class of the bit vector implementations, heavily
 used when the number of ones in the bit sequence is much smaller than its length.
-Although we stated that RRR is used in this case, when the number of ones is very
-small, i.e. less than 5\% of the sequence, sparse bit vector implementations can
-outperform solutions based on RRR. Where RRR stands out to some of its alternatives
-is that it is also very competitive in cases where globally frequencies of zeroes
-and ones are similar, but the bit sequence has a lot of places where locally
-zeroes/ones are over-represented. Many of sparse bit vector solutions are
-based on the work by \cite{okanohara2007practical}.
+Although we stated that RRR is used in case of shifted frequencies, when the number
+of ones is very small, i.e. less than 5\% of the sequence, sparse bit vector
+implementations can outperform solutions based on RRR as was observed by \cite{navarro2012fast}.
+Where RRR stands out to some of its alternatives is that it is also very competitive
+in cases where globally frequencies of zeroes and ones are similar, but the bit
+sequence has a lot of places where locally zeroes/ones are over-represented.
+Many of sparse bit vector solutions are based on the work by \cite{okanohara2007practical}.
