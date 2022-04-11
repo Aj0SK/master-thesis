@@ -34,13 +34,13 @@ for file_path in file_paths:
 
 print(results)
 
-fig, axs = plt.subplots(6)
+fig, axs = plt.subplots(3)
 fig.suptitle('Prístup, rank, select na postupnosti dĺžky 100 000 prvkov (5% jednotiek - 0.29)')
 
 isHybrid = [True, False]
 
 for result_index in range(2):
-    for (index1, access_pattern) in enumerate(["AccessPattern::Random", "AccessPattern::ContinuousRandom"]):
+    for (index1, access_pattern) in enumerate(["AccessPattern::Random"]):
         for (index2, operation) in enumerate(["Operation::Access", "Operation::Rank", "Operation::Select"]):
             for (index3, block_size) in enumerate([15, 31, 63, 127]):
                 x = [res[1] for (par, res) in results[0] if par[0] == operation and par[1] == access_pattern and int(par[3]) == block_size and (isHybrid[result_index] == sum([1 for i in range(256) if (str(i) + ">") in par]))]
