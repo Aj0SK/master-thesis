@@ -191,23 +191,23 @@ the second sub-block is not that hard. So far, we focused how many times the fir
 changes up to the 7th position. Now, we turn our attention on which second sub-block the cycle
 ends. We know that every 3rd iteration, the second sub-blocks starts, where it began.
 
-\paragraph{Combining encoding methods}
+\paragraph{Extending block size of method}
 
-Our proposed method can be used to obtain the encoding and decoding scheme for block size $2b$
+Our newly proposed method can be used to obtain the encoding and decoding scheme for block size $2b$
 using only scheme for the block size of $b$. As we already mentioned in
-subsection~\ref{subsection:block_size}, most of the implementations of RRR choose the size
-of the block to be of form $2^k-1$ as the possible number of ones in the block is power of two and
+subsection~\ref{subsection:block_size}, most of the implementations of RRR choose the size of the
+block to be of form $2^k-1$ as the number of possibilities for the value of class is power of two and
 its representation fits exactly into $k$ bits. This is not very convenient for us as combining two
 solutions of size $2^k-1$ together gives us only solution for block size $2(2^k-1)$ what is one bit
 short of a practically desired size $2^{k+1}-1$. To overcome this, we need to extend the block by one bit.
 To do this, we shall once again alter the order of the blocks along the same class. Let us now look on
-an example how to obtain blocks of length 5 and class 3. There will be two types of blocks
-in this class. One of the form {\tt 0xxxx} and second of the form {\tt 1xxxx}. There are
+an example how we order blocks of length 5 and class 3. There will be two types of blocks
+in this class. Ones of the form {\tt 0xxxx} and the rest of the form {\tt 1xxxx}. There are
 ${4\choose 3}$ ways how to distribute 3 ones along the four places so there will be exactly
 4 blocks starting with 0 and ${4\choose 2}$ blocks starting with one. Blocks starting with
-zero will continue with all the possible blocks of length 4 and class 3. These blocks can
-come in any valid ordering but we can already use our newly devised technique of block
-encoding. The complete order of the blocks in this example appears in Fig.~\ref{obr:bitExtension}.
+zero will continue with all the possible blocks of length 4 and class 3. These blocks could
+come in any valid ordering but we can already use our newly devised ordering $P$.
+The complete order of the blocks in this example appears in Fig.~\ref{obr:bitExtension}.
 \begin{figure}
 	\centerline{
         \begin{tabular}{l c}
@@ -237,28 +237,29 @@ encoding. The complete order of the blocks in this example appears in Fig.~\ref{
 	\label{obr:bitExtension}
 \end{figure}
 
-We shall call this technique \textit{bit extension} technique. The fact that this
-ordering can be encoded and decoded easily is based on the observation that this technique,
+We shall call this technique \textit{bit extending} technique. The fact that this
+ordering can be encoded and decoded easily is based on the observation that this technique
 is just a generalization of our newly devised technique. Up to this point, we combined
 scheme for the block size $b$ to obtain solution for block size $2b$. Combining method
 for block size $b_1$ with method for block size $b_2$ yields the block size $b_1+b_2$
-but uses the same arguments and ideas for encoding and decoding as we already presented. 
+but we may use the same arguments and ideas for encoding and decoding as we already presented. 
 
 \section{Hybrid encoding}
 
 % TODO: pridat viac kontextu, preco sa zaoberame percentami jednotiek
 % TODO: ukazat ze vacsie b je lepsie
 
-The main space saving in RRR happens in the way how the block is stored. If we have
+The main space saving done by RRR happens in the way how the blocks are stored. If we have
 a block of length $b$, then storing it in a raw bit representation takes $b$ bits.
-Storing it in block compressed form depends on the blocks class. If the block
+The amount of bits used when we use compressed form depends on the blocks class. If the block
 has class $c$ then compressed representation takes $\ceil{\log_2 (b+1)}$ bits to store the
 class and $\ceil{\log_2{b\choose c}}$ to store the offset. In
 Fig.~\ref{obr:rrrSpaceSavings} we can see for different block sizes how the space saved
-per block depends on the blocks class. We may observe RRR saves most of the memory on the
+per block depends on the blocks class. We may observe that RRR saves most of the memory on the
 sparse blocks, those with small number of ones. Let us now consider a randomly
-generated bit sequence $B$ of length $n$ containing $p\%$ of ones. We shall study how
-often blocks with big number of ones arise in a sequence with small number of ones in it.
+generated bit sequence $B$ of length $n$ containing $p\%$ of ones. Although we shall put most of
+our interest into a sequences with very small percentage of ones in it, we now do the analysis
+about the space distribution of blocks classes for any $p$.
 
 \begin{figure}
 	\centerline{
@@ -275,14 +276,12 @@ often blocks with big number of ones arise in a sequence with small number of on
 	\label{obr:rrrSpaceSavings}
 \end{figure}
 
-We shall make some general observations about the space distribution of block
-classes of the random bit sequence containing $p\%$ of ones. If we consider a
-block size $b$ then the random variable $X$ denoting number of ones in the
-block follows a binomial distribution $$X \sim Bin(b,p).$$ As we can see in
+If we consider a block size $b$ then the random variable $X$ denoting number of ones in the
+block follows a binomial distribution $$X \sim Bin(b,p).$$ As we may observe in
 Fig.~\ref{obr:hybridEncodingDistribution}, the probability of blocks
-containing many ones in a sequence containing only 5\% of ones
-decreases exponentially. Even in very long sequences, these blocks will
-occur very rarely. This led us to a solution that we call a \textit{hybrid encoding}.
+containing a lot of ones decreases exponentially in a sequence containing only 5\% of ones.
+Even in very long sequences, these blocks will occur very rarely. This led us to a solution
+that we call a \textit{hybrid encoding}.
 
 \begin{figure}
 	\centerline{
@@ -305,7 +304,7 @@ representation. Storing the whole block may waste space if the number of
 ones is big but there are not many possibilities how the block may look.
 Although we waste some space by this from time to time (for every
 block that is almost completely filled with ones), we can save some small
-amount of space by decreasing the number of bits used to store classes.
+amount of space by decreasing the number of bits used to store the classes.
 The main idea of hybrid encoding is that every block with its
 class bigger than some threshold will have its class set to this threshold
 and this will mean that the block is stored using full $b$ bits instead of
@@ -342,42 +341,76 @@ from the previous blocks and as we are interested in total number of blocks with
 it follows that $C_i$ follows binomial distribution. As $C_i \sim Bin(n/b, p^c(1-p)^{b-c})$,
 it follows that the expected value is equal to \ref{eq:hybrid_encoding_expected_c_i}.
 
+We present the expected space saved by hybrid implementation for some chosen values of
+$b, c_k$ and $p$ in Fig.~\ref{obr:hybridEncodingTheoretical}.
+
+\begin{figure}
+	\centerline{
+        \begin{tabular}{l c c c}
+            $p$                 & $b$   &   $c_k$   &  {\tt used space}\\
+        \hline
+            \multirow{7}{*}{5}  &   31  &   7       &   0.83\\
+                                &   31  &   15      &   0.91\\
+                                &   63  &   15      &   0.91\\
+                                &   63  &   31      &   0.95\\
+                                &   127 &   7       &   1.86\\
+                                &   127 &   15      &   0.93\\
+                                &   127 &   63      &   0.98\\
+        \end{tabular}
+        \hspace{4em}
+        \begin{tabular}{l c c c}
+                                &       &           &       \\
+            \multirow{7}{*}{10} &   31  &   7       &   0.90\\
+                                &   31  &   15      &   0.94\\
+                                &   63  &   15      &   0.94\\
+                                &   63  &   31      &   0.97\\
+                                &   127 &   7       &   2.03\\
+                                &   127 &   15      &   1.22\\
+                                &   127 &   63      &   0.99\\
+        \end{tabular}
+        %\hspace{4em}
+	}
+	\caption[TODO]{
+        TODO.
+    }
+	\label{obr:hybridEncodingTheoretical}
+\end{figure}
 % some rough numbers from the program:
 % https://github.com/Aj0SK/master-thesis/blob/main/code/experiment3/sdsl_theoretical_stat.py
-% length of sequence, b, c_k, p     ->  classic vs hybrid and hybrid/classic
-% For 31000, 31, 7, 0.05 the result is 11653 vs 9660 ... rate 0.83
-% For 31000, 31, 15, 0.05 the result is 11653 vs 10653 ... rate 0.91
-% For 63000, 63, 7, 0.05 the result is 21248 vs 19469 ... rate 0.92
-% For 63000, 63, 15, 0.05 the result is 21248 vs 19248 ... rate 0.91
-% For 63000, 63, 31, 0.05 the result is 21248 vs 20248 ... rate 0.95
-% For 127000, 127, 7, 0.05 the result is 40047 vs 74355 ... rate 1.86
-% For 127000, 127, 15, 0.05 the result is 40047 vs 37157 ... rate 0.93
-% For 127000, 127, 31, 0.05 the result is 40047 vs 38047 ... rate 0.95
-% For 127000, 127, 63, 0.05 the result is 40047 vs 39047 ... rate 0.98
-% For 31000, 31, 7, 0.1 the result is 16789 vs 15065 ... rate 0.90
-% For 31000, 31, 15, 0.1 the result is 16789 vs 15789 ... rate 0.94
-% For 63000, 63, 7, 0.1 the result is 32263 vs 42662 ... rate 1.32
-% For 63000, 63, 15, 0.1 the result is 32263 vs 30281 ... rate 0.94
-% For 63000, 63, 31, 0.1 the result is 32263 vs 31263 ... rate 0.97
-% For 127000, 127, 7, 0.1 the result is 62765 vs 127569 ... rate 2.03
-% For 127000, 127, 15, 0.1 the result is 62765 vs 76680 ... rate 1.22
-% For 127000, 127, 31, 0.1 the result is 62765 vs 60765 ... rate 0.97
-% For 127000, 127, 63, 0.1 the result is 62765 vs 61765 ... rate 0.98
-% For 31000, 31, 7, 0.15 the result is 20885 vs 20364 ... rate 0.98
-% For 31000, 31, 15, 0.15 the result is 20885 vs 19885 ... rate 0.95
-% For 63000, 63, 7, 0.15 the result is 40878 vs 60139 ... rate 1.47
-% For 63000, 63, 15, 0.15 the result is 40878 vs 39523 ... rate 0.97
-% For 63000, 63, 31, 0.15 the result is 40878 vs 39878 ... rate 0.98
-% For 127000, 127, 7, 0.15 the result is 80398 vs 129978 ... rate 1.62
-% For 127000, 127, 15, 0.15 the result is 80398 vs 122017 ... rate 1.52
-% For 127000, 127, 31, 0.15 the result is 80398 vs 78497 ... rate 0.98
-% For 127000, 127, 63, 0.15 the result is 80398 vs 79398 ... rate 0.99
-% For 31000, 31, 7, 0.2 the result is 24188 vs 25577 ... rate 1.06
-% For 31000, 31, 15, 0.2 the result is 24188 vs 23189 ... rate 0.96
-% For 63000, 63, 7, 0.2 the result is 47772 vs 65193 ... rate 1.36
-% For 63000, 63, 15, 0.2 the result is 47772 vs 49499 ... rate 1.04
-% For 63000, 63, 31, 0.2 the result is 47772 vs 46772 ... rate 0.98
-% For 127000, 127, 7, 0.2 the result is 94468 vs 130000 ... rate 1.38
-% For 127000, 127, 15, 0.2 the result is 94468 vs 130636 ... rate 1.38
-% For 127000, 127, 31, 0.2 the result is 94468 vs 95834 ... rate 1.01
-% For 127000, 127, 63, 0.2 the result is 94468 vs 93468 ... rate 0.99
+% n, b, c_k, p     ->  classic vs hybrid and hybrid/classic
+% For 100000, 31, 7, 0.05 the result is 37591 vs 31161 ... rate 0.83
+% For 100000, 31, 15, 0.05 the result is 37591 vs 34365 ... rate 0.91
+% For 100000, 63, 7, 0.05 the result is 33727 vs 30904 ... rate 0.92
+% For 100000, 63, 15, 0.05 the result is 33727 vs 30553 ... rate 0.91
+% For 100000, 63, 31, 0.05 the result is 33727 vs 32140 ... rate 0.95
+% For 100000, 127, 7, 0.05 the result is 31533 vs 58547 ... rate 1.86
+% For 100000, 127, 15, 0.05 the result is 31533 vs 29257 ... rate 0.93
+% For 100000, 127, 31, 0.05 the result is 31533 vs 29958 ... rate 0.95
+% For 100000, 127, 63, 0.05 the result is 31533 vs 30746 ... rate 0.98
+% For 100000, 31, 7, 0.1 the result is 54158 vs 48597 ... rate 0.90
+% For 100000, 31, 15, 0.1 the result is 54158 vs 50932 ... rate 0.94
+% For 100000, 63, 7, 0.1 the result is 51211 vs 67717 ... rate 1.32
+% For 100000, 63, 15, 0.1 the result is 51211 vs 48065 ... rate 0.94
+% For 100000, 63, 31, 0.1 the result is 51211 vs 49624 ... rate 0.97
+% For 100000, 127, 7, 0.1 the result is 49421 vs 100448 ... rate 2.03
+% For 100000, 127, 15, 0.1 the result is 49421 vs 60378 ... rate 1.22
+% For 100000, 127, 31, 0.1 the result is 49421 vs 47847 ... rate 0.97
+% For 100000, 127, 63, 0.1 the result is 49421 vs 48634 ... rate 0.98
+% For 100000, 31, 7, 0.15 the result is 67370 vs 65690 ... rate 0.98
+% For 100000, 31, 15, 0.15 the result is 67370 vs 64144 ... rate 0.95
+% For 100000, 63, 7, 0.15 the result is 64885 vs 95458 ... rate 1.47
+% For 100000, 63, 15, 0.15 the result is 64885 vs 62736 ... rate 0.97
+% For 100000, 63, 31, 0.15 the result is 64885 vs 63298 ... rate 0.98
+% For 100000, 127, 7, 0.15 the result is 63305 vs 102345 ... rate 1.62
+% For 100000, 127, 15, 0.15 the result is 63305 vs 96077 ... rate 1.52
+% For 100000, 127, 31, 0.15 the result is 63305 vs 61809 ... rate 0.98
+% For 100000, 127, 63, 0.15 the result is 63305 vs 62518 ... rate 0.99
+% For 100000, 31, 7, 0.2 the result is 78024 vs 82507 ... rate 1.06
+% For 100000, 31, 15, 0.2 the result is 78024 vs 74802 ... rate 0.96
+% For 100000, 63, 7, 0.2 the result is 75829 vs 103481 ... rate 1.36
+% For 100000, 63, 15, 0.2 the result is 75829 vs 78570 ... rate 1.04
+% For 100000, 63, 31, 0.2 the result is 75829 vs 74242 ... rate 0.98
+% For 100000, 127, 7, 0.2 the result is 74384 vs 102362 ... rate 1.38
+% For 100000, 127, 15, 0.2 the result is 74384 vs 102863 ... rate 1.38
+% For 100000, 127, 31, 0.2 the result is 74384 vs 75460 ... rate 1.01
+% For 100000, 127, 63, 0.2 the result is 74384 vs 73596 ... rate 0.99
