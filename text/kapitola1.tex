@@ -36,11 +36,9 @@ symbol $c$ in $S$ up to the $i$-th index. Method $\select_c(i)$ on the other han
 returns the index of $i$-th occurrence of symbol $c$ in $S$.
 
 The reason behind our focus on bit vector and particularly its compressed version
-is that it is one of the main building blocks of many succinct data structures and can be
-useful in a lot of use cases. We shall now look onto some interesting and useful applications
-of the bit vector.
+is that it is one of the main building blocks of many succinct data structures.
+In the next sections, we introduce some interesting and useful applications of the bit vector.
 
-% TODO: name use cases of bit vector (mainly compressed one)
 
 \section{Application 1: Sparse array}
 
@@ -256,20 +254,20 @@ in this case. From this it follows that the relative ordering of the same charac
 from $F$ to $L$.
 
 The search for rows where pattern $P$ is located will proceed from the end of $P$. This works by
-finding rows where $P[n-1..], P[n-2..]$ etc. is located. At every step, these rows will form a continuous
-subsequence of rows of $M$ so we will store only its beginning and end. This follows from the observation
-\ref{chapter1:fmindexprop:prop1}. Let us assume that we are
+finding rows where suffixes $P[n\ldots], P[n-1\ldots]$ etc. are located. At every step, these
+rows will form a continuous subsequence of rows of $M$ so we will store only its beginning and end.
+This follows from the observation \ref{chapter1:fmindexprop:prop1}. Let us assume that we are
 looking for a word {\tt house} and we already found the range of rows in $M$ that have {\tt ouse}
-as their prefix. If we look to the last column that corresponds to the symbols preceding {\tt ouse}
-we can see there in arbitrary order symbols like {\tt m} for word {\tt mouse} or {\tt h} for
-{\tt house}. To search for the range of rows in $M$ that have as a prefix word ({\tt house})
-we shall look into the range of all prefixes beginning with {\tt h}. Locating this range is easy
-thanks to the $\Count$ helper array. These lines are sorted according to the second character so
-there will be some lines continuing with {\tt a} if the text contained for example word {\tt hashtag}
-or {\tt e} if the word {\tt head} was in the text. Somewhere the lines starting with 
+as their prefix. If we look to the last column, these symbols corresponds to the symbols preceding
+{\tt ouse} in the text. We can maybe see there in arbitrary order symbols like {\tt m} for worw
+{\tt mouse} or {\tt h} for {\tt house}. To search for the range of rows in $M$ that have as a prefix
+word ({\tt house}) we shall look into the range of all prefixes beginning with {\tt h}. Locating this
+range is easy thanks to the $\Count$ helper array. Lines in this range are sorted according to the
+second character so there will be some lines continuing with {\tt a} if the text contained for exampl
+word {\tt hashtag} or {\tt e} if the word {\tt head} was in the text. Somewhere the lines starting with 
 {\tt house} will be located, but we do not store anything except for $T_{BWT}$ and $\Count$.
 However, we already located the range where suffixes starting with {\tt ouse} are located in.
-We can also look how many times {\tt h} is located before this range in $T_{BWT}$. Thanks to this
+We can look how many times {\tt h} is located before this range in $T_{BWT}$. Thanks to this
 number and the property \ref{chapter1:fmindexprop:prop2}, we know where in $F$ the subsequence
 containing the prefix {\tt house} begins.
 

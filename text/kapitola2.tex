@@ -1,15 +1,15 @@
 \chapter{Binary sequence representation}
 \label{kap:kap2}
 
-This chapter is dedicated to showcasing the current state of the bit vector
+This chapter is dedicated to outlining the current state of the bit vector
 implementations. Bit vector stores binary sequence supporting methods $\access$,
 $\rank$ and $\select$. As we have shown in section~\ref{section:WaweletTree}, wavelet
 tree can be used to build a vector for the general alphabet using the bit vector
 implementation. This is, why it is of the utmost importance to dedicate time
-to build fast and efficient bit vector implementation. We start with the
-succinct representation of a bit vector, in which we simply store bits one
-after another. Then we look at the compressed representation. In the end we
-briefly explain what other alternatives there exist for bit vector implementation.
+to build fast and efficient bit vector implementation. We start with its
+succinct representation, in which we simply store bits one after another. Then we
+look at the compressed representation. In the end we briefly explain what other
+alternatives exists for bit vector implementation.
 
 \section{Bit vector implementation}
 
@@ -236,9 +236,9 @@ roughly $\frac{n}{bk}$ integers takes the space $\BigO(\log(n)\cdot \frac{n}{bk}
 	% source at https://docs.google.com/drawings/d/1f1M7e-dZIiIZh1RdgqnmptF3xWZBKqjms3f_aQwVMhg/edit
 \end{figure}
 
-To obtain interesting practical results, we may set the block size to $\log(n)/2$. Then, we
-get the total space $nH_0(B) + o(n)$. So we are storing only a sublinear amount of data on
-top of the compressed data.
+To obtain interesting practical results, we set the block size to $\log(n)/2$. Then, we
+get the total space used $nH_0(B) + o(n)$. This means that we are storing only a sublinear
+amount of data on top of the compressed data.
 
 \paragraph{Practical considerations}
 \label{subsection:block_size}
@@ -247,26 +247,26 @@ One of the most important parameters of RRR implementation is the block
 size $b$ used. A bigger block size is better because of lower per bit overhead. Not
 all block sizes are however used in practice. Very often, we are only interested in
 block sizes of the form $2^k-1$. This is because number of ones in block of size $2^k-1$
-can be anywhere between 0 and $2^k-1$ making this in total $2^k$ possibilities. Then, storing
+can be number between 0 and $2^k-1$ making this in total $2^k$ possibilities. Storing
 this number in the fixed buckets of size $\log_2 2^k$ makes use of all the available space.
-So in practice, the commonly used bucket sizes are 15, 31, 63 and 127. However, there are
+Thus, the commonly used bucket sizes in practice are 15, 31, 63 and 127. However, there are
 other limiting factors that come into play. For block size of 15 the encoding and decoding table
-occupy roughly 64kB of space each. This is because there are $2^{15}$ of entries each taking
-2 bytes of storage. However, for block size of 31 these two tables would consume roughly
+occupies each roughly 64kB of space. This is because there are $2^{15}$ of entries each taking
+2 bytes of storage. Unfortunately, for block size of 31 these two tables would consume roughly
 $2^{31}\cdot 4$ bytes of storage. That amounts to roughly 8.5GB of space and makes this approach
 unreasonable in practice. These problems force us to use the on the fly decoding for block sizes
 bigger than 15. The disadvantage is that it takes $\BigO(b)$ steps to decode the block. Furthermore,
 the decoding contains branching and it is hard to parallelize the steps in some meaningful way.
 Note that decoding is faster if we want to access the element close to the beginning of
-the block as we can stop the process when we obtain this bit. Overall, this makes the block
+the block as we can stop the process when we obtain the particular bit. Overall, this makes the block
 size a parameter that we can adjust to balance between better space efficiency and faster
-runtime performance. There are several used implementation speedups and improvements.
-They impact the run time in a significant way. The first trick, being one of the most important
-for the real life performance is taking care of special case when the number of ones in the block
+runtime performance. There are several used implementation speedups and improvements. They impact
+the run time in a significant way. The most common and also impactful trick on the real life
+performance is taking care of special case when the number of ones in the block
 is zero or equal to the length of the block $b$. These blocks are often called \textit{trivial}. 
 In this case, no decoding is necessary and we can immediately tell what the result is only from
 looking into the helper array $C$. This may seem like not that important change. However, in many
-places where RRR is used, the frequency of trivial blocks is high.
+places where RRR is used, the frequency of trivial blocks tends to be high.
 
 \paragraph{Alternatives}
 % https://github.com/simongog/sdsl-lite/blob/master/include/sdsl/sd_vector.hpp
@@ -275,11 +275,11 @@ So far we have provided just one example of the bit vector implementation.
 RRR is used on sequences with low entropy, where the frequency of zeroes/ones
 is shifted to one or the other side such as 20-40\% percent of all bits are the same.
 There is also second class of the bit vector implementations, heavily
-used when the number of ones in the bit sequence is much smaller than its length.
+used when the frequency of zeroes or ones is more significantly shifted.
 Although we stated that RRR is used in case of shifted frequencies, when the number
 of ones is very small, i.e. less than 5\% of the sequence, sparse bit vector
 implementations can outperform solutions based on RRR as was observed by \cite{navarro2012fast}.
 Where RRR stands out to some of its alternatives is that it is also very competitive
-in cases where globally frequencies of zeroes and ones are similar, but the bit
-sequence has a lot of places where locally zeroes/ones are over-represented.
+in cases where frequencies of zeroes and ones are similar globally, but the bit
+sequence has a lot of places where locally zeroes or ones are over-represented.
 Many of sparse bit vector solutions are based on the work by \cite{okanohara2007practical}.

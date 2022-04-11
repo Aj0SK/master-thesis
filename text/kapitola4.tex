@@ -16,7 +16,7 @@ It allows to easily use different building blocks to implement more complex stru
 i.e. using different bit vector implementations in wavelet tree. On top of this, thorough
 tests and benchmarks were devised, mainly by \cite{gog2014optimized}.
 The RRR implementations consists of \texttt{rrr\_vector} class that uses the on the fly-decoding
-and enables us to use any blocks size from 3 up to 256. SDSL also provides specialization
+and enables us to use any block size from 3 up to 256. SDSL also provides specialization
 of this class for block size 15 that uses the table encoding method. We thus decided to use
 this as an underlying solution for the sub-blocks and provided specialized implementations
 for block sizes 31, 63 and 127 that are mostly used in the practical scenarios. We tried to
