@@ -253,7 +253,7 @@ Storing it in block compressed form depends on the blocks class. If the block
 has class $c$ then compressed representation takes $\ceil{\log_2 (b+1)}$ bits to store the
 class and $\ceil{\log_2{b\choose c}}$ to store the offset. In
 Fig.~\ref{obr:rrrSpaceSavings} we can see for different block sizes how the space saved
-per block depends on the blocks class. We can see RRR saves most of the memory on the
+per block depends on the blocks class. We may observe RRR saves most of the memory on the
 sparse blocks, those with small number of ones. Let us now consider a randomly
 generated bit sequence $B$ of length $n$ containing $p\%$ of ones. We shall study how
 often blocks with big number of ones arise in a sequence with small number of ones in it.
@@ -299,12 +299,12 @@ occur very rarely. This led us to a solution that we call a \textit{hybrid encod
 Hybrid encoding uses a property that in some sequences blocks with high number
 of ones are very rare. Encoding these blocks is not that helpful as their
 compressed representation may take even more bits than the original raw
-representation. Storing the whole block may waste memory if the number of
+representation. Storing the whole block may waste space if the number of
 ones is big but there are not many possibilities how the block may look.
-Although we shall waste some memory by this from time to time (for every
+Although we waste some space by this from time to time (for every
 block that is almost completely filled with ones), we can save some small
-amount of memory by decreasing the number of bits that we use to store
-classes. The main idea of hybrid encoding is that every block with its
+amount of space by decreasing the number of bits used to store classes.
+The main idea of hybrid encoding is that every block with its
 class bigger than some threshold will have its class set to this threshold
 and this will mean that the block is stored using full $b$ bits instead of
 $\ceil{\log_2{b\choose c_i}}$ bits. If we choose a $c_k$ as a value for cut off.
@@ -325,16 +325,20 @@ bits of space. We would like to see what is the expected space that we save
 using the hybrid encoding. We start by simplifying the expected value of the
 difference of these representations:
 % My mathematical guesswork
-\begin{align*}
-E[space] &= E\left[(n/b)(\lg(b+1)-\lg(c_k+1)) + \sum_{i=c_k}^{i\leq b}\ceil{C_i}\cdot \left(\ceil{{b\choose i}} - b\right)\right]\\
-&=(n/b)(\lg(b+1)-\lg(c_k+1)) + \sum_{i=c_k}^{i\leq b}E\left[\ceil{C_i}\cdot \left(\ceil{{b\choose i}} - b\right)\right]\\
-&=(n/b)(\lg(b+1)-\lg(c_k+1)) + \sum_{i=c_k}^{i\leq b}\ceil{E\left[C_i\right]}\cdot \left(\ceil{{b\choose i}} - b\right)\\
-E[C_i] &= (n/b)\cdot {b\choose i}\cdot p^i\cdot (1-p)^{b-i}
-\end{align*}
+\begin{align} 
+E[space] &= E\left[(n/b)(\lg(b+1)-\lg(c_k+1)) + \sum_{i=c_k}^{i\leq b}\ceil{C_i}\cdot \left(\ceil{{b\choose i}} - b\right)\right] \nonumber\\
+&=(n/b)(\lg(b+1)-\lg(c_k+1)) + \sum_{i=c_k}^{i\leq b}E\left[\ceil{C_i}\cdot \left(\ceil{{b\choose i}} - b\right)\right] \nonumber\\
+&=(n/b)(\lg(b+1)-\lg(c_k+1)) + \sum_{i=c_k}^{i\leq b}\ceil{E\left[C_i\right]}\cdot \left(\ceil{{b\choose i}} - b\right) \nonumber\\
+E[C_i] &= (n/b)\cdot {b\choose i}\cdot p^i\cdot (1-p)^{b-i} \label{eq:hybrid_encoding_expected_c_i}
+\end{align}
 
-Here we used the linearity of the expected value. To compute the expected value of
+Here we mainly use the linearity of the expected value. To compute the expected value of
 $C_i$ we used the fact, that number of blocks of certain class follows binomial
-distribution.
+distribution. We know that in the bit sequence, there is $p\%$ of ones. There is $n/b$ blocks
+and each has probability $p^c(1-p)^{b-c}$ for being of class $c$. This probability is independent
+from the previous blocks and as we are interested in total number of blocks with this class,
+it follows that $C_i$ follows binomial distribution. As $C_i \sim Bin(n/b, p^c(1-p)^{b-c})$,
+it follows that the expected value is equal to \ref{eq:hybrid_encoding_expected_c_i}.
 
 % some rough numbers from the program:
 % https://github.com/Aj0SK/master-thesis/blob/main/code/experiment3/sdsl_theoretical_stat.py

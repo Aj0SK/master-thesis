@@ -1,19 +1,48 @@
 \chapter{Implementation and benchmarking}
 \label{kap:kap4}
 
-In this chapter, we focus on implementation of the ideas from previous chapter.
-First, we describe the important parts and decisions in our implementation. Then,
-we describe how we benchmarked our implementation and the results we obtained.
+In this chapter, we focus on important aspects of implementation of the ideas from
+previous chapter and the results we obtained using them. First, we describe the
+important parts and decisions in our implementation. Then, we describe how we
+benchmarked our implementation and the results we obtained.
 
 \section{Implementation}
 
 We decided to make our solution a part of the SDSL library~\citep{gog2014theory}. This
-is of the most matured and versatile libraries implementing succinct data structures.
+is one of the most matured and versatile libraries implementing succinct data structures.
 SDSL is a heavily tested library offering various implementations of succinct
 structures such as wavelet tree, FM-index, bit vectors, suffix array and many more.
 It allows to easily use different building blocks to implement more complex structures,
 i.e. using different bit vector implementations in wavelet tree. On top of this, thorough
-tests and benchmarks were devised and used, mainly by \cite{gog2014optimized}.
+tests and benchmarks were devised, mainly by \cite{gog2014optimized}.
+The RRR implementations consists of \texttt{rrr\_vector} class that uses the on the fly-decoding
+and enables us to use any blocks size from 3 up to 256. SDSL also provides specialization
+of this class for block size 15 that uses the table encoding method. We thus decided to use
+this as an underlying solution for the sub-blocks and provided specialized implementations
+for block sizes 31, 63 and 127 that are mostly used in the practical scenarios. We tried to
+keep the number of changes to the general implementation of \texttt{rrr\_vector} as small as possible.
+We have been able to only alter the two functions that the SDSL uses namely \texttt{bin\_to\_nr}
+that is used for encoding and \texttt{nr\_to\_bin} used for decoding. As we mentioned, the encoding
+is less critical for most of the applications as encoding is done only once at the beginning.
+This is why we shall focus more on the decoding implementation.
+
+When implementing our technique based on the divide and conquer for smaller block size,
+we put the bigget focus on the performance of subroutine to divide our problem to sub-problems as
+solving these sub-problems is done using the table approach and is thus very fast. This
+parts consists of finding the pair of classes $(c_1, c_2)$ for our block $B$. After this,
+we need to find the number of ways how the first and second sub-block may look.
+These numbers can be precomputed as for every class $c$, there is at most $b+1$ ways how to
+write it in a form $c_1+c_2$ for valid $c_1$ and $c_2$. After obtaining the number of combinations
+for the first and second sub-block, it is then trivial to call sub-routines and combine their result
+to obtain decoded block. We devised 3 different methods to find the pair $(c_1, c_2)$ for our block $B$.
+We may precompute how many block there are with class pair equal to $(0, c), (1, c-1),\ldots ,
+(c, 0)$ and name these numbers $C_{0}\ldots C_{c}$. With known offset of our block we may shift
+along these numbers keeping the sum of the $C$ up to $i$-th position.
+
+We used 3 different techniques to find the last index in these prefix sums that is smaller 
+
+
+
 
 \section{Benchmarking}
 
