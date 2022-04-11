@@ -18,8 +18,8 @@ using std::next_permutation;
 using std::pair;
 using std::vector;
 
-constexpr bool kTest30 = true, kTest31 = true, kTest62 = true, kTest63 = true,
-               kTest127 = false;
+constexpr bool kTest30 = false, kTest31 = false, kTest62 = false,
+               kTest63 = false, kTest127 = true;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Benchmarks
@@ -46,7 +46,7 @@ vector<pair<uint64_t, uint64_t>> get_test(uint64_t N)
   return test;
 }
 
-static void BM_SDSL15(benchmark::State& state)
+static void SDSL_Table_15(benchmark::State& state)
 {
   auto test = get_test(15);
   for (auto _ : state)
@@ -59,7 +59,7 @@ static void BM_SDSL15(benchmark::State& state)
   }
 }
 
-static void BM_SDSL30_LINEAR(benchmark::State& state)
+static void OUR_30_LINEAR(benchmark::State& state)
 {
   auto test = get_test(30);
   for (auto _ : state)
@@ -72,7 +72,7 @@ static void BM_SDSL30_LINEAR(benchmark::State& state)
   }
 }
 
-static void BM_SDSL30_LINEAR_SIMD(benchmark::State& state)
+static void OUR_30_LINEAR_SIMD(benchmark::State& state)
 {
   auto test = get_test(30);
   for (auto _ : state)
@@ -85,7 +85,7 @@ static void BM_SDSL30_LINEAR_SIMD(benchmark::State& state)
   }
 }
 
-static void BM_SDSL30_BINARY(benchmark::State& state)
+static void OUR_30_BINARY(benchmark::State& state)
 {
   auto test = get_test(30);
   for (auto _ : state)
@@ -98,7 +98,7 @@ static void BM_SDSL30_BINARY(benchmark::State& state)
   }
 }
 
-static void BM_SDSL31_LINEAR_SIMD(benchmark::State& state)
+static void OUR_31_LINEAR_SIMD(benchmark::State& state)
 {
   auto test = get_test(31);
   for (auto _ : state)
@@ -111,7 +111,7 @@ static void BM_SDSL31_LINEAR_SIMD(benchmark::State& state)
   }
 }
 
-static void BM_SDSL62_LINEAR(benchmark::State& state)
+static void OUR_62_LINEAR(benchmark::State& state)
 {
   auto test = get_test(62);
   for (auto _ : state)
@@ -124,7 +124,7 @@ static void BM_SDSL62_LINEAR(benchmark::State& state)
   }
 }
 
-static void BM_SDSL62_BINARY(benchmark::State& state)
+static void OUR_62_BINARY(benchmark::State& state)
 {
   auto test = get_test(62);
   for (auto _ : state)
@@ -137,7 +137,7 @@ static void BM_SDSL62_BINARY(benchmark::State& state)
   }
 }
 
-static void BM_SDSL63_LINEAR(benchmark::State& state)
+static void OUR_63_LINEAR_1_62(benchmark::State& state)
 {
   auto test = get_test(63);
   for (auto _ : state)
@@ -150,7 +150,7 @@ static void BM_SDSL63_LINEAR(benchmark::State& state)
   }
 }
 
-static void BM_SDSL63_33030(benchmark::State& state)
+static void OUR_63_LINEAR_3_30_30(benchmark::State& state)
 {
   auto test = get_test(63);
   for (auto _ : state)
@@ -163,7 +163,7 @@ static void BM_SDSL63_33030(benchmark::State& state)
   }
 }
 
-static void BM_SDSL127_LINEAR(benchmark::State& state)
+static void OUR_127_LINEAR(benchmark::State& state)
 {
   auto test = get_test(63);
   for (auto _ : state)
@@ -176,7 +176,21 @@ static void BM_SDSL127_LINEAR(benchmark::State& state)
   }
 }
 
-template <typename T, size_t N> static void BM_FUNC(benchmark::State& state)
+static void OUR_127_BINARY(benchmark::State& state)
+{
+  auto test = get_test(63);
+  for (auto _ : state)
+  {
+    for (auto [k, index] : test)
+    {
+      auto block = RRR127_Helper::decode_binary(k, index);
+      benchmark::DoNotOptimize(block);
+    }
+  }
+}
+
+template <typename T, size_t N>
+static void SDSL_ON_THE_FLY_DECODING(benchmark::State& state)
 {
   auto test = get_test(N);
   for (auto _ : state)
@@ -189,21 +203,22 @@ template <typename T, size_t N> static void BM_FUNC(benchmark::State& state)
   }
 }
 
-BENCHMARK(BM_SDSL15);
-BENCHMARK(BM_SDSL30_LINEAR);
-BENCHMARK(BM_SDSL30_LINEAR_SIMD);
-BENCHMARK(BM_SDSL30_BINARY);
-BENCHMARK(BM_SDSL31_LINEAR_SIMD);
-BENCHMARK(BM_SDSL62_LINEAR);
-BENCHMARK(BM_SDSL62_BINARY);
-BENCHMARK(BM_SDSL63_LINEAR);
-BENCHMARK(BM_SDSL63_33030);
-BENCHMARK(BM_SDSL127);
-BENCHMARK_TEMPLATE(BM_FUNC, uint32_t, 15);
-BENCHMARK_TEMPLATE(BM_FUNC, uint32_t, 30);
-BENCHMARK_TEMPLATE(BM_FUNC, uint32_t, 31);
-BENCHMARK_TEMPLATE(BM_FUNC, uint64_t, 62);
-BENCHMARK_TEMPLATE(BM_FUNC, uint64_t, 63);
+BENCHMARK(SDSL_Table_15);
+BENCHMARK_TEMPLATE(SDSL_ON_THE_FLY_DECODING, uint32_t, 15);
+BENCHMARK(OUR_30_LINEAR);
+BENCHMARK(OUR_30_LINEAR_SIMD);
+BENCHMARK(OUR_30_BINARY);
+BENCHMARK_TEMPLATE(SDSL_ON_THE_FLY_DECODING, uint32_t, 30);
+BENCHMARK(OUR_31_LINEAR_SIMD);
+BENCHMARK_TEMPLATE(SDSL_ON_THE_FLY_DECODING, uint32_t, 31);
+BENCHMARK(OUR_62_LINEAR);
+BENCHMARK(OUR_62_BINARY);
+BENCHMARK_TEMPLATE(SDSL_ON_THE_FLY_DECODING, uint64_t, 62);
+BENCHMARK(OUR_63_LINEAR_1_62);
+BENCHMARK(OUR_63_LINEAR_3_30_30);
+BENCHMARK_TEMPLATE(SDSL_ON_THE_FLY_DECODING, uint64_t, 63);
+BENCHMARK(OUR_127_LINEAR);
+BENCHMARK(OUR_127_BINARY);
 
 int main(int argc, char** argv)
 {
@@ -289,13 +304,13 @@ int main(int argc, char** argv)
     std::mt19937_64 gen(rd());
     std::uniform_int_distribution<uint64_t> dis;
 
-    for (uint32_t i = 0; i < 1'000'000'000; ++i)
+    for (uint32_t i = 0; i < 1'000'000; ++i)
     {
       uint64_t r1 = dis(gen);
       uint64_t r2 = dis(gen);
       __uint128_t r = (r1 << 62) + r2;
       auto [k, index] = RRR127_Helper::encode(r);
-      auto res = RRR127_Helper::decode(k, index);
+      auto res = RRR127_Helper::decode_binary(k, index);
       if (res != r)
       {
         cout << "Problem with 127-bit impl!\nShould be:";

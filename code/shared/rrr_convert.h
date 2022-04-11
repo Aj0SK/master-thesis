@@ -584,6 +584,38 @@ public:
     return to_or | (left_bin << 63) | right_bin;
   }
 
+  static inline __uint128_t decode_binary(int k, __uint128_t nr)
+  {
+    __uint128_t to_or = 0;
+    constexpr __uint128_t one = 1;
+    const bool first_bit = (nr >= (BinCoeff128[126][k]));
+    if (first_bit)
+    {
+      nr -= BinCoeff128[126][k];
+      --k;
+      to_or |= one << 126;
+    }
+
+    const int right_k_from = (k > 63) ? (k - 63) : 0;
+    const int right_k_to = std::min(k, 63);
+
+    const auto it = std::upper_bound(data.helper[k].begin() + right_k_from,
+                                     data.helper[k].begin() + right_k_to, nr);
+    int right_k = std::distance(data.helper[k].begin(), it);
+    if (data.helper[k][right_k] > nr)
+      --right_k;
+
+    nr -= data.helper[k][right_k];
+    const int left_k = k - right_k;
+
+    const __uint128_t left_bin =
+        RRR63_Helper::decode(left_k, nr % BinCoeff128[63][left_k]);
+    const __uint128_t right_bin =
+        RRR63_Helper::decode(right_k, nr / BinCoeff128[63][left_k]);
+
+    return to_or | (left_bin << 63) | right_bin;
+  }
+
   static int popcountllll(__uint128_t n)
   {
     const int cnt_hi = __builtin_popcountll(n >> 64);
