@@ -15,12 +15,14 @@ cp ./results/all.txt ../../../res1.txt
 
 cd ../../build
 
-git checkout refactor
+git checkout benchmark_our
 ./build.sh
 cd ../benchmark/rrr_vector
 make clean-build
 make clean_results
 make timing
 cp ./results/all.txt ../../../res2.txt
+
+cd ../../../
 
 python3 sdsl_helper.py

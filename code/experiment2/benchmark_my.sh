@@ -12,7 +12,7 @@ make sdsl_rrr_vector_test.out
 ./sdsl_rrr_vector_test.out --benchmark_format=json > old_output.txt
 
 cd sdsl-lite
-git checkout refactor && ./install.sh
+git checkout benchmark_our && ./install.sh
 cd ..
 touch sdsl_rrr_vector_test.cpp
 make sdsl_rrr_vector_test.out
