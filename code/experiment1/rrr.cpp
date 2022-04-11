@@ -18,13 +18,15 @@ using std::next_permutation;
 using std::pair;
 using std::vector;
 
-constexpr bool kTest30 = false, kTest31 = false, kTest62 = false,
-               kTest63 = false, kTest127 = false;
+constexpr bool kTest30 = true, kTest31 = true, kTest62 = true, kTest63 = true,
+               kTest127 = false;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Benchmarks
 
 constexpr size_t kPerTestQueries = 10'000;
+
+binomial15::impl binomial15::iii;
 
 // Returns vector of random pairs. Each pair represents
 // (k, index) where k is number of set bits in the block
@@ -64,7 +66,7 @@ static void BM_SDSL30_LINEAR(benchmark::State& state)
   {
     for (auto [k, index] : test)
     {
-      auto block = RRR30_Helper::f(k, index);
+      auto block = RRR30_Helper::decode(k, index);
       benchmark::DoNotOptimize(block);
     }
   }
@@ -77,7 +79,7 @@ static void BM_SDSL30_LINEAR_SIMD(benchmark::State& state)
   {
     for (auto [k, index] : test)
     {
-      auto block = RRR30_Helper::f_simd(k, index);
+      auto block = RRR30_Helper::decode_simd(k, index);
       benchmark::DoNotOptimize(block);
     }
   }
@@ -90,7 +92,7 @@ static void BM_SDSL30_BINARY(benchmark::State& state)
   {
     for (auto [k, index] : test)
     {
-      auto block = RRR30_Helper::f_binary(k, index);
+      auto block = RRR30_Helper::decode_binary(k, index);
       benchmark::DoNotOptimize(block);
     }
   }
@@ -208,25 +210,25 @@ int main(int argc, char** argv)
   if constexpr (kTest30)
   {
     cout << "Started testing of 30 bit impl...\n";
-    for (size_t i = 0; i < (1ull << 30); ++i)
+    for (uint64_t i = 0; i < (1ull << 30); ++i)
     {
-      auto [k, index] = RRR30_Helper::decode(i);
-      uint32_t res = RRR30_Helper::f_simd(k, index);
+      auto [k, index] = RRR30_Helper::encode(i);
+      uint32_t res = RRR30_Helper::decode_binary(k, index);
       if (res != i)
       {
         cout << "Problem with 30-bit impl!\n";
         return 1;
       }
     }
-    std::cout << "Successfully tested for block size " << 30 << "\n";
+    std::cout << "Successfully tested for block size 30\n";
   }
 
   if constexpr (kTest31)
   {
     cout << "Started testing of 31 bit impl...\n";
-    for (uint32_t i = 0; i < (1ull << 31); ++i)
+    for (uint64_t i = 0; i < (1ull << 31); ++i)
     {
-      auto [k, index] = RRR31_Helper::decode(i);
+      auto [k, index] = RRR31_Helper::encode(i);
       uint32_t res = RRR31_Helper::f(k, index);
       if (res != i)
       {
@@ -234,21 +236,21 @@ int main(int argc, char** argv)
         return 1;
       }
     }
-    std::cout << "Successfully tested for block size " << 31 << "\n";
+    std::cout << "Successfully tested for block size 31\n";
   }
 
   if constexpr (kTest62)
   {
+    cout << "Started testing of 62 bit impl...\n";
     std::random_device rd;
     std::mt19937_64 gen(rd());
     std::uniform_int_distribution<uint64_t> dis;
 
-    cout << "Started testing of 62 bit impl...\n";
     for (uint32_t i = 0; i < 1'000'000; ++i)
     {
       uint64_t r = dis(gen) % (1ull << 62);
 
-      auto [k, index] = RRR62_Helper::decode(r);
+      auto [k, index] = RRR62_Helper::encode(r);
       uint64_t res = RRR62_Helper::f(k, index);
       if (res != r)
       {
@@ -256,20 +258,20 @@ int main(int argc, char** argv)
         return 1;
       }
     }
-    std::cout << "Successfully tested for block size " << 62 << "\n";
+    std::cout << "Successfully tested for block size 62\n";
   }
 
   if constexpr (kTest63)
   {
+    cout << "Started testing of 63 bit impl...\n";
     std::random_device rd;
     std::mt19937_64 gen(rd());
     std::uniform_int_distribution<uint64_t> dis;
 
-    cout << "Started testing of 63 bit impl...\n";
     for (uint32_t i = 0; i < 1'000'000'000; ++i)
     {
       uint64_t r = dis(gen) % (1ull << 63);
-      auto [k, index] = RRR63_Alt_Helper::decode(r);
+      auto [k, index] = RRR63_Alt_Helper::encode(r);
       uint64_t res = RRR63_Alt_Helper::f(k, index);
       if (res != r)
       {
@@ -277,22 +279,22 @@ int main(int argc, char** argv)
         return 1;
       }
     }
-    std::cout << "Successfully tested for block size " << 63 << "\n";
+    std::cout << "Successfully tested for block size 63\n";
   }
 
   if constexpr (kTest127)
   {
+    cout << "Started testing of 127 bit impl...\n";
     std::random_device rd;
     std::mt19937_64 gen(rd());
     std::uniform_int_distribution<uint64_t> dis;
 
-    cout << "Started testing of 127 bit impl...\n";
     for (uint32_t i = 0; i < 1'000'000'000; ++i)
     {
       uint64_t r1 = dis(gen);
       uint64_t r2 = dis(gen);
       __uint128_t r = (r1 << 62) + r2;
-      auto [k, index] = RRR127_Helper::decode(r);
+      auto [k, index] = RRR127_Helper::encode(r);
       auto res = RRR127_Helper::f(k, index);
       if (res != r)
       {
@@ -300,7 +302,7 @@ int main(int argc, char** argv)
         return 1;
       }
     }
-    std::cout << "Successfully tested for block size " << 127 << "\n";
+    std::cout << "Successfully tested for block size 127\n";
   }
 
   ::benchmark::Initialize(&argc, argv);

@@ -13,12 +13,6 @@ clean:
 prepare:
 	mkdir -p $(BUILD)
 
-$(BUILD)/main.out: main.cpp ../shared/*.h
-	$(CXX) $(CXXFLAGS) $< $(BENCHMARK) $(SDSL) -o $@
-
-benchmark: $(BUILD)/main.out
-	$< > out.txt
-
 $(BUILD)/table.out: table.cpp ../shared/*.h
 	$(CXX) $(CXXFLAGS) $(MY) $< $(BENCHMARK) -o $@
 

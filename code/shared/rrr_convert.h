@@ -3,6 +3,8 @@
 
 #include "binomial_coefficient.h"
 
+#include <sdsl/int_vector.hpp>
+
 #include <algorithm>
 #include <iostream>
 #include <vector>
@@ -47,7 +49,7 @@ public:
   typedef uint32_t number_type;
 
 private:
-  static inline class impl
+  static class impl
   {
   public:
     static const int n = 15;
@@ -55,8 +57,8 @@ private:
     uint8_t m_space_for_bt[16];
     uint8_t m_space_for_bt_pair[256];
     uint64_t m_C[MAX_SIZE];
-    vector<uint16_t> m_nr_to_bin;
-    vector<uint16_t> m_bin_to_nr;
+    sdsl::int_vector<16> m_nr_to_bin;
+    sdsl::int_vector<16> m_bin_to_nr;
 
     impl()
     {
@@ -79,11 +81,28 @@ private:
           ++cnt;
           ++class_cnt;
         } while (next_permutation(b.begin(), b.end()));
+        if (class_cnt == 1)
+          m_space_for_bt[i] = 0;
+        else
+          m_space_for_bt[i] = sdsl::bits::hi(class_cnt) + 1;
+      }
+      if (n == 15)
+      {
+        for (int x = 0; x < 256; ++x)
+        {
+          m_space_for_bt_pair[x] =
+              m_space_for_bt[x >> 4] + m_space_for_bt[x & 0x0F];
+        }
       }
     }
   } iii;
 
 public:
+  static inline uint8_t space_for_bt(uint32_t i)
+  {
+    return iii.m_space_for_bt[i];
+  }
+
   static inline uint32_t nr_to_bin(uint8_t k, uint32_t nr)
   {
     return iii.m_nr_to_bin[iii.m_C[k] + nr];
@@ -92,6 +111,11 @@ public:
   static inline uint32_t bin_to_nr(uint32_t bin)
   {
     return iii.m_bin_to_nr[bin];
+  }
+
+  static inline uint8_t space_for_bt_pair(uint8_t x)
+  {
+    return iii.m_space_for_bt_pair[x];
   }
 };
 
@@ -123,81 +147,80 @@ private:
   } data;
 
 public:
-  static inline pair<size_t, uint32_t> decode(uint32_t block)
+  static inline pair<int, uint32_t> encode(uint32_t bin)
   {
-    const size_t k = __builtin_popcount(block);
-    const uint32_t left_block = block >> 15;     // upper 15 bits
-    const uint32_t right_block = block & 0x7fff; // lower 15 bits
-    const size_t set_in_left = __builtin_popcount(left_block);
-    const size_t set_in_right = __builtin_popcount(right_block);
+    const int k = __builtin_popcount(bin);
+    const uint32_t left_bin = bin >> 15;     // upper 15 bits
+    const uint32_t right_bin = bin & 0x7fff; // lower 15 bits
+    const int left_k = __builtin_popcount(left_bin);
+    const int right_k = __builtin_popcount(right_bin);
 
-    uint32_t index = 0;
-    index += data.helper[k][set_in_right];
-    index += BinCoeff64[15][set_in_left] * binomial15::bin_to_nr(right_block);
-    index += binomial15::bin_to_nr(left_block);
+    uint32_t nr = 0;
+    nr += data.helper[k][right_k];
+    nr += BinCoeff64[15][left_k] * binomial15::bin_to_nr(right_bin);
+    nr += binomial15::bin_to_nr(left_bin);
 
-    return {k, index};
+    return {k, nr};
   }
 
-  static inline uint32_t f(size_t k, uint32_t index)
+  static inline uint32_t decode(int k, uint32_t nr)
   {
-    const size_t set_in_big_lower = (k > 15) ? (k - 15) : 0;
-    const size_t set_in_big_upper = std::min(k, static_cast<size_t>(15));
+    const int right_k_from = (k > 15) ? (k - 15) : 0;
+    const int right_k_to = std::min(k, 15);
 
-    size_t set_in_big = set_in_big_lower;
-    for (; set_in_big < set_in_big_upper; ++set_in_big)
+    int right_k = right_k_from;
+    for (; right_k < right_k_to; ++right_k)
     {
-      if (auto curr_index = data.helper[k][set_in_big + 1]; curr_index >= index)
+      if (auto curr_index = data.helper[k][right_k + 1]; curr_index >= nr)
       {
-        if (curr_index == index)
-          ++set_in_big;
+        if (curr_index == nr)
+          ++right_k;
         break;
       }
     }
 
-    index -= data.helper[k][set_in_big];
+    nr -= data.helper[k][right_k];
 
-    const size_t set_in_small = k - set_in_big;
+    const int left_k = k - right_k;
 
-    const uint32_t small_index = binomial15::nr_to_bin(
-        set_in_small, index % BinCoeff64[15][set_in_small]);
+    const uint32_t left_bin =
+        binomial15::nr_to_bin(left_k, nr % BinCoeff64[15][left_k]);
 
-    const uint32_t big_index =
-        binomial15::nr_to_bin(set_in_big, index / BinCoeff64[15][set_in_small]);
+    const uint32_t right_bin =
+        binomial15::nr_to_bin(right_k, nr / BinCoeff64[15][left_k]);
 
-    return (small_index << 15) | big_index;
+    return (left_bin << 15) | right_bin;
   }
 
-  static inline uint32_t f_binary(size_t k, uint32_t index)
+  static inline uint32_t decode_binary(int k, uint32_t nr)
   {
-    const size_t set_in_big_lower = (k > 15) ? (k - 15) : 0;
-    const size_t set_in_big_upper = std::min(k, static_cast<size_t>(15));
+    const int right_k_from = (k > 15) ? (k - 15) : 0;
+    const int right_k_to = std::min(k, 15);
 
-    const auto it =
-        std::upper_bound(data.helper[k].begin() + set_in_big_lower,
-                         data.helper[k].begin() + set_in_big_upper, index);
-    size_t set_in_big = std::distance(data.helper[k].begin(), it);
-    if (data.helper[k][set_in_big] > index)
-      --set_in_big;
+    const auto it = std::upper_bound(data.helper[k].begin() + right_k_from,
+                                     data.helper[k].begin() + right_k_to, nr);
+    int right_k = std::distance(data.helper[k].begin(), it);
+    if (data.helper[k][right_k] > nr)
+      --right_k;
 
-    index -= data.helper[k][set_in_big];
+    nr -= data.helper[k][right_k];
 
-    const size_t set_in_small = k - set_in_big;
+    const int left_k = k - right_k;
 
-    const uint32_t small_index = binomial15::nr_to_bin(
-        set_in_small, index % BinCoeff64[15][set_in_small]);
+    const uint32_t left_bin =
+        binomial15::nr_to_bin(left_k, nr % BinCoeff64[15][left_k]);
 
-    const uint32_t big_index =
-        binomial15::nr_to_bin(set_in_big, index / BinCoeff64[15][set_in_small]);
+    const uint32_t right_bin =
+        binomial15::nr_to_bin(right_k, nr / BinCoeff64[15][left_k]);
 
-    return (small_index << 15) | big_index;
+    return (left_bin << 15) | right_bin;
   }
 
-  static inline uint32_t f_simd(size_t k, uint32_t index)
+  static inline uint32_t decode_simd(int k, uint32_t nr)
   {
-    const size_t set_in_big_upper = std::min(k, static_cast<size_t>(15));
+    const int right_k_to = std::min(k, 15);
 
-    const __m128i keys = _mm_set1_epi32(index);
+    const __m128i keys = _mm_set1_epi32(nr);
     const __m128i vec1 =
         _mm_loadu_si128(reinterpret_cast<const __m128i*>(&data.helper[k][0]));
     const __m128i vec2 =
@@ -219,27 +242,26 @@ public:
 
     const uint32_t mask = (mask2 << 16) | mask1;
 
-    size_t set_in_big = set_in_big_upper;
-
+    int right_k = right_k_to;
     if (mask != 0)
     {
-      set_in_big = (1 + __builtin_ctz(mask)) / 2;
+      right_k = (1 + __builtin_ctz(mask)) / 2;
 
-      if (data.helper[k][set_in_big] > index)
-        --set_in_big;
+      if (data.helper[k][right_k] > nr)
+        --right_k;
     }
 
-    index -= data.helper[k][set_in_big];
+    nr -= data.helper[k][right_k];
 
-    const size_t set_in_small = k - set_in_big;
+    const int left_k = k - right_k;
 
-    const uint32_t small_index = binomial15::nr_to_bin(
-        set_in_small, index % BinCoeff64[15][set_in_small]);
+    const uint32_t left_bin =
+        binomial15::nr_to_bin(left_k, nr % BinCoeff64[15][left_k]);
 
-    const uint32_t big_index =
-        binomial15::nr_to_bin(set_in_big, index / BinCoeff64[15][set_in_small]);
+    const uint32_t right_bin =
+        binomial15::nr_to_bin(right_k, nr / BinCoeff64[15][left_k]);
 
-    return (small_index << 15) | big_index;
+    return (left_bin << 15) | right_bin;
   }
 };
 
@@ -256,21 +278,21 @@ public:
       index -= threshold;
       to_or = 1 << 30;
     }
-    return to_or | RRR30_Helper::f_simd(k, index);
+    return to_or | RRR30_Helper::decode_simd(k, index);
   }
 
-  static pair<uint32_t, uint32_t> decode(uint32_t block)
+  static pair<uint32_t, uint32_t> encode(uint32_t block)
   {
     const uint32_t k = __builtin_popcount(block);
 
     if (block & (1 << 30))
     {
       const uint32_t new_block = block & (~(1 << 30));
-      return {k, BinCoeff64[30][k] + RRR30_Helper::decode(new_block).second};
+      return {k, BinCoeff64[30][k] + RRR30_Helper::encode(new_block).second};
     }
     else
     {
-      return {k, RRR30_Helper::decode(block).second};
+      return {k, RRR30_Helper::encode(block).second};
     }
   }
 };
@@ -353,7 +375,7 @@ public:
     return (small_index << 31) | big_index;
   }
 
-  static inline pair<uint64_t, uint64_t> decode(const uint64_t block)
+  static inline pair<uint64_t, uint64_t> encode(const uint64_t block)
   {
     const uint64_t k = __builtin_popcountll(block);
     const uint32_t left = block >> 31;
@@ -364,8 +386,8 @@ public:
 
     uint64_t index = 0;
     index += data.helper[k][count_right];
-    index += BinCoeff64[31][count_left] * RRR31_Helper::decode(right).second;
-    index += RRR31_Helper::decode(left).second;
+    index += BinCoeff64[31][count_left] * RRR31_Helper::encode(right).second;
+    index += RRR31_Helper::encode(left).second;
 
     return {k, index};
   }
@@ -387,18 +409,18 @@ public:
     return to_or | RRR62_Helper::f(k, index);
   }
 
-  static pair<uint64_t, uint64_t> decode(const uint64_t block)
+  static pair<uint64_t, uint64_t> encode(const uint64_t block)
   {
     const uint64_t k = __builtin_popcountll(block);
 
     if (block & (1ull << 62))
     {
       const uint64_t new_block = block & (~(1ull << 62));
-      return {k, BinCoeff64[62][k] + RRR62_Helper::decode(new_block).second};
+      return {k, BinCoeff64[62][k] + RRR62_Helper::encode(new_block).second};
     }
     else
     {
-      return {k, RRR62_Helper::decode(block).second};
+      return {k, RRR62_Helper::encode(block).second};
     }
   }
 };
@@ -479,15 +501,15 @@ public:
 
     const size_t set_in_small = k - set_in_big;
 
-    const uint64_t small_index = RRR30_Helper::f_simd(
+    const uint64_t small_index = RRR30_Helper::decode_simd(
         set_in_small, index % BinCoeff64[30][set_in_small]);
-    const uint64_t big_index =
-        RRR30_Helper::f_simd(set_in_big, index / BinCoeff64[30][set_in_small]);
+    const uint64_t big_index = RRR30_Helper::decode_simd(
+        set_in_big, index / BinCoeff64[30][set_in_small]);
 
     return to_or | (small_index << 30) | big_index;
   }
 
-  static pair<uint64_t, uint64_t> decode(const uint64_t block)
+  static pair<uint64_t, uint64_t> encode(const uint64_t block)
   {
     const uint64_t k = __builtin_popcountll(block);
     bool first_bit = block & (1ull << 62);
@@ -507,8 +529,8 @@ public:
     const uint32_t count_right = __builtin_popcount(right);
 
     index += data.helper[rem_k][count_right];
-    index += BinCoeff64[30][count_left] * RRR30_Helper::decode(right).second;
-    index += RRR30_Helper::decode(left).second;
+    index += BinCoeff64[30][count_left] * RRR30_Helper::encode(right).second;
+    index += RRR30_Helper::encode(left).second;
     return {k, index};
   }
 };
@@ -591,7 +613,7 @@ public:
     return cnt_hi + cnt_lo;
   }
 
-  static pair<uint64_t, __uint128_t> decode(const __uint128_t block)
+  static pair<uint64_t, __uint128_t> encode(const __uint128_t block)
   {
     const size_t k = popcountllll(block);
     const __uint128_t one = 1;
@@ -610,8 +632,8 @@ public:
 
     index += data.helper[rem_k][count_right];
     index += BinCoeff128[63][count_left] *
-             static_cast<__uint128_t>(RRR63_Helper::decode(right).second);
-    index += RRR63_Helper::decode(left).second;
+             static_cast<__uint128_t>(RRR63_Helper::encode(right).second);
+    index += RRR63_Helper::encode(left).second;
     return {k, index};
   }
 };
