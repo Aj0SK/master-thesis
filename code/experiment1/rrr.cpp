@@ -105,7 +105,7 @@ static void BM_SDSL31_LINEAR_SIMD(benchmark::State& state)
   {
     for (auto [k, index] : test)
     {
-      auto block = RRR31_Helper::f(k, index);
+      auto block = RRR31_Helper::decode(k, index);
       benchmark::DoNotOptimize(block);
     }
   }
@@ -118,7 +118,7 @@ static void BM_SDSL62_LINEAR(benchmark::State& state)
   {
     for (auto [k, index] : test)
     {
-      auto block = RRR62_Helper::f(k, index);
+      auto block = RRR62_Helper::decode(k, index);
       benchmark::DoNotOptimize(block);
     }
   }
@@ -131,7 +131,7 @@ static void BM_SDSL62_BINARY(benchmark::State& state)
   {
     for (auto [k, index] : test)
     {
-      auto block = RRR62_Helper::f_binary(k, index);
+      auto block = RRR62_Helper::decode_binary(k, index);
       benchmark::DoNotOptimize(block);
     }
   }
@@ -144,7 +144,7 @@ static void BM_SDSL63_LINEAR(benchmark::State& state)
   {
     for (auto [k, index] : test)
     {
-      auto block = RRR63_Helper::f(k, index);
+      auto block = RRR63_Helper::decode(k, index);
       benchmark::DoNotOptimize(block);
     }
   }
@@ -157,20 +157,20 @@ static void BM_SDSL63_33030(benchmark::State& state)
   {
     for (auto [k, index] : test)
     {
-      auto block = RRR63_Alt_Helper::f(k, index);
+      auto block = RRR63_Alt_Helper::decode(k, index);
       benchmark::DoNotOptimize(block);
     }
   }
 }
 
-static void BM_SDSL127(benchmark::State& state)
+static void BM_SDSL127_LINEAR(benchmark::State& state)
 {
   auto test = get_test(63);
   for (auto _ : state)
   {
     for (auto [k, index] : test)
     {
-      auto block = RRR127_Helper::f(k, index);
+      auto block = RRR127_Helper::decode(k, index);
       benchmark::DoNotOptimize(block);
     }
   }
@@ -229,7 +229,7 @@ int main(int argc, char** argv)
     for (uint64_t i = 0; i < (1ull << 31); ++i)
     {
       auto [k, index] = RRR31_Helper::encode(i);
-      uint32_t res = RRR31_Helper::f(k, index);
+      uint32_t res = RRR31_Helper::decode(k, index);
       if (res != i)
       {
         cout << "Problem with 31-bit impl!\n";
@@ -251,7 +251,7 @@ int main(int argc, char** argv)
       uint64_t r = dis(gen) % (1ull << 62);
 
       auto [k, index] = RRR62_Helper::encode(r);
-      uint64_t res = RRR62_Helper::f(k, index);
+      uint64_t res = RRR62_Helper::decode(k, index);
       if (res != r)
       {
         cout << "Problem with 62-bit impl!\n";
@@ -272,7 +272,7 @@ int main(int argc, char** argv)
     {
       uint64_t r = dis(gen) % (1ull << 63);
       auto [k, index] = RRR63_Alt_Helper::encode(r);
-      uint64_t res = RRR63_Alt_Helper::f(k, index);
+      uint64_t res = RRR63_Alt_Helper::decode(k, index);
       if (res != r)
       {
         cout << "Problem with 63-bit impl!\n:";
@@ -295,7 +295,7 @@ int main(int argc, char** argv)
       uint64_t r2 = dis(gen);
       __uint128_t r = (r1 << 62) + r2;
       auto [k, index] = RRR127_Helper::encode(r);
-      auto res = RRR127_Helper::f(k, index);
+      auto res = RRR127_Helper::decode(k, index);
       if (res != r)
       {
         cout << "Problem with 127-bit impl!\nShould be:";

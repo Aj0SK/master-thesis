@@ -268,31 +268,31 @@ public:
 class RRR31_Helper
 {
 public:
-  static uint32_t f(uint32_t k, uint32_t index)
+  static uint32_t decode(int k, uint32_t nr)
   {
     const uint32_t threshold = BinCoeff64[30][k];
     uint32_t to_or = 0;
-    if (index >= threshold)
+    if (nr >= threshold)
     {
       --k;
-      index -= threshold;
+      nr -= threshold;
       to_or = 1 << 30;
     }
-    return to_or | RRR30_Helper::decode_simd(k, index);
+    return to_or | RRR30_Helper::decode_simd(k, nr);
   }
 
-  static pair<uint32_t, uint32_t> encode(uint32_t block)
+  static pair<int, uint32_t> encode(uint32_t bin)
   {
-    const uint32_t k = __builtin_popcount(block);
+    const int k = __builtin_popcount(bin);
 
-    if (block & (1 << 30))
+    if (bin & (1 << 30))
     {
-      const uint32_t new_block = block & (~(1 << 30));
-      return {k, BinCoeff64[30][k] + RRR30_Helper::encode(new_block).second};
+      const uint32_t new_bin = bin & (~(1 << 30));
+      return {k, BinCoeff64[30][k] + RRR30_Helper::encode(new_bin).second};
     }
     else
     {
-      return {k, RRR30_Helper::encode(block).second};
+      return {k, RRR30_Helper::encode(bin).second};
     }
   }
 };
@@ -323,71 +323,68 @@ private:
   } data;
 
 public:
-  static inline uint64_t f(const size_t k, uint64_t index)
+  static inline uint64_t decode(const int k, uint64_t nr)
   {
-    const size_t set_in_big_lower = (k > 31) ? (k - 31) : 0;
-    const size_t set_in_big_upper = std::min(k, static_cast<size_t>(31));
+    const int right_k_from = (k > 31) ? (k - 31) : 0;
+    const int right_k_to = std::min(k, 31);
 
-    size_t set_in_big = set_in_big_lower;
-    for (; set_in_big < set_in_big_upper; ++set_in_big)
+    int right_k = right_k_from;
+    for (; right_k < right_k_to; ++right_k)
     {
-      if (auto curr_index = data.helper[k][set_in_big + 1]; curr_index >= index)
+      if (auto curr_index = data.helper[k][right_k + 1]; curr_index >= nr)
       {
-        if (curr_index == index)
-          ++set_in_big;
+        if (curr_index == nr)
+          ++right_k;
         break;
       }
     }
 
-    index -= data.helper[k][set_in_big];
+    nr -= data.helper[k][right_k];
 
-    const size_t set_in_small = k - set_in_big;
+    const int left_k = k - right_k;
+    const uint64_t left_bin =
+        RRR31_Helper::decode(left_k, nr % BinCoeff64[31][left_k]);
+    const uint64_t right_bin =
+        RRR31_Helper::decode(right_k, nr / BinCoeff64[31][left_k]);
 
-    const uint64_t small_index =
-        RRR31_Helper::f(set_in_small, index % BinCoeff64[31][set_in_small]);
-    const uint64_t big_index =
-        RRR31_Helper::f(set_in_big, index / BinCoeff64[31][set_in_small]);
-
-    return (small_index << 31) | big_index;
+    return (left_bin << 31) | right_bin;
   }
 
-  static inline uint64_t f_binary(const size_t k, uint64_t index)
+  static inline uint64_t decode_binary(const int k, uint64_t nr)
   {
-    const size_t set_in_big_lower = (k > 31) ? (k - 31) : 0;
-    const size_t set_in_big_upper = std::min(k, static_cast<size_t>(31));
+    const int right_k_from = (k > 31) ? (k - 31) : 0;
+    const int right_k_to = std::min(k, 31);
 
-    const auto it =
-        std::upper_bound(data.helper[k].begin() + set_in_big_lower,
-                         data.helper[k].begin() + set_in_big_upper, index);
-    size_t set_in_big = std::distance(data.helper[k].begin(), it);
-    if (data.helper[k][set_in_big] > index)
-      --set_in_big;
+    const auto it = std::upper_bound(data.helper[k].begin() + right_k_from,
+                                     data.helper[k].begin() + right_k_to, nr);
+    int right_k = std::distance(data.helper[k].begin(), it);
+    if (data.helper[k][right_k] > nr)
+      --right_k;
 
-    index -= data.helper[k][set_in_big];
+    nr -= data.helper[k][right_k];
 
-    const size_t set_in_small = k - set_in_big;
+    const int left_k = k - right_k;
+    const uint64_t left_bin =
+        RRR31_Helper::decode(left_k, nr % BinCoeff64[31][left_k]);
+    const uint64_t right_bin =
+        RRR31_Helper::decode(right_k, nr / BinCoeff64[31][left_k]);
 
-    const uint64_t small_index =
-        RRR31_Helper::f(set_in_small, index % BinCoeff64[31][set_in_small]);
-    const uint64_t big_index =
-        RRR31_Helper::f(set_in_big, index / BinCoeff64[31][set_in_small]);
-
-    return (small_index << 31) | big_index;
+    return (left_bin << 31) | right_bin;
   }
 
-  static inline pair<uint64_t, uint64_t> encode(const uint64_t block)
+  static inline pair<int, uint64_t> encode(const uint64_t bin)
   {
-    const uint64_t k = __builtin_popcountll(block);
-    const uint32_t left = block >> 31;
-    const uint32_t right =
-        block & 2147483647; // 2147483647_10 = 1111111111111111111111111111111_2
-    const uint32_t count_left = __builtin_popcount(left);
-    const uint32_t count_right = __builtin_popcount(right);
+    const int k = __builtin_popcountll(bin);
+    const uint32_t bin_left = bin >> 31;
+    const uint32_t bin_right =
+        bin & 2147483647; // 2147483647_10 = 1111111111111111111111111111111_2
+    const int k_left = __builtin_popcount(bin_left);
+    const int k_right = __builtin_popcount(bin_right);
 
     uint64_t index = 0;
-    index += data.helper[k][count_right];
-    index += BinCoeff64[31][count_left] * RRR31_Helper::encode(right).second;
-    index += RRR31_Helper::encode(left).second;
+    index += data.helper[k][k_right];
+    index += BinCoeff64[31][k_left] * RRR31_Helper::encode(bin_right).second;
+    index += RRR31_Helper::encode(bin_left).second;
 
     return {k, index};
   }
@@ -396,31 +393,31 @@ public:
 class RRR63_Helper
 {
 public:
-  static uint64_t f(uint64_t k, uint64_t index)
+  static uint64_t decode(uint64_t k, uint64_t nr)
   {
     const uint64_t threshold = BinCoeff64[62][k];
     uint64_t to_or = 0;
-    if (index >= threshold)
+    if (nr >= threshold)
     {
       --k;
-      index -= threshold;
+      nr -= threshold;
       to_or = 1ull << 62;
     }
-    return to_or | RRR62_Helper::f(k, index);
+    return to_or | RRR62_Helper::decode(k, nr);
   }
 
-  static pair<uint64_t, uint64_t> encode(const uint64_t block)
+  static pair<int, uint64_t> encode(const uint64_t bin)
   {
-    const uint64_t k = __builtin_popcountll(block);
+    const int k = __builtin_popcountll(bin);
 
-    if (block & (1ull << 62))
+    if (bin & (1ull << 62))
     {
-      const uint64_t new_block = block & (~(1ull << 62));
-      return {k, BinCoeff64[62][k] + RRR62_Helper::encode(new_block).second};
+      const uint64_t new_bin = bin & (~(1ull << 62));
+      return {k, BinCoeff64[62][k] + RRR62_Helper::encode(new_bin).second};
     }
     else
     {
-      return {k, RRR62_Helper::encode(block).second};
+      return {k, RRR62_Helper::encode(bin).second};
     }
   }
 };
@@ -449,89 +446,79 @@ private:
   } data;
 
 public:
-  static inline uint64_t f(size_t k, uint64_t index)
+  static inline uint64_t decode(int k, uint64_t nr)
   {
-    // x000
-    // pozicia: 4 -> 63
-    // shiftov: 3 -> 62
-    // pocet kombinacii pred: 8 (1<<3)
-    // pocet shiftov
-    // x001
-    // x010
-    // x011
-    // x100
     uint64_t to_or = 0;
-    const bool first_bit = (index >= (BinCoeff64[62][k]));
+    const bool first_bit = (nr >= (BinCoeff64[62][k]));
     if (first_bit)
     {
-      index -= BinCoeff64[62][k];
+      nr -= BinCoeff64[62][k];
       --k;
       to_or |= 1ull << 62;
     }
-    const bool second_bit = (index >= (BinCoeff64[61][k]));
+    const bool second_bit = (nr >= (BinCoeff64[61][k]));
     if (second_bit)
     {
-      index -= BinCoeff64[61][k];
+      nr -= BinCoeff64[61][k];
       --k;
       to_or |= 1ull << 61;
     }
-    const bool third_bit = (index >= (BinCoeff64[60][k]));
+    const bool third_bit = (nr >= (BinCoeff64[60][k]));
     if (third_bit)
     {
-      index -= BinCoeff64[60][k];
+      nr -= BinCoeff64[60][k];
       --k;
       to_or |= 1ull << 60;
     }
 
-    const size_t set_in_big_lower = (k > 30) ? (k - 30) : 0;
-    const size_t set_in_big_upper = std::min(k, static_cast<size_t>(30));
+    const int right_k_from = (k > 30) ? (k - 30) : 0;
+    const int right_k_to = std::min(k, 30);
 
-    size_t set_in_big = set_in_big_lower;
-    for (; set_in_big < set_in_big_upper; ++set_in_big)
+    int right_k = right_k_from;
+    for (; right_k < right_k_to; ++right_k)
     {
-      if (auto curr_index = data.helper[k][set_in_big + 1]; curr_index >= index)
+      if (auto curr_index = data.helper[k][right_k + 1]; curr_index >= nr)
       {
-        if (curr_index == index)
-          ++set_in_big;
+        if (curr_index == nr)
+          ++right_k;
         break;
       }
     }
 
-    index -= data.helper[k][set_in_big];
+    nr -= data.helper[k][right_k];
 
-    const size_t set_in_small = k - set_in_big;
+    const int left_k = k - right_k;
+    const uint64_t left_bin =
+        RRR30_Helper::decode_simd(left_k, nr % BinCoeff64[30][left_k]);
+    const uint64_t right_bin =
+        RRR30_Helper::decode_simd(right_k, nr / BinCoeff64[30][left_k]);
 
-    const uint64_t small_index = RRR30_Helper::decode_simd(
-        set_in_small, index % BinCoeff64[30][set_in_small]);
-    const uint64_t big_index = RRR30_Helper::decode_simd(
-        set_in_big, index / BinCoeff64[30][set_in_small]);
-
-    return to_or | (small_index << 30) | big_index;
+    return to_or | (left_bin << 30) | right_bin;
   }
 
-  static pair<uint64_t, uint64_t> encode(const uint64_t block)
+  static pair<int, uint64_t> encode(const uint64_t bin)
   {
-    const uint64_t k = __builtin_popcountll(block);
-    bool first_bit = block & (1ull << 62);
-    bool second_bit = block & (1ull << 61);
-    bool third_bit = block & (1ull << 60);
+    const int k = __builtin_popcountll(bin);
+    bool first_bit = bin & (1ull << 62);
+    bool second_bit = bin & (1ull << 61);
+    bool third_bit = bin & (1ull << 60);
 
-    uint64_t index = first_bit * BinCoeff64[62][k] +
-                     second_bit * BinCoeff64[61][k - first_bit] +
-                     third_bit * BinCoeff64[60][k - first_bit - second_bit];
+    uint64_t nr = first_bit * BinCoeff64[62][k] +
+                  second_bit * BinCoeff64[61][k - first_bit] +
+                  third_bit * BinCoeff64[60][k - first_bit - second_bit];
 
-    const uint64_t rem_k = k - first_bit - second_bit - third_bit;
+    const int rem_k = k - first_bit - second_bit - third_bit;
 
     // 1073741823_10 = 111111111111111111111111111111_2
-    const uint32_t left = (block >> 30) & 1073741823ull;
-    const uint32_t right = block & 1073741823ull;
-    const uint32_t count_left = __builtin_popcount(left);
-    const uint32_t count_right = __builtin_popcount(right);
+    const uint32_t bin_left = (bin >> 30) & 1073741823ull;
+    const uint32_t bin_right = bin & 1073741823ull;
+    const int k_left = __builtin_popcount(bin_left);
+    const int k_right = __builtin_popcount(bin_right);
 
-    index += data.helper[rem_k][count_right];
-    index += BinCoeff64[30][count_left] * RRR30_Helper::encode(right).second;
-    index += RRR30_Helper::encode(left).second;
-    return {k, index};
+    nr += data.helper[rem_k][k_right];
+    nr += BinCoeff64[30][k_left] * RRR30_Helper::encode(bin_right).second;
+    nr += RRR30_Helper::encode(bin_left).second;
+    return {k, nr};
   }
 };
 
@@ -559,82 +546,71 @@ private:
   } data;
 
 public:
-  static inline __uint128_t f(size_t k, __uint128_t index)
+  static inline __uint128_t decode(int k, __uint128_t nr)
   {
-    // x000
-    // pozicia: 4 -> 63
-    // shiftov: 3 -> 62
-    // pocet kombinacii pred: 8 (1<<3)
-    // pocet shiftov
-    // x001
-    // x010
-    // x011
-    // x100
     __uint128_t to_or = 0;
     constexpr __uint128_t one = 1;
-    const bool first_bit = (index >= (BinCoeff128[126][k]));
+    const bool first_bit = (nr >= (BinCoeff128[126][k]));
     if (first_bit)
     {
-      index -= BinCoeff128[126][k];
+      nr -= BinCoeff128[126][k];
       --k;
       to_or |= one << 126;
     }
 
-    const size_t set_in_big_lower = (k > 63) ? (k - 63) : 0;
-    const size_t set_in_big_upper = std::min(k, static_cast<size_t>(63));
+    const int right_k_from = (k > 63) ? (k - 63) : 0;
+    const int right_k_to = std::min(k, 63);
 
-    size_t set_in_big = set_in_big_lower;
-    for (; set_in_big < set_in_big_upper; ++set_in_big)
+    int right_k = right_k_from;
+    for (; right_k < right_k_to; ++right_k)
     {
-      if (auto curr_index = data.helper[k][set_in_big + 1]; curr_index >= index)
+      if (auto curr_index = data.helper[k][right_k + 1]; curr_index >= nr)
       {
-        if (curr_index == index)
-          ++set_in_big;
+        if (curr_index == nr)
+          ++right_k;
         break;
       }
     }
 
-    index -= data.helper[k][set_in_big];
+    nr -= data.helper[k][right_k];
 
-    const size_t set_in_small = k - set_in_big;
+    const int left_k = k - right_k;
 
-    const __uint128_t small_index =
-        RRR63_Helper::f(set_in_small, index % BinCoeff128[63][set_in_small]);
-    const __uint128_t big_index =
-        RRR63_Helper::f(set_in_big, index / BinCoeff128[63][set_in_small]);
+    const __uint128_t left_bin =
+        RRR63_Helper::decode(left_k, nr % BinCoeff128[63][left_k]);
+    const __uint128_t right_bin =
+        RRR63_Helper::decode(right_k, nr / BinCoeff128[63][left_k]);
 
-    return to_or | (small_index << 63) | big_index;
+    return to_or | (left_bin << 63) | right_bin;
   }
 
-  static size_t popcountllll(__uint128_t n)
+  static int popcountllll(__uint128_t n)
   {
-    const size_t cnt_hi = __builtin_popcountll(n >> 64);
-    const size_t cnt_lo = __builtin_popcountll(n);
+    const int cnt_hi = __builtin_popcountll(n >> 64);
+    const int cnt_lo = __builtin_popcountll(n);
     return cnt_hi + cnt_lo;
   }
 
-  static pair<uint64_t, __uint128_t> encode(const __uint128_t block)
+  static pair<int, __uint128_t> encode(const __uint128_t bin)
   {
-    const size_t k = popcountllll(block);
+    const int k = popcountllll(bin);
     const __uint128_t one = 1;
-    bool first_bit = block & (one << 126);
-
-    __uint128_t index = first_bit * BinCoeff128[126][k];
-
-    const uint64_t rem_k = k - first_bit;
+    const bool first_bit = bin & (one << 126);
+    const int rem_k = k - first_bit;
 
     // 1073741823_10 = 111111111111111111111111111111_2
     const __uint128_t low_end = 9223372036854775807ull;
-    const uint64_t left = (block >> 63) & low_end;
-    const uint64_t right = block & low_end;
-    const uint64_t count_left = __builtin_popcountll(left);
-    const uint64_t count_right = __builtin_popcountll(right);
+    const uint64_t left_bin = (bin >> 63) & low_end;
+    const uint64_t right_bin = bin & low_end;
+    const int left_k = __builtin_popcountll(left_bin);
+    const int right_k = __builtin_popcountll(right_bin);
 
-    index += data.helper[rem_k][count_right];
-    index += BinCoeff128[63][count_left] *
-             static_cast<__uint128_t>(RRR63_Helper::encode(right).second);
-    index += RRR63_Helper::encode(left).second;
-    return {k, index};
+    __uint128_t nr = first_bit * BinCoeff128[126][k];
+    nr += data.helper[rem_k][right_k];
+    nr += BinCoeff128[63][left_k] *
+          static_cast<__uint128_t>(RRR63_Helper::encode(right_bin).second);
+    nr += RRR63_Helper::encode(left_bin).second;
+    return {k, nr};
   }
 };
 
