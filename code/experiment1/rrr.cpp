@@ -18,8 +18,8 @@ using std::next_permutation;
 using std::pair;
 using std::vector;
 
-constexpr bool kTest30 = true, kTest31 = true, kTest62 = true, kTest63 = true,
-               kTest127 = true;
+constexpr bool kTest30 = false, kTest31 = false, kTest62 = false,
+               kTest63 = false, kTest127 = false;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Benchmarks
@@ -72,7 +72,7 @@ static void OUR_30_LINEAR(benchmark::State& state)
   }
 }
 
-static void OUR_30_LINEAR_SIMD(benchmark::State& state)
+static void OUR_30_SIMD(benchmark::State& state)
 {
   auto test = get_test(30);
   for (auto _ : state)
@@ -98,7 +98,7 @@ static void OUR_30_BINARY(benchmark::State& state)
   }
 }
 
-static void OUR_31_LINEAR_SIMD(benchmark::State& state)
+static void OUR_31_SIMD_1_30(benchmark::State& state)
 {
   auto test = get_test(31);
   for (auto _ : state)
@@ -163,7 +163,7 @@ static void OUR_63_LINEAR_3_30_30(benchmark::State& state)
   }
 }
 
-static void OUR_127_LINEAR(benchmark::State& state)
+static void OUR_127_LINEAR_1_63_63(benchmark::State& state)
 {
   auto test = get_test(63);
   for (auto _ : state)
@@ -206,10 +206,10 @@ static void SDSL_ON_THE_FLY_DECODING(benchmark::State& state)
 BENCHMARK(SDSL_Table_15);
 BENCHMARK_TEMPLATE(SDSL_ON_THE_FLY_DECODING, uint32_t, 15);
 BENCHMARK(OUR_30_LINEAR);
-BENCHMARK(OUR_30_LINEAR_SIMD);
+BENCHMARK(OUR_30_SIMD);
 BENCHMARK(OUR_30_BINARY);
 BENCHMARK_TEMPLATE(SDSL_ON_THE_FLY_DECODING, uint32_t, 30);
-BENCHMARK(OUR_31_LINEAR_SIMD);
+BENCHMARK(OUR_31_SIMD_1_30);
 BENCHMARK_TEMPLATE(SDSL_ON_THE_FLY_DECODING, uint32_t, 31);
 BENCHMARK(OUR_62_LINEAR);
 BENCHMARK(OUR_62_BINARY);
@@ -217,7 +217,7 @@ BENCHMARK_TEMPLATE(SDSL_ON_THE_FLY_DECODING, uint64_t, 62);
 BENCHMARK(OUR_63_LINEAR_1_62);
 BENCHMARK(OUR_63_LINEAR_3_30_30);
 BENCHMARK_TEMPLATE(SDSL_ON_THE_FLY_DECODING, uint64_t, 63);
-BENCHMARK(OUR_127_LINEAR);
+BENCHMARK(OUR_127_LINEAR_1_63_63);
 BENCHMARK(OUR_127_BINARY);
 
 int main(int argc, char** argv)
