@@ -18,8 +18,8 @@ using std::next_permutation;
 using std::pair;
 using std::vector;
 
-constexpr bool kTest30 = false, kTest31 = false, kTest62 = false,
-               kTest63 = false, kTest127 = true;
+constexpr bool kTest30 = true, kTest31 = true, kTest62 = true, kTest63 = true,
+               kTest127 = true;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Benchmarks
@@ -228,7 +228,7 @@ int main(int argc, char** argv)
     for (uint64_t i = 0; i < (1ull << 30); ++i)
     {
       auto [k, index] = RRR30_Helper::encode(i);
-      uint32_t res = RRR30_Helper::decode_binary(k, index);
+      uint32_t res = RRR30_Helper::decode(k, index);
       if (res != i)
       {
         cout << "Problem with 30-bit impl!\n";

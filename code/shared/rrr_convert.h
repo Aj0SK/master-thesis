@@ -121,8 +121,8 @@ public:
 
 // Implementation of a 30-bit block size version.
 // 000000000000000|000000000000000
-// ___big_block___|__small_block__
-// (k - number of one's, index - position in all numbers with k-bits set)
+// ___left_bin____|___right_bin__
+// (k - number of one's, nr - position in all numbers with k-bits set)
 class RRR30_Helper
 {
 private:
@@ -135,12 +135,13 @@ private:
       {
         std::fill(helper[k].begin(), helper[k].end(), 0);
         uint32_t total = 0;
-        for (size_t ones_in_big = (k > 15) ? (k - 15) : 0;
-             ones_in_big <= std::min(k, static_cast<size_t>(15)); ++ones_in_big)
+        for (size_t ones_in_left = (k > 15) ? (k - 15) : 0;
+             ones_in_left <= std::min(k, static_cast<size_t>(15));
+             ++ones_in_left)
         {
-          helper[k][ones_in_big] = total;
+          helper[k][ones_in_left] = total;
           total +=
-              BinCoeff64[15][ones_in_big] * BinCoeff64[15][k - ones_in_big];
+              BinCoeff64[15][ones_in_left] * BinCoeff64[15][k - ones_in_left];
         }
       }
     }
@@ -156,69 +157,69 @@ public:
     const int right_k = __builtin_popcount(right_bin);
 
     uint32_t nr = 0;
-    nr += data.helper[k][right_k];
-    nr += BinCoeff64[15][left_k] * binomial15::bin_to_nr(right_bin);
-    nr += binomial15::bin_to_nr(left_bin);
+    nr += data.helper[k][left_k];
+    nr += BinCoeff64[15][right_k] * binomial15::bin_to_nr(left_bin);
+    nr += binomial15::bin_to_nr(right_bin);
 
     return {k, nr};
   }
 
   static inline uint32_t decode(int k, uint32_t nr)
   {
-    const int right_k_from = (k > 15) ? (k - 15) : 0;
-    const int right_k_to = std::min(k, 15);
+    const int left_k_from = (k > 15) ? (k - 15) : 0;
+    const int left_k_to = std::min(k, 15);
 
-    int right_k = right_k_from;
-    for (; right_k < right_k_to; ++right_k)
+    int left_k = left_k_from;
+    for (; left_k < left_k_to; ++left_k)
     {
-      if (auto curr_index = data.helper[k][right_k + 1]; curr_index >= nr)
+      if (auto curr_index = data.helper[k][left_k + 1]; curr_index >= nr)
       {
         if (curr_index == nr)
-          ++right_k;
+          ++left_k;
         break;
       }
     }
 
-    nr -= data.helper[k][right_k];
+    nr -= data.helper[k][left_k];
 
-    const int left_k = k - right_k;
+    const int right_k = k - left_k;
 
     const uint32_t left_bin =
-        binomial15::nr_to_bin(left_k, nr % BinCoeff64[15][left_k]);
+        binomial15::nr_to_bin(left_k, nr / BinCoeff64[15][right_k]);
 
     const uint32_t right_bin =
-        binomial15::nr_to_bin(right_k, nr / BinCoeff64[15][left_k]);
+        binomial15::nr_to_bin(right_k, nr % BinCoeff64[15][right_k]);
 
     return (left_bin << 15) | right_bin;
   }
 
   static inline uint32_t decode_binary(int k, uint32_t nr)
   {
-    const int right_k_from = (k > 15) ? (k - 15) : 0;
-    const int right_k_to = std::min(k, 15);
+    const int left_k_from = (k > 15) ? (k - 15) : 0;
+    const int left_k_to = std::min(k, 15);
 
-    const auto it = std::upper_bound(data.helper[k].begin() + right_k_from,
-                                     data.helper[k].begin() + right_k_to, nr);
-    int right_k = std::distance(data.helper[k].begin(), it);
-    if (data.helper[k][right_k] > nr)
-      --right_k;
+    const auto it = std::upper_bound(data.helper[k].begin() + left_k_from,
+                                     data.helper[k].begin() + left_k_to, nr);
+    int left_k = std::distance(data.helper[k].begin(), it);
+    if (data.helper[k][left_k] > nr)
+      --left_k;
 
-    nr -= data.helper[k][right_k];
+    nr -= data.helper[k][left_k];
 
-    const int left_k = k - right_k;
+    const int right_k = k - left_k;
 
     const uint32_t left_bin =
-        binomial15::nr_to_bin(left_k, nr % BinCoeff64[15][left_k]);
+        binomial15::nr_to_bin(left_k, nr / BinCoeff64[15][right_k]);
 
     const uint32_t right_bin =
-        binomial15::nr_to_bin(right_k, nr / BinCoeff64[15][left_k]);
+        binomial15::nr_to_bin(right_k, nr % BinCoeff64[15][right_k]);
 
     return (left_bin << 15) | right_bin;
   }
 
   static inline uint32_t decode_simd(int k, uint32_t nr)
   {
-    const int right_k_to = std::min(k, 15);
+    const int left_k_to = std::min(k, 15);
 
     const __m128i keys = _mm_set1_epi32(nr);
     const __m128i vec1 =
@@ -242,24 +243,24 @@ public:
 
     const uint32_t mask = (mask2 << 16) | mask1;
 
-    int right_k = right_k_to;
+    int left_k = left_k_to;
     if (mask != 0)
     {
-      right_k = (1 + __builtin_ctz(mask)) / 2;
+      left_k = (1 + __builtin_ctz(mask)) / 2;
 
-      if (data.helper[k][right_k] > nr)
-        --right_k;
+      if (data.helper[k][left_k] > nr)
+        --left_k;
     }
 
-    nr -= data.helper[k][right_k];
+    nr -= data.helper[k][left_k];
 
-    const int left_k = k - right_k;
+    const int right_k = k - left_k;
 
     const uint32_t left_bin =
-        binomial15::nr_to_bin(left_k, nr % BinCoeff64[15][left_k]);
+        binomial15::nr_to_bin(left_k, nr / BinCoeff64[15][right_k]);
 
     const uint32_t right_bin =
-        binomial15::nr_to_bin(right_k, nr / BinCoeff64[15][left_k]);
+        binomial15::nr_to_bin(right_k, nr % BinCoeff64[15][right_k]);
 
     return (left_bin << 15) | right_bin;
   }
@@ -311,12 +312,13 @@ private:
       {
         std::fill(helper[k].begin(), helper[k].end(), 0);
         uint64_t total = 0;
-        for (size_t ones_in_big = (k > 31) ? (k - 31) : 0;
-             ones_in_big <= std::min(k, static_cast<size_t>(31)); ++ones_in_big)
+        for (size_t ones_in_left = (k > 31) ? (k - 31) : 0;
+             ones_in_left <= std::min(k, static_cast<size_t>(31));
+             ++ones_in_left)
         {
-          helper[k][ones_in_big] = total;
+          helper[k][ones_in_left] = total;
           total +=
-              BinCoeff64[31][ones_in_big] * BinCoeff64[31][k - ones_in_big];
+              BinCoeff64[31][ones_in_left] * BinCoeff64[31][k - ones_in_left];
         }
       }
     }
@@ -325,49 +327,49 @@ private:
 public:
   static inline uint64_t decode(const int k, uint64_t nr)
   {
-    const int right_k_from = (k > 31) ? (k - 31) : 0;
-    const int right_k_to = std::min(k, 31);
+    const int left_k_from = (k > 31) ? (k - 31) : 0;
+    const int left_k_to = std::min(k, 31);
 
-    int right_k = right_k_from;
-    for (; right_k < right_k_to; ++right_k)
+    int left_k = left_k_from;
+    for (; left_k < left_k_to; ++left_k)
     {
-      if (auto curr_index = data.helper[k][right_k + 1]; curr_index >= nr)
+      if (auto curr_index = data.helper[k][left_k + 1]; curr_index >= nr)
       {
         if (curr_index == nr)
-          ++right_k;
+          ++left_k;
         break;
       }
     }
 
-    nr -= data.helper[k][right_k];
+    nr -= data.helper[k][left_k];
 
-    const int left_k = k - right_k;
+    const int right_k = k - left_k;
     const uint64_t left_bin =
-        RRR31_Helper::decode(left_k, nr % BinCoeff64[31][left_k]);
+        RRR31_Helper::decode(left_k, nr / BinCoeff64[31][right_k]);
     const uint64_t right_bin =
-        RRR31_Helper::decode(right_k, nr / BinCoeff64[31][left_k]);
+        RRR31_Helper::decode(right_k, nr % BinCoeff64[31][right_k]);
 
     return (left_bin << 31) | right_bin;
   }
 
   static inline uint64_t decode_binary(const int k, uint64_t nr)
   {
-    const int right_k_from = (k > 31) ? (k - 31) : 0;
-    const int right_k_to = std::min(k, 31);
+    const int left_k_from = (k > 31) ? (k - 31) : 0;
+    const int left_k_to = std::min(k, 31);
 
-    const auto it = std::upper_bound(data.helper[k].begin() + right_k_from,
-                                     data.helper[k].begin() + right_k_to, nr);
-    int right_k = std::distance(data.helper[k].begin(), it);
-    if (data.helper[k][right_k] > nr)
-      --right_k;
+    const auto it = std::upper_bound(data.helper[k].begin() + left_k_from,
+                                     data.helper[k].begin() + left_k_to, nr);
+    int left_k = std::distance(data.helper[k].begin(), it);
+    if (data.helper[k][left_k] > nr)
+      --left_k;
 
-    nr -= data.helper[k][right_k];
+    nr -= data.helper[k][left_k];
 
-    const int left_k = k - right_k;
+    const int right_k = k - left_k;
     const uint64_t left_bin =
-        RRR31_Helper::decode(left_k, nr % BinCoeff64[31][left_k]);
+        RRR31_Helper::decode(left_k, nr / BinCoeff64[31][right_k]);
     const uint64_t right_bin =
-        RRR31_Helper::decode(right_k, nr / BinCoeff64[31][left_k]);
+        RRR31_Helper::decode(right_k, nr % BinCoeff64[31][right_k]);
 
     return (left_bin << 31) | right_bin;
   }
@@ -382,9 +384,9 @@ public:
     const int k_right = __builtin_popcount(bin_right);
 
     uint64_t index = 0;
-    index += data.helper[k][k_right];
-    index += BinCoeff64[31][k_left] * RRR31_Helper::encode(bin_right).second;
-    index += RRR31_Helper::encode(bin_left).second;
+    index += data.helper[k][k_left];
+    index += BinCoeff64[31][k_right] * RRR31_Helper::encode(bin_left).second;
+    index += RRR31_Helper::encode(bin_right).second;
 
     return {k, index};
   }
@@ -434,12 +436,13 @@ private:
       {
         std::fill(helper[k].begin(), helper[k].end(), 0);
         uint64_t total = 0;
-        for (size_t ones_in_big = (k > 30) ? (k - 30) : 0;
-             ones_in_big <= std::min(k, static_cast<size_t>(30)); ++ones_in_big)
+        for (size_t ones_in_left = (k > 30) ? (k - 30) : 0;
+             ones_in_left <= std::min(k, static_cast<size_t>(30));
+             ++ones_in_left)
         {
-          helper[k][ones_in_big] = total;
+          helper[k][ones_in_left] = total;
           total +=
-              BinCoeff64[30][ones_in_big] * BinCoeff64[30][k - ones_in_big];
+              BinCoeff64[30][ones_in_left] * BinCoeff64[30][k - ones_in_left];
         }
       }
     }
@@ -471,27 +474,27 @@ public:
       to_or |= 1ull << 60;
     }
 
-    const int right_k_from = (k > 30) ? (k - 30) : 0;
-    const int right_k_to = std::min(k, 30);
+    const int left_k_from = (k > 30) ? (k - 30) : 0;
+    const int left_k_to = std::min(k, 30);
 
-    int right_k = right_k_from;
-    for (; right_k < right_k_to; ++right_k)
+    int left_k = left_k_from;
+    for (; left_k < left_k_to; ++left_k)
     {
-      if (auto curr_index = data.helper[k][right_k + 1]; curr_index >= nr)
+      if (auto curr_index = data.helper[k][left_k + 1]; curr_index >= nr)
       {
         if (curr_index == nr)
-          ++right_k;
+          ++left_k;
         break;
       }
     }
 
-    nr -= data.helper[k][right_k];
+    nr -= data.helper[k][left_k];
 
-    const int left_k = k - right_k;
+    const int right_k = k - left_k;
     const uint64_t left_bin =
-        RRR30_Helper::decode_simd(left_k, nr % BinCoeff64[30][left_k]);
+        RRR30_Helper::decode_simd(left_k, nr / BinCoeff64[30][right_k]);
     const uint64_t right_bin =
-        RRR30_Helper::decode_simd(right_k, nr / BinCoeff64[30][left_k]);
+        RRR30_Helper::decode_simd(right_k, nr % BinCoeff64[30][right_k]);
 
     return to_or | (left_bin << 30) | right_bin;
   }
@@ -515,9 +518,9 @@ public:
     const int k_left = __builtin_popcount(bin_left);
     const int k_right = __builtin_popcount(bin_right);
 
-    nr += data.helper[rem_k][k_right];
-    nr += BinCoeff64[30][k_left] * RRR30_Helper::encode(bin_right).second;
-    nr += RRR30_Helper::encode(bin_left).second;
+    nr += data.helper[rem_k][k_left];
+    nr += BinCoeff64[30][k_right] * RRR30_Helper::encode(bin_left).second;
+    nr += RRR30_Helper::encode(bin_right).second;
     return {k, nr};
   }
 };
@@ -534,12 +537,13 @@ private:
       {
         std::fill(helper[k].begin(), helper[k].end(), 0);
         __uint128_t total = 0;
-        for (size_t ones_in_big = (k > 63) ? (k - 63) : 0;
-             ones_in_big <= std::min(k, static_cast<size_t>(63)); ++ones_in_big)
+        for (size_t ones_in_left = (k > 63) ? (k - 63) : 0;
+             ones_in_left <= std::min(k, static_cast<size_t>(63));
+             ++ones_in_left)
         {
-          helper[k][ones_in_big] = total;
+          helper[k][ones_in_left] = total;
           total +=
-              BinCoeff128[63][ones_in_big] * BinCoeff128[63][k - ones_in_big];
+              BinCoeff128[63][ones_in_left] * BinCoeff128[63][k - ones_in_left];
         }
       }
     }
@@ -558,28 +562,28 @@ public:
       to_or |= one << 126;
     }
 
-    const int right_k_from = (k > 63) ? (k - 63) : 0;
-    const int right_k_to = std::min(k, 63);
+    const int left_k_from = (k > 63) ? (k - 63) : 0;
+    const int left_k_to = std::min(k, 63);
 
-    int right_k = right_k_from;
-    for (; right_k < right_k_to; ++right_k)
+    int left_k = left_k_from;
+    for (; left_k < left_k_to; ++left_k)
     {
-      if (auto curr_index = data.helper[k][right_k + 1]; curr_index >= nr)
+      if (auto curr_index = data.helper[k][left_k + 1]; curr_index >= nr)
       {
         if (curr_index == nr)
-          ++right_k;
+          ++left_k;
         break;
       }
     }
 
-    nr -= data.helper[k][right_k];
+    nr -= data.helper[k][left_k];
 
-    const int left_k = k - right_k;
+    const int right_k = k - left_k;
 
     const __uint128_t left_bin =
-        RRR63_Helper::decode(left_k, nr % BinCoeff128[63][left_k]);
+        RRR63_Helper::decode(left_k, nr / BinCoeff128[63][right_k]);
     const __uint128_t right_bin =
-        RRR63_Helper::decode(right_k, nr / BinCoeff128[63][left_k]);
+        RRR63_Helper::decode(right_k, nr % BinCoeff128[63][right_k]);
 
     return to_or | (left_bin << 63) | right_bin;
   }
@@ -596,22 +600,22 @@ public:
       to_or |= one << 126;
     }
 
-    const int right_k_from = (k > 63) ? (k - 63) : 0;
-    const int right_k_to = std::min(k, 63);
+    const int left_k_from = (k > 63) ? (k - 63) : 0;
+    const int left_k_to = std::min(k, 63);
 
-    const auto it = std::upper_bound(data.helper[k].begin() + right_k_from,
-                                     data.helper[k].begin() + right_k_to, nr);
-    int right_k = std::distance(data.helper[k].begin(), it);
-    if (data.helper[k][right_k] > nr)
-      --right_k;
+    const auto it = std::upper_bound(data.helper[k].begin() + left_k_from,
+                                     data.helper[k].begin() + left_k_to, nr);
+    int left_k = std::distance(data.helper[k].begin(), it);
+    if (data.helper[k][left_k] > nr)
+      --left_k;
 
-    nr -= data.helper[k][right_k];
-    const int left_k = k - right_k;
+    nr -= data.helper[k][left_k];
+    const int right_k = k - left_k;
 
     const __uint128_t left_bin =
-        RRR63_Helper::decode(left_k, nr % BinCoeff128[63][left_k]);
+        RRR63_Helper::decode(left_k, nr / BinCoeff128[63][right_k]);
     const __uint128_t right_bin =
-        RRR63_Helper::decode(right_k, nr / BinCoeff128[63][left_k]);
+        RRR63_Helper::decode(right_k, nr % BinCoeff128[63][right_k]);
 
     return to_or | (left_bin << 63) | right_bin;
   }
@@ -638,10 +642,10 @@ public:
     const int right_k = __builtin_popcountll(right_bin);
 
     __uint128_t nr = first_bit * BinCoeff128[126][k];
-    nr += data.helper[rem_k][right_k];
-    nr += BinCoeff128[63][left_k] *
-          static_cast<__uint128_t>(RRR63_Helper::encode(right_bin).second);
-    nr += RRR63_Helper::encode(left_bin).second;
+    nr += data.helper[rem_k][left_k];
+    nr += BinCoeff128[63][right_k] *
+          static_cast<__uint128_t>(RRR63_Helper::encode(left_bin).second);
+    nr += RRR63_Helper::encode(right_bin).second;
     return {k, nr};
   }
 };
