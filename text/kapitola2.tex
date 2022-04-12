@@ -6,10 +6,10 @@ implementations. Bit vector stores binary sequence supporting methods $\access$,
 $\rank$ and $\select$. As we have shown in section~\ref{section:WaweletTree}, wavelet
 tree can be used to build a vector for the general alphabet using the bit vector
 implementation. This is, why it is of the utmost importance to dedicate time
-to build fast and efficient bit vector implementation. We start with its
+to creating fast and efficient bit vector implementation. We start with its
 succinct representation, in which we simply store bits one after another. Then we
-look at the compressed representation. In the end we briefly explain what other
-alternatives exists for bit vector implementation.
+look at the compressed representation. In the end, we briefly explain what other
+alternatives exist for bit vector implementation.
 
 \section{Bit vector implementation}
 
@@ -30,21 +30,21 @@ However, the space needed to support this solution is $(n\cdot\log n)$ bits wher
 $n$ is the length of the bit sequence. These two solutions can be combined together
 to obtain an idea of a practically interesting solution. We shall store the
 pre-computed $\rank_1$ values, but not for every bit in order to save space. At first,
-we choose a constant $k$ and split bit vector into non-overlaping subsequences of length
+we choose a constant $k$ and split bit vector into non-overlapping subsequences of length
 $k$. We shall call these subsequences \textit{superblocks}. We then precompute $\rank_1$
 only for the beginning of every superblock. This enables us to answer $\rank_1$ in time $\BigO(k)$
 as we need to only access the precomputed value and then count bits from the start of the
 superblock up to the queried position. The stored information uses $\BigO(\ceil{n/k}\log n)$
 bits of memory as there is $\ceil{n/k}$ superblocks and every rank can be of size at most $n$.
-This version of implementation also allows us to trade speed and used memory using the parameter
+This version of the implementation also allows us to trade speed and used memory using the parameter
 $k$. Increasing this parameter allows us to save space. On the other hand, smaller $k$
 requires less work to be done. For smaller $k$ the time of answering the query may be
 dominated by two cache misses that most of the time occur when accessing the precomputed ranks
 and then subsequently accessing the bits on the beginning of the superblock. Continuous linear
-scan through subsequent bits in $B$ can be then very cache friendly after the initial two cache misses.
+scan through subsequent bits in $B$ can be then very cache-friendly after the initial two cache misses.
 
 Although this solution works well and is commonly used in practice, it is possible to
-answer $\rank$ query in constant time only with sublinear space overhead as was first
+answer the $\rank$ query in constant time only with sublinear space overhead as was first
 shown by \cite{okanohara2007practical}. We start as in the previous solution by splitting
 the bit sequence into superblocks of size $k=\log^2 n$ and precomputing $\rank$ for every
 beginning of superblock. We further divide every superblock into blocks of size $(\log n)/2$.
@@ -54,8 +54,8 @@ of some position, we know in which superblock this position is located, so we kn
 number of ones up to the beginning of the superblock. We also
 precomputed what is the number of ones from the beginning of the superblock up to this block.
 The last step is to find out the number of ones that are located before the index in this
-block. This would be easy to do linearly in time $\BigO(\log n)$. Hovewer, we are aiming for
-constant time $\rank$. Thanks to block being short there are not too many possibilities what
+block. This would be easy to do linearly in time $\BigO(\log n)$. However, we are aiming for
+constant time $\rank$. Thanks to block being short there are not too many possibilities for what
 this block can be so we can precompute every possible $\rank$ query inside of the every possible
 block The space overhead that this solution adds consists of three parts.
 Precomputed $\rank$ for every superblock. Number of superblocks is $\BigO(n/\log^2 n)$ and we
@@ -73,7 +73,7 @@ smaller blocks is then
     \label{eq:rank_space_2}
 \end{equation}
 The third part is the precomputed table where we store for every possible block and every
-possible $\rank$ query over its result. The number of different ways how the block of length
+possible $\rank$ query over it its result. The number of different ways how the block of length
 $\log(n)/2$ may look is $2^{(\log n)/2} = \sqrt{n}$. Number of possible $\rank$
 queries over it is $\log n$ so this makes the table of the size
 \begin{equation}
@@ -98,7 +98,7 @@ for accessing the precomputed $\rank$ value of the block.
 It is important to note that in bit vector we are again interested in methods $\select_0$
 and $select_1$. Although there is not a simple way how to convert one to another just like with
 $rank$, we shall be interested mainly in $select_1$ version as the other one can be easily
-implemented using the same ideas. Important property of the $\select$ method is that it
+implemented using the same ideas. The important property of the $\select$ method is that it
 works much like an inverse to $\rank$. This is given by the fact that
                 $$\rank_c(\select_c(i)) = i$$.
 Thanks to $\rank$ being a nondecreasing function, it is possible to binary search for the result
@@ -116,20 +116,20 @@ multiple of $t_1=...$. These precomputed values take $\BigO(n/\log\log n)$ bits 
 This also splits the bit sequence into superblocks that contain exactly $t_1$ ones (possibly
 except for the last). There are
 now two categories of superblocks. The ones called \textit{long} that are of size bigger
-than $t_1^2$. In these superblocks we can store the positions of ones as they are sparse
+than $t_1^2$. In these superblocks, we can store the positions of ones as they are sparse
 and there is not many of them. The total memory used shall be $\BigO(n/t_1^2\cdot t_1\cdot
 \log n) = \BigO(n/\log\log n)$. Then there are superblocks of size smaller than $t_1^2$ called
 \textit{short} that we shall solve using the same idea that we used for the original bit sequence
 and superblocks. We precompute the $\select$ from the beginning of the superblock for every
 multiple of $t_2=(\log\log n)^2$. These precomputed values are small as they are only from the
-beginning of small superblock. Every one of these values takes $\log\log n$ of space so the
+beginning of short superblock. Every one of these values takes $\log\log n$ of space so the
 total amount of space used for the values is $\BigO(n/t_2\cdot \log\log n) = \BigO(n/\log\log n)$.
 For blocks of size bigger than $t_2^2$ we shall store the positions of ones as there is not
-many of them in big block. This, using the same reasoning as in the previous part takes
-$\BigO(n/t_2^2\cdot t_2\cdot \log\log n) = \BigO(n/\log\log n)$. To take care of the
-blocks of size smaller than $t_2^2$ we can precompute a table of all the possible ways how
-the block may look and all the possible $\select$ queries over it with their responses.
-This is possible as $t_2^2 = o(n)$.
+many of them in long block. We may use the same reasoning as in the previous part to conclude
+that this takes $\BigO(n/t_2^2\cdot t_2\cdot \log\log n) = \BigO(n/\log\log n)$ of bits. To
+take care of the blocks of size smaller than $t_2^2$ we can precompute a table of all the
+possible ways how the block may look and all the possible $\select$ queries over it with
+their responses. This is possible as $t_2^2 = o(n)$.
 
 \section{Compressed representation}
 \label{section:compressed_bv}
@@ -163,13 +163,13 @@ by generating all the possible blocks in lexicographical order before we even
 obtain the sequence that we will want to represent. After this precomputation,
 the encoding and decoding of a block takes constant time.
 
-For smaller values of $b$, it is possible to store the whole table $T$ that helps us
+For smaller values of $b$, it is possible to store the whole table $T$ which helps us
 to encode and decode the block. For bigger $b$ it is not practical and many times
-impossible to store a huge helper tables $E$ and $D$. On the other hand, the bigger
+impossible to store huge helper tables $E$ and $D$. On the other hand, the bigger
 block size yields a better compression because of smaller per block overhead. This limitation
-is something that was to some extent overcomed by \cite{navarro2012fast}. The came up with the
+is something that was to some extent overcame by \cite{navarro2012fast}. They came up with the
 method we shall call \textit{on the fly-decoding}. This works by encoding and decoding without
-the need for the helper tables. This method instead relies on a bit by bit decoding of the block
+the need for helper tables. This method instead relies on a bit by bit decoding of the block
 thus taking $\BigO(b)$ time instead of a constant time lookup with the help of table.
 
 Idea is that we are decoding the block from the beginning, bit by bit until the end. On every bit,
@@ -209,7 +209,7 @@ For array $O$ we argue that its size is bounded by
     &\leq \log{n\choose \#_1(B)} + \ceil{n/b} &\leq nH_0(B) + \ceil{n/b}
 \end{align*}
 
-where $\#_1(B)$ denotes the total number of ones in $B$. We obtained (someref) using the
+where $\#_1(B)$ denotes the total number of ones in $B$. We obtained (TODOsomeref) using the
 observation that ${n\choose k} {m\choose \ell} \leq {n+m\choose k+\ell}$. This can be seen
 when we interpret the left side of the equation as a number of ways we can choose $k$ elements
 from $n$ elements and $\ell$ elements from another $m$ elements. This is all contained on the
@@ -227,7 +227,7 @@ roughly $\frac{n}{bk}$ integers takes the space $\BigO(\log(n)\cdot \frac{n}{bk}
 	}
 	\caption[TODO]{RRR implementation. $B$ shows the original bit sequence cut to
     blocks. $C$ stores the class which is in this case number of ones in the block.
-    $O$ uses variable number of bits per entry, in general $i$-th entry uses
+    $O$ uses variable number of bits per entry, in general, $i$-th entry uses
     $\ceil{\log_2{b\choose C[i]}}$ bits and stores the lexicographical order
     of this block in the class $C[i]$. For $k=2$ we can see a helper array $P$
     storing bit offsets into every $k$-th element namely $0, 2, 4\ldots$
@@ -244,14 +244,14 @@ amount of data on top of the compressed data.
 \label{subsection:block_size}
 
 One of the most important parameters of RRR implementation is the block
-size $b$ used. A bigger block size is better because of lower per bit overhead. Not
+size $b$ used. Bigger block size is better because of lower per bit overhead. Not
 all block sizes are however used in practice. Very often, we are only interested in
-block sizes of the form $2^k-1$. This is because number of ones in block of size $2^k-1$
+block sizes of the form $2^k-1$. This is because the number of ones in block of size $2^k-1$
 can be number between 0 and $2^k-1$ making this in total $2^k$ possibilities. Storing
 this number in the fixed buckets of size $\log_2 2^k$ makes use of all the available space.
 Thus, the commonly used bucket sizes in practice are 15, 31, 63 and 127. However, there are
 other limiting factors that come into play. For block size of 15 the encoding and decoding table
-occupies each roughly 64kB of space. This is because there are $2^{15}$ of entries each taking
+each occupies roughly 64kB of space. This is because there are $2^{15}$ of entries each taking
 2 bytes of storage. Unfortunately, for block size of 31 these two tables would consume roughly
 $2^{31}\cdot 4$ bytes of storage. That amounts to roughly 8.5GB of space and makes this approach
 unreasonable in practice. These problems force us to use the on the fly decoding for block sizes
@@ -261,7 +261,7 @@ Note that decoding is faster if we want to access the element close to the begin
 the block as we can stop the process when we obtain the particular bit. Overall, this makes the block
 size a parameter that we can adjust to balance between better space efficiency and faster
 runtime performance. There are several used implementation speedups and improvements. They impact
-the run time in a significant way. The most common and also impactful trick on the real life
+the run time in a significant way. The most common and also impactful trick on the real-life
 performance is taking care of special case when the number of ones in the block
 is zero or equal to the length of the block $b$. These blocks are often called \textit{trivial}. 
 In this case, no decoding is necessary and we can immediately tell what the result is only from
@@ -273,8 +273,8 @@ places where RRR is used, the frequency of trivial blocks tends to be high.
 
 So far we have provided just one example of the bit vector implementation.
 RRR is used on sequences with low entropy, where the frequency of zeroes/ones
-is shifted to one or the other side such as 20-40\% percent of all bits are the same.
-There is also second class of the bit vector implementations, heavily
+is shifted to one or the other side such as 20-40\% of all bits are the same.
+There is also a second class of the bit vector implementations, heavily
 used when the frequency of zeroes or ones is more significantly shifted.
 Although we stated that RRR is used in case of shifted frequencies, when the number
 of ones is very small, i.e. less than 5\% of the sequence, sparse bit vector

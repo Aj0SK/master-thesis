@@ -25,7 +25,7 @@ concepts and computation patterns that are slow on modern computers. However, as
 there are cases in which usage of space-efficient data structures speeds up the overall
 running time as they enable us to store the data in a faster type of memory (e.g. fast RAM
 instead of the slower disk). Thus, even if they use slower, more advanced concepts, the overall
-runtime may decrease due to lower amount of slow \textit{I/O operations}.
+runtime may decrease due to the lower amount of slow \textit{I/O operations}.
 
 In this work, we are mainly concerned with \textit{bit vector}. One of the simplest
 data structures that represents the sequence of zeroes and ones while supporting the
@@ -43,7 +43,7 @@ In the next sections, we introduce some interesting and useful applications of t
 \section{Application 1: Sparse array}
 
 Let $A$ be an array of $N$ elements each taking $k$ bits of space. We shall be interested in
-accessing the $i$-th element of $A$. For simplicity we assume that the elements of array may
+accessing the $i$-th element of $A$. For simplicity, we assume that the elements of array may
 not change after the construction. A straightforward representation of this array takes $N\cdot k$
 bits of space. However, imagine a scenario where significant portion of the array is empty
 and just a handful of elements are filled in. Take for example a sparse vector of numbers,
@@ -70,7 +70,7 @@ the value of $B[i]$. If it is zero, we return the default value. If it is one, w
 how many ones are preceding this particular one in $B$ to locate where in array $P$ our non-default
 value is placed. For this, we may use the $\rank_1$ method. Note, that method $\select_1$ can
 be used to obtain the position of $i$-th non-default value in $A$. The total space used by this
-representaton is $N+n\cdot k+R$ where $R$ is the space needed to support an efficient $\rank$ query.
+representation is $N+n\cdot k+R$ where $R$ is the space needed to support an efficient $\rank$ query.
 As we shall show in section~\ref{section:rank}, $\rank$ can be implemented in constant time with
 sublinear space overhead, i.e., $R = o(N)$. If we are provided with bit vector implementation along
 with $\access$ and $\rank$ methods we are able to reduce the total space used from $k\cdot N$ to
@@ -120,19 +120,19 @@ this method can be implemented efficiently.
 \section{Application 3: FM-index}
 % sources to help understand https://www.dcc.uchile.cl/TR/2005/TR_DCC-2005-004.pdf
 
-For simplicity, most of the time we shall assume in this section that the every text
-$T$ contains a special character {\tt \$} located only at its end that is lexicographically
+For simplicity, most of the time we shall assume in this section that every text $T$
+contains a special character {\tt \$} located only at its end that is lexicographically
 smallest.
 
 Let us now consider another practically interesting problem. As we shall see, solution
 to this problem also uses bit vector and other building blocks commonly used in succinct
 data structures. This time, we have a text $T$ and are interested in \textit{indexing} it.
 This means if we get some pattern $P$, we would like to quickly answer questions such as
-how many times is $P$ contained in $T$ and also where in $T$ this occurrences are located.
-This is particularly useful in bioinformatics, where we have very long sequence
+how many times is $P$ contained in $T$ and also where in $T$ these occurrences are located.
+This is particularly useful in bioinformatics, where we have a very long sequence
 of DNA and are interested in searching for some subsequences in it. One of the solutions that
 is reasonable and may be used is constructing \textit{suffix array} of $T$. Suffix array of $T$
-is data structure that stores information about the lexicograpical order of suffixes of $T$.
+is data structure that stores information about the lexicographical order of suffixes of $T$.
 
 \begin{figure}
 	\centerline{
@@ -250,20 +250,20 @@ such that $i<j$. Let $T_i$ be of the form $cxA$ and $T_j$ of the form $cyB$ wher
 characters of the text and $A$ and $B$ are sequences of characters. As $i<j$ it follows that
 either $x<y$ or $x=y$ and $A<B$ but this also means that after rotating these two rows we get
 sequences $xAc$ and $yBc$ respectively. It can be observed that $xAc$ will also preceed $yBc$
-in this case. From this it follows that the relative ordering of the same character is maintained
-from $F$ to $L$.
+in this case. From this observation, it follows that the relative ordering of the same character
+is maintained from $F$ to $L$.
 
 The search for rows where pattern $P$ is located will proceed from the end of $P$. This works by
 finding rows where suffixes $P[n\ldots], P[n-1\ldots]$ etc. are located. At every step, these
 rows will form a continuous subsequence of rows of $M$ so we will store only its beginning and end.
 This follows from the observation \ref{chapter1:fmindexprop:prop1}. Let us assume that we are
 looking for a word {\tt house} and we already found the range of rows in $M$ that have {\tt ouse}
-as their prefix. If we look to the last column, these symbols corresponds to the symbols preceding
-{\tt ouse} in the text. We can maybe see there in arbitrary order symbols like {\tt m} for worw
+as their prefix. If we look to the last column, these symbols correspond to the symbols preceding
+{\tt ouse} in the text. We can maybe see there in arbitrary order symbols like {\tt m} for word
 {\tt mouse} or {\tt h} for {\tt house}. To search for the range of rows in $M$ that have as a prefix
 word ({\tt house}) we shall look into the range of all prefixes beginning with {\tt h}. Locating this
 range is easy thanks to the $\Count$ helper array. Lines in this range are sorted according to the
-second character so there will be some lines continuing with {\tt a} if the text contained for exampl
+second character so there will be some lines continuing with {\tt a} if the text contained for example
 word {\tt hashtag} or {\tt e} if the word {\tt head} was in the text. Somewhere the lines starting with 
 {\tt house} will be located, but we do not store anything except for $T_{BWT}$ and $\Count$.
 However, we already located the range where suffixes starting with {\tt ouse} are located in.
@@ -299,7 +299,7 @@ The process will in general proceed in these steps:
 As we can see, we are not only interested in $\rank$ over a bit vector but also over an arbitrary
 alphabet that we would like to use in the FM-index. This seems like an even harder task.
 In the next section, we shall see how we can reduce this problem and use the bit vector
-implementation also for the $\rank$ and $\select$ over general alphabet.
+implementation also for the $\rank$ and $\select$ over the general alphabet.
 
 \paragraph{Wavelet tree}
 \label{section:WaweletTree}
@@ -311,7 +311,7 @@ alphabet still supporting $\access$, $\rank$ and $\select$ queries in reasonable
 
 The most straightforward approach is to store one bit vector of size $|S|$,
 per every character of the alphabet $\Sigma$. Let us call these bit vectors $B_1,
-B_2, \ldots B_{\sigma}$. Each of them stores one on places where the symbol corresponding
+B_2, \ldots B_{\sigma}$. Each of them stores ones on positions where the symbol corresponding
 to this bit vector is located, according to the formula
 
 \[
