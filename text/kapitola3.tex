@@ -12,9 +12,9 @@ As we already discussed in section~\ref{section:compressed_bv}, there are to
 the best of our knowledge two widely used methods to encode and decode the
 blocks in RRR. The main disadvantage of the table decoding method is the big space
 overhead that it poses and the inability to reasonably support longer blocks
-in practice because of the huge table sizes for bigger block length. On the
+in practice because of the huge table sizes for bigger block lengths. On the
 other hand, the on-the-fly decoding method may be used to support a bigger block size
-with the downside being longer encoding and decoding times. We propose
+with the downside being longer encoding and decoding times. We propose a
 new method of encoding and decoding the blocks. The main objective of the new method is
 to create an alternative to the previous methods that enables use of longer blocks
 while not hurting the runtime so significantly.
@@ -31,7 +31,7 @@ concatenation $B_1\cdot B_2$. We shall at first sort the big block $B$ by the pa
 where $c_1$ and $c_2$ are the respective classes of the smaller sub-blocks $B_1$ and $B_2$. Only then,
 we break the tie by lexicographical order of $B_1$ and $B_2$. Note that the original lexicographical
 ordering can be rephrased in the context of sub-blocks as sorting at first by $B_1$ and then by
-$B_2$. The example of the new ordering for particular block length and class is shown on
+$B_2$. The example of the new ordering for particular block length and class is shown in
 Fig.~\ref{obr:lexicographicalVsUs}.
 
 \begin{figure}
@@ -76,7 +76,7 @@ decode block in a divide and conquer manner.
 
 \paragraph{Encoding}
 
-Before providing the general encoding stratedy, we shall demonstrate the encoding on
+Before providing the general encoding strategy, we shall demonstrate the encoding on
 simple example and then generalize the ideas behind the process. Imagine encoding
 block {\tt 100 010}. We may observe that the class of this block is 2 as there are two ones in
 the whole block. Obtaining the offset is more complicated. We will proceed by enumerating the
@@ -93,7 +93,7 @@ number of blocks preceding {\tt 100 010} in the class $c=2$. We divide the block
 \end{itemize}
 
 Summing up, we get that there are 10 blocks preceding {\tt 100 010} so it has the offset $o$
-equal to 10 as we index from 0. Together with its class we would encode this block as a pair
+equal to 10 as we index from 0. Together with its class, we would encode this block as a pair
 $(2, 10)$.
 
 In general, consider a block $B$ of length $b$. The first step is to obtain
@@ -130,7 +130,7 @@ denotes the number of blocks with $i$-ones in the first sub-block and the rest
 $c-i$ ones in the second sub-block.
 
 The number of blocks in group~\ref{chapter3:encoding:2} is equal to the number of blocks that
-share classes of sub-blocks, but are smaller than $B$. Number of these blocks is $o_1\times {15\choose c_1}$.
+share classes of sub-blocks but are smaller than $B$. Number of these blocks is $o_1\times {15\choose c_1}$.
 The number of blocks in group~\ref{chapter3:encoding:3} is equal to the number of blocks smaller 
 than $B_2$. This is identical to the offset of second sub-block -- $o_2$. Note, that to obtain the
 offset of $B$ we need the encoding of the sub-blocks $B_1$ and $B_2$. These are two pairs of numbers
@@ -148,7 +148,7 @@ All the possible blocks along the class $c$ are primarily sorted by pair $(c_1, 
 that we shall call the class pair. If we know what is the number of blocks along the class $c$
 that have the class pair $(c_1, c_2)$ equal to $(0, c), (1, c-1), \ldots , (c, 0)$, we can search
 using the offset in which of these groups our block is located. This gives us classes of the sub-blocks
-$c_1$ and $c_2$. When we obtain these two, we shall proceed to the second step. Along all the blocks
+$c_1$ and $c_2$. When we obtain these two, we shall proceed to the second step. Between all the blocks
 that have the same $c_1$ and $c_2$, we would like to find $o'$-th along them where the new offset $o'$
 is given by subtracting the number of blocks with the smaller class pairs $(c_1, c_2)$, from the offset
 $o$. There are ${b/2 \choose c_1}$ and ${b/2 \choose c_2}$ ways how the first and second block may look
@@ -166,7 +166,7 @@ the current cycle is on position $o'$. This is straightforward to compute.
 % TODO: sem dopisat ako to presne vypocitat
 % TODO: nasledujuci example este mozno skryva nejake off by one
 
-We shall again present this process on an example and decode the block from previous
+We shall again present this process on an example and decode the block from the previous
 encoding example {\tt 100 010} encoded as $(2, 10)$. To obtain the number of ones in
 the first sub-block only from the offset of the block, we can look into the table and
 see that there are 3 blocks with zero ones in the first sub-block. As the offset of our
@@ -175,12 +175,12 @@ are 9 blocks with one 1 in the first sub-block. As $3+9$ is bigger than 10, we d
 that the number of ones in the first block is 1 and it follows that the number of ones in
 the second sub-block is
 also 1 as we know the total number of ones in the block. There are 9 blocks with
-this exact same property, the smallest one being {\tt 001 001} and largest one
+this exact same property, the smallest one being {\tt 001 001} and the largest one
 {\tt 100 100}. We had successfully narrowed our search into these 9 blocks and can now
 focus on identifying what is the offset of the first and second sub-block. There are
 ${3 \choose 1} = 3$ possibilities (namely {\tt 001}, {\tt 010}, {\tt 100}) how the first
 and also the second sub-block may look. Blocks are sorted according
-to the first sub-block and then second sub-block. Cycle through
+to the first sub-block and then second sub-block. The cycle through
 the sub-blocks will be of length 3 (number of possible second sub-blocks) and will repeat
 3 times (number of possible first sub-blocks). Along these ordering of 9 blocks we are
 looking for the 7th. From this, we know that the block, we are looking for contains a
@@ -189,19 +189,19 @@ So to find the first sub-block, we reuse the solution based on the lexicographic
 and ask it to decode pair $(1, 2)$ that gives us the first sub-block {\tt 100}. Obtaining
 the second sub-block is not that hard. So far, we focused how many times the first sub-block
 changes up to the 7th position. Now, we turn our attention on which second sub-block the cycle
-ends. We know that every 3rd iteration, the second sub-blocks starts, where it began.
+ends. We know that every 3rd iteration, the second sub-block starts, where it began.
 
 \paragraph{Extending block size of method}
 
 Our newly proposed method can be used to obtain the encoding and decoding scheme for block size $2b$
 using only scheme for the block size of $b$. As we already mentioned in
 subsection~\ref{subsection:block_size}, most of the implementations of RRR choose the size of the
-block to be of form $2^k-1$ as the number of possibilities for the value of class is power of two and
+block to be of the form $2^k-1$ as the number of possibilities for the value of class is a power of two and
 its representation fits exactly into $k$ bits. This is not very convenient for us as combining two
-solutions of size $2^k-1$ together gives us only solution for block size $2(2^k-1)$ what is one bit
+solutions of size $2^k-1$ together gives us only solution for block size $2(2^k-1)$ which is one bit
 short of a practically desired size $2^{k+1}-1$. To overcome this, we need to extend the block by one bit.
 To do this, we shall once again alter the order of the blocks along the same class. Let us now look on
-an example how we order blocks of length 5 and class 3. There will be two types of blocks
+an example of how we order blocks of length 5 and class 3. There will be two types of blocks
 in this class. Ones of the form {\tt 0xxxx} and the rest of the form {\tt 1xxxx}. There are
 ${4\choose 3}$ ways how to distribute 3 ones along the four places so there will be exactly
 4 blocks starting with 0 and ${4\choose 2}$ blocks starting with one. Blocks starting with
@@ -249,16 +249,16 @@ but we may use the same arguments and ideas for encoding and decoding as we alre
 % TODO: pridat viac kontextu, preco sa zaoberame percentami jednotiek
 % TODO: ukazat ze vacsie b je lepsie
 
-The main space saving done by RRR happens in the way how the blocks are stored. If we have
+The main space-saving done by RRR happens in the way how the blocks are stored. If we have
 a block of length $b$, then storing it in a raw bit representation takes $b$ bits.
-The amount of bits used when we use compressed form depends on the blocks class. If the block
+The number of bits used when we use compressed form depends on the blocks class. If the block
 has class $c$ then compressed representation takes $\ceil{\log_2 (b+1)}$ bits to store the
 class and $\ceil{\log_2{b\choose c}}$ to store the offset. In
 Fig.~\ref{obr:rrrSpaceSavings} we can see for different block sizes how the space saved
 per block depends on the blocks class. We may observe that RRR saves most of the memory on the
 sparse blocks, those with small number of ones. Let us now consider a randomly
 generated bit sequence $B$ of length $n$ containing $p\%$ of ones. Although we shall put most of
-our interest into a sequences with very small percentage of ones in it, we now do the analysis
+our interest into sequences with very small percentage of ones in it, we now do the analysis
 about the space distribution of blocks classes for any $p$.
 
 \begin{figure}
@@ -288,7 +288,7 @@ that we call a \textit{hybrid encoding}.
 		\includegraphics[width=\textwidth]{images/hybrid_encoding_motivation}
 	}
 	\caption[TODO]{On these 3 graphs, we can see the cumulative distribution
-    of blocks classes for the block sizes of 31, 63, 127. The frequency of ones is
+    of blocks classes for the block sizes 31, 63, 127. The frequency of ones is
     fixed to 5\%. Note the marked classes on the $x$-axis. Numbers 6, 12 and
     25 mark the place up to which 99\% of probability distribution lies for
     the block sizes 31, 63 and 127 respectively.
@@ -297,7 +297,7 @@ that we call a \textit{hybrid encoding}.
 	\label{obr:hybridEncodingDistribution}
 \end{figure}
 
-Hybrid encoding uses a property that in some sequences blocks with high number
+The hybrid encoding uses a property that in some sequences blocks with high number
 of ones are very rare. Encoding these blocks is not that helpful as their
 compressed representation may take even more bits than the original raw
 representation. Storing the whole block may waste space if the number of
@@ -334,7 +334,7 @@ E[C_i] &= (n/b)\cdot {b\choose i}\cdot p^i\cdot (1-p)^{b-i} \label{eq:hybrid_enc
 \end{align}
 
 Here we mainly used the linearity of the expected value. To compute the expected value of
-$C_i$ we used the fact, that number of blocks of certain class follows binomial
+$C_i$ we used the fact, that number of blocks of a certain class follows binomial
 distribution. We know that in the bit sequence, there is $p\%$ of ones. There is $n/b$ blocks
 and each has probability $p^c(1-p)^{b-c}$ for being of class $c$. This probability is independent
 from the previous blocks and as we are interested in total number of blocks with this class,
