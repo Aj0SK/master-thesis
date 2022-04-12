@@ -1,6 +1,7 @@
 #include <benchmark/benchmark.h>
 #include <iostream>
 #include <sdsl/rrr_vector.hpp>
+#include <sdsl/sd_vector.hpp>
 
 using std::cout;
 using std::pair;
@@ -10,6 +11,7 @@ using namespace std::chrono;
 using timer = std::chrono::high_resolution_clock;
 
 constexpr int kDensity = 5;
+constexpr int kSeqLen = 1 << 25;
 
 enum Operation
 {
@@ -84,6 +86,52 @@ get_test(size_t size, size_t queries_count, int density)
 }
 
 template <Operation op, AccessPattern ap, size_t kN,
+          short unsigned int BLOCK_SIZE, int density>
+static void BM_SD(benchmark::State& state)
+{
+  using vec_type = sd_vector<>;
+  using vector_select_type = typename vec_type::select_1_type;
+  using vector_rank_type = typename vec_type::rank_1_type;
+
+  auto [data, queries] = get_test<op, ap>(kN, 10'000, density);
+
+  bit_vector bv(data.size());
+  for (size_t i = 0; i < data.size(); ++i)
+  {
+    bv[i] = data[i];
+  }
+
+  sd_vector sd_vector(bv);
+  vector_rank_type sd_rank(&sd_vector);
+  vector_select_type sd_select(&sd_vector);
+
+  for (auto _ : state)
+  {
+    for (size_t q : queries)
+    {
+      if constexpr (op == Operation::Access)
+      {
+        bool x = sd_vector[q];
+        benchmark::DoNotOptimize(x);
+      }
+      if constexpr (op == Operation::Rank)
+      {
+        bool x = sd_rank(q);
+        benchmark::DoNotOptimize(x);
+      }
+      if constexpr (op == Operation::Select)
+      {
+        bool x = sd_select(q);
+        benchmark::DoNotOptimize(x);
+      }
+    }
+  }
+
+  double ratio = 8.0 * size_in_bytes(sd_vector) / static_cast<double>(kN);
+  state.counters["Space"] = ratio;
+}
+
+template <Operation op, AccessPattern ap, size_t kN,
           short unsigned int BLOCK_SIZE, int density,
           size_t RANK_SAMPLE_DENS = 32, int hybrid = BLOCK_SIZE>
 static void BM_FUNC(benchmark::State& state)
@@ -131,70 +179,79 @@ static void BM_FUNC(benchmark::State& state)
   state.counters["Space"] = ratio;
 }
 
-BENCHMARK_TEMPLATE(BM_FUNC, Operation::Access, AccessPattern::Random, 100'000,
+BENCHMARK_TEMPLATE(BM_FUNC, Operation::Access, AccessPattern::Random, kSeqLen,
                    15, kDensity)
     ->Unit(benchmark::kNanosecond);
-BENCHMARK_TEMPLATE(BM_FUNC, Operation::Access, AccessPattern::Random, 100'000,
+BENCHMARK_TEMPLATE(BM_FUNC, Operation::Access, AccessPattern::Random, kSeqLen,
                    31, kDensity)
     ->Unit(benchmark::kNanosecond);
-BENCHMARK_TEMPLATE(BM_FUNC, Operation::Access, AccessPattern::Random, 100'000,
+BENCHMARK_TEMPLATE(BM_FUNC, Operation::Access, AccessPattern::Random, kSeqLen,
                    31, kDensity, 32, 7)
     ->Unit(benchmark::kNanosecond);
-BENCHMARK_TEMPLATE(BM_FUNC, Operation::Access, AccessPattern::Random, 100'000,
+BENCHMARK_TEMPLATE(BM_FUNC, Operation::Access, AccessPattern::Random, kSeqLen,
                    63, kDensity)
     ->Unit(benchmark::kNanosecond);
-BENCHMARK_TEMPLATE(BM_FUNC, Operation::Access, AccessPattern::Random, 100'000,
+BENCHMARK_TEMPLATE(BM_FUNC, Operation::Access, AccessPattern::Random, kSeqLen,
                    63, kDensity, 32, 15)
     ->Unit(benchmark::kNanosecond);
-BENCHMARK_TEMPLATE(BM_FUNC, Operation::Access, AccessPattern::Random, 100'000,
+BENCHMARK_TEMPLATE(BM_FUNC, Operation::Access, AccessPattern::Random, kSeqLen,
                    127, kDensity)
     ->Unit(benchmark::kNanosecond);
-BENCHMARK_TEMPLATE(BM_FUNC, Operation::Access, AccessPattern::Random, 100'000,
+BENCHMARK_TEMPLATE(BM_FUNC, Operation::Access, AccessPattern::Random, kSeqLen,
                    127, kDensity, 32, 15)
     ->Unit(benchmark::kNanosecond);
+BENCHMARK_TEMPLATE(BM_SD, Operation::Access, AccessPattern::Random, kSeqLen, 0,
+                   kDensity)
+    ->Unit(benchmark::kNanosecond);
 
-BENCHMARK_TEMPLATE(BM_FUNC, Operation::Rank, AccessPattern::Random, 100'000, 15,
+BENCHMARK_TEMPLATE(BM_FUNC, Operation::Rank, AccessPattern::Random, kSeqLen, 15,
                    kDensity)
     ->Unit(benchmark::kNanosecond);
-BENCHMARK_TEMPLATE(BM_FUNC, Operation::Rank, AccessPattern::Random, 100'000, 31,
+BENCHMARK_TEMPLATE(BM_FUNC, Operation::Rank, AccessPattern::Random, kSeqLen, 31,
                    kDensity)
     ->Unit(benchmark::kNanosecond);
-BENCHMARK_TEMPLATE(BM_FUNC, Operation::Rank, AccessPattern::Random, 100'000, 31,
+BENCHMARK_TEMPLATE(BM_FUNC, Operation::Rank, AccessPattern::Random, kSeqLen, 31,
                    kDensity, 32, 7)
     ->Unit(benchmark::kNanosecond);
-BENCHMARK_TEMPLATE(BM_FUNC, Operation::Rank, AccessPattern::Random, 100'000, 63,
+BENCHMARK_TEMPLATE(BM_FUNC, Operation::Rank, AccessPattern::Random, kSeqLen, 63,
                    kDensity)
     ->Unit(benchmark::kNanosecond);
-BENCHMARK_TEMPLATE(BM_FUNC, Operation::Rank, AccessPattern::Random, 100'000, 63,
+BENCHMARK_TEMPLATE(BM_FUNC, Operation::Rank, AccessPattern::Random, kSeqLen, 63,
                    kDensity, 32, 15)
     ->Unit(benchmark::kNanosecond);
-BENCHMARK_TEMPLATE(BM_FUNC, Operation::Rank, AccessPattern::Random, 100'000,
+BENCHMARK_TEMPLATE(BM_FUNC, Operation::Rank, AccessPattern::Random, kSeqLen,
                    127, kDensity)
     ->Unit(benchmark::kNanosecond);
-BENCHMARK_TEMPLATE(BM_FUNC, Operation::Rank, AccessPattern::Random, 100'000,
+BENCHMARK_TEMPLATE(BM_FUNC, Operation::Rank, AccessPattern::Random, kSeqLen,
                    127, kDensity, 32, 15)
+    ->Unit(benchmark::kNanosecond);
+BENCHMARK_TEMPLATE(BM_SD, Operation::Rank, AccessPattern::Random, kSeqLen, 0,
+                   kDensity)
     ->Unit(benchmark::kNanosecond);
 
-BENCHMARK_TEMPLATE(BM_FUNC, Operation::Select, AccessPattern::Random, 100'000,
+BENCHMARK_TEMPLATE(BM_FUNC, Operation::Select, AccessPattern::Random, kSeqLen,
                    15, kDensity)
     ->Unit(benchmark::kNanosecond);
-BENCHMARK_TEMPLATE(BM_FUNC, Operation::Select, AccessPattern::Random, 100'000,
+BENCHMARK_TEMPLATE(BM_FUNC, Operation::Select, AccessPattern::Random, kSeqLen,
                    31, kDensity)
     ->Unit(benchmark::kNanosecond);
-BENCHMARK_TEMPLATE(BM_FUNC, Operation::Select, AccessPattern::Random, 100'000,
+BENCHMARK_TEMPLATE(BM_FUNC, Operation::Select, AccessPattern::Random, kSeqLen,
                    31, kDensity, 32, 7)
     ->Unit(benchmark::kNanosecond);
-BENCHMARK_TEMPLATE(BM_FUNC, Operation::Select, AccessPattern::Random, 100'000,
+BENCHMARK_TEMPLATE(BM_FUNC, Operation::Select, AccessPattern::Random, kSeqLen,
                    63, kDensity)
     ->Unit(benchmark::kNanosecond);
-BENCHMARK_TEMPLATE(BM_FUNC, Operation::Select, AccessPattern::Random, 100'000,
+BENCHMARK_TEMPLATE(BM_FUNC, Operation::Select, AccessPattern::Random, kSeqLen,
                    63, kDensity, 32, 15)
     ->Unit(benchmark::kNanosecond);
-BENCHMARK_TEMPLATE(BM_FUNC, Operation::Select, AccessPattern::Random, 100'000,
+BENCHMARK_TEMPLATE(BM_FUNC, Operation::Select, AccessPattern::Random, kSeqLen,
                    127, kDensity)
     ->Unit(benchmark::kNanosecond);
-BENCHMARK_TEMPLATE(BM_FUNC, Operation::Select, AccessPattern::Random, 100'000,
+BENCHMARK_TEMPLATE(BM_FUNC, Operation::Select, AccessPattern::Random, kSeqLen,
                    127, kDensity, 32, 15)
+    ->Unit(benchmark::kNanosecond);
+BENCHMARK_TEMPLATE(BM_SD, Operation::Select, AccessPattern::Random, kSeqLen, 0,
+                   kDensity)
     ->Unit(benchmark::kNanosecond);
 
 int main(int argc, char** argv)

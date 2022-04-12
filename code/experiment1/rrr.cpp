@@ -1,3 +1,5 @@
+// Before running turn off the CPU scaling
+// cpupower frequency-set --governor performance
 #include "binary_helpers.h"
 #include "rrr_convert.h"
 

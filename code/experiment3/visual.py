@@ -35,7 +35,7 @@ for file_path in file_paths:
 print(results)
 
 fig, axs = plt.subplots(3)
-fig.suptitle('Prístup, rank, select na postupnosti dĺžky 100 000 prvkov (5% jednotiek - 0.29)')
+fig.suptitle('Prístup, rank, select na postupnosti dĺžky 1 << 25 prvkov (5% jednotiek - 0.29)')
 
 isHybrid = [True, False]
 
@@ -51,6 +51,10 @@ for result_index in range(2):
             axs[3*index1+index2].set_title(translate(operation + " " + access_pattern))
             axs[3*index1+index2].set_xlabel("bitov na bit")
             axs[3*index1+index2].set_ylabel("čas (ns)")
+
+            x = [res[1] for (par, res) in results[0] if par[0] == operation and par[1] == access_pattern and int(par[3]) == 0]
+            y = [res[0]/NUM_OF_QUERIES for (par, res) in results[0] if par[0] == operation and par[1] == access_pattern and int(par[3]) == 0]
+            axs[3*index1+index2].scatter(x, y, label = str(result_index) + "-" + str(block_size), marker = '*', c="0.0")
 
 fig.tight_layout(pad=3.0)
 
