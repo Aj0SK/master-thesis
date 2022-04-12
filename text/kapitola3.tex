@@ -326,24 +326,25 @@ bits of space. We would like to see what is the expected space that we save
 using the hybrid encoding. We start by simplifying the expected value of the
 difference of these representations:
 % My mathematical guesswork
-\begin{align} 
+\begin{align}
 E[space] &= E\left[(n/b)(\lg(b+1)-\lg(c_k+1)) + \sum_{i=c_k}^{i\leq b}\ceil{C_i}\cdot \left(\ceil{{b\choose i}} - b\right)\right] \nonumber\\
 &=(n/b)(\lg(b+1)-\lg(c_k+1)) + \sum_{i=c_k}^{i\leq b}E\left[\ceil{C_i}\cdot \left(\ceil{{b\choose i}} - b\right)\right] \nonumber\\
 &=(n/b)(\lg(b+1)-\lg(c_k+1)) + \sum_{i=c_k}^{i\leq b}\ceil{E\left[C_i\right]}\cdot \left(\ceil{{b\choose i}} - b\right) \nonumber\\
 E[C_i] &= (n/b)\cdot {b\choose i}\cdot p^i\cdot (1-p)^{b-i} \label{eq:hybrid_encoding_expected_c_i}
 \end{align}
 
-Here we mainly use the linearity of the expected value. To compute the expected value of
+Here we mainly used the linearity of the expected value. To compute the expected value of
 $C_i$ we used the fact, that number of blocks of certain class follows binomial
 distribution. We know that in the bit sequence, there is $p\%$ of ones. There is $n/b$ blocks
 and each has probability $p^c(1-p)^{b-c}$ for being of class $c$. This probability is independent
 from the previous blocks and as we are interested in total number of blocks with this class,
-it follows that $C_i$ follows binomial distribution. As $C_i \sim Bin(n/b, p^c(1-p)^{b-c})$,
+it follows that $C_i$ follows binomial distribution. As $$C_i \sim Bin(n/b, p^c(1-p)^{b-c})$$
 it follows that the expected value is equal to \ref{eq:hybrid_encoding_expected_c_i}.
 
 We present the expected space saved by hybrid implementation for some chosen values of
-$b, c_k$ and $p$ in Fig.~\ref{obr:hybridEncodingTheoretical}.
+$p, b$ and $c_k$ in Fig.~\ref{obr:hybridEncodingTheoretical}.
 
+% TODO: space saved should be used, need to regenerate to 1-x
 \begin{figure}
 	\centerline{
         \begin{tabular}{l c c c}
@@ -371,7 +372,9 @@ $b, c_k$ and $p$ in Fig.~\ref{obr:hybridEncodingTheoretical}.
         %\hspace{4em}
 	}
 	\caption[TODO]{
-        TODO.
+        We may observe the ratio of expected space used by the hybrid implementation to space used by our
+        standard RRR implementation for varios percentage of ones in the text -- $p$ as well as for
+        different block size -- $b$ and cutoff value -- $c_k$. 
     }
 	\label{obr:hybridEncodingTheoretical}
 \end{figure}

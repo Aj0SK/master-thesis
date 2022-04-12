@@ -1,59 +1,87 @@
 \chapter{Implementation and benchmarking}
 \label{kap:kap4}
 
-In this chapter, we focus on important aspects of implementation of the ideas from
-previous chapter and the results we obtained using them. First, we describe the
-important parts and decisions in our implementation. Then, we describe how we
-benchmarked our implementation and the results we obtained.
+In this chapter, we focus on the implementation of the ideas from previous chapter
+and the results we obtained using them. First, we describe the important parts and
+decisions in our implementation. Then, we describe how we benchmarked our implementation
+and the results we obtained.
 
 \section{Implementation}
 
-We decided to make our solution a part of the SDSL library~\citep{gog2014theory}. This
+We have decided to make our solution a part of the SDSL library~\citep{gog2014theory}. This
 is one of the most matured and versatile libraries implementing succinct data structures.
 SDSL is a heavily tested library offering various implementations of succinct
 structures such as wavelet tree, FM-index, bit vectors, suffix array and many more.
 It allows to easily use different building blocks to implement more complex structures,
 i.e. using different bit vector implementations in wavelet tree. On top of this, thorough
 tests and benchmarks were devised, mainly by \cite{gog2014optimized}.
-The RRR implementations consists of \texttt{rrr\_vector} class that uses the on the fly-decoding
+The RRR implementations consists of templated class \texttt{rrr\_vector} that uses the on the fly-decoding
 and enables us to use any block size from 3 up to 256. SDSL also provides specialization
 of this class for block size 15 that uses the table encoding method. We thus decided to use
-this as an underlying solution for the sub-blocks and provided specialized implementations
-for block sizes 31, 63 and 127 that are mostly used in the practical scenarios. We tried to
-keep the number of changes to the general implementation of \texttt{rrr\_vector} as small as possible.
-We have been able to only alter the two functions that the SDSL uses namely \texttt{bin\_to\_nr}
-that is used for encoding and \texttt{nr\_to\_bin} used for decoding. As we mentioned, the encoding
-is less critical for most of the applications as encoding is done only once at the beginning.
-This is why we shall focus more on the decoding implementation.
+this specialization as an underlying solution for the sub-blocks encoding and decoding. we further
+provided specialized implementations for block sizes 31, 63 and 127 that are mostly used in the
+practical scenarios. We based our specializations on the the general implementation of
+\texttt{rrr\_vector} and tried to keep the number of changes as small as possible. We have been able
+to only alter the two functions that the SDSL for encoding and decoding namely \texttt{bin\_to\_nr}
+and \texttt{nr\_to\_bin}. As we mentioned, the encoding is less performance critical for most of the
+applications as encoding is done only once at the beginning. This is why we focused more on the
+decoding implementation.
 
-When implementing our technique based on the divide and conquer for smaller block size,
-we put the bigget focus on the performance of subroutine to divide our problem to sub-problems as
-solving these sub-problems is done using the table approach and is thus very fast. This
-parts consists of finding the pair of classes $(c_1, c_2)$ for our block $B$. After this,
-we need to find the number of ways how the first and second sub-block may look.
+\paragraph{Division to subproblems}
+
+When implementing our method, we identified the proces of dividing our problem to sub-problems
+as the most critical. There are varios reasons why. The first one is that for smaller blocks 
+solving the sub-problems is done using the table approach that is quite fast and can be hardly
+made faster as it consists only of one lookup to table. The second one is that this part is
+inherently blocking us from running the methods on the sub-problems. These sub-problems may be
+solved in parallel (either by more workers or by instruction-level parallelism), this part is
+though harder to parallelize. Dividing the problem into sub-problems consists of
+finding the pair of classes $(c_1, c_2)$ for our block $B$. After this, we need to find the number
+of ways how the first and second sub-block may look.
 These numbers can be precomputed as for every class $c$, there is at most $b+1$ ways how to
 write it in a form $c_1+c_2$ for valid $c_1$ and $c_2$. After obtaining the number of combinations
-for the first and second sub-block, it is then trivial to call sub-routines and combine their result
-to obtain decoded block. We devised 3 different methods to find the pair $(c_1, c_2)$ for our block $B$.
-We may precompute how many block there are with class pair equal to $(0, c), (1, c-1),\ldots ,
-(c, 0)$ and name these numbers $C_{0}\ldots C_{c}$. With known offset of our block we may shift
-along these numbers keeping the sum of the $C$ up to $i$-th position.
-
-We used 3 different techniques to find the last index in these prefix sums that is smaller 
-
-
-
+for the first and second sub-block, it is then trivial to compute the parameters for sub-routines 
+that decode the sub-blocks and combine their result to obtain decoded block. We devised 3 different
+methods to find the pair $(c_1, c_2)$ for our block $B$. We may precompute how many block there are
+with class pair equal to $(0, c), (1, c-1),\ldots , (c, 0)$ and name these numbers $C_{0}\ldots C_{c}$.
+Example is on Fig.~\ref{table:class_pairs}.
+\begin{figure}
+	\centerline{
+        \begin{tabular}{c c c c}
+            $C_k$	&	$(c_1, c_2)$  &   Block count & Offsets of blocks\\
+        \hline
+			$C_0$	&	$(0, 2)$	&   \tt 3 	&	0-2\\
+			$C_1$	&	$(1, 1)$	&	\tt 9 	&	3-11\\
+			$C_2$	&	$(2, 0)$	&	\tt 3	&	12-14\\
+        \end{tabular}
+	}
+	\caption[TODO]{
+        Table shows all the class pairs with the number of blocks for $b=6, c=2$.
+    }
+	\label{table:class_pairs}
+\end{figure}
+We would like to map the offset of the block to the number $C_i$.
+One possible way is to precompute the prefix sums, such that $P_i = \sum_{i=0}^{i} C_i$.
+As these prefix sums form an increasing sequence, we can binary search for class
+that contains our offset. Although binary search has better time complexity, as the number
+of buckets where our offset may land is usually small, linear search outperforms the binary
+most of the time. In practice, we found that sequential search using the \textit{SIMD}
+instructions leads to the best results for a smaller block sizes.
 
 \section{Benchmarking}
 
-We benchmarked our code using 3 types of benchmarks. The first type of the bechmarks
-were the micro-benchmarks, focusing on measuring the performance of block encoding
-and decoding in more artificial setting. The second type of benchmarks was based on
-the SDSL benchmarks mainly focusing on the performance of the bit vector but also
-on the performance of FM-index when the bit vector is used inside of the FM-index.
+We benchmarked our code using two types of benchmarks. The first type of benchmarks used
+a \textit{Google Benchmark} library. This is one of the standard libraries used for
+microbenchmarking of programs. It can reliably benchmark program as it does a lot of work
+under the hood. Code snippet that is being benchmarked is run several times until the
+library can reliably state some information about its runtime. The second type of benchmarks
+were the ones that are included in SDSL. These are built on top of a data from the
+Pizza\&Chili dataset \citep{ferragina2005pizza} and include DNA data, web data, structured
+XML data from the DBLP computer science bibliography, C and Java source codes from linux
+and gcc projects as well as english texts from the gutenberg project.
 
 \paragraph{Bit vector in FM-index}
-Most of the FM-index implementations provide at least methods:
+Most of the FM-index implementations provides methods:
 \begin{itemize}
 	\item $\mathit{count}(P)$ counts the number of occurrences of $P$ in text $T$
 	\item $\mathit{locate}(P)$ returns all positions of pattern $P$ in text $T$
@@ -61,5 +89,3 @@ Most of the FM-index implementations provide at least methods:
 \end{itemize}
 The reason that the $\mathit{extract}$ method is useful and non-trivial is that FM-index
 does not store the original sequence $T$ -- at least not in an easily readable form.
-As we have already shown, the bit vector is used in the implementation of the FM-index as it is
-used inside of the wavelet tree as was described in section TODO.

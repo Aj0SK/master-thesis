@@ -40,8 +40,8 @@ This version of implementation also allows us to trade speed and used memory usi
 $k$. Increasing this parameter allows us to save space. On the other hand, smaller $k$
 requires less work to be done. For smaller $k$ the time of answering the query may be
 dominated by two cache misses that most of the time occur when accessing the precomputed ranks
-and then subsequently accessing the bits on the beginning of the superblock. Subsequent linear
-scan through subsequent bits in $B$ can be then very cache friendly after these two misses.
+and then subsequently accessing the bits on the beginning of the superblock. Continuous linear
+scan through subsequent bits in $B$ can be then very cache friendly after the initial two cache misses.
 
 Although this solution works well and is commonly used in practice, it is possible to
 answer $\rank$ query in constant time only with sublinear space overhead as was first
