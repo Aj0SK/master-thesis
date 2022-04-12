@@ -65,23 +65,43 @@ One possible way is to precompute the prefix sums, such that $P_i = \sum_{i=0}^{
 As these prefix sums form an increasing sequence, we can binary search for class
 that contains our offset. Although binary search has better time complexity, as the number
 of buckets where our offset may land is usually small, linear search outperforms the binary
-most of the time. In practice, we found that sequential search using the \textit{SIMD}
+most of the time. In practice, we found that sequential search using the \texttt{SIMD}
 instructions leads to the best results for a smaller block sizes.
 
 \section{Benchmarking}
 
 We benchmarked our code using two types of benchmarks. The first type of benchmarks used
-a \textit{Google Benchmark} library. This is one of the standard libraries used for
+a \texttt{Google Benchmark} library. This is one of the standard libraries used for
 microbenchmarking of programs. It can reliably benchmark program as it does a lot of work
 under the hood. Code snippet that is being benchmarked is run several times until the
 library can reliably state some information about its runtime. The second type of benchmarks
-were the ones that are included in SDSL. These are built on top of a data from the
-Pizza\&Chili dataset \citep{ferragina2005pizza} and include DNA data, web data, structured
-XML data from the DBLP computer science bibliography, C and Java source codes from linux
-and gcc projects as well as english texts from the gutenberg project.
+were the ones that are included in \texttt{SDSL}. These are built on top of a data from the
+\texttt{Pizza\&Chili} dataset \citep{ferragina2005pizza} and include DNA data, web data, structured
+\texttt{XML} data from the \texttt{DBLP} computer science bibliography, \texttt{C} and
+\texttt{Java} source codes from \texttt{Linux} and \texttt{GCC} projects as well as English
+texts from the Gutenberg project. All the benchmark results were obtained on a machine
+with 8 core AMD Ryzen 7 2700X running on 3.7 Ghz with 16 MB of cache and 16 GB of RAM. The
+running operating system was Ubuntu 20.04.3 LTS.
+
+\paragraph{Early RRR microbenchmarks}
+
+These benchmarks were used in the early stage of the development to measure a potential gain from
+our new proposed method of encoding and decoding. We mainly focused on measuring different block sizes
+in combination with different methods used for dividing block to subproblems and with different
+approaches to obtain particular block size. The mainly tested block sizes were 15, 30, 31, 62, 63
+and 127. Sizes 15, 31, 63 and 127 are most useful in practice however they can be obtained using
+different combinations of block size 30 and 62, i.e. 31 can be combined as 1 bit and 30 bit solution,
+63 can be divided to 1 and 62 as well as to 3 and two sub-problems of length 30.
+We used 3 different techniques to divide a problem into sub-problems, these were the linear scan,
+binary search and linear scan enhanced by \texttt{SIMD} instructions.
+
+\paragraph{Early RRR microbenchmarks}
 
 \paragraph{Bit vector in FM-index}
-Most of the FM-index implementations provides methods:
+
+We further benchmarked our bit vector implementation as a part of Huffman shaped wavelet tree
+used inside of the FM-index. Implementation of FM-index in \texttt{SDSL} as most of the
+other implementations of FM-index provides 3 basic methods:
 \begin{itemize}
 	\item $\mathit{count}(P)$ counts the number of occurrences of $P$ in text $T$
 	\item $\mathit{locate}(P)$ returns all positions of pattern $P$ in text $T$
@@ -89,3 +109,8 @@ Most of the FM-index implementations provides methods:
 \end{itemize}
 The reason that the $\mathit{extract}$ method is useful and non-trivial is that FM-index
 does not store the original sequence $T$ -- at least not in an easily readable form.
+As we mentioned these methods are benchmarked on samples like english texts, \texttt{XML}
+data from \texttt{DBLP} as well as on soure codes, DNA and protein sequences and many more.
+We present here the just a selected subset of the results obtained. We either choose samples
+where our implementation beat the original implementation by a wide margin or other where
+the results were less clear. All other graphs can be found in AppendixTODO.
