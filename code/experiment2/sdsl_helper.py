@@ -48,12 +48,17 @@ test_cases = list(test_cases)
 block_sizes = list(block_sizes)
 
 fig, axs = plt.subplots(len(test_cases), 3)
-fig.suptitle('Čas pre 10^7 operácií prístup, rank, select')
+slovak_title = 'Čas pre 10^7 operácií prístup, rank, select'
+english_title = 'Access, rank and select query time as a function of block size '
+fig.suptitle(english_title)
 
 for i in range(len(test_cases)):
     axs[i][0].set_title(test_cases[i] + " access")
     axs[i][1].set_title(test_cases[i] + " rank")
     axs[i][2].set_title(test_cases[i] + " select")
+    axs[i][0].set_xticks([15, 31, 63, 127])
+    axs[i][1].set_xticks([15, 31, 63, 127])
+    axs[i][2].set_xticks([15, 31, 63, 127])
 
 for file, block_size in res1.keys():
     access, rank, select = res1[file, block_size]
@@ -63,6 +68,8 @@ for file, block_size in res1.keys():
     axs[file_index][2].scatter(block_size, select, c='b', marker='o')
 
 for file, block_size in res2.keys():
+    if block_size == 15:
+        continue
     access, rank, select = res2[file, block_size]
     file_index = test_cases.index(file)
     axs[file_index][0].scatter(block_size, access, c='r', marker='+')
@@ -70,18 +77,15 @@ for file, block_size in res2.keys():
     axs[file_index][2].scatter(block_size, select, c='b', marker='+')
 
 for i in range(len(test_cases)):
-    axs[i][0].set_ylabel("čas")
-    axs[i][0].set_xlabel("veľkosť bloku")
-    axs[i][1].set_xlabel("veľkosť bloku")
-    axs[i][2].set_xlabel("veľkosť bloku")
+    axs[i][0].set_ylabel("time (ns)")
+    #axs[i][0].set_xlabel("veľkosť bloku")
+    #axs[i][1].set_xlabel("veľkosť bloku")
+
+axs[-1][0].set_xlabel("block_size")
+axs[-1][1].set_xlabel("block_size")
+axs[-1][2].set_xlabel("block_size")
 
 fig.set_size_inches(8, 10)
 plt.tight_layout()
 plt.savefig("vysledky_sdsl.png")
 plt.clf()
-
-#for ax in axs:
-#    fig = plt.figure()
-#    extent = ax[0].get_window_extent().transformed(fig.dpi_scale_trans.inverted())
-#    #fig.savefig('ax2_figure.png', bbox_inches=extent)
-#    fig.savefig('ax_fig.png', bbox_inches=extent)#extent.expanded(1.1, 1.2))

@@ -17,7 +17,7 @@ cd ../../../
 git clone "$REPOSRC" sdsl-new 2> /dev/null || (cd "sdsl-new" ; git pull ; cd ..)
 cd sdsl-new/build
 
-git checkout refactor
+git checkout benchmark_our
 ./build.sh
 cd ../benchmark/indexing_count
 make clean-build
