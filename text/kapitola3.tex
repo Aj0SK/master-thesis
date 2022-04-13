@@ -2,9 +2,9 @@
 \label{kap:kap3}
 
 In this chapter, we shall look into our proposed enhancements to the existing
-implementations of RRR. Firstly, we propose a new block encoding method.
-Then, we show how we can exploit the assumptions about the share of ones
-in the bit sequence.
+implementations of RRR. We at first propose a new block encoding method.
+Then, we show how we can exploit the assumptions about the input sequence to
+build a better suited implementation for our underlying data. 
 
 \section{Block encoding}
 
@@ -191,12 +191,12 @@ the second sub-block is not that hard. So far, we focused how many times the fir
 changes up to the 7th position. Now, we turn our attention on which second sub-block the cycle
 ends. We know that every 3rd iteration, the second sub-block starts, where it began.
 
-\paragraph{Extending block size of method}
+\paragraph{Extending block size}
 
 Our newly proposed method can be used to obtain the encoding and decoding scheme for block size $2b$
-using only scheme for the block size of $b$. As we already mentioned in
-subsection~\ref{subsection:block_size}, most of the implementations of RRR choose the size of the
-block to be of the form $2^k-1$ as the number of possibilities for the value of class is a power of two and
+using just a scheme for the block size of $b$. As we already mentioned in
+subsection~\ref{subsection:block_size}, most of the implementations of RRR choose the block size of
+form $2^k-1$ as the number of possibilities for the value of class is a power of two and
 its representation fits exactly into $k$ bits. This is not very convenient for us as combining two
 solutions of size $2^k-1$ together gives us only solution for block size $2(2^k-1)$ which is one bit
 short of a practically desired size $2^{k+1}-1$. To overcome this, we need to extend the block by one bit.
@@ -249,17 +249,17 @@ but we may use the same arguments and ideas for encoding and decoding as we alre
 % TODO: pridat viac kontextu, preco sa zaoberame percentami jednotiek
 % TODO: ukazat ze vacsie b je lepsie
 
-The main space-saving done by RRR happens in the way how the blocks are stored. If we have
-a block of length $b$, then storing it in a raw bit representation takes $b$ bits.
-The number of bits used when we use compressed form depends on the blocks class. If the block
-has class $c$ then compressed representation takes $\ceil{\log_2 (b+1)}$ bits to store the
-class and $\ceil{\log_2{b\choose c}}$ to store the offset. In
-Fig.~\ref{obr:rrrSpaceSavings} we can see for different block sizes how the space saved
-per block depends on the blocks class. We may observe that RRR saves most of the memory on the
-sparse blocks, those with small number of ones. Let us now consider a randomly
-generated bit sequence $B$ of length $n$ containing $p\%$ of ones. Although we shall put most of
-our interest into sequences with very small percentage of ones in it, we now do the analysis
-about the space distribution of blocks classes for any $p$.
+The main part of the space-saving aspect of RRR happens because of the way how blocks are stored.
+If we have a block of length $b$, then storing it in a raw bit representation takes $b$ bits.
+The number of bits used by compressed form depends heavily on the blocks class. If the block
+has class $c$, then compressed representation uses $\ceil{\log_2 (b+1)}$ bits to store the
+class and $\ceil{\log_2{b\choose c}}$ to store the offset. In Fig.~\ref{obr:rrrSpaceSavings}
+we may observe for different block sizes, how the space saved per block depends on the blocks
+class. We may observe that RRR saves most of the memory on very sparse or very dense blocks.
+We would like to exploit these situations, when the number of ones/zeroes is very low. Thus,
+we at first analyze what is the probability distribution of the block classes in a sequence
+containing some fixed number of ones distributed randomly. Let us consider a randomly generated
+bit sequence $B$ of length $n$ containing $p\%$ of ones.
 
 \begin{figure}
 	\centerline{
@@ -280,8 +280,8 @@ If we consider a block size $b$ then the random variable $X$ denoting number of 
 block follows a binomial distribution $$X \sim Bin(b,p).$$ As we may observe in
 Fig.~\ref{obr:hybridEncodingDistribution}, the probability of blocks
 containing a lot of ones decreases exponentially in a sequence containing only 5\% of ones.
-Even in very long sequences, these blocks will occur very rarely. This led us to a solution
-that we call a \textit{hybrid encoding}.
+Even in very long sequences, these blocks will occur very rarely. This gaved us
+opportunity to a solution that we call \textit{hybrid encoding}.
 
 \begin{figure}
 	\centerline{
@@ -298,31 +298,32 @@ that we call a \textit{hybrid encoding}.
 \end{figure}
 
 The hybrid encoding uses a property that in some sequences blocks with high number
-of ones are very rare. Encoding these blocks is not that helpful as their
+of ones are very rare. Encoding these blocks is not that beneficial as their
 compressed representation may take even more bits than the original raw
 representation. Storing the whole block may waste space if the number of
 ones is big but there are not many possibilities how the block may look.
-Although we waste some space by this from time to time (for every
-block that is almost completely filled with ones), we can save some small
+Although we waste some space by this approach from time to time (for every
+block that is densely packed with ones), we can save some small
 amount of space by decreasing the number of bits used to store the classes.
 The main idea of hybrid encoding is that every block with its
 class bigger than some threshold will have its class set to this threshold
 and this will mean that the block is stored using full $b$ bits instead of
-$\ceil{\log_2{b\choose c_i}}$ bits. If we choose a $c_k$ as a value for cut off.
-Blocks with bigger or equal class than $c_k$ will not be encoded but just
-copied with the class set to $c_k$. Note that the class of the block
-is a number from 0 to $b$. To possibly save some space on the bit representation
+$\ceil{\log_2{b\choose c_i}}$ bits. When we choose a $c_k$ as a value for cut off
+then blocks with class bigger or equal to $c_k$ will not be encoded but just
+copied with the class set to $c_k$ no matter what is the number of ones in them.
+Note that the class of the block
+is a number from 0 up to $b$. To possibly save some space on the bit representation
 of the blocks class, we need to choose $c_k$ such that $\ceil{\log_2(c_k+1)} < \ceil{\log_2(b+1)}$.
 We shall now compare these two representations and the theoretical space savings that
 can be obtained. Let $n$ be a length of the sequence, $b$ the block size and $C_i$
-number of blocks with class $i$. To simplify the calculation, we shall assume that $b+1$
+number of blocks with class $i$. To simplify the calculations, we shall assume that $b+1$
 as well as $c_k$ is a power of 2 and $n$ is divisible by $b$, also we shall
-use $\lg x$ instead of $\log_2 x$. Using this notation, first representation is
+denote logarithm with base 2 $\lg x$. Using this notation, first representation is
 consuming $$(n/b)\lg (b+1) + \sum_{i=0}^{b} C_i\ceil{\lg {b\choose i}}$$
 bits of space with the first and second term being the number of bits that
 is used by the classes and offsets respectively. The second representation
-using the cutoff $c_k$ shall consume $$(n/b)\lg (c_k+1)+\sum_{i=0}^{c_k-1}C_i\ceil{\lg {b\choose i}} + \sum_{i=c_k}^{b}C_i b$$
-bits of space. We would like to see what is the expected space that we save
+with the cutoff $c_k$ shall consume $$(n/b)\lg (c_k+1) + \sum_{i=0}^{c_k-1}C_i\ceil{\lg {b\choose i}} + \sum_{i=c_k}^{b}C_i b$$
+bits of space. We would like to find out what is the expected space that we save
 using the hybrid encoding. We start by simplifying the expected value of the
 difference of these representations:
 % My mathematical guesswork
@@ -336,14 +337,14 @@ E[C_i] &= (n/b)\cdot {b\choose i}\cdot p^i\cdot (1-p)^{b-i} \label{eq:hybrid_enc
 Here we mainly used the linearity of the expected value. To compute the expected value of
 $C_i$ we used the fact, that number of blocks of a certain class follows binomial
 distribution. We know that in the bit sequence, there is $p\%$ of ones. There is $n/b$ blocks
-and each has probability $p^c(1-p)^{b-c}$ for being of class $c$. This probability is independent
-from the previous blocks and as we are interested in total number of blocks with this class,
-it follows that $C_i$ follows binomial distribution. As $$C_i \sim Bin(n/b, p^c(1-p)^{b-c})$$
-it follows that the expected value is equal to \ref{eq:hybrid_encoding_expected_c_i}.
+and each has probability ${b\choose i}p^i(1-p)^{b-i}$ for being of class $i$. This probability
+is independent from the previous blocks and as we are interested in total number of blocks with
+this class, it follows that $C_i$ follows binomial distribution. As
+$$C_i \sim Bin(n/b, {b\choose i}p^i(1-p)^{b-i})$$ it follows that the expected value is equal to
+\ref{eq:hybrid_encoding_expected_c_i}.
 
 We present the expected space saved by hybrid implementation for some chosen values of
 $p, b$ and $c_k$ in Fig.~\ref{obr:hybridEncodingTheoretical}.
-
 % TODO: space saved should be used, need to regenerate to 1-x
 \begin{figure}
 	\centerline{
@@ -378,6 +379,11 @@ $p, b$ and $c_k$ in Fig.~\ref{obr:hybridEncodingTheoretical}.
     }
 	\label{obr:hybridEncodingTheoretical}
 \end{figure}
+We may observe, that for some choices of cut-off, we may expect to save rougly 10-17\%
+of space compared to the original method. On top of this, hybrid encoding approach has a potential
+to be of the same or even better performance as it is easier to decode the blocks
+saved in the raw form. However, we should note that hybrid encoding is based on the expectation
+that the number of these blocks is low, so the possible speedup may not be very significant.
 % some rough numbers from the program:
 % https://github.com/Aj0SK/master-thesis/blob/main/code/experiment3/sdsl_theoretical_stat.py
 % n, b, c_k, p     ->  classic vs hybrid and hybrid/classic

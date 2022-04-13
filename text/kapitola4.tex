@@ -2,9 +2,9 @@
 \label{kap:kap4}
 
 In this chapter, we focus on the implementation of the ideas from previous chapter
-and the results we obtained using them. First, we describe the important parts and
-decisions in our implementation. Then, we describe how we benchmarked our implementation
-and the results we obtained.
+and the results we obtained from measuring their performance. First, we describe the
+important parts and decisions in our implementation. Then, we describe how we
+benchmarked our implementation and the results we obtained.
 
 \section{Implementation}
 
@@ -25,15 +25,15 @@ practical scenarios. We based our specializations on the the general implementat
 to only alter the two functions that the SDSL for encoding and decoding namely \texttt{bin\_to\_nr}
 and \texttt{nr\_to\_bin}. As we mentioned, the encoding is less performance critical for most of the
 applications as encoding is done only once at the beginning. This is why we focused more on the
-decoding implementation.
+decoding part of the implementation.
 
 \paragraph{Division to subproblems}
 
-When implementing our method, we identified the proces of dividing our problem to sub-problems
+When implementing our decoding method, we identified the process of dividing our problem to sub-problems
 as the most critical. There are varios reasons why. The first one is that for smaller blocks 
 solving the sub-problems is done using the table approach that is quite fast and can be hardly
-made faster as it consists only of one lookup to table. The second one is that this part is
-inherently blocking us from running the methods on the sub-problems. These sub-problems may be
+made faster as it consists only of one table lookup. The second one is that this part is
+inherently blocking us from solving the sub-problems. These sub-problems may be
 solved in parallel (either by more workers or by instruction-level parallelism), this part is
 though harder to parallelize. Dividing the problem into sub-problems consists of
 finding the pair of classes $(c_1, c_2)$ for our block $B$. After this, we need to find the number
@@ -102,7 +102,7 @@ different combinations of block size 30 and 62, i.e. 31 can be combined as 1 bit
 We used 3 different techniques to divide a problem into sub-problems, these were the linear scan,
 binary search and linear scan enhanced by \texttt{SIMD} instructions.
 
-\paragraph{Bit vector - SDSL}
+\paragraph{Bit vector}
 
 After bencharking and finding the potential for speeding up the bit vector implementation using
 our new method, we decided to implement it and test in some environment closer to the real-life

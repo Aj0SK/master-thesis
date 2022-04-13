@@ -8,8 +8,8 @@ tree can be used to build a vector for the general alphabet using the bit vector
 implementation. This is, why it is of the utmost importance to dedicate time
 to creating fast and efficient bit vector implementation. We start with its
 succinct representation, in which we simply store bits one after another. Then we
-look at the compressed representation. In the end, we briefly explain what other
-alternatives exist for bit vector implementation.
+look at the compressed representation using the method RRR. In the end, we briefly
+explain what other alternatives exist for compressed bit vector implementation.
 
 \section{Bit vector implementation}
 
@@ -278,8 +278,8 @@ There is also a second class of the bit vector implementations, heavily
 used when the frequency of zeroes or ones is more significantly shifted.
 Although we stated that RRR is used in case of shifted frequencies, when the number
 of ones is very small, i.e. less than 5\% of the sequence, sparse bit vector
-implementations can outperform solutions based on RRR as was observed by \cite{navarro2012fast}.
+implementations may outperform solutions based on RRR as was observed by \cite{navarro2012fast}.
 Where RRR stands out to some of its alternatives is that it is also very competitive
 in cases where frequencies of zeroes and ones are similar globally, but the bit
 sequence has a lot of places where locally zeroes or ones are over-represented.
-Many of sparse bit vector solutions are based on the work by \cite{okanohara2007practical}.
+Many of sparse bit vector solutions are based on the work of \cite{okanohara2007practical}.

@@ -10,16 +10,16 @@ the used data structures is heavily influenced by their space usage. The field
 of \textit{succinct data structures} focuses on representing data using as little
 space as possible but at the same time tries not to hurt the time complexity and
 runtime of methods that these structures support. In this field, data structures for many
-varied problems have been already devised such as succinct dictionaries~\citep{raman2007succinct},
+varied problems have been devised such as succinct dictionaries~\citep{raman2007succinct},
 fenwick tree~\citep{bille2017succinct} or trie~\citep{grossi2015fast}. While many of
 the resulting structures give some solid theoretical bounds on the used space, others look
 into real-world space usage and performance.
 
 Succinct data structures are very helpful in scenarios where we work with massive
-amounts of data. In these scenarios, using the ordinary data structures may limit us to place
+amount of data. In these scenarios, using the ordinary data structures may limit us to place
 the entire representation of data structure onto the slower type of memory storage. As succinct
 data structures need to do the work of regular data structures but with additional constraints
-on memory usage, they are often slower and more complicated than the alternatives using more
+on space used, they are often slower and more complicated than the alternatives using more
 space. This is mainly because they do more work behind the scene and at the same time contain
 concepts and computation patterns that are slow on modern computers. However, as we hinted
 there are cases in which usage of space-efficient data structures speeds up the overall
@@ -37,8 +37,8 @@ returns the index of $i$-th occurrence of symbol $c$ in $S$.
 
 The reason behind our focus on bit vector and particularly its compressed version
 is that it is one of the main building blocks of many succinct data structures.
-In the next sections, we introduce some interesting and useful applications of the bit vector.
-
+In the next sections, we introduce some of its interesting and useful applications
+bit vector.
 
 \section{Application 1: Sparse array}
 
