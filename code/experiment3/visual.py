@@ -2,59 +2,79 @@ import json
 import re
 import matplotlib.pyplot as plt
 
+
 def translate(str):
     preklady = [["Operation", "Operácia"], ["AccessPattern", "PrístupovýTyp"],
-    ["Access", "Prístup"], ["ContinuousRandom", "NáhodnýLineárny"], ["Random", "Náhodný"]]
+                ["Random", "Náhodný"]]
     for preklad in preklady:
         str = str.replace(preklad[0], preklad[1])
     return str
 
-plt.rcParams["figure.figsize"] = (10,15)
 
-file_paths = ["special.txt"]
+class BenchRes:
+    def __init__(self, data):
+        struct_name = data["name"]
+        split_by = r"[,<>]"
+        struct_name_split = re.split(split_by, struct_name)
+        struct_name_split = [i.strip()
+                             for i in struct_name_split if i != '']
+        self.oper = struct_name_split[1]
+        self.access_pat = struct_name_split[2]
+        self.block_size = int(struct_name_split[4])
+        self.cutoff, self.is_hybrid = -1, False
+        if len(struct_name_split) > 7:
+            self.cutoff = int(struct_name_split[7])
+            self.is_hybrid = True
+        self.time = float(data["cpu_time"])
+        self.space = float(data["Space"])
+
+
+plt.rcParams["figure.figsize"] = (10, 15)
+
+file_path = "special.txt"
 
 NUM_OF_QUERIES = 10000.0
+ONES_PERCENTAGE = 5
 results = []
 markers = ["x", "s"]
 colors = ['r', 'g', 'b', 'darkorange']
 
-for file_path in file_paths:
-    tests = []
-    with open(file_path, "r") as f:
-        data = json.load(f)
-        for i in data["benchmarks"]:
-            name = i["name"]
-            time = i["cpu_time"]
-            space = i["Space"]
-            it = i["iterations"]
-            splited_name = re.split(r"[,<]", name)
-            splited_name = [i.strip() for i in splited_name if i != '']
-            tests.append((splited_name[1:], [time, space]))
-    results.append(tests)
-
-print(results)
+with open(file_path, "r") as f:
+    data = json.load(f)
+    results = [BenchRes(i) for i in data["benchmarks"]]
 
 fig, axs = plt.subplots(3)
-fig.suptitle('Prístup, rank, select na postupnosti dĺžky 1 << 25 prvkov (5% jednotiek - 0.29)')
+fig.suptitle(
+    f"Access, rank, select na postupnosti dĺžky 1 << 25 prvkov ({ONES_PERCENTAGE}% jednotiek)")
 
 isHybrid = [True, False]
 
 for result_index in range(2):
     for (index1, access_pattern) in enumerate(["AccessPattern::Random"]):
-        for (index2, operation) in enumerate(["Operation::Access", "Operation::Rank", "Operation::Select"]):
-            for (index3, block_size) in enumerate([15, 31, 63, 127]):
-                x = [res[1] for (par, res) in results[0] if par[0] == operation and par[1] == access_pattern and int(par[3]) == block_size and (isHybrid[result_index] == sum([1 for i in range(256) if (str(i) + ">") in par]))]
-                y = [res[0]/NUM_OF_QUERIES for (par, res) in results[0] if par[0] == operation and par[1] == access_pattern and int(par[3]) == block_size and (isHybrid[result_index] == sum([1 for i in range(256) if (str(i) + ">") in par]))]
-                if x:
-                    axs[3*index1+index2].scatter(x, y, label = str(result_index) + "-" + str(block_size), marker = markers[result_index], c=colors[index3])
-            axs[3*index1+index2].legend(loc='center left', bbox_to_anchor=(1, 0.5))
-            axs[3*index1+index2].set_title(translate(operation + " " + access_pattern))
-            axs[3*index1+index2].set_xlabel("bitov na bit")
-            axs[3*index1+index2].set_ylabel("čas (ns)")
+        for (index2, oper) in enumerate(["Operation::Access", "Operation::Rank", "Operation::Select"]):
+            graph_index = 3*index1+index2
 
-            x = [res[1] for (par, res) in results[0] if par[0] == operation and par[1] == access_pattern and int(par[3]) == 0]
-            y = [res[0]/NUM_OF_QUERIES for (par, res) in results[0] if par[0] == operation and par[1] == access_pattern and int(par[3]) == 0]
-            axs[3*index1+index2].scatter(x, y, label = str(result_index) + "-" + str(block_size), marker = '*', c="0.0")
+            for (index3, block_size) in enumerate([15, 31, 63, 127]):
+                x = [res.space for res in results if (res.oper, res.access_pat, res.block_size, res.is_hybrid) == (
+                    oper, access_pattern, block_size, isHybrid[result_index])]
+                y = [res.time/NUM_OF_QUERIES for res in results if (res.oper, res.access_pat, res.block_size, res.is_hybrid) == (
+                    oper, access_pattern, block_size, isHybrid[result_index])]
+                if x:
+                    axs[graph_index].scatter(x, y, label=str(result_index) + "-" + str(
+                        block_size), marker=markers[result_index], c=colors[index3])
+
+            axs[graph_index].legend(loc='center left',
+                                        bbox_to_anchor=(1, 0.5))
+            axs[graph_index].set_title(translate(oper + " " + access_pattern))
+            axs[graph_index].set_xlabel("bitov na bit")
+            axs[graph_index].set_ylabel("čas (ns)")
+
+            x = [res.space for res in results if (
+                res.oper, res.access_pat, res.block_size) == (oper, access_pattern, 0)]
+            y = [res.time/NUM_OF_QUERIES for res in results if (
+                res.oper, res.access_pat, res.block_size) == (oper, access_pattern, 0)]
+            axs[graph_index].scatter(x, y, label=str(result_index) +
+                                     "-" + str(block_size), marker='*', c="0.0")
 
 fig.tight_layout(pad=3.0)
 
