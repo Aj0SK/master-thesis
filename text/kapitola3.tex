@@ -265,18 +265,17 @@ bit sequence $B$ of length $n$ containing $p\%$ of ones.
 	\centerline{
 		\includegraphics[width=\textwidth]{images/rrr_space_savings}
 	}
-	\caption[TODO]{Ratio of space used by the compressed
-    block representation of blocks class and offset to the space used by storing the raw
-    block. First, second and third graph represent how the ratio is dependent on the blocks
-    class for 3 different block sizes 31, 63 and 127 respectively. Black numbers on the $x$-axis
-    are denoting the start and the end of the interval where compressed version is even worse
-    in the space usage (ratio over 1).
+	\caption[TODO]{Individual graphs present for different block sizes (31, 63, 127), 
+    the space saved by using the compressed block representation. We can observe how
+    the number of saved bits is dependent on the blocks class. Black numbers on the $x$-axis
+    are denoting start and end of the interval where compressed version is worse
+    in space usage (negative space saved).
 	}
     % can be found on https://github.com/Aj0SK/master-thesis/blob/main/text/images/rrr_space_savings.png
 	\label{obr:rrrSpaceSavings}
 \end{figure}
 
-If we consider a block size $b$ then the random variable $X$ denoting number of ones in the
+If we consider a block size $b$ then the random variable $X$ denoting number of ones in
 block follows a binomial distribution $$X \sim Bin(b,p).$$ As we may observe in
 Fig.~\ref{obr:hybridEncodingDistribution}, the probability of blocks
 containing a lot of ones decreases exponentially in a sequence containing only 5\% of ones.
