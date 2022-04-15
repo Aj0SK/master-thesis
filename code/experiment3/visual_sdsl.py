@@ -83,7 +83,7 @@ axs[-1][0].set_xlabel("bits per bit")
 axs[-1][1].set_xlabel("bits per bit")
 axs[-1][2].set_xlabel("bits per bit")
 
-fig.set_size_inches(8, 10)
+fig.set_size_inches(8, 5)
 plt.tight_layout()
 plt.savefig("vysledky_sdsl.png")
 plt.clf()
