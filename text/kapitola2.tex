@@ -28,32 +28,32 @@ add any additional space. The second approach is to precompute $\rank$ of every
 bit. This enables us to answer $\rank_1$ in constant time -- a single table lookup.
 However, the space needed to support this solution is $(n\cdot\log n)$ bits where
 $n$ is the length of the bit sequence. These two solutions can be combined together
-to obtain an idea of a practically interesting solution. We shall store the
-pre-computed $\rank_1$ values, but not for every bit in order to save space. At first,
-we choose a constant $k$ and split bit vector into non-overlapping subsequences of length
-$k$. We shall call these subsequences \textit{superblocks}. We then precompute $\rank_1$
+to obtain an idea of a practically interesting solution where we store the pre-computed
+$\rank_1$ values only for some of the bits. At first, we choose a constant $k$ and split
+bit vector into non-overlapping subsequences of $k$
+bits. We name these subsequences \textit{superblocks}. We then precompute $\rank_1$
 only for the beginning of every superblock. This enables us to answer $\rank_1$ in time $\BigO(k)$
 as we need to only access the precomputed value and then count bits from the start of the
-superblock up to the queried position. The stored information uses $\BigO(\ceil{n/k}\log n)$
+superblock up to the queried position. In this solution, we store $\BigO(\ceil{n/k}\log n)$
 bits of memory as there is $\ceil{n/k}$ superblocks and every rank can be of size at most $n$.
-This version of the implementation also allows us to trade speed and used memory using the parameter
-$k$. Increasing this parameter allows us to save space. On the other hand, smaller $k$
+This version of the implementation allows us to balance between speed and space usage using the
+parameter $k$. Increasing this parameter allows us to save space. On the other hand, smaller $k$
 requires less work to be done. For smaller $k$ the time of answering the query may be
 dominated by two cache misses that most of the time occur when accessing the precomputed ranks
 and then subsequently accessing the bits on the beginning of the superblock. Continuous linear
 scan through subsequent bits in $B$ can be then very cache-friendly after the initial two cache misses.
 
 Although this solution works well and is commonly used in practice, it is possible to
-answer the $\rank$ query in constant time only with sublinear space overhead as was first
+answer $\rank$ query in constant time and only sublinear space overhead. This was first
 shown by \cite{okanohara2007practical}. We start as in the previous solution by splitting
-the bit sequence into superblocks of size $k=\log^2 n$ and precomputing $\rank$ for every
-beginning of superblock. We further divide every superblock into blocks of size $(\log n)/2$.
-We precompute the $\rank$ for all of these smaller blocks but to save space we only precompute
-it from the beginning of the corresponding superblock. Now, when queried for $\rank_1$
-of some position, we know in which superblock this position is located, so we know what is the
-number of ones up to the beginning of the superblock. We also
-precomputed what is the number of ones from the beginning of the superblock up to this block.
-The last step is to find out the number of ones that are located before the index in this
+the bit sequence into superblocks. This time we let the superblocks be of size $\log^2 n$
+and again precompute $\rank$ for every beginning of superblock. We further divide every
+superblock into blocks of size $(\log n)/2$. We precompute the $\rank$ for all of these
+smaller blocks but to save space we only precompute it from the beginning of the corresponding
+superblock. Now, when queried for $\rank_1$ of some position, we know in which superblock this
+position is located, so we know what is the number of ones up to the beginning of the superblock.
+We also precomputed what is the number of ones from the beginning of the superblock up to this
+block. The last step is to find out the number of ones that are located before the index in this
 block. This would be easy to do linearly in time $\BigO(\log n)$. However, we are aiming for
 constant time $\rank$. Thanks to block being short there are not too many possibilities for what
 this block can be so we can precompute every possible $\rank$ query inside of the every possible

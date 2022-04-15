@@ -217,6 +217,17 @@ our implementation was not running that good. All other graphs can be found in A
 \subsection{Implementation}
 
 Implementing hybrid encoding required changes to more than encoding and decoding
-subroutines. The main difference is that as long as 
+subroutines. The first neccessary change is that we added an hybrid cutoff parameter
+to the \texttt{rrr\_vector} class. The second change relates to the way how we work
+with superblocks. When computing rank of a bit in particular block, we can still binary
+search for the superblock where the $i$-th one is located.  To linearly search for a result
+inside of the superblock, we need just information from the array $C$. This is because we know
+the number of ones in the block using this array and can continu through the superblock.
+When we overrun the block, where the result is definitely located, we can go back.
+Now using the precomputed offset of this superblock into the array $O$ and information we kept
+during the linear scan, we can easily find the beginning of the block that is interesting
+for us. With cutoff in place however, we are not able to linearly scan through the superblock
+as we need to know the number of ones in the block. However, if number of ones in the block
+is more than cutoff, we need to access array $O$ and perform counting of ones in it.
 
 \subsection{Results}

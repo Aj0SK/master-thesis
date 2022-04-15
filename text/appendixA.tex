@@ -17,12 +17,14 @@ The first repository contains 4 experiments in directory \texttt{master-thesis/c
 In all these folders, there are scripts to run the benchmarks. We used these also to obtain
 all the results in this work. 
 
-The second repository is a fork of \texttt{SDSL} library, where code is divided into
-branches:
+The second repository is a fork of \texttt{SDSL} library. The individual features are implemented
+on separate branches:
 \begin{itemize}
     \item \texttt{master} - non-modified version of master branch
     \item \texttt{benchmark\_original} - master branch containing minor changes
         to limit the number of benchmarked blocks, make the tests random but deterministic
+    \item \texttt{rrr\_benchmark\_our} - branch with 31, 63 and 127 bit specialization and benchmarking changes
+    \item \texttt{rrr\_benchmark\_hybrid} - branch with hybrid 31, 63 and 127 bit specialization and benchmarking changes
     \item \texttt{rrr\_vector\_31\_spec} - branch with minimum changes, implementing 31 bit specialization
     \item \texttt{rrr\_vector\_63\_127\_spec} - implementing 63 and 127 bit specialization (branched from \texttt{rrr\_vector\_31\_spec})
     \item \texttt{rrr\_vector\_hybrid} - hybrid implementation for block size 31, 63, 127
