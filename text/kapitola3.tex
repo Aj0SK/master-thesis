@@ -26,7 +26,7 @@ smaller subproblems. To facilitate our solution, we need to alter the respective
 the blocks along the same class. We want to note that we also use the number of ones to
 identify class of the block. On the other hand, both previous solutions used the lexicographical ordering
 for the blocks that shared the same class. In our solution, every block $B$ will be thought
-of as two smaller \textit{sub-blocks} of half the size, namely $B_1$ and $B_2$ with $B$ being equal to their
+of as two smaller \textit{sub-blocks}, namely $B_1$ and $B_2$ with $B$ being equal to their bit
 concatenation $B_1\cdot B_2$. We shall at first sort the big block $B$ by the pair $(c_1, c_2)$
 where $c_1$ and $c_2$ are the respective classes of the smaller sub-blocks $B_1$ and $B_2$. Only then,
 we break the tie by lexicographical order of $B_1$ and $B_2$. Note that the original lexicographical
@@ -51,6 +51,8 @@ Fig.~\ref{obr:lexicographicalVsUs}.
         \end{tabular}
         \hspace{3em}
         \begin{tabular}{l c l}
+            Offset  &   Block       & $(c_1, c_2)$\\
+        \hline
             \small 8&   \tt 010 100 & \multirow{4}{*}{$(1, 1)$}\\
             \small 9&   \tt 100 001 &\\
             \small 10&  \tt 100 010 &\\
@@ -220,6 +222,8 @@ The complete order of the blocks in this example appears in Fig.~\ref{obr:bitExt
         \end{tabular}
         \hspace{4em}
         \begin{tabular}{l c}
+            Offset  &   Block      \\
+        \hline
             \small 4&   \tt 1 0011 \\
             \small 5&   \tt 1 0101 \\
             \small 6&   \tt 1 0110 \\
@@ -360,7 +364,8 @@ $p, b$ and $c_k$ in Fig.~\ref{obr:hybridEncodingTheoretical}.
         \end{tabular}
         \hspace{4em}
         \begin{tabular}{l c c c}
-                                &       &           &       \\
+            $p$                 & $b$   &   $c_k$   &  {\tt used space}\\
+        \hline
             \multirow{7}{*}{10} &   31  &   7       &   0.90\\
                                 &   31  &   15      &   0.94\\
                                 &   63  &   15      &   0.94\\
@@ -383,42 +388,12 @@ of space compared to the original method. On top of this, hybrid encoding approa
 to be of the same or even better performance as it is easier to decode the blocks
 saved in the raw form. However, we should note that hybrid encoding is based on the expectation
 that the number of these blocks is low, so the possible speedup may not be very significant.
-% some rough numbers from the program:
-% https://github.com/Aj0SK/master-thesis/blob/main/code/experiment3/sdsl_theoretical_stat.py
-% n, b, c_k, p     ->  classic vs hybrid and hybrid/classic
-% For 100000, 31, 7, 0.05 the result is 37591 vs 31161 ... rate 0.83
-% For 100000, 31, 15, 0.05 the result is 37591 vs 34365 ... rate 0.91
-% For 100000, 63, 7, 0.05 the result is 33727 vs 30904 ... rate 0.92
-% For 100000, 63, 15, 0.05 the result is 33727 vs 30553 ... rate 0.91
-% For 100000, 63, 31, 0.05 the result is 33727 vs 32140 ... rate 0.95
-% For 100000, 127, 7, 0.05 the result is 31533 vs 58547 ... rate 1.86
-% For 100000, 127, 15, 0.05 the result is 31533 vs 29257 ... rate 0.93
-% For 100000, 127, 31, 0.05 the result is 31533 vs 29958 ... rate 0.95
-% For 100000, 127, 63, 0.05 the result is 31533 vs 30746 ... rate 0.98
-% For 100000, 31, 7, 0.1 the result is 54158 vs 48597 ... rate 0.90
-% For 100000, 31, 15, 0.1 the result is 54158 vs 50932 ... rate 0.94
-% For 100000, 63, 7, 0.1 the result is 51211 vs 67717 ... rate 1.32
-% For 100000, 63, 15, 0.1 the result is 51211 vs 48065 ... rate 0.94
-% For 100000, 63, 31, 0.1 the result is 51211 vs 49624 ... rate 0.97
-% For 100000, 127, 7, 0.1 the result is 49421 vs 100448 ... rate 2.03
-% For 100000, 127, 15, 0.1 the result is 49421 vs 60378 ... rate 1.22
-% For 100000, 127, 31, 0.1 the result is 49421 vs 47847 ... rate 0.97
-% For 100000, 127, 63, 0.1 the result is 49421 vs 48634 ... rate 0.98
-% For 100000, 31, 7, 0.15 the result is 67370 vs 65690 ... rate 0.98
-% For 100000, 31, 15, 0.15 the result is 67370 vs 64144 ... rate 0.95
-% For 100000, 63, 7, 0.15 the result is 64885 vs 95458 ... rate 1.47
-% For 100000, 63, 15, 0.15 the result is 64885 vs 62736 ... rate 0.97
-% For 100000, 63, 31, 0.15 the result is 64885 vs 63298 ... rate 0.98
-% For 100000, 127, 7, 0.15 the result is 63305 vs 102345 ... rate 1.62
-% For 100000, 127, 15, 0.15 the result is 63305 vs 96077 ... rate 1.52
-% For 100000, 127, 31, 0.15 the result is 63305 vs 61809 ... rate 0.98
-% For 100000, 127, 63, 0.15 the result is 63305 vs 62518 ... rate 0.99
-% For 100000, 31, 7, 0.2 the result is 78024 vs 82507 ... rate 1.06
-% For 100000, 31, 15, 0.2 the result is 78024 vs 74802 ... rate 0.96
-% For 100000, 63, 7, 0.2 the result is 75829 vs 103481 ... rate 1.36
-% For 100000, 63, 15, 0.2 the result is 75829 vs 78570 ... rate 1.04
-% For 100000, 63, 31, 0.2 the result is 75829 vs 74242 ... rate 0.98
-% For 100000, 127, 7, 0.2 the result is 74384 vs 102362 ... rate 1.38
-% For 100000, 127, 15, 0.2 the result is 74384 vs 102863 ... rate 1.38
-% For 100000, 127, 31, 0.2 the result is 74384 vs 75460 ... rate 1.01
-% For 100000, 127, 63, 0.2 the result is 74384 vs 73596 ... rate 0.99
+
+\paragraph{Hybrid encoding for balanced sequences}
+
+Although, this version of hybrid encoding may work well for sequences with low number of ones.
+At the same time, we would like to have a viable solution for sequences that contain very similar
+number of zeroes and ones but still exhibit behavior that some block classes are underepresented.
+This may for example occur when sequence has a property, that it is globally balanced, but is very
+unbalanced in some local parts. Then it may be the case, that blocks with low count of zeroes and
+ones occur way more than blocks with balanced count of zeroes and ones. 

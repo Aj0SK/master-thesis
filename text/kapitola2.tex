@@ -43,6 +43,8 @@ dominated by two cache misses that most of the time occur when accessing the pre
 and then subsequently accessing the bits on the beginning of the superblock. Continuous linear
 scan through subsequent bits in $B$ can be then very cache-friendly after the initial two cache misses.
 
+\paragraph{Constant time rank}
+
 Although this solution works well and is commonly used in practice, it is possible to
 answer $\rank$ query in constant time and only sublinear space overhead. This was first
 shown by \cite{okanohara2007practical}. We start as in the previous solution by splitting
@@ -108,6 +110,8 @@ the solution in the samples of $\rank$ stored in superblocks. When we identify t
 superblock of length $k$ bits, we simply linearly scan for the solution. This solution is not
 asking for any additional memory on top of the space used for $\rank$. The answer can be given
 in time $\BigO(\log(n/k)+k)$.
+
+\paragraph{Constant time select}
 
 There is also a constant time solution for $\select$ using the sublinear memory overhead.
 This solution is just like solution for the constant time $\rank$, based on a division

@@ -22,7 +22,7 @@ of the wavelet tree. On top of this, thorough tests and benchmarks were devised,
 \cite{gog2014optimized}. The RRR implementation is provided by templated class \texttt{rrr\_vector}
 that uses the on the fly-decoding and enables us to use block size from 3 up to 256. To support
 these block sizes, \sdsl implements 128 and 256 bit integers. \sdsl provides template
-specialization for block size 15 that uses the table encoding method. To support $\access$,
+specialization for block size 15 that uses the table decoding method. To support $\access$,
 \texttt{rrr\_vector} supports single bit access operator \texttt{[]} and \texttt{get\_int} method.
 To facilitate access it uses the encoding scheme presented on Fig.~\label{obr:RRRFinal} that
 consists of the array of fixed size elements that stores classes $C$, array of variable length
@@ -31,7 +31,7 @@ to the array $O$. $P$ stores pointer to the beginning of every superblock. Resul
 precomputed for the beginning of every superblock so at first, binary search along these values
 is done. Then linear search for the final result is done inside of the superblock. As a select
 can be answered using the simple binary search, the first part of answering $\select$ is to
-binary search between precomputed values of $\rank$, then do the select inside of the superblock.
+binary search between precomputed values of $\rank$, then to do the select inside of the superblock.
 This demonstrates, how the size of superblock can be used to balance the ratio of space used and the
 speed of the $\access$, $\rank$ and $\select$ methods. We however decided not to explore this dimension
 of RRR and keep the number of blocks in superblock on default value 32.
@@ -39,11 +39,11 @@ of RRR and keep the number of blocks in superblock on default value 32.
 We decided to use the 15 bit specialization as an underlying solution for the encoding and decoding of
 sub-blocks. We provided specialized implementations for block sizes 31, 63 and 127 that are mostly used
 in the practical scenarios. We based our specializations on the general implementation of
-\texttt{rrr\_vector} and tried to keep the number of changes as small as possible. We have been able
-to only alter the two functions that the \sdsl uses for encoding and decoding namely \texttt{bin\_to\_nr}
-and \texttt{nr\_to\_bin}. As we mentioned, the encoding is less performance critical for most of the
-applications as encoding is done only once at the beginning. This is why we focused more on the
-decoding part of the implementation.
+\texttt{rrr\_vector} and tried to keep the number of changes as small as possible to clearly see the
+effects of our new decoding method. We have been able to only alter the two functions that the \sdsl
+uses for encoding and decoding namely \texttt{bin\_to\_nr} and \texttt{nr\_to\_bin}. As we mentioned,
+the encoding is less performance critical for most of the applications as encoding is done only once
+at the beginning. This is why we focused more on the decoding part of the implementation.
 
 \paragraph{Breaking instance into subproblems}
 
@@ -52,14 +52,14 @@ sub-problems. There are varios reasons why. The first one is that for smaller bl
 solving the sub-problems is done using the table approach that is quite fast and can be hardly
 made faster as it consists only of one table lookup. The second one is that this part is
 inherently blocking us from solving the sub-problems. These sub-problems may be potentially
-solved in parallel (either by more workers or by instruction-level parallelism), this part is
+solved in parallel (by instruction-level parallelism), this part is
 though harder to parallelize. Dividing the problem into sub-problems consists of
 finding the pair of classes $(c_1, c_2)$ for our block $B$. After this, we need to find the number
 of ways how the first and second sub-block may look.
 These numbers can be precomputed as for every class $c$, there is at most $b+1$ ways how to
-write it in a form $c_1+c_2$ for valid $c_1$ and $c_2$. After obtaining the number of combinations
+write it in a form $c_1+c_2$ for valid $c_1$ and $c_2$. After obtaining these numbers of combinations
 for the first and second sub-block, it is then trivial to compute the parameters for sub-routines 
-that decode the sub-blocks and combine their result to obtain decoded block. We devised 3 different
+that decode the sub-blocks and then combine their results to obtain decoded block. We devised 3 different
 methods to find the pair $(c_1, c_2)$ for our block $B$. We may precompute how many block there are
 with class pair equal to $(0, c), (1, c-1),\ldots , (c, 0)$ and name these numbers $C_{0}\ldots C_{c}$.
 Example is on Fig.~\ref{table:class_pairs}.
