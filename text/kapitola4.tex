@@ -1,4 +1,4 @@
-\chapter{Implementation and benchmarking}
+\chapter{Implementation and results}
 \label{kap:kap4}
 
 In this chapter, we focus on the implementation of ideas from previous chapter
@@ -6,20 +6,22 @@ and the practical results we obtained from measuring their performance. First,
 we describe the important parts and decisions in our implementation. Then, we
 describe how we benchmarked our implementation and the results we obtained.
 
-\section{Implementation}
+\section{New decoding method}
 
-\paragraph{SDSL}
+\subsection{Implementation}
+
+\paragraph{SDSL library}
 
 We decided to make our solution a part of the \sdsl library~\citep{gog2014theory}. This
 is one of the most matured and versatile libraries implementing succinct data structures.
-\sdsl is a heavily tested library offering various implementations of succinct
-structures such as wavelet tree, FM-index, bit vectors, suffix array and many more.
-It allows to easily use different building blocks to implement more complex structures,
-i.e. using different bit vector implementations inside of the wavelet tree. On top of this,
-thorough tests and benchmarks were devised, mainly by \cite{gog2014optimized}.
-The RRR implementation is provided by templated class \texttt{rrr\_vector} that uses the on the fly-decoding
-and enables us to use block size from 3 up to 256. To support these block sizes, \sdsl implements
-128 and 256 bit integers. \sdsl provides template
+With more than 30 contributors and almost 2\,000 commits, \sdsl is a heavily tested library
+offering various implementations of succinct structures such as wavelet tree, FM-index,
+bit vectors, suffix array and many more. It allows to easily use different building blocks
+to implement more complex structures, i.e. using different bit vector implementations inside
+of the wavelet tree. On top of this, thorough tests and benchmarks were devised, mainly by
+\cite{gog2014optimized}. The RRR implementation is provided by templated class \texttt{rrr\_vector}
+that uses the on the fly-decoding and enables us to use block size from 3 up to 256. To support
+these block sizes, \sdsl implements 128 and 256 bit integers. \sdsl provides template
 specialization for block size 15 that uses the table encoding method. To support $\access$,
 \texttt{rrr\_vector} supports single bit access operator \texttt{[]} and \texttt{get\_int} method.
 To facilitate access it uses the encoding scheme presented on Fig.~\label{obr:RRRFinal} that
@@ -43,7 +45,7 @@ and \texttt{nr\_to\_bin}. As we mentioned, the encoding is less performance crit
 applications as encoding is done only once at the beginning. This is why we focused more on the
 decoding part of the implementation.
 
-\paragraph{Division to subproblems}
+\paragraph{Breaking instance into subproblems}
 
 When implementing our decoding method, we put most of our focus on the process of dividing problem to
 sub-problems. There are varios reasons why. The first one is that for smaller blocks 
@@ -142,12 +144,7 @@ uint32_t get_right_class(uint8_t k, uint32_t nr)  {
 }
 \end{lstlisting}
 
-\paragraph{Hybrid encoding}
-
-Implementing hybrid encoding required changes to more than encoding and decoding
-subroutines. The main difference is that as long as 
-
-\section{Benchmarking}
+\subsection{Results}
 
 We benchmarked our code using two types of benchmarks. The first type of benchmarks used
 a \texttt{Google Benchmark} library. This is one of the standard libraries used to
@@ -214,3 +211,12 @@ data from \texttt{DBLP} as well as on source codes, DNA and protein sequences an
 We present here just a selected subset of the results obtained. We either choose samples
 where our implementation beat the original implementation by a wide margin or others where
 our implementation was not running that good. All other graphs can be found in AppendixTODO.
+
+\section{Hybrid encoding}
+
+\subsection{Implementation}
+
+Implementing hybrid encoding required changes to more than encoding and decoding
+subroutines. The main difference is that as long as 
+
+\subsection{Results}
