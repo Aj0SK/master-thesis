@@ -8,6 +8,8 @@ describe how we benchmarked our implementation and the results we obtained.
 
 \section{Implementation}
 
+\paragraph{SDSL}
+
 We decided to make our solution a part of the \sdsl library~\citep{gog2014theory}. This
 is one of the most matured and versatile libraries implementing succinct data structures.
 \sdsl is a heavily tested library offering various implementations of succinct
@@ -30,7 +32,8 @@ can be answered using the simple binary search, the first part of answering $\se
 binary search between precomputed values of $\rank$, then do the select inside of the superblock.
 This demonstrates, how the size of superblock can be used to balance the ratio of space used and the
 speed of the $\access$, $\rank$ and $\select$ methods. We however decided not to explore this dimension
-of RRR and keep the number of blocks in superblock on default value 32. 
+of RRR and keep the number of blocks in superblock on default value 32.
+
 We decided to use the 15 bit specialization as an underlying solution for the encoding and decoding of
 sub-blocks. We provided specialized implementations for block sizes 31, 63 and 127 that are mostly used
 in the practical scenarios. We based our specializations on the general implementation of
@@ -81,6 +84,64 @@ of buckets where our offset may land is usually small, linear search outperforms
 most of the time. In practice, we found that sequential search using the \texttt{SIMD}
 instructions leads to the best results for a smaller block sizes.
 
+\lstset{language=C,caption={Linear search for classes of sub-blocks},label=alg:C}
+\begin{lstlisting}
+uint32_t get_right_class(uint8_t k, uint32_t nr)  {
+	int right_k_from = std::max(k - 15, 0);
+	int right_k_to = std::min(k, 15);
+	int right_k = right_k_from;
+	for (; right_k < right_k_to; ++right_k)  {
+		uint32_t curr_index = C[k][right_k+1];
+		if (curr_index >= nr)  {
+			if (curr_index == nr)
+				++right_k;
+			break;
+		}
+	}
+	return right_k;
+}
+\end{lstlisting}
+
+\lstset{language=C,caption={SIMD enhanced linear search for classes of sub-blocks},label=alg:C}
+\begin{lstlisting}
+uint32_t get_right_class(uint8_t k, uint32_t nr)  {
+	int right_k_from = std::max(k - 15, 0);
+	int right_k_to = std::min(k, 15);
+	__m128i keys = _mm_set1_epi32(nr);
+	__m128i vec1 =
+		_mm_loadu_si128(reinterpret_cast<__m128i*>(&C[k][0]));
+	__m128i vec2 =
+		_mm_loadu_si128(reinterpret_cast<__m128i*>(&C[k][4]));
+	__m128i vec3 =
+		_mm_loadu_si128(reinterpret_cast<__m128i*>(&C[k][8]));
+	__m128i vec4 =
+		_mm_loadu_si128(reinterpret_cast<__m128i*>(&C[k][12]));
+
+	__m128i cmp1 = _mm_cmpgt_epi32(vec1, keys);
+	__m128i cmp2 = _mm_cmpgt_epi32(vec2, keys);
+	__m128i cmp3 = _mm_cmpgt_epi32(vec3, keys);
+	__m128i cmp4 = _mm_cmpgt_epi32(vec4, keys);
+
+	__m128i tmp1 = _mm_packs_epi32(cmp1, cmp2);
+	__m128i tmp2 = _mm_packs_epi32(cmp3, cmp4);
+	uint32_t mask1 = _mm_movemask_epi8(tmp1);
+	uint32_t mask2 = _mm_movemask_epi8(tmp2);
+
+	uint32_t mask = (mask2 << 16) | mask1;
+
+	int right_k = right_k_to;
+
+	if (mask != 0)
+	{
+		right_k = (1 + __builtin_ctz(mask)) / 2;
+
+		if (C[k][right_k] > nr)
+			--right_k;
+	}
+	return right_k;
+}
+\end{lstlisting}
+
 \paragraph{Hybrid encoding}
 
 Implementing hybrid encoding required changes to more than encoding and decoding
@@ -89,12 +150,12 @@ subroutines. The main difference is that as long as
 \section{Benchmarking}
 
 We benchmarked our code using two types of benchmarks. The first type of benchmarks used
-a \texttt{Google Benchmark} library. This is one of the standard libraries used for
-microbenchmarking of code. It can reliably benchmark code as it does a lot of work
-under the hood. Code snippet that is being benchmarked is run several times until the
-library can reliably state some information about its runtime. The second type of benchmarks
+a \texttt{Google Benchmark} library. This is one of the standard libraries used to
+microbenchmark code. Code snippet that is being benchmarked is run several times until
+the stable results are obtained. This makes the obtained results reliable even if the
+measured time is very small. The second type of benchmarks
 were the ones that are included in \sdsl. These are built on top of a data from the
-\texttt{Pizza\&Chili} datasets \citep{ferragina2005pizza} and include many various datasets such
+\texttt{Pizza\&Chili} datasets \citep{ferragina2005pizza} and include many types of data such
 as DNA sequences, \texttt{C} and \texttt{Java} source codes from \texttt{Linux} and \texttt{GCC}
 projects as well as English texts from the Gutenberg project. More information about this
 data such as some statistics about the compressibility and much more can be found in
@@ -123,10 +184,10 @@ binary search and linear scan enhanced by \texttt{SIMD} instructions.
 \paragraph{Bit vector}
 
 After bencharking and finding the potential for speeding up the bit vector implementation using
-our new method, we decided to implement it and test in some environment closer to the real-life
+our new method, we decided to implement and test it in environment that is closer to the real-life
 usage of bit vectors. We picked a benchmarking part of \texttt{SDSL} library that tests bit vector
 on a randomly generated sequences with fixed number of ones and on raw representation of a wavelet
-tree built on top of a data from the DNA sequence, XML web data taken from \texttt{DBLP}, computer
+tree built on top of data from the DNA sequence, XML web data taken from \texttt{DBLP}, computer
 science bibliography. Among the explored dimensions is block size, size of the underlying data.
 Through all of our experiments, we did not made any changes to the preset number of blocks per
 superblock that is set in \texttt{SDSL} to 32. \texttt{SDSL} uses the random pattern for $\access$,

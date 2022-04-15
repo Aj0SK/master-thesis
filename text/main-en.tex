@@ -9,6 +9,7 @@
 \usepackage[table,xcdraw]{xcolor} % Added for table coloring
 \usepackage[semicolon,round,sort&compress,sectionbib]{natbib}
 \usepackage{multirow} % Multirow table
+\usepackage{listings} % Code
 %\usepackage[slovak]{babel} % vypnite pre prace v anglictine
 \linespread{1.25} % hodnota 1.25 by mala zodpovedat 1.5 riadkovaniu
 
@@ -28,6 +29,22 @@
 \def\Lex{\mathit{Lex}}
 \def\prec{<}
 \def\sdsl{\texttt{SDSL} }
+
+% Listings
+\lstset{
+  aboveskip=1ex,
+  backgroundcolor=\color{gray!10},
+  basicstyle=\small\ttfamily,
+  belowskip=1ex,
+  breaklines=true,
+  columns=fullflexible,
+  framerule=0pt,
+  framexrightmargin=0em,
+  framexleftmargin=0em,
+  numbers=left,
+  numberstyle=\footnotesize\sffamily,
+  tabsize=2
+}
 
 % -------------------
 % --- Definicia zakladnych pojmov
