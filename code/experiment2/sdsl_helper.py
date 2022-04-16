@@ -60,6 +60,11 @@ for i in range(len(test_cases)):
     axs[i][1].set_xticks([15, 31, 63, 127])
     axs[i][2].set_xticks([15, 31, 63, 127])
 
+for i in range(len(test_cases)-1):
+    axs[i][0].set_xticklabels([])
+    axs[i][1].set_xticklabels([])
+    axs[i][2].set_xticklabels([])
+
 for file, block_size in res1.keys():
     access, rank, select = res1[file, block_size]
     file_index = test_cases.index(file)
