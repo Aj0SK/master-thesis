@@ -253,8 +253,8 @@ but we may use the same arguments and ideas for encoding and decoding as we alre
 % TODO: pridat viac kontextu, preco sa zaoberame percentami jednotiek
 % TODO: ukazat ze vacsie b je lepsie
 
-The main part of the space-saving aspect of RRR happens because of the way how blocks are stored.
-If we have a block of length $b$, then storing it in a raw bit representation takes $b$ bits.
+It is easy to observe, that the space-saving aspect of RRR is hiddden in a way how blocks are stored.
+If we have a block of length $b$, then storing it in a raw bit representation takes exactly $b$ bits.
 The number of bits used by compressed form depends heavily on the blocks class. If the block
 has class $c$, then compressed representation uses $\ceil{\log_2 (b+1)}$ bits to store the
 class and $\ceil{\log_2{b\choose c}}$ to store the offset. In Fig.~\ref{obr:rrrSpaceSavings}
@@ -262,7 +262,7 @@ we may observe for different block sizes, how the space saved per block depends 
 class. We may observe that RRR saves most of the memory on very sparse or very dense blocks.
 We would like to exploit these situations, when the number of ones/zeroes is very low. Thus,
 we at first analyze what is the probability distribution of the block classes in a sequence
-containing some fixed number of ones distributed randomly. Let us consider a randomly generated
+containing some fixed percentage of ones distributed randomly. Let us consider a randomly generated
 bit sequence $B$ of length $n$ containing $p\%$ of ones.
 
 \begin{figure}
@@ -280,7 +280,7 @@ bit sequence $B$ of length $n$ containing $p\%$ of ones.
 \end{figure}
 
 If we consider a block size $b$ then the random variable $X$ denoting number of ones in
-block follows a binomial distribution $$X \sim Bin(b,p).$$ As we may observe in
+a single block follows a binomial distribution $$X \sim Bin(b,p).$$ As we may observe in
 Fig.~\ref{obr:hybridEncodingDistribution}, the probability of blocks
 containing a lot of ones decreases exponentially in a sequence containing only 5\% of ones.
 Even in very long sequences, these blocks will occur very rarely. This gaved us

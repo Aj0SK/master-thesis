@@ -32,7 +32,8 @@ to obtain an idea of a practically interesting solution where we store the pre-c
 $\rank_1$ values only for some of the bits. At first, we choose a constant $k$ and split
 bit vector into non-overlapping subsequences of $k$
 bits. We name these subsequences \textit{superblocks}. We then precompute $\rank_1$
-only for the beginning of every superblock. This enables us to answer $\rank_1$ in time $\BigO(k)$
+only for the beginning of every superblock. Example of this representation is presented on
+Fig.~\ref{obr:practicalRank}. This enables us to answer $\rank_1$ in time $\BigO(k)$
 as we need to only access the precomputed value and then count bits from the start of the
 superblock up to the queried position. In this solution, we store $\BigO(\ceil{n/k}\log n)$
 bits of memory as there is $\ceil{n/k}$ superblocks and every rank can be of size at most $n$.
@@ -43,11 +44,29 @@ dominated by two cache misses that most of the time occur when accessing the pre
 and then subsequently accessing the bits on the beginning of the superblock. Continuous linear
 scan through subsequent bits in $B$ can be then very cache-friendly after the initial two cache misses.
 
+\begin{figure}
+	\centerline{
+	\begin{tabular}{c|c|c|c|c|}
+	\cline{2-5}
+	\textbf{B} & 0 0 1 0 1 1 0 1 & 1 1 1 0 1 1 1 1 & 0 0 0 0 0 1 1 0 & 1 1 0 0 1    \\ \cline{2-5}
+	\end{tabular}
+    % TODO: oddelit tie tabulky medzerou, netusim ako to urobit jednoducho
+    \begin{tabular}{c|c|c|c|c|}
+        \cline{2-5}
+        \textbf{precomputed ranks} & 0 & 4 & 11 & 13    \\ \cline{2-5}
+        \end{tabular}
+    }
+	\caption[TODO]{Example of dividing bit sequence $B$ into superblocks of length 8 and precomputing
+    $\rank_1$ for the beginning of every superblock. Note that last superblock may not contain full
+    number of 8 bits.}
+	\label{obr:practicalRank}
+\end{figure}
+
 \paragraph{Constant time rank}
 
-Although this solution works well and is commonly used in practice, it is possible to
-answer $\rank$ query in constant time and only sublinear space overhead. This was first
-shown by \cite{okanohara2007practical}. We start as in the previous solution by splitting
+Although the previous solution works well and is commonly used in practice, it is possible to
+answer $\rank$ query in constant time and only sublinear space overhead. This result was first
+obtained by \cite{okanohara2007practical}. We start as in the previous solution by splitting
 the bit sequence into superblocks. This time we let the superblocks be of size $\log^2 n$
 and again precompute $\rank$ for every beginning of superblock. We further divide every
 superblock into blocks of size $(\log n)/2$. We precompute the $\rank$ for all of these
