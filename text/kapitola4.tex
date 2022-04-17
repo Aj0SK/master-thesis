@@ -219,15 +219,15 @@ Through all of our experiments, we did not made any changes to the preset number
 superblock that is set in \texttt{SDSL} to 32. \texttt{SDSL} uses the random pattern for $\access$,
 $\rank$ and $\select$ queries. We were not able to find significant practical usability for other
 access patterns. As a baseline, we choose the 15 bit specialized implementation already implemented
-in \texttt{SDSL} that uses the table decoding method. We present the measured difference between our
-implementation and SDSL original implementation in Fig.~\ref{obr:benchmark_sdsl_new_method}.
+in \texttt{SDSL} that uses the table decoding method. We present the measured results of our and
+the original implementation in Fig.~\ref{obr:benchmark_sdsl_new_method}.
 
 \begin{figure}
 	\centerline{
 		\includegraphics[width=\textwidth, height=0.7\textheight]{images/benchmark_sdsl_new_method}
 	}
-	\caption[TODO]{\texttt{SDSL} benchmark to measure the bit vector performance and how it is
-	dependent on the block size. Our implementations are marked using cross. 
+	\caption[TODO]{\texttt{SDSL} benchmark to measure the bit vector performance and its dependence
+	on the block size. Our implementations are marked using cross.
 	}
 	\label{obr:benchmark_sdsl_new_method}
 \end{figure}
@@ -258,6 +258,11 @@ The reason that the $\mathit{extract}$ method is useful and non-trivial is that 
 does not store the original sequence $T$ -- at least not in an easily readable form.
 As in previous case, these methods are benchmarked on samples like English texts, \texttt{XML}
 data from \texttt{DBLP} as well as on source codes, DNA and protein sequences and many more.
+Alongside our new encoding methods and their original counterparts, we once again added
+to the benchmark the 15 bit version of bit vector decoded by table. On top of that, we
+also added a classic uncompressed bit vector to put into the perspective space savings that
+are made by RRR.
+
 We present here just a selected subset of the results obtained. We either choose samples
 where our implementation beat the original implementation by a wide margin or others where
 our implementation was not running that good. All other graphs can be found in AppendixTODO.

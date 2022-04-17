@@ -1,38 +1,39 @@
 \chapter{Our work}
 \label{kap:kap3}
 
-In this chapter, we shall look into our proposed enhancements to the existing
-implementations of RRR. We at first propose a new block encoding method.
-Then, we show how we can exploit the assumptions about the input sequence to
-build a better suited implementation for our underlying data. 
+In this chapter, we propose various ideas that could lead to a better practical
+implementation of RRR. We at first propose a new block encoding and decoding method.
+Then, we show how we can exploit the assumptions about the input sequence to build
+an implementation better tailored for the underlying bit sequence.
 
 \section{Block encoding}
 
-As we already discussed in section~\ref{section:compressed_bv}, there are to
+As we discussed in section~\ref{section:compressed_bv}, there are to
 the best of our knowledge two widely used methods to encode and decode the
 blocks in RRR. The main disadvantage of the table decoding method is its
 inability to reasonably support longer blocks in practice because of the
-huge table sizes for bigger block lengths. On the other hand, the on-the-fly
+huge helper table sizes for bigger block lengths. On the other hand, the on-the-fly
 decoding method may be used to support a bigger block size with the downside
-being longer encoding and decoding times. We propose a new method of encoding
-and decoding the blocks. The main objective of the new method is to create an
-alternative to the previous methods that enables use of longer blocks while not
-hurting the runtime so significantly.
+being longer encoding and decoding times. In this section, we propose a new
+method for encoding and decoding the blocks. The main objective of the new
+method is to create an alternative to the previous methods that enables use
+of longer blocks while not hurting the runtime so significantly.
 
-The main idea behind our solution is to use a divide-and-conquer approach to break
-the problem of finding the order of the block $B$ along the class $c$ to finding the order
-of the several smaller blocks. This may for example enable us to use the table method to solve the
-smaller subproblems. To facilitate our solution, we need to alter the respective order of
-the blocks along the same class. We want to note that we also use the number of ones to
-identify class of the block. On the other hand, both previous solutions used the lexicographical ordering
-for the blocks that shared the same class. In our solution, every block $B$ will be thought
-of as two smaller \textit{sub-blocks}, namely $B_1$ and $B_2$ with $B$ being equal to their bit
-concatenation $B_1\cdot B_2$. We shall at first sort the big block $B$ by the pair $(c_1, c_2)$
-where $c_1$ and $c_2$ are the respective classes of the smaller sub-blocks $B_1$ and $B_2$. Only then,
-we break the tie by lexicographical order of $B_1$ and $B_2$. Note that the original lexicographical
-ordering can be rephrased in the context of sub-blocks as sorting at first by $B_1$ and then by
-$B_2$. The example of the new ordering for particular block length and class is shown in
-Fig.~\ref{obr:lexicographicalVsUs}.
+The main idea behind our solution is to use a divide-and-conquer approach.
+We would like to break the problem of finding the order of the block $B$ along
+the class $c$ to finding the order of several smaller blocks. One of the advantages
+is that this would enable us to use the table method to solve the smaller subproblems.
+To facilitate our solution, we shall alter the respective order of the blocks along
+the same class. We want to note that we also use the number of ones to identify class
+of the block. On the other hand, both previous solutions for encoding used the lexicographical
+ordering for the blocks that shared the same class. In our solution, every block $B$ will
+be thought of as two smaller \textit{sub-blocks}, namely $B_1$ and $B_2$ with $B$ being equal
+to their bit concatenation $B_1\cdot B_2$. Primarily, the block is compared according to its
+\textit{class pair} $(c_1, c_2)$ where $c_1$ and $c_2$ are the classes of the smaller sub-blocks
+$B_1$ and $B_2$. Only then, the tie is broken by order of $B_1$ and then by $B_2$ along their respective
+classes. Note that the original lexicographical ordering can be rephrased in the context of sub-blocks as
+sorting at first by $B_1$ and then by $B_2$. The example of the new ordering for particular block
+length and class is shown in Fig.~\ref{obr:lexicographicalVsUs}.
 
 \begin{figure}
 	\centerline{
@@ -73,17 +74,32 @@ Fig.~\ref{obr:lexicographicalVsUs}.
 	\label{obr:lexicographicalVsUs}
 \end{figure}
 
-We shall now demonstrate how we use this new ordering and that it is convenient to encode and
-decode block in a divide and conquer manner.
+Formalizing this, we shall write $B\prec_X B'$ if blocks $B$ and $B'$ are of
+the same length and class and at the same time $B$ precedes $B'$ in ordering $X$.
+When convenient, in this situation we refer to block $B$ as being smaller than $B'$. 
+We write $B\prec_{\Lex} B'$ if $B$ preceeds $B'$ in lexicographical
+ordering. Using this new notation, our new proposed ordering $P$ can be formalized
+as
+\begin{align*}
+    B\prec_P B' \iff
+    &[\#_1(B_1) < \#_1(B_1')] \\
+    &\lor [(\#_1(B_1) = \#_1(B_1')) \land B_1 \prec_{X} B_1']\\
+    &\lor [B_1 = B_1' \land B_2 \prec_{Y} B_2']
+\end{align*}
+where $B=B_1\cdot B_2$, $B'=B_1'\cdot B_2'$ and $X$, $Y$ are some orderings.
+
+We now demonstrate how encoding and decoding works with our proposed ordering.
 
 \paragraph{Encoding}
 
-Before providing the general encoding strategy, we shall demonstrate the encoding on
+Before providing the general encoding routine, we demonstrate encoding on
 simple example and then generalize the ideas behind the process. Imagine encoding
-block {\tt 100 010}. We may observe that the class of this block is 2 as there are two ones in
-the whole block. Obtaining the offset is more complicated. We will proceed by enumerating the
-number of blocks preceding {\tt 100 010} in the class $c=2$. We divide the blocks preceding
-{\tt 100 010} along its class into 3 categories:
+block {\tt 100010} of length 6. Let us encode this block using our new
+subroutine with 3 as a sub-block length. We may observe that the class of this
+block is 2 as there are two ones in the whole block. Obtaining the offset is
+more complicated. We calculate it by enumerating the number of blocks preceding
+{\tt 100 010} in the class $c=2$. We divide the blocks preceding {\tt 100 010}
+along its class into 3 categories:
 
 \begin{itemize}
     \item Blocks with smaller number of ones in the first sub-block.
@@ -94,79 +110,51 @@ number of blocks preceding {\tt 100 010} in the class $c=2$. We divide the block
     (There is 1 such block, namely {\tt 100 001}.)
 \end{itemize}
 
-Summing up, we get that there are 10 blocks preceding {\tt 100 010} so it has the offset $o$
-equal to 10 as we index from 0. Together with its class, we would encode this block as a pair
-$(2, 10)$.
+Summing up, we get that there are 10 blocks preceding {\tt 100 010} so it
+has the offset $o$ equal to 10 (when indexing from 0). Together with its
+class, we would encode this block as a pair of numbers $(2, 10)$.
 
-In general, consider a block $B$ of length $b$. The first step is to obtain
-$c$ -- the class of the block. This can be done by counting ones in $B$, so we
-get that $$c=\#_1(B).$$ To obtain the sequence number $o$ of $B$, we shall
-count the number of blocks preceding $B$ along the class $c$. As we mentioned,
+Let us generalize this process and consider encoding block $B$ of length $b$
+with sub-blocks of size $b_1$ and $b_2$. The first step is to obtain $c$ --
+class of the block. This can be done by counting ones in $B$, so we get that
+$$c=\#_1(B).$$ To obtain the sequence number $o$ of $B$ along the class $c$,
+we count the number of blocks preceding $B$ along its class. As we mentioned,
 there are 3 types of blocks preceding $B$:
 
 \begin{enumerate}
     \item Blocks with the first sub-block having smaller class than $B_1$.
     \label{chapter3:encoding:1}
-    \item Blocks with the first sub-block being of the same class as is $B_1$
+    \item Blocks with the first sub-block being of the same class as $B_1$
     but with smaller first sub-block. \label{chapter3:encoding:2}
     \item Blocks with the same first sub-block but smaller second sub-block.
     \label{chapter3:encoding:3}
 \end{enumerate}
 
-Formalizing this, we shall write $B\prec_X B'$ if blocks $B$ and $B'$ are of
-the same length and class and at the same time $B$ precedes $B'$ in ordering $X$.
-We write $B\prec_{\Lex} B'$ if $B$ preceeds $B'$ in lexicographical
-ordering. To formally define our new proposed ordering $P$, we shall write that
-\begin{align*}
-    B\prec_P B' \iff
-    &[\#_1(B_1) < \#_1(B_1')] \\
-    &\lor [(\#_1(B_1) = \#_1(B_1')) \land B_1 \prec_{X} B_1']\\
-    &\lor [B_1 = B_1' \land B_2 \prec_{Y} B_2']
-\end{align*}
-where $B=B_1B_2$, $B'=B_1'B_2'$ and $X$, $Y$ are some valid orderings.
-
 The number of blocks in group~\ref{chapter3:encoding:1} is equal to
-$$\sum_{i=0}^{c_1-1} {15\choose i} {15\choose c-i}$$ where $i$ denotes the number
-of ones in the first block. Product of term ${15\choose i}$ and ${15\choose c-i}$
+$$\sum_{i=0}^{c_1-1} {b_1\choose i} {b_2\choose c-i}$$ where $i$ denotes the number
+of ones in the first block. Product of term ${b_1\choose i}$ and ${b_2\choose c-i}$
 denotes the number of blocks with $i$-ones in the first sub-block and the rest
 $c-i$ ones in the second sub-block.
 
-The number of blocks in group~\ref{chapter3:encoding:2} is equal to the number of blocks that
-share classes of sub-blocks but are smaller than $B$. Number of these blocks is $o_1\times {15\choose c_1}$.
-The number of blocks in group~\ref{chapter3:encoding:3} is equal to the number of blocks smaller 
-than $B_2$. This is identical to the offset of second sub-block -- $o_2$. Note, that to obtain the
-offset of $B$ we need the encoding of the sub-blocks $B_1$ and $B_2$. These are two pairs of numbers
+The number of blocks in group~\ref{chapter3:encoding:2} is equal to $o_1\times {b_2\choose c_2}$
+as $o_i$ denotes the number of sub-blocks smaller than the $B_1$ in its class and ${b_2\choose c_2}$
+denotes number of possible combination for second sub-block. The number of blocks in
+group~\ref{chapter3:encoding:3} is equal to the number of blocks smaller than $B_2$.
+This is identical to the offset of second sub-block -- $o_2$. Note, that to obtain the offset of
+$B$ we need the encoded representation of the sub-blocks $B_1$ and $B_2$. These are two pairs of numbers
 $(c_1, o_1)$ and $(c_2, o_2)$ that can be computed using the on-the-fly encoding or more conveniently,
 if the block size is small enough by table encoding.
 
 \paragraph{Decoding}
 
-Decoding is a process of obtaining blocks bit representation $B$ from the encoded
-representation $(c, o)$. We would like to reuse the sub-routines for the blocks
-of size $b/2$. However, to use these we need to find the classes and offsets of
-the smaller sub-blocks. Namely, we need to find what the pairs $(c_1, o_1)$ and
-$(c_2, o_2)$ are. This will be a 3 step process. It is easy to observe that $c_1 + c_2 = c$.
-All the possible blocks along the class $c$ are primarily sorted by pair $(c_1, c_2)$
-that we shall call the class pair. If we know what is the number of blocks along the class $c$
-that have the class pair $(c_1, c_2)$ equal to $(0, c), (1, c-1), \ldots , (c, 0)$, we can search
-using the offset in which of these groups our block is located. This gives us classes of the sub-blocks
-$c_1$ and $c_2$. When we obtain these two, we shall proceed to the second step. Between all the blocks
-that have the same $c_1$ and $c_2$, we would like to find $o'$-th along them where the new offset $o'$
-is given by subtracting the number of blocks with the smaller class pairs $(c_1, c_2)$, from the offset
-$o$. There are ${b/2 \choose c_1}$ and ${b/2 \choose c_2}$ ways how the first and second block may look
-respectively. As all the combinations of first and second sub-block are possible, we want to identify
-$o'$-th block along the ${b/2 \choose c_1}\cdot {b/2 \choose c_2}$ blocks. Blocks are sorted primarily
-by the first sub-block and then by the second sub-block. This means, that the ordered sequence of
-the blocks within the class pair $(c_1, c_2)$ will be just all the possible ${b/2 \choose c_2}$
-second sub-blocks repeating cyclically, every time with the different, yet increasing
-first sub-block. Furthermore, this cycle of ${b/2 \choose c_2}$ sub-blocks will repeat
-${b/2 \choose c_1}$ times (once for each possible first sub-block). Using $o'$ we can easily
-find the order of the first and second sub-block. We just need to know how many cycles of length
-${b/2 \choose c_2}$ happened until $o'$ and what is the offset of the second sub-block at which
-the current cycle is on position $o'$. This is straightforward to compute.
+Decoding is a process of obtaining bit representation of block $B$ from its encoded
+representation $(c, o)$. However, when our new encoding scheme is used, main part
+of the decoding process is to obtain encoded representations $(c_1, o_1)$ and
+$(c_2, o_2)$ of sub-blocks $B_1$ and $B_2$ as then these two can be fed into
+the decoding subroutines to obtain sub-blocks $B_1$ and $B_2$. Combining these
+representations to obtain $B$ is then trivial.
 
-% TODO: sem dopisat ako to presne vypocitat
-% TODO: nasledujuci example este mozno skryva nejake off by one
+%% Tento priklad stale nemam pekne popisany...
 
 We shall again present this process on an example and decode the block from the previous
 encoding example {\tt 100 010} encoded as $(2, 10)$. To obtain the number of ones in
@@ -175,17 +163,16 @@ see that there are 3 blocks with zero ones in the first sub-block. As the offset
 block is ten, we need to look for this block between blocks with more than 0 ones. There
 are 9 blocks with one 1 in the first sub-block. As $3+9$ is bigger than 10, we discovered
 that the number of ones in the first block is 1 and it follows that the number of ones in
-the second sub-block is
-also 1 as we know the total number of ones in the block. There are 9 blocks with
-this exact same property, the smallest one being {\tt 001 001} and the largest one
+the second sub-block is also 1 as we know the total number of ones in the block. There are
+9 blocks with this exact same property, the smallest one being {\tt 001 001} and the largest one
 {\tt 100 100}. We had successfully narrowed our search into these 9 blocks and can now
 focus on identifying what is the offset of the first and second sub-block. There are
 ${3 \choose 1} = 3$ possibilities (namely {\tt 001}, {\tt 010}, {\tt 100}) how the first
-and also the second sub-block may look. Blocks are sorted according
-to the first sub-block and then second sub-block. The cycle through
-the sub-blocks will be of length 3 (number of possible second sub-blocks) and will repeat
-3 times (number of possible first sub-blocks). Along these ordering of 9 blocks we are
-looking for the 7th. From this, we know that the block, we are looking for contains a
+and also the second sub-block may look. Blocks are sorted according to the first sub-block
+and then second. The cycle through the sub-blocks will be of length 3 (number of possible
+second sub-blocks) and will repeat 3 times (number of possible first sub-blocks). Along
+these ordering of 9 blocks we are interested in 7th so we know that the block,
+we are looking for contains a
 first sub-block, that is along all the blocks of size 3 and class 1, third in the ordering.
 So to find the first sub-block, we reuse the solution based on the lexicographical ordering
 and ask it to decode pair $(1, 2)$ that gives us the first sub-block {\tt 100}. Obtaining
@@ -193,8 +180,38 @@ the second sub-block is not that hard. So far, we focused how many times the fir
 changes up to the 7th position. Now, we turn our attention on which second sub-block the cycle
 ends. We know that every 3rd iteration, the second sub-block starts, where it began.
 
-Our newly devised method enables us to combine two different encoding/decoding methods
-for block size $b_1$ and for block size $b_2$ yielding the method for block size $b_1+b_2$
+%%%%%%%%%%%
+
+Let us propose a general decoding scheme for block $B$ of length $B$ combined from the
+sub-blocks of size $b_1$ and $b_2$. We start with the encoded pair $(c, o)$. It is easy
+to observe that $$c_1 + c_2 = c$$. All the possible blocks along the class $c$ are primarily
+sorted by class pair $(c_1, c_2)$. Let us denote the number of blocks with class pair $(c_1, c_2)$
+$C_{c_1}$. If we know the exact values of the number $C_0, C_1, \ldots , C_c$, we can search
+using the offset $o$ in which of these groups our block is located. This gives us the sub-blocks classes
+$c_1$ and $c_2$. When we obtain these two, we proceed to the second step. Between all the blocks
+that have the same $c_1$ and $c_2$, we would like to find $o'$-th along them where the new offset $o'$
+is given by subtracting the number of blocks with the smaller class pairs, from the offset
+$o$. There are ${b_1 \choose c_1}$ and ${b_2 \choose c_2}$ ways how the first and second sub-block may
+look respectively. As all the combinations of first and second sub-block are possible, we want to identify
+$o'$-th block along the ${b_1 \choose c_1}\cdot {b_2 \choose c_2}$ blocks. Blocks are sorted primarily
+by the first sub-block and then by the second sub-block. This means, that the ordered sequence of
+the blocks within the class pair $(c_1, c_2)$ will be just all the possible ${b_2 \choose c_2}$
+second sub-blocks repeating cyclically, every time with the different, yet increasing
+first sub-block. Furthermore, this cycle of ${b_2 \choose c_2}$ sub-blocks will repeat
+${b_1 \choose c_1}$ times (once for each possible first sub-block). Using $o'$ we can easily
+find the order of the first and second sub-block. We just need to know how many cycles of length
+${b_2 \choose c_2}$ fit into $o'$ and what is the offset of the second sub-block at which
+the current cycle is on position $o'$. This is straightforward to compute as:
+\begin{align*}
+    o_1 &= o'/{b_2 \choose c_2} \\
+    o_2 &= o'\mod ({b_2 \choose c_2})\\ % TODO: not working without ()
+\end{align*}
+Now we have successfully obtained $(c_1, o_1)$ and $(c_2, o_2)$ so we are ready to use
+the decoding subroutine for the block size $b_1$ and $b_2$.
+
+Note that our newly devised method enables us to combine two different encoding/decoding methods
+for block size $b_1$ and $b_2$ yielding the method for block size $b_1+b_2$. Thus, most of the
+time block size $b$ can be obtained using the different combinations of $b_1$ and $b_2$.
 
 \section{Hybrid encoding}
 
