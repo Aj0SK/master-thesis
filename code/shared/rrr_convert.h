@@ -166,7 +166,7 @@ public:
 
   static inline uint32_t decode(int k, uint32_t nr)
   {
-    const int left_k_from = (k > 15) ? (k - 15) : 0;
+    const int left_k_from = std::max(k - 15, 0);
     const int left_k_to = std::min(k, 15);
 
     int left_k = left_k_from;
@@ -195,7 +195,7 @@ public:
 
   static inline uint32_t decode_binary(int k, uint32_t nr)
   {
-    const int left_k_from = (k > 15) ? (k - 15) : 0;
+    const int left_k_from = std::max(k - 15, 0);
     const int left_k_to = std::min(k, 15);
 
     const auto it = std::upper_bound(data.helper[k].begin() + left_k_from,
@@ -327,7 +327,7 @@ private:
 public:
   static inline uint64_t decode(const int k, uint64_t nr)
   {
-    const int left_k_from = (k > 31) ? (k - 31) : 0;
+    const int left_k_from = std::max(k - 31, 0);
     const int left_k_to = std::min(k, 31);
 
     int left_k = left_k_from;
@@ -354,7 +354,7 @@ public:
 
   static inline uint64_t decode_binary(const int k, uint64_t nr)
   {
-    const int left_k_from = (k > 31) ? (k - 31) : 0;
+    const int left_k_from = std::max(k - 31, 0);
     const int left_k_to = std::min(k, 31);
 
     const auto it = std::upper_bound(data.helper[k].begin() + left_k_from,
@@ -474,7 +474,7 @@ public:
       to_or |= 1ull << 60;
     }
 
-    const int left_k_from = (k > 30) ? (k - 30) : 0;
+    const int left_k_from = std::max(k - 30, 0);
     const int left_k_to = std::min(k, 30);
 
     int left_k = left_k_from;
@@ -562,7 +562,7 @@ public:
       to_or |= one << 126;
     }
 
-    const int left_k_from = (k > 63) ? (k - 63) : 0;
+    const int left_k_from = std::max(k - 63, 0);
     const int left_k_to = std::min(k, 63);
 
     int left_k = left_k_from;
@@ -600,7 +600,7 @@ public:
       to_or |= one << 126;
     }
 
-    const int left_k_from = (k > 63) ? (k - 63) : 0;
+    const int left_k_from = std::max(k - 63, 0);
     const int left_k_to = std::min(k, 63);
 
     const auto it = std::upper_bound(data.helper[k].begin() + left_k_from,
