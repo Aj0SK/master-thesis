@@ -3,8 +3,9 @@
 
 In this chapter, we propose various ideas that could lead to a better practical
 implementation of RRR. We at first propose a new block encoding and decoding method.
-Then, we show how we can exploit the assumptions about the input sequence to build
-an implementation better tailored for the underlying bit sequence.
+Then, we show how we can exploit the assumptions about the input bit sequence to build
+implementation that is better tailored for it in terms of the space used and time to
+asnwer the query.
 
 \section{Block encoding}
 
@@ -19,21 +20,21 @@ method for encoding and decoding the blocks. The main objective of the new
 method is to create an alternative to the previous methods that enables use
 of longer blocks while not hurting the runtime so significantly.
 
-The main idea behind our solution is to use a divide-and-conquer approach.
+The main idea behind our proposed solution is to use a divide-and-conquer approach.
 We would like to break the problem of finding the order of the block $B$ along
 the class $c$ to finding the order of several smaller blocks. One of the advantages
 is that this would enable us to use the table method to solve the smaller subproblems.
 To facilitate our solution, we shall alter the respective order of the blocks along
-the same class. We want to note that we also use the number of ones to identify class
+the same class. Note that we also use the number of ones to identify class
 of the block. On the other hand, both previous solutions for encoding used the lexicographical
 ordering for the blocks that shared the same class. In our solution, every block $B$ will
 be thought of as two smaller \textit{sub-blocks}, namely $B_1$ and $B_2$ with $B$ being equal
-to their bit concatenation $B_1\cdot B_2$. Primarily, the block is compared according to its
+to their bit concatenation $B_1\cdot B_2$. Primarily, the blocks are sorted according to their
 \textit{class pair} $(c_1, c_2)$ where $c_1$ and $c_2$ are the classes of the smaller sub-blocks
-$B_1$ and $B_2$. Only then, the tie is broken by order of $B_1$ and then by $B_2$ along their respective
-classes. Note that the original lexicographical ordering can be rephrased in the context of sub-blocks as
-sorting at first by $B_1$ and then by $B_2$. The example of the new ordering for particular block
-length and class is shown in Fig.~\ref{obr:lexicographicalVsUs}.
+$B_1$ and $B_2$ respectively. Only then, the tie is broken by order of $B_1$ and $B_2$ along
+their respective classes. Note that the original lexicographical ordering can be rephrased in the
+context of sub-blocks as sorting at first by $B_1$ and then by $B_2$. The example of the new
+ordering for particular block length and class is shown in Fig.~\ref{obr:lexicographicalVsUs}.
 
 \begin{figure}
 	\centerline{
@@ -65,7 +66,7 @@ length and class is shown in Fig.~\ref{obr:lexicographicalVsUs}.
         \end{tabular}
 	}
 	\caption[TODO]{
-        Example of the new ordering for the block length $b=6$ and class $c=2$.
+        The example of new ordering for the block length $b=6$ and class $c=2$.
         Every block is divided into two sub-blocks of size 3. Note the differences to the
         lexicographical ordering. Block {\tt 011 000} on offset 12 is preceded by lexicographicaly
         greater blocks {\tt 100 001}, {\tt 100 010} and {\tt 100 100} as it has bigger number of ones
@@ -77,9 +78,8 @@ length and class is shown in Fig.~\ref{obr:lexicographicalVsUs}.
 Formalizing this, we shall write $B\prec_X B'$ if blocks $B$ and $B'$ are of
 the same length and class and at the same time $B$ precedes $B'$ in ordering $X$.
 When convenient, in this situation we refer to block $B$ as being smaller than $B'$. 
-We write $B\prec_{\Lex} B'$ if $B$ preceeds $B'$ in lexicographical
-ordering. Using this new notation, our new proposed ordering $P$ can be formalized
-as
+We write $B\prec_{\Lex} B'$ if $B$ preceeds $B'$ in lexicographical ordering.
+Using this new notation, our new proposed ordering $P$ can be formalized as follows:
 \begin{align*}
     B\prec_P B' \iff
     &[\#_1(B_1) < \#_1(B_1')] \\
@@ -134,23 +134,22 @@ The number of blocks in group~\ref{chapter3:encoding:1} is equal to
 $$\sum_{i=0}^{c_1-1} {b_1\choose i} {b_2\choose c-i}$$ where $i$ denotes the number
 of ones in the first block. Product of term ${b_1\choose i}$ and ${b_2\choose c-i}$
 denotes the number of blocks with $i$-ones in the first sub-block and the rest
-$c-i$ ones in the second sub-block.
-
-The number of blocks in group~\ref{chapter3:encoding:2} is equal to $o_1\times {b_2\choose c_2}$
-as $o_i$ denotes the number of sub-blocks smaller than the $B_1$ in its class and ${b_2\choose c_2}$
-denotes number of possible combination for second sub-block. The number of blocks in
-group~\ref{chapter3:encoding:3} is equal to the number of blocks smaller than $B_2$.
-This is identical to the offset of second sub-block -- $o_2$. Note, that to obtain the offset of
-$B$ we need the encoded representation of the sub-blocks $B_1$ and $B_2$. These are two pairs of numbers
-$(c_1, o_1)$ and $(c_2, o_2)$ that can be computed using the on-the-fly encoding or more conveniently,
-if the block size is small enough by table encoding.
+$c-i$ ones in the second sub-block. The number of blocks in group~\ref{chapter3:encoding:2}
+is equal to $$o_1\times {b_2\choose c_2}$$ as $o_i$ is the number of sub-blocks smaller
+than the $B_1$ in its class and ${b_2\choose c_2}$ denotes number of possible combination
+for second sub-block. The number of blocks in group~\ref{chapter3:encoding:3} is equal to
+the number of blocks smaller than $B_2$. This is identical to the offset of second
+sub-block -- $o_2$. Note, that to obtain the offset of $B$ we need the encoded representation
+of the sub-blocks $B_1$ and $B_2$. These are two pairs of numbers $(c_1, o_1)$ and $(c_2, o_2)$
+that can be computed using the on-the-fly encoding or more conveniently, if the block size is
+small enough by table encoding.
 
 \paragraph{Decoding}
 
 Decoding is a process of obtaining bit representation of block $B$ from its encoded
 representation $(c, o)$. However, when our new encoding scheme is used, main part
 of the decoding process is to obtain encoded representations $(c_1, o_1)$ and
-$(c_2, o_2)$ of sub-blocks $B_1$ and $B_2$ as then these two can be fed into
+$(c_2, o_2)$ of sub-blocks $B_1$ and $B_2$. These two can be then fed into
 the decoding subroutines to obtain sub-blocks $B_1$ and $B_2$. Combining these
 representations to obtain $B$ is then trivial.
 
@@ -185,8 +184,8 @@ ends. We know that every 3rd iteration, the second sub-block starts, where it be
 Let us propose a general decoding scheme for block $B$ of length $B$ combined from the
 sub-blocks of size $b_1$ and $b_2$. We start with the encoded pair $(c, o)$. It is easy
 to observe that $$c_1 + c_2 = c$$. All the possible blocks along the class $c$ are primarily
-sorted by class pair $(c_1, c_2)$. Let us denote the number of blocks with class pair $(c_1, c_2)$
-$C_{c_1}$. If we know the exact values of the number $C_0, C_1, \ldots , C_c$, we can search
+sorted by class pair $(c_1, c_2)$. Let us denote $C_{c_1}$ the number of blocks with class
+pair $(c_1, c_2)$. If we know the exact values of the number $C_0, C_1, \ldots , C_c$, we can search
 using the offset $o$ in which of these groups our block is located. This gives us the sub-blocks classes
 $c_1$ and $c_2$. When we obtain these two, we proceed to the second step. Between all the blocks
 that have the same $c_1$ and $c_2$, we would like to find $o'$-th along them where the new offset $o'$
@@ -218,17 +217,19 @@ time block size $b$ can be obtained using the different combinations of $b_1$ an
 % TODO: pridat viac kontextu, preco sa zaoberame percentami jednotiek
 % TODO: ukazat ze vacsie b je lepsie
 
-It is easy to observe, that the space-saving aspect of RRR is hiddden in a way how blocks are stored.
-If we have a block of length $b$, then storing it in a raw bit representation takes always exactly $b$ bits.
-The number of bits used by compressed form however, depends heavily on the blocks class. If the block
-has class $c$, then compressed representation uses $\ceil{\log_2 (b+1)}$ bits to store the
-class and $\ceil{\log_2{b\choose c}}$ to store the offset. In Fig.~\ref{obr:rrrSpaceSavings}
-we may observe for different block sizes, how the space saved per block depends on the blocks
-class. We may observe that RRR saves most of the memory on very sparse or very dense blocks.
-We would like to exploit these situations, when the number of ones/zeroes is very low. Thus,
-we at first analyze what is the probability distribution of the block classes in a sequence
-containing some fixed percentage of ones distributed randomly. Let us consider a randomly generated
-bit sequence $B$ of length $n$ containing $p\%$ of ones.
+It is easy to observe, that the main part of space-saving aspect of RRR is hiddden in
+a way how blocks are stored. If we have a block of length $b$, then storing it in
+a raw bit representation takes always exactly $b$ bits. The number of bits used by
+compressed form however, depends heavily on the blocks class. If the block is of class
+$c$, then compressed representation uses $\ceil{\log_2 (b+1)}$ bits to store its
+class and $\ceil{\log_2{b\choose c}}$ bits to store the offset. We may observe in
+Fig.~\ref{obr:rrrSpaceSavings}, how for different block sizes the space saved per
+block depends on the blocks class. At the same time, RRR saves most of the memory
+on very sparse or very dense blocks. We would like to exploit situations, when
+the number of these blocks is very high. Let us consider a randomly generated bit
+sequence $B$ of length $n$ containing $p\%$ of ones. Let us analyze what is the
+probability distribution of the block classes in a sequence containing this fixed
+percentage of ones distributed randomly. 
 
 \begin{figure}
 	\centerline{
@@ -236,20 +237,20 @@ bit sequence $B$ of length $n$ containing $p\%$ of ones.
 	}
 	\caption[TODO]{Individual graphs present for different block sizes (31, 63, 127), 
     the space saved by using the compressed block representation. We can observe how
-    the number of saved bits is dependent on the blocks class. Black numbers on the $x$-axis
-    are denoting start and end of the interval where compressed version is worse
-    in space usage (negative space saved).
+    the blocks class influences number of saved bits. Black numbers on the $x$-axis
+    denote start and end of the interval where compressed version is even worse
+    in space used (negative number of bits saved).
 	}
     % can be found on https://github.com/Aj0SK/master-thesis/blob/main/text/images/rrr_space_savings.png
 	\label{obr:rrrSpaceSavings}
 \end{figure}
 
-If we consider a block size $b$ then the random variable $X$ denoting number of ones in
-a single block follows a binomial distribution $$X \sim Bin(b,p).$$ As we may observe in
-Fig.~\ref{obr:hybridEncodingDistribution}, the probability of blocks
-containing a lot of ones decreases exponentially in a sequence containing only 5\% of ones.
-Even in very long sequences, these blocks will occur very rarely. This gaved us
-opportunity to a solution that we call \textit{hybrid encoding}.
+If we consider a block size $b$ then the random variable $X$ denoting number of
+ones in a single block follows a binomial distribution $$X \sim Bin(b, p).$$ As
+we may observe in Fig.~\ref{obr:hybridEncodingDistribution}, the probability of
+blocks containing a lot of ones decreases exponentially in a sequence containing
+only 5\% of ones. Even in very long sequences, these blocks will occur very rarely.
+This gaved us opportunity to a encoding method we named \textit{hybrid encoding}.
 
 \begin{figure}
 	\centerline{
@@ -271,14 +272,14 @@ compressed representation may take even more bits than the original raw
 representation. Storing the whole block may waste space if the number of
 ones is big but there are not many possibilities how the block may look.
 Although we waste some space by this approach from time to time (for every
-block that is densely packed with ones), we can save some small
-amount of space by decreasing the number of bits used to store the classes.
-The main idea of hybrid encoding is that every block with its
-class bigger than some threshold will have its class set to this threshold
-and this will mean that the block is stored using full $b$ bits instead of
-$\ceil{\log_2{b\choose c_i}}$ bits. Let us set $c_k$ as a value for cut off.
-Blocks with class bigger than $c_k$ will not be encoded but just
-copied with the class set to $c_k$ no matter what is the number of ones in them.
+block that is densely packed with ones), we can save a small amount of space
+by decreasing the number of bits used to store the classes. The main idea
+of hybrid encoding is that every block with a class bigger than some threshold
+will have its class set to this threshold and this will mean that the block
+is stored using full $b$ bits instead of $\ceil{\log_2{b\choose c_i}}$ bits.
+Let $c_k$ be a cutoff value. Blocks with class bigger than $c_k$ will not be
+encoded but just copied with the class set to $c_k$ no matter what is the
+number of ones in them.
 
 \[
     \text{stored class} = 
@@ -291,19 +292,18 @@ copied with the class set to $c_k$ no matter what is the number of ones in them.
 Note that the class of block is a number from 0 up to $b$. When the cuttoff $c_k$ is
 used, the class of block is a number from 0 up to $c_k$. To possibly save some space on the bit representation
 of the blocks class, we need to choose $c_k$ such that $$\ceil{\log_2(c_k+1)} < \ceil{\log_2(b+1)}.$$
-We shall now compare these two representations and the theoretical space savings that
+Let us now compare these two representations and the theoretical space savings that
 can be obtained. Let $n$ be a length of the sequence, $b$ the block size and $C_i$
-number of blocks with class $i$. To simplify the calculations, we shall assume that $b+1$
-as well as $c_k$ is a power of 2 and $n$ is divisible by $b$, also we shall
-denote logarithm with base 2 $\lg x$. Using this notation, first representation is
-consuming $$(n/b)\lg (b+1) + \sum_{i=0}^{b} C_i\ceil{\lg {b\choose i}}$$
+number of blocks with class $i$. To simplify the calculations in this section, we
+assume that $b+1$ as well as $c_k$ is a power of 2 and $n$ is divisible by $b$, also
+we shall denote logarithm with base 2 $\lg x$. Using this notation, first representation
+is consuming $$(n/b)\lg (b+1) + \sum_{i=0}^{b} C_i\ceil{\lg {b\choose i}}$$
 bits of space with the first and second term being the number of bits that
 is used by the classes and offsets respectively. The second representation
 with the cutoff $c_k$ shall consume $$(n/b)\lg (c_k+1) + \sum_{i=0}^{c_k-1}C_i\ceil{\lg {b\choose i}} + \sum_{i=c_k}^{b}C_i b$$
 bits of space. We would like to find out what is the expected space that we save
 using the hybrid encoding. We start by simplifying the expected value of the
 difference of these representations:
-% My mathematical guesswork
 \begin{align}
 E[space] &= E\left[(n/b)(\lg(b+1)-\lg(c_k+1)) + \sum_{i=c_k}^{i\leq b}\ceil{C_i}\cdot \left(\ceil{{b\choose i}} - b\right)\right] \nonumber\\
 &=(n/b)(\lg(b+1)-\lg(c_k+1)) + \sum_{i=c_k}^{i\leq b}E\left[\ceil{C_i}\cdot \left(\ceil{{b\choose i}} - b\right)\right] \nonumber\\
@@ -314,10 +314,10 @@ E[C_i] &= (n/b)\cdot {b\choose i}\cdot p^i\cdot (1-p)^{b-i} \label{eq:hybrid_enc
 Here we mainly used the linearity of the expected value. To compute the expected value of
 $C_i$ we used the fact, that number of blocks of a certain class follows binomial
 distribution. We know that in the bit sequence, there is $p\%$ of ones. There is $n/b$ blocks
-and each has probability ${b\choose i}p^i(1-p)^{b-i}$ for being of class $i$. This probability
+and each has probability ${b\choose i}p^i(1-p)^{b-i}$ to be of class $i$. This probability
 is independent from the previous blocks and as we are interested in total number of blocks with
 this class, it follows that $C_i$ follows binomial distribution. As
-$$C_i \sim Bin(n/b, {b\choose i}p^i(1-p)^{b-i})$$ it follows that the expected value is equal to
+$$C_i \sim Bin\left(n/b, {b\choose i}p^i(1-p)^{b-i}\right)$$ it follows that the expected value is equal to
 \ref{eq:hybrid_encoding_expected_c_i}.
 
 We present the expected space saved by hybrid implementation for some chosen values of
@@ -365,34 +365,49 @@ that the number of these blocks is low, so the possible speedup may not be very 
 
 \paragraph{Hybrid encoding for balanced sequences}
 
-Although, this version of hybrid encoding may work well for sequences with low number of ones.
-We would like to use this idea as a viable solution for sequences that contain very similar
-number of zeroes and ones but still exhibit behavior that some block classes are underrepresented.
-This may for example occur when sequence has a property, that it is globally balanced, but is very
+Although, the previous version of hybrid encoding may work well for sequences with low number of ones.
+We would like to use this idea as a viable solution for sequences that contain similar frequency
+of zeroes and ones but still exhibit behaviour that some block classes are underrepresented.
+This may, for example, occur when sequence has a property, that it is globally balanced, but is very
 unbalanced in some local parts. Then it may be the case, that blocks with low count of zeroes and
-ones are more frequent than blocks with balanced count of zeroes and ones.
+ones are more frequent than blocks with balanced counts of zeroes and ones.
 
 Let us say, that we want to only store $r$ possible classes. To make some space saving possible,
-it must hold that $$\ceil{\log_2(r)} < \ceil{\log_2(b+1)}.$$ We shall create a range of classes
+it must hold that $$\ceil{\log_2(r)} < \ceil{\log_2(b+1)}.$$ We create a range of classes
 given by closed interval $[\mathit{cut\_from}, \mathit{cut\_to}]$. If the class is outside of
-its range, it would not be altered. All the values inside of this interval are mapped to one
-number. This could be without loss of generality the lowest value $\mathit{cut\_from}$.
-Example of this mapping can be observed in Fig.~\ref{obr:hybrid_encoding_valley}. 
+its range, its representation would not be altered. On the other hand, all the values inside of
+this interval are mapped to one particular class number. This could be without loss of generality
+the lowest value $\mathit{cut\_from}$. An example of this idea can be observed in
+Fig.~\ref{obr:hybrid_encoding_valley}. 
 
 \begin{figure}
 	\centerline{
 	\begin{tabular}{l|c|c|c|c|c|c|c|c|}
 	\cline{2-9}
 	\textbf{Class} & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7          \\ \cline{2-9} 
-	\textbf{Hybrid mapping} & 0 & 1 & 3 & 3 & 3 & 3 & 3 & 7 \\ \cline{2-9} 
+	\textbf{Hybrid mapping} & 0 & 1 & 2 & 2 & 2 & 2 & 2 & 7 \\ \cline{2-9} 
 	\end{tabular}
 	}
-	\caption[TODO]{Example for $b=8, \mathit{cut\_from}=2, \mathit{cut\_to} = 6$}
+	\caption[TODO]{Encoding of blocks class. Mapping class values in closed range
+    $[\mathit{cut\_from}, \mathit{cut\_to}]$ to single value for $\mathit{cut\_from}=2, \mathit{cut\_to} = 6$}
 	\label{obr:hybrid_encoding_valley}
 \end{figure}
 
 In this example, the number of different possible class values $r$, is equal to 4.
-However, using this representation, we would not save any space as the maximal value
-of class can be still of size 7, requesting the same number of bits to store as
-in initial scenario. It is easy to observe however, that these value can be mapped
-somehow into the range $[0, 3]$, thus only consuming two bits per class value.
+However, using this representation, we would not save any space as the maximum value
+of class can be still at most 7. This would consume the same number of bits to store as
+in original representation. It is easy to observe, however, that these values can be
+mapped into the range $[0, 3]$, thus only consuming two bits per class value.
+
+\begin{figure}
+	\centerline{
+	\begin{tabular}{l|c|c|c|c|c|c|c|c|}
+	\cline{2-9}
+	\textbf{Class} & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7          \\ \cline{2-9} 
+	\textbf{Hybrid mapping} & 0 & 1 & 3 & 3 & 3 & 3 & 3 & 2 \\ \cline{2-9} 
+	\end{tabular}
+	}
+	\caption[TODO]{Example of hybrid encoding for balanced sequences.
+    $[\mathit{cut\_from}, \mathit{cut\_to}]$ to single value for $\mathit{cut\_from}=2, \mathit{cut\_to} = 6$}
+	\label{obr:hybrid_encoding_valley}
+\end{figure}

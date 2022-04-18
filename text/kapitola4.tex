@@ -69,7 +69,7 @@ is equal to ${b\choose c_1}$ and ${b\choose c_2}$ respectively. These two number
 can be computed beforehand as there are only roughly $b^2$ combinations of possible
 pairs of $c$ and $c_1$. So for the price of at most two cache misses, we can
 easily do the last two steps. To solve the first step, we may precompute for every 
-possible class $c$, numbers $C_{0}\ldots C_{c}$ where $C_i$ is the number of blocks
+possible class $c$, numbers $C_0, C_1,\ldots ,C_{c}$ where $C_i$ is the number of blocks
 along the class $c$ with their classes pair equal to $(i, c-i)$. Example can be observed
 in Fig.~\ref{table:class_pairs}.
 \begin{figure}
@@ -187,11 +187,11 @@ results were obtained on a machine with 8-core AMD~Ryzen~7~2700X with 16~MB of c
 at 3.7~GHz with 16~GB of RAM. The running operating system was Ubuntu~20.04.3~LTS.
 We used both \texttt{GCC} version 9.4.0 and \texttt{Clang} version 10.0.0 compilers,
 most of the time with the optimizations level set to O3. All the results we obtained are
-easily reproducible just by following the instructions in AppendixTODO. However, to obtain
+easily reproducible by following the instructions in appendix A. However, to obtain
 the best results possible, our implementation asks for a processor with a support for \texttt{SSE2}
 instruction set.
 
-\paragraph{Early RRR microbenchmarks}
+\paragraph{RRR microbenchmarks}
 
 These benchmarks were used in the early stage of the development to measure a potential gain from
 our new method of encoding and decoding. We mainly focused on measuring different block sizes
