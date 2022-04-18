@@ -1,10 +1,13 @@
 \chapter{Implementation and results}
 \label{kap:kap4}
 
-In this chapter, we describe our implementation of the ideas proposed in previous
-chapter and the practical results we obtained from measuring their performance. First,
-we describe the important parts and decisions in our implementation. Then, we
-describe how we benchmarked our implementation and present the results obtained.
+In this chapter, we describe the implementation of ideas proposed in previous
+chapter and the practical results we obtained from measuring their performance.
+We split the chapter into two main parts according to the two main topics discussed
+in previous chapter namely our new encoding and decoding method and hybrid encoding.
+For both of these ideas, we first describe the important parts and decisions in our
+implementation. Then, we describe how we benchmarked our implementation and present
+the results we obtained.
 
 \section{New decoding method}
 
@@ -16,18 +19,18 @@ We decided to make our solution a part of the \texttt{SDSL} library~\citep{gog20
 is one of the most matured and versatile libraries implementing succinct data structures.
 With more than 30 contributors and almost 2\,000 commits, \texttt{SDSL} is a heavily tested library
 offering various implementations of succinct structures such as wavelet tree, FM-index,
-bit vector, suffix array and many more. It allows to easily use different building blocks
+bit vector, suffix array and many more. It allows easy use of different building blocks
 to implement more complex structures, i.e. using different bit vector implementations inside
 of the wavelet tree. On top of this, thorough tests and benchmarks were implemented alongside
 the main functionality. The RRR support is provided by templated class \texttt{rrr\_vector}
-that uses the on the fly-decoding and enables us to use block size from 3 up to 256. To support
-these block sizes, \texttt{SDSL} implements 128 and 256 bit integers. On top of this, \texttt{SDSL}
+that uses the on the fly-decoding and enables us to use block sizes from 3 up to 256. To support
+these block sizes, \texttt{SDSL} implements 128-bit and 256-bit integers. On top of this, \texttt{SDSL}
 provides template specialization for block size 15 that uses the table decoding method. To support $\access$,
 \texttt{rrr\_vector} supports single bit access operator \texttt{[]} and \texttt{get\_int} method.
 To facilitate access it uses the encoding scheme presented on Fig.~\label{obr:RRRFinal} that
 consists of the array $C$ of fixed size elements that stores classes, array $O$ of variable length
-elements $O$ that stores offsets corresponding to blocks and third array $P$ that stores pointers
-to the array $O$. $P$ stores pointer to the beginning of every superblock. Result of $\rank$ is
+elements $O$ that stores offsets of blocks along their class and third array $P$ that stores pointers
+to the array $O$. $P$ stores pointer to the beginning of every superblock. The result of $\rank$ is
 precomputed for the beginning of every superblock so at first, binary search along these values
 is done. Then linear search for the final result is made inside of the superblock. As a select
 can be answered using the binary search and $\rank$ functionality, the first part of answering $\select$ is to
@@ -35,22 +38,22 @@ binary search between precomputed values of $\rank$, then to do the select insid
 This demonstrates, how the size of superblock can be used to balance the ratio of space used and the
 speed of the $\access$, $\rank$ and $\select$ methods.
 
-We decided to use the 15 bit specialization as an underlying solution for the encoding and decoding of
+We decided to use the 15-bit specialization as an underlying solution for the encoding and decoding of
 sub-blocks. We provided specialized implementations for block sizes 31, 63 and 127 that are mostly used
-in the practical scenarios. We based our specializations on the general implementation of
+in practical scenarios. We based our specializations on the general implementation of
 \texttt{rrr\_vector} and tried to keep the number of changes as small as possible to easily observe the
 effects of our new decoding method. We have been able to only alter the two functions that the \texttt{SDSL}
 uses for encoding and decoding namely \texttt{bin\_to\_nr} and \texttt{nr\_to\_bin}. As we mentioned,
-the encoding is less performance critical for most of the applications as encoding is done only once
+the encoding is less performance-critical for most of the applications as encoding is done only once
 at the beginning. This is why we focused more on the decoding part of the implementation.
 
 \paragraph{Breaking decoding into sub-problems}
 
 When implementing our decoding method, we put most of our focus on the process of dividing problem to
 sub-problems of smaller size. This is a part, where we obtain pairs $(c_1, o_1)$ and $(c_2, o_2)$
-from the encoded pair $(c, o)$ and call other decoding subroutine on these two pairs.
-There are various reasons why we focus on this part of algorithm. The first one is that for smaller blocks 
-solving the sub-problems is done using the table approach that is very fast and can be hardly
+from the encoded pair $(c, o)$ and call another decoding subroutine on these two pairs.
+There are various reasons why we focus on this part of the algorithm. The first one is that for smaller
+blocks solving the sub-problems is done using the table approach which is very fast and can be hardly
 made faster as it consists only of one table lookup. The second one is that this part is
 inherently blocking us from solving the sub-problems. Even though sub-problems may be potentially
 solved in parallel (by instruction-level parallelism), this part is harder to parallelize. Let us break down
@@ -83,7 +86,7 @@ in Fig.~\ref{table:class_pairs}.
         \end{tabular}
 	}
 	\caption[TODO]{
-        Table shows all the class pairs with the number of blocks for $b=6, c=2$.
+        The table shows all the class pairs with the number of blocks for $b=6, c=2$.
     }
 	\label{table:class_pairs}
 \end{figure}
@@ -92,8 +95,8 @@ of ones in the first sub-block. One possible way is to precompute the prefix sum
 such that $$P_i = \sum_{j=0}^{i} C_i.$$ As these prefix sums form an increasing sequence, we can
 binary search for class that contains our offset. Although binary search has good time complexity,
 the number of buckets where our offset may land is usually small. As we found out, linear search
-outperforms the binary search most of the time. In practice, we found that sequential search using
-the \texttt{SIMD} instructions leads to the best results for a smaller block sizes. Possible 
+outperforms binary search most of the time. In practice, we found that sequential search using
+the \texttt{SIMD} instructions leads to the best results for smaller block sizes. Possible 
 implementations that we tried follow in listings \ref{code:linear}, \ref{code:linearSimd} and
 \ref{code:binary}.
 
@@ -173,9 +176,10 @@ uint32_t get_left_class(uint8_t k, uint32_t nr)  {
 
 We benchmarked our code using two types of benchmarks. The first type of benchmarks used
 a \texttt{Google Benchmark} library. This is one of the standard libraries used to
-microbenchmark code. Code snippet that is being benchmarked is run several times until
-the stable results are obtained. This makes the obtained results reliable even if the
-measured time is very small. The second type of benchmarks
+microbenchmark code. A code snippet that is being benchmarked is run several times until
+stable results are obtained. This makes the results reliable even if the measured time is
+very small and also limits the interference of other running processes on the result of
+benchmark. The second type of benchmarks used
 were the ones that are included in \texttt{SDSL}. These are built on top of a data from the
 \texttt{Pizza\&Chili} datasets \citep{ferragina2005pizza} and include many types of data such
 as DNA sequences, \texttt{C} and \texttt{Java} source codes from \texttt{Linux} and \texttt{GCC}
@@ -282,8 +286,8 @@ search for the answer using successive entries of $C$. When we overrun the block
 the result is located, we go back and find finally answer to $\rank$ inside of a
 single block. To locate the beginning of the block, we take the offset of this superblock
 in $O$ and add the offset of this block inside of the superblock. The offset from the
-beginning of superblock can be counted along the linear search for $\rank$ result.
-With cutoff in place however, we are not able to linearly scan through the superblock
+beginning of superblock can be counted along with the linear search for $\rank$ result.
+With cutoff in place, however, we are not able to linearly scan through the superblock
 only using information contained in $C$. This is because now, for some classes, $C$ does
 not store the number of ones in the block. Thus when we are linearly searching for the result
 of $\rank$ query along the block, we need to also from time to time count number of ones

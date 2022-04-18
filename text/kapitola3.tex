@@ -217,19 +217,18 @@ time block size $b$ can be obtained using the different combinations of $b_1$ an
 % TODO: pridat viac kontextu, preco sa zaoberame percentami jednotiek
 % TODO: ukazat ze vacsie b je lepsie
 
-It is easy to observe, that the main part of space-saving aspect of RRR is hiddden in
+It is easy to observe, that the main part of space-saving aspect of RRR is hidden in
 a way how blocks are stored. If we have a block of length $b$, then storing it in
 a raw bit representation takes always exactly $b$ bits. The number of bits used by
 compressed form however, depends heavily on the blocks class. If the block is of class
 $c$, then compressed representation uses $\ceil{\log_2 (b+1)}$ bits to store its
-class and $\ceil{\log_2{b\choose c}}$ bits to store the offset. We may observe in
-Fig.~\ref{obr:rrrSpaceSavings}, how for different block sizes the space saved per
-block depends on the blocks class. At the same time, RRR saves most of the memory
-on very sparse or very dense blocks. We would like to exploit situations, when
-the number of these blocks is very high. Let us consider a randomly generated bit
-sequence $B$ of length $n$ containing $p\%$ of ones. Let us analyze what is the
-probability distribution of the block classes in a sequence containing this fixed
-percentage of ones distributed randomly. 
+class and $\ceil{\log_2{b\choose c}}$ bits to store the offset. In Fig.~\ref{obr:rrrSpaceSavings},
+we can see how the space saved per block depends on the blocks class. At the same
+time, we see that RRR saves most of the memory on very sparse or very dense blocks.
+We would like to exploit situations when the number of these blocks is very high.
+Let us consider a randomly generated bit sequence $B$ of length $n$ containing
+$p\%$ of ones. Let us analyze what is the probability distribution of the block
+classes in a sequence containing this fixed percentage of ones distributed randomly. 
 
 \begin{figure}
 	\centerline{
@@ -250,7 +249,7 @@ ones in a single block follows a binomial distribution $$X \sim Bin(b, p).$$ As
 we may observe in Fig.~\ref{obr:hybridEncodingDistribution}, the probability of
 blocks containing a lot of ones decreases exponentially in a sequence containing
 only 5\% of ones. Even in very long sequences, these blocks will occur very rarely.
-This gaved us opportunity to a encoding method we named \textit{hybrid encoding}.
+This led us to the idea of an encoding method we named \textit{hybrid encoding}.
 
 \begin{figure}
 	\centerline{
@@ -305,9 +304,9 @@ bits of space. We would like to find out what is the expected space that we save
 using the hybrid encoding. We start by simplifying the expected value of the
 difference of these representations:
 \begin{align}
-E[space] &= E\left[(n/b)(\lg(b+1)-\lg(c_k+1)) + \sum_{i=c_k}^{i\leq b}\ceil{C_i}\cdot \left(\ceil{{b\choose i}} - b\right)\right] \nonumber\\
-&=(n/b)(\lg(b+1)-\lg(c_k+1)) + \sum_{i=c_k}^{i\leq b}E\left[\ceil{C_i}\cdot \left(\ceil{{b\choose i}} - b\right)\right] \nonumber\\
-&=(n/b)(\lg(b+1)-\lg(c_k+1)) + \sum_{i=c_k}^{i\leq b}\ceil{E\left[C_i\right]}\cdot \left(\ceil{{b\choose i}} - b\right) \nonumber\\
+E[\text{space}] &= E\left[(n/b)(\lg(b+1)-\lg(c_k+1)) + \sum_{i=c_k}^{i\leq b}C_i\cdot \left(\ceil{\lg{b\choose i}} - b\right)\right] \nonumber\\
+&=(n/b)(\lg(b+1)-\lg(c_k+1)) + \sum_{i=c_k}^{i\leq b}E\left[C_i\cdot \left(\ceil{\lg{b\choose i}} - b\right)\right] \nonumber\\
+&=(n/b)(\lg(b+1)-\lg(c_k+1)) + \sum_{i=c_k}^{i\leq b}E\left[C_i\right]\cdot \left(\ceil{\lg{b\choose i}} - b\right) \nonumber\\
 E[C_i] &= (n/b)\cdot {b\choose i}\cdot p^i\cdot (1-p)^{b-i} \label{eq:hybrid_encoding_expected_c_i}
 \end{align}
 
@@ -357,7 +356,7 @@ $p, b$ and $c_k$ in Fig.~\ref{obr:hybridEncodingTheoretical}.
     }
 	\label{obr:hybridEncodingTheoretical}
 \end{figure}
-We may observe, that for some choices of cut-off, we may expect to save rougly 10-17\%
+We may observe, that for some choices of cut-off, we may expect to save rougly 10--17\%
 of space compared to the original method. On top of this, hybrid encoding approach has a potential
 to be of the same or even better performance as it is easier to decode the blocks
 saved in the raw form. However, we should note that hybrid encoding is based on the expectation
