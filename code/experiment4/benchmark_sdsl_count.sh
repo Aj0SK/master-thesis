@@ -24,3 +24,7 @@ make clean-build
 make cleanresults
 make timing
 cp ./results/all.txt ../../../res2-count.txt
+
+cd ../../../
+
+python3 benchmark_sdsl_count_visual.py
