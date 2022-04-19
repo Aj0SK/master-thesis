@@ -22,8 +22,9 @@ def return_results(path):
                 #    continue
                 test_name = initial_line_split[3]
                 test_structure = lines[i+1].split()[3]
-                test_rrr_size = 8*int(lines[i + 8].split()[3])
-                test_memory = float(lines[i + 9].split()[3])/test_rrr_size
+                test_text_size = int(lines[i + 8].split()[3])
+                test_index_size = 8*float(lines[i + 9].split()[3])
+                test_memory = test_index_size/test_text_size
                 test_time = float(lines[i + 12].split()[3])
                 
             results[(test_name, test_structure)] = (test_time, test_memory)
@@ -71,7 +72,7 @@ for r in range(len(res)):
 for i in range(len(datasets)):
     axs[i].set_yticks(list(pts[i]))
     axs[i].set_ylabel("time (ms)")
-    axs[i].set_xlabel("bits per bit")
+    axs[i].set_xlabel("bits per symbol")
 
 fig.tight_layout(pad=3.0)
 

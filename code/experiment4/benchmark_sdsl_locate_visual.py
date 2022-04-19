@@ -17,15 +17,14 @@ def return_results(path):
             if len(initial_line_split) < 2 or initial_line_split[1] != "TC_ID":
                 continue
             else:
-                opt_lvl = lines[i+2].split()[3]
-                if opt_lvl != "SSE":
+                if lines[i+3].split()[3] != "16x16":
                     continue
                 test_name = initial_line_split[3]
                 test_structure = lines[i+1].split()[3]
-                test_text_size = int(lines[i + 7].split()[3])
-                test_index_size = 8*float(lines[i + 8].split()[3])
+                test_text_size = int(lines[i + 8].split()[3])
+                test_index_size = 8*float(lines[i + 9].split()[3])
                 test_memory = test_index_size/test_text_size
-                test_time = float(lines[i + 16].split()[3])
+                test_time = float(lines[i + 15].split()[3])
                 
             results[(test_name, test_structure)] = (test_time, test_memory)
     return results
@@ -33,12 +32,12 @@ def return_results(path):
 map_name = {"FM_HUFF" : "bv", "FM_HUFF_RRR15": "rrr_15",
             "FM_HUFF_RRR31": "rrr_31",
             "FM_HUFF_RRR63": "rrr_63",
-            "FM_HUFF_RRR127": "rrr_127"}
+            "FM_HUFF_RRR127": "rrr_127", "CSA_SADA": "sparse"}
 
 reimplemented = ["FM_HUFF_RRR31", "FM_HUFF_RRR63", "FM_HUFF_RRR127"]
 
-old_version_path = "./res1-count.txt"
-new_version_path = "./res2-count.txt"
+old_version_path = "./res1-locate.txt"
+new_version_path = "./res2-locate.txt"
 
 res1 = return_results(old_version_path)
 res2 = return_results(new_version_path)
@@ -53,7 +52,7 @@ for r in res:
 
 fig, axs = plt.subplots(len(datasets))
 pts = [set() for i in range(len(datasets))]
-fig.suptitle('FM-index count')
+fig.suptitle('FM-index locate')
 
 for r in range(len(res)):
     for dataset_name, structure in res[r].keys():
@@ -72,12 +71,9 @@ for r in range(len(res)):
 for i in range(len(datasets)):
     axs[i].set_yticks(list(pts[i]))
     axs[i].set_ylabel("time (ms)")
-    axs[i].set_xlabel("bits per symbol")
+    axs[i].set_xlabel("bits per bit")
 
 fig.tight_layout(pad=3.0)
 
-plt.savefig("vysledky_sdsl_count.png", bbox_inches='tight')
+plt.savefig("vysledky_sdsl_locate.png", bbox_inches='tight')
 plt.clf()
-
-
-
