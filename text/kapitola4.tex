@@ -1,13 +1,22 @@
 \chapter{Implementation and results}
 \label{kap:kap4}
 
-In this chapter, we describe the implementation of ideas proposed in previous
-chapter and the practical results we obtained from measuring their performance.
-We split the chapter into two main parts according to the two main topics discussed
+In this chapter, we describe the implementation of ideas proposed in previous chapter
+and the practical results we obtained when measuring experimentally their performance.
+This chapter is split into two main parts according to the two main topics discussed
 in previous chapter namely our new encoding and decoding method and hybrid encoding.
-For both of these ideas, we first describe the important parts and decisions in our
+In both of these sections, we first describe the important parts and decisions in our
 implementation. Then, we describe how we benchmarked our implementation and present
 the results we obtained.
+
+The source code to all benchmarks can be found in electronic attachment to this work
+and also on \texttt{Github}. More about how to reproduce our results can be found in
+appendix A. However, to obtain the best possible results, our implementation requires
+a processor with support for \texttt{SSE2} instruction set. All the results presented
+in this chapter were obtained on a machine with 8-core AMD~Ryzen~7~2700X with 16~MB of
+cache, running at 3.7~GHz with 16~GB of RAM. The running operating system was Ubuntu~20.04.3~LTS.
+We used both \texttt{GCC} version 9.4.0 and \texttt{Clang} version 10.0.0 compilers with
+the optimizations level most of the time set to \texttt{O3}.
 
 \section{New decoding method}
 
@@ -17,39 +26,42 @@ the results we obtained.
 
 We decided to make our solution a part of the \texttt{SDSL} library~\citep{gog2014theory}. This
 is one of the most matured and versatile libraries implementing succinct data structures.
-With more than 30 contributors and almost 2\,000 commits, \texttt{SDSL} is a heavily tested library
+With almost 2\,000 commits from more than 30 contributors, \texttt{SDSL} is a heavily tested library
 offering various implementations of succinct structures such as wavelet tree, FM-index,
 bit vector, suffix array and many more. It allows easy use of different building blocks
 to implement more complex structures, i.e. using different bit vector implementations inside
 of the wavelet tree. On top of this, thorough tests and benchmarks were implemented alongside
 the main functionality. The RRR support is provided by templated class \texttt{rrr\_vector}
-that uses the on the fly-decoding and enables us to use block sizes from 3 up to 256. To support
-these block sizes, \texttt{SDSL} implements 128-bit and 256-bit integers. On top of this, \texttt{SDSL}
+that generally uses the on the fly-decoding enabling us to use block sizes from 3 up to 256. To support
+these long block sizes, \texttt{SDSL} implements 128-bit and 256-bit integers. On top of this, \texttt{SDSL}
 provides template specialization for block size 15 that uses the table decoding method. To support $\access$,
-\texttt{rrr\_vector} supports single bit access operator \texttt{[]} and \texttt{get\_int} method.
-To facilitate access it uses the encoding scheme presented on Fig.~\label{obr:RRRFinal} that
+\texttt{rrr\_vector} supports single bit access operator \texttt{[]} as well as \texttt{get\_int} method.
+To facilitate $\access$ it uses the encoding scheme presented on Fig.~\ref{obr:RRRFinal} that
 consists of the array $C$ of fixed size elements that stores classes, array $O$ of variable length
-elements $O$ that stores offsets of blocks along their class and third array $P$ that stores pointers
+elements that stores offsets of blocks along their class and third array $P$ that stores pointers
 to the array $O$. $P$ stores pointer to the beginning of every superblock. The result of $\rank$ is
 precomputed for the beginning of every superblock so at first, binary search along these values
 is done. Then linear search for the final result is made inside of the superblock. As a select
 can be answered using the binary search and $\rank$ functionality, the first part of answering $\select$ is to
-binary search between precomputed values of $\rank$, then to do the select inside of the superblock.
+binary search between precomputed values of $\rank$, then to do the $\select$ inside of the superblock.
 This demonstrates, how the size of superblock can be used to balance the ratio of space used and the
-speed of the $\access$, $\rank$ and $\select$ methods.
+speed of the $\access$, $\rank$ and $\select$ methods. Although size of superblock is one of the parameters
+of \texttt{rrr\_vector}, we did not made any changes to the preset number of blocks per superblock that is
+set in \texttt{SDSL} to 32.
 
 We decided to use the 15-bit specialization as an underlying solution for the encoding and decoding of
 sub-blocks. We provided specialized implementations for block sizes 31, 63 and 127 that are mostly used
 in practical scenarios. We based our specializations on the general implementation of
 \texttt{rrr\_vector} and tried to keep the number of changes as small as possible to easily observe the
-effects of our new decoding method. We have been able to only alter the two functions that the \texttt{SDSL}
-uses for encoding and decoding namely \texttt{bin\_to\_nr} and \texttt{nr\_to\_bin}. As we mentioned,
-the encoding is less performance-critical for most of the applications as encoding is done only once
-at the beginning. This is why we focused more on the decoding part of the implementation.
+effects of our new decoding method. We have been able to implement our changes and at the same time alter
+only two methods that the \texttt{SDSL} uses for encoding and decoding namely \texttt{bin\_to\_nr} and
+\texttt{nr\_to\_bin}. As we mentioned, the encoding is less performance-critical for most of the applications
+as encoding is done only once at the construction of bit vector. This is why we focused more on the decoding
+part of the implementation.
 
 \paragraph{Breaking decoding into sub-problems}
 
-When implementing our decoding method, we put most of our focus on the process of dividing problem to
+When implementing our decoding routine, we put most of our focus on the process of dividing problem to
 sub-problems of smaller size. This is a part, where we obtain pairs $(c_1, o_1)$ and $(c_2, o_2)$
 from the encoded pair $(c, o)$ and call another decoding subroutine on these two pairs.
 There are various reasons why we focus on this part of the algorithm. The first one is that for smaller
@@ -60,7 +72,7 @@ solved in parallel (by instruction-level parallelism), this part is harder to pa
 the process of dividing the sub-problem into steps:
 
 \begin{enumerate}
-	\item Finding the classes pair $(c_1, c_2)$.
+	\item Finding the class pair $(c_1, c_2)$.
 	\item Counting the number of possibilities for first and second sub-block $\text{comb}_1, \text{comb}_2$.
 	\item Compute offsets of sub-blocks $o_1$ and $o_2$.
 \end{enumerate}
@@ -95,10 +107,11 @@ of ones in the first sub-block. One possible way is to precompute the prefix sum
 such that $$P_i = \sum_{j=0}^{i} C_i.$$ As these prefix sums form an increasing sequence, we can
 binary search for class that contains our offset. Although binary search has good time complexity,
 the number of buckets where our offset may land is usually small. As we found out, linear search
-outperforms binary search most of the time. In practice, we found that sequential search using
-the \texttt{SIMD} instructions leads to the best results for smaller block sizes. Possible 
-implementations that we tried follow in listings \ref{code:linear}, \ref{code:linearSimd} and
-\ref{code:binary}.
+outperforms binary search most of the time. Another idea that we tested was to speed up the linear
+search using the \texttt{SIMD} instructions. These can be used to do 4 comparisons at a time using
+special 128-bit register. In practice, we found that sequential search using the \texttt{SIMD}
+instructions leads to the best results for smaller block sizes. Possible implementations that we
+tested, follow in listings \ref{code:linear}, \ref{code:linearSimd} and \ref{code:binary}.
 
 \lstset{language=C++,caption={Linear search for classes of sub-blocks},label=code:linear}
 \begin{lstlisting}
@@ -107,7 +120,7 @@ uint32_t get_left_class(uint8_t k, uint32_t nr)  {
 	int left_k_to = std::min(k, 15);
 	int left_k = left_k_from;
 	for (; left_k < left_k_to; ++left_k)  {
-		uint32_t curr_index = C[k][left_k+1];
+		uint32_t curr_index = P[k][left_k+1];
 		if (curr_index >= nr)  {
 			if (curr_index == nr)
 				++left_k;
@@ -125,13 +138,13 @@ uint32_t get_left_class(uint8_t k, uint32_t nr)  {
 	int left_k_to = std::min(k, 15);
 	__m128i keys = _mm_set1_epi32(nr);
 	__m128i vec1 =
-		_mm_loadu_si128(reinterpret_cast<__m128i*>(&C[k][0]));
+		_mm_loadu_si128(reinterpret_cast<__m128i*>(&P[k][0]));
 	__m128i vec2 =
-		_mm_loadu_si128(reinterpret_cast<__m128i*>(&C[k][4]));
+		_mm_loadu_si128(reinterpret_cast<__m128i*>(&P[k][4]));
 	__m128i vec3 =
-		_mm_loadu_si128(reinterpret_cast<__m128i*>(&C[k][8]));
+		_mm_loadu_si128(reinterpret_cast<__m128i*>(&P[k][8]));
 	__m128i vec4 =
-		_mm_loadu_si128(reinterpret_cast<__m128i*>(&C[k][12]));
+		_mm_loadu_si128(reinterpret_cast<__m128i*>(&P[k][12]));
 
 	__m128i cmp1 = _mm_cmpgt_epi32(vec1, keys);
 	__m128i cmp2 = _mm_cmpgt_epi32(vec2, keys);
@@ -151,7 +164,7 @@ uint32_t get_left_class(uint8_t k, uint32_t nr)  {
 	{
 		left_k = (1 + __builtin_ctz(mask)) / 2;
 
-		if (C[k][left_k] > nr)
+		if (P[k][left_k] > nr)
 			--left_k;
 	}
 	return left_k;
@@ -163,37 +176,29 @@ uint32_t get_left_class(uint8_t k, uint32_t nr)  {
 uint32_t get_left_class(uint8_t k, uint32_t nr)  {
 	int left_k_from = std::max(k - 15, 0);
 	int left_k_to = std::min(k, 15);
-	auto it = std::upper_bound(C[k].begin() + left_k_from,
-                                     C[k].begin() + left_k_to, nr);
-    int left_k = std::distance(C[k].begin(), it);
-    if (C[k][left_k] > nr)
+	auto it = std::upper_bound(P[k].begin() + left_k_from,
+                                     P[k].begin() + left_k_to, nr);
+    int left_k = std::distance(P[k].begin(), it);
+    if (P[k][left_k] > nr)
       --left_k;
 	return left_k;
 }
 \end{lstlisting}
 
-\subsection{Results}
+\subsection{Experimental results}
 
 We benchmarked our code using two types of benchmarks. The first type of benchmarks used
 a \texttt{Google Benchmark} library. This is one of the standard libraries used to
 microbenchmark code. A code snippet that is being benchmarked is run several times until
 stable results are obtained. This makes the results reliable even if the measured time is
 very small and also limits the interference of other running processes on the result of
-benchmark. The second type of benchmarks used
-were the ones that are included in \texttt{SDSL}. These are built on top of a data from the
-\texttt{Pizza\&Chili} datasets \citep{ferragina2005pizza} and include many types of data such
-as DNA sequences, \texttt{C} and \texttt{Java} source codes from \texttt{Linux} and \texttt{GCC}
-projects as well as English texts from the Gutenberg project. More information about this
-data such as some statistics about the compressibility and much more can be found in
-\cite{ferragina2009compressed}. We shall only provide information neccessary to explain the
-measured phenomenons later when exploring the results of our benchmarks. All the benchmark
-results were obtained on a machine with 8-core AMD~Ryzen~7~2700X with 16~MB of cache, running
-at 3.7~GHz with 16~GB of RAM. The running operating system was Ubuntu~20.04.3~LTS.
-We used both \texttt{GCC} version 9.4.0 and \texttt{Clang} version 10.0.0 compilers,
-most of the time with the optimizations level set to O3. All the results we obtained are
-easily reproducible by following the instructions in appendix A. However, to obtain
-the best results possible, our implementation asks for a processor with a support for \texttt{SSE2}
-instruction set.
+benchmark. The second type of benchmarks used were the ones that are included in \texttt{SDSL}.
+These are built on top of a data from the \texttt{Pizza\&Chili} datasets \citep{ferragina2005pizza}
+and include many types of data such as DNA sequences, \texttt{C} and \texttt{Java} source codes from
+\texttt{Linux} and \texttt{GCC} projects as well as English texts from the Gutenberg project.
+More information about this data such as some statistics about the compressibility and much
+more can be found in section 4.2 of \cite{ferragina2009compressed}. We only provide information
+neccessary to explain the measured phenomenons later when exploring the results of our benchmarks.
 
 \paragraph{RRR microbenchmarks}
 
@@ -219,12 +224,11 @@ usage of bit vectors. We picked a benchmarking part of \texttt{SDSL} library tha
 on a randomly generated sequence with fixed number of ones and on raw representation of a wavelet
 tree built on top of data from the DNA sequence, XML web data taken from \texttt{DBLP}, computer
 science bibliography. Among the explored dimensions is block size and size of the underlying data.
-Through all of our experiments, we did not made any changes to the preset number of blocks per
-superblock that is set in \texttt{SDSL} to 32. \texttt{SDSL} uses the random pattern for $\access$,
-$\rank$ and $\select$ queries. We were not able to find significant practical usability for other
-access patterns. As a baseline, we choose the 15 bit specialized implementation already implemented
-in \texttt{SDSL} that uses the table decoding method. We present the measured results of our and
-the original implementation in Fig.~\ref{obr:benchmark_sdsl_new_method}.
+\texttt{SDSL} uses the random pattern for $\access$, $\rank$ and $\select$ queries. We were not able
+to find significant practical usability for other access patterns. As a baseline, we choose the 15
+bit specialized implementation already implemented in \texttt{SDSL} that uses the table decoding
+method. We present the measured results of our and the original implementation in
+Fig.~\ref{obr:benchmark_sdsl_new_method}.
 
 \begin{figure}
 	\centerline{
@@ -239,7 +243,7 @@ the original implementation in Fig.~\ref{obr:benchmark_sdsl_new_method}.
 There are several interesting things to observe on these results. We can see that our new implementation
 beats older implementations on almost all block sizes and all types of data. We can observe that the
 results are more clear on random data and DNA sequence. On web data however, the difference is less
-noticable. We attribute this behaviour to the fact, that was observed by \ref{gog2014optimized},
+noticable. We attribute this behaviour to the fact, that was observed by \cite{gog2014optimized},
 creators of this dataset. As they observed, the number of uniform blocks (full of either zeroes or ones)
 is much bigger in \texttt{WT-WEB} data than in \texttt{WT-DNA}. For block size 63, they observed ratio of
 uniform blocks in \texttt{WT-WEB-1GB} to be 84\% compared to 28\% in \texttt{WT-DNA}. As the uniform
@@ -253,23 +257,58 @@ used inside of the FM-index. Implementation of FM-index in \texttt{SDSL}, as mos
 implementations of FM-index, provides 3 basic methods:
 
 \begin{itemize}
-	\item $\mathit{count}(P)$ counts the number of occurrences of $P$ in text $T$
-	\item $\mathit{locate}(P)$ returns all positions of pattern $P$ in text $T$
-	\item $\mathit{extract}(i, j)$ returns the subsequence $T[i..j]$
+	\item $\countOp(P)$ returns the number of occurrences of $P$ in text $T$
+	\item $\locateOp(P)$ returns all positions of pattern $P$ in text $T$
+	\item $\extractOp(i, j)$ returns the subsequence $T[i..j]$
 \end{itemize}
 
-The reason that the $\mathit{extract}$ method is useful and non-trivial is that FM-index
+The reason that the $\extractOp$ method is useful and non-trivial is that FM-index
 does not store the original sequence $T$ -- at least not in an easily readable form.
 As in previous case, these methods are benchmarked on samples like English texts, \texttt{XML}
-data from \texttt{DBLP} as well as on source codes, DNA and protein sequences and many more.
+data from \texttt{DBLP} as well as on source codes, DNA and protein sequences.
 Alongside our new encoding methods and their original counterparts, we once again added
 to the benchmark the 15 bit version of bit vector decoded by table. On top of that, we
 also added a classic uncompressed bit vector to put into the perspective space savings that
-are made by RRR.
+are made by RRR. We present here just a selected subset of the results obtained. We either
+choose samples where our implementation beat the original implementation by a wide margin
+or others where our implementation was not running that good. All other graphs can be found
+in AppendixTODO.
 
-We present here just a selected subset of the results obtained. We either choose samples
-where our implementation beat the original implementation by a wide margin or others where
-our implementation was not running that good. All other graphs can be found in AppendixTODO.
+To benchmark operation $\countOp$, the index over the text is built. Then, random patterns of
+various lengths are extracted from the text and subsequently used for benchmarking. Code
+generating these patterns used in \texttt{SDSL} is a slight modification of a version provided
+by \texttt{Pizza\&Chili}.
+
+\begin{figure}
+	\centerline{
+		\includegraphics[width=\textwidth, height=0.7\textheight]{images/vysledky_sdsl_count}
+	}
+	\caption[TODO]{TODO: Zatial iba placeholder obrazok.
+	}
+	\label{obr:benchmark_sdsl_count}
+\end{figure}
+
+For benchmarking of operation $\extractOp$, \texttt{SDSL} uses a methodology proposed by
+\cite{ferragina2009compressed}. This basically consists of extracting numerous substrings of
+length 512 starting at random positions in text.
+
+\begin{figure}
+	\centerline{
+		\includegraphics[width=\textwidth, height=0.7\textheight]{images/vysledky_sdsl_extract}
+	}
+	\caption[TODO]{TODO: Zatial iba placeholder obrazok.
+	}
+	\label{obr:benchmark_sdsl_extract}
+\end{figure}
+
+\begin{figure}
+	\centerline{
+		\includegraphics[width=\textwidth, height=0.7\textheight]{images/vysledky_sdsl_locate}
+	}
+	\caption[TODO]{TODO: Zatial iba placeholder obrazok.
+	}
+	\label{obr:benchmark_sdsl_locate}
+\end{figure}
 
 \section{Hybrid encoding}
 
@@ -294,4 +333,4 @@ of $\rank$ query along the block, we need to also from time to time count number
 for some block in $O$. This creates some additional memory accesses that may slow down the
 hybrid implementation.
 
-\subsection{Results}
+\subsection{Experimental results}

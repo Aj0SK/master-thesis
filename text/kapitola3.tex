@@ -407,6 +407,8 @@ mapped into the range $[0, 3]$, thus only consuming two bits per class value.
 	\end{tabular}
 	}
 	\caption[TODO]{Example of hybrid encoding for balanced sequences.
-    $[\mathit{cut\_from}, \mathit{cut\_to}]$ to single value for $\mathit{cut\_from}=2, \mathit{cut\_to} = 6$}
+    $[\mathit{cut\_from}, \mathit{cut\_to}]$ to single value for $\mathit{cut\_from}=2, \mathit{cut\_to} = 6$.
+    All possible values can be stored using 2 bits as there are 4 possible values. Hybridly encoded pairs
+    have as class value the biggest possible value we can store using 2 bits.}
 	\label{obr:hybrid_encoding_valley}
 \end{figure}
