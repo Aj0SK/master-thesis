@@ -71,7 +71,7 @@ for r in range(len(res)):
 for i in range(len(datasets)):
     axs[i].set_yticks(list(pts[i]))
     axs[i].set_ylabel("time (ms)")
-    axs[i].set_xlabel("bits per bit")
+    axs[i].set_xlabel("bits per symbol")
 
 fig.tight_layout(pad=3.0)
 
