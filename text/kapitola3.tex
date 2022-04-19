@@ -1,7 +1,7 @@
 \chapter{Our work}
 \label{kap:kap3}
 
-In this chapter, we propose various ideas that could lead to a better practical
+In this chapter, we propose various ideas that we hope lead to a better practical
 implementation of RRR. We at first propose a new block encoding and decoding method.
 Then, we show how we can exploit the assumptions about the input bit sequence to build
 implementation that is better tailored for it in terms of the space used and time to
@@ -153,8 +153,6 @@ $(c_2, o_2)$ of sub-blocks $B_1$ and $B_2$. These two can be then fed into
 the decoding subroutines to obtain sub-blocks $B_1$ and $B_2$. Combining these
 representations to obtain $B$ is then trivial.
 
-%% Tento priklad stale nemam pekne popisany...
-
 We shall again present this process on an example and decode the block from the previous
 encoding example {\tt 100 010} encoded as $(2, 10)$. To obtain the number of ones in
 the first sub-block only from the offset of the block, we can look into the table and
@@ -164,22 +162,19 @@ are 9 blocks with one 1 in the first sub-block. As $3+9$ is bigger than 10, we d
 that the number of ones in the first block is 1 and it follows that the number of ones in
 the second sub-block is also 1 as we know the total number of ones in the block. There are
 9 blocks with this exact same property, the smallest one being {\tt 001 001} and the largest one
-{\tt 100 100}. We had successfully narrowed our search into these 9 blocks and can now
+{\tt 100 100} as can be seen in Fig.~\ref{obr:lexicographicalVsUs} (offsets 3--11).
+We had successfully narrowed our search into these 9 blocks and can now
 focus on identifying what is the offset of the first and second sub-block. There are
 ${3 \choose 1} = 3$ possibilities (namely {\tt 001}, {\tt 010}, {\tt 100}) how the first
 and also the second sub-block may look. Blocks are sorted according to the first sub-block
 and then second. The cycle through the sub-blocks will be of length 3 (number of possible
-second sub-blocks) and will repeat 3 times (number of possible first sub-blocks). Along
-these ordering of 9 blocks we are interested in 7th so we know that the block,
-we are looking for contains a
-first sub-block, that is along all the blocks of size 3 and class 1, third in the ordering.
-So to find the first sub-block, we reuse the solution based on the lexicographical ordering
-and ask it to decode pair $(1, 2)$ that gives us the first sub-block {\tt 100}. Obtaining
-the second sub-block is not that hard. So far, we focused how many times the first sub-block
-changes up to the 7th position. Now, we turn our attention on which second sub-block the cycle
-ends. We know that every 3rd iteration, the second sub-block starts, where it began.
-
-%%%%%%%%%%%
+second sub-blocks) and will repeat 3 times (number of possible first sub-blocks). To find the
+offset of first and second sub-block, we need to find out on which first and second sub-block
+the cycle is on 7th position. As the blocks are of fixed size 3, this can be easily computed
+using operations division and modulus. So to find the first sub-block, we reuse the solution
+based on the lexicographical ordering and ask it to decode pair $(1, 7/3)$ that gives us
+the first sub-block {\tt 100}. Obtaining the second sub-block can be done by decoding pair
+$(1, 7\mod 3)$.
 
 Let us propose a general decoding scheme for block $B$ of length $B$ combined from the
 sub-blocks of size $b_1$ and $b_2$. We start with the encoded pair $(c, o)$. It is easy
@@ -275,7 +270,7 @@ block that is densely packed with ones), we can save a small amount of space
 by decreasing the number of bits used to store the classes. The main idea
 of hybrid encoding is that every block with a class bigger than some threshold
 will have its class set to this threshold and this will mean that the block
-is stored using full $b$ bits instead of $\ceil{\log_2{b\choose c_i}}$ bits.
+is stored using full $b$ bits instead of $\ceil{\log_2{b\choose c}}$ bits.
 Let $c_k$ be a cutoff value. Blocks with class bigger than $c_k$ will not be
 encoded but just copied with the class set to $c_k$ no matter what is the
 number of ones in them.
@@ -374,7 +369,7 @@ ones are more frequent than blocks with balanced counts of zeroes and ones.
 Let us say, that we want to only store $r$ possible classes. To make some space saving possible,
 it must hold that $$\ceil{\log_2(r)} < \ceil{\log_2(b+1)}.$$ We create a range of classes
 given by closed interval $[\mathit{cut\_from}, \mathit{cut\_to}]$. If the class is outside of
-its range, its representation would not be altered. On the other hand, all the values inside of
+this range, its representation would not be altered. On the other hand, all the values inside of
 this interval are mapped to one particular class number. This could be without loss of generality
 the lowest value $\mathit{cut\_from}$. An example of this idea can be observed in
 Fig.~\ref{obr:hybrid_encoding_valley}. 
