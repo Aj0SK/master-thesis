@@ -215,7 +215,7 @@ time block size $b$ can be obtained using the different combinations of $b_1$ an
 It is easy to observe, that the main part of space-saving aspect of RRR is hidden in
 a way how blocks are stored. If we have a block of length $b$, then storing it in
 a raw bit representation takes always exactly $b$ bits. The number of bits used by
-compressed form however, depends heavily on the blocks class. If the block is of class
+compressed form, however, depends heavily on the blocks class. If the block is of class
 $c$, then compressed representation uses $\ceil{\log_2 (b+1)}$ bits to store its
 class and $\ceil{\log_2{b\choose c}}$ bits to store the offset. In Fig.~\ref{obr:rrrSpaceSavings},
 we can see how the space saved per block depends on the blocks class. At the same
@@ -223,8 +223,7 @@ time, we see that RRR saves most of the memory on very sparse or very dense bloc
 We would like to exploit situations when the number of these blocks is very high.
 Let us consider a randomly generated bit sequence $B$ of length $n$ containing
 $p\%$ of ones. Let us analyze what is the probability distribution of the block
-classes in a sequence containing this fixed percentage of ones distributed randomly. 
-
+classes in a sequence containing this fixed percentage of ones distributed randomly.
 \begin{figure}
 	\centerline{
 		\includegraphics[width=\textwidth]{images/rrr_space_savings}
@@ -238,13 +237,12 @@ classes in a sequence containing this fixed percentage of ones distributed rando
     % can be found on https://github.com/Aj0SK/master-thesis/blob/main/text/images/rrr_space_savings.png
 	\label{obr:rrrSpaceSavings}
 \end{figure}
-
-If we consider a block size $b$ then the random variable $X$ denoting number of
-ones in a single block follows a binomial distribution $$X \sim Bin(b, p).$$ As
-we may observe in Fig.~\ref{obr:hybridEncodingDistribution}, the probability of
-blocks containing a lot of ones decreases exponentially in a sequence containing
-only 5\% of ones. Even in very long sequences, these blocks will occur very rarely.
-This led us to the idea of an encoding method we named \textit{hybrid encoding}.
+For a block size $b$, the random variable $X$ denoting number of ones in a single
+block follows a binomial distribution $$X \sim Bin(b, p).$$ As we may observe in
+Fig.~\ref{obr:hybridEncodingDistribution}, the probability that block contains
+a lot of ones decreases exponentially in a sequence containing only 5\% of ones.
+Even in very long sequences, these blocks will occur rarely. This led us to the
+idea of an encoding method we named \textit{hybrid encoding}.
 
 \begin{figure}
 	\centerline{
@@ -274,7 +272,6 @@ is stored using full $b$ bits instead of $\ceil{\log_2{b\choose c}}$ bits.
 Let $c_k$ be a cutoff value. Blocks with class bigger than $c_k$ will not be
 encoded but just copied with the class set to $c_k$ no matter what is the
 number of ones in them.
-
 \[
     \text{stored class} = 
 \begin{cases}
@@ -282,7 +279,6 @@ number of ones in them.
     c_k,              & \text{otherwise}
 \end{cases}
 \]
-
 Note that the class of block is a number from 0 up to $b$. When the cuttoff $c_k$ is
 used, the class of block is a number from 0 up to $c_k$. To possibly save some space on the bit representation
 of the blocks class, we need to choose $c_k$ such that $$\ceil{\log_2(c_k+1)} < \ceil{\log_2(b+1)}.$$
@@ -354,7 +350,7 @@ $p, b$ and $c_k$ in Fig.~\ref{obr:hybridEncodingTheoretical}.
 We may observe, that for some choices of cut-off, we may expect to save rougly 10--17\%
 of space compared to the original method. On top of this, hybrid encoding approach has a potential
 to be of the same or even better performance as it is easier to decode the blocks
-saved in the raw form. However, we should note that hybrid encoding is based on the expectation
+saved in the raw form. However, we should note that hybrid encoding is based on our expectations
 that the number of these blocks is low, so the possible speedup may not be very significant.
 
 \paragraph{Hybrid encoding for balanced sequences}
@@ -366,13 +362,13 @@ This may, for example, occur when sequence has a property, that it is globally b
 unbalanced in some local parts. Then it may be the case, that blocks with low count of zeroes and
 ones are more frequent than blocks with balanced counts of zeroes and ones.
 
-Let us say, that we want to only store $r$ possible classes. To make some space saving possible,
-it must hold that $$\ceil{\log_2(r)} < \ceil{\log_2(b+1)}.$$ We create a range of classes
-given by closed interval $[\mathit{cut\_from}, \mathit{cut\_to}]$. If the class is outside of
-this range, its representation would not be altered. On the other hand, all the values inside of
-this interval are mapped to one particular class number. This could be without loss of generality
-the lowest value $\mathit{cut\_from}$. An example of this idea can be observed in
-Fig.~\ref{obr:hybrid_encoding_valley}. 
+Let us say, that we want to only store $r$ classes instead of all $b+1$ of them. To make some space
+saving possible, it must hold that $$\ceil{\log_2(r)} < \ceil{\log_2(b+1)}.$$ We create a range of classes
+given by closed interval $[\mathit{cut\_from}, \mathit{cut\_to}]$. If the blocks class is outside of
+this range, it is encoded in a classic way. On the other hand, all the values inside of this interval
+are mapped to one particular class number and the corresponding block is stored in a raw form. This could
+be without loss of generality the lowest value $\mathit{cut\_from}$. An example of this idea can be observed
+in Fig.~\ref{obr:hybrid_encoding_valley}. 
 
 \begin{figure}
 	\centerline{
@@ -389,7 +385,7 @@ Fig.~\ref{obr:hybrid_encoding_valley}.
 
 In this example, the number of different possible class values $r$, is equal to 4.
 However, using this representation, we would not save any space as the maximum value
-of class can be still at most 7. This would consume the same number of bits to store as
+of class is still 7. This would consume the same number of bits to store as
 in original representation. It is easy to observe, however, that these values can be
 mapped into the range $[0, 3]$, thus only consuming two bits per class value.
 
