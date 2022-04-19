@@ -18,7 +18,8 @@ def return_results(path):
                 test_rrr_size = int(lines[i + 6].split()[3])
                 test_block_size = int(lines[i + 8+1].split()[3])
                 test_cutoff = int(lines[i + 8 + 2].split()[3])
-                test_memory = 8*float(lines[i + 11 + 1].split()[3])/test_rrr_size
+                test_byte_size = float(lines[i + 11 + 1].split()[3]);
+                test_memory = 8*test_byte_size/test_rrr_size
                 test_access = float(lines[i + 13 + 2].split()[3])
                 test_rank = float(lines[i + 15 + 2].split()[3])
                 test_select = float(lines[i + 17 + 2].split()[3])
@@ -47,7 +48,7 @@ block_sizes = list(block_sizes)
 
 fig, axs = plt.subplots(len(test_cases), 3)
 slovak_title = 'Čas pre 10^7 operácií prístup, rank, select'
-english_title = 'Access, rank and select query time as a function of block size '
+english_title = 'Access, rank and select query time as a function of space for different block sizes'
 fig.suptitle(english_title)
 
 for i in range(len(test_cases)):
@@ -85,5 +86,5 @@ axs[-1][2].set_xlabel("bits per bit")
 
 fig.set_size_inches(8, 5)
 plt.tight_layout()
-plt.savefig("vysledky_sdsl.png")
+plt.savefig("vysledky_sdsl_hybrid.png")
 plt.clf()
