@@ -178,7 +178,7 @@ preprocessing step of some compression algorithms such as \textit{bzip2} introdu
 \cite{seward1996bzip2} and was studied more by \cite{manzini2001analysis}. This is because
 BWT is oftentimes easier to compress. We shall show how it is constructed and then give 
 intuition why it has this property. We consider the sequence $T$ of symbols over some
-alphabet $\Sigma$. Now we take all the cyclical rotations $T_1, T_2, \ldots T_n$ of
+alphabet $\Sigma$. Now we take all the cyclical rotations $T_1, T_2, \ldots ,T_n$ of
 the sequence $T$ and imagine putting them sorted by their lexicographical order into the
 rows of table $M$ as seen in Fig.~\ref{obr:BWT}. We name the sequence created by the
 concatenation of symbols in first and last column $F$ and $L$ respectively. Last column $L$
@@ -243,24 +243,24 @@ Searching in FM-index is based on the two important properties:
 	\label{chapter1:fmindexprop:prop2}
 \end{enumerate}
 
-First property was also what enabled us to search for a pattern in a suffix array.
-The second property is less trivial to observe. Let us take two rows in $M$, $T_i$ and $T_j$
+First property was also what enabled us to search for a pattern in a suffix array. The second
+property is less trivial to observe. Let us take two rows in $M$, namely $T_i$ and $T_j$
 such that $i<j$. Let $T_i$ be of the form $cxA$ and $T_j$ of the form $cyB$ where $c, y$ are
 characters of the text and $A$ and $B$ are sequences of characters. As $i<j$ it follows that
-either $x<y$ or $x=y$ and $A<B$ but this also means that after rotating these two rows we get
-sequences $xAc$ and $yBc$ respectively. It can be observed that $xAc$ will also preceed $yBc$
-in this case. From this observation, it follows that the relative ordering of the same character
-is maintained from $F$ to $L$.
+either $x<y$ or $x=y$ and $A<B$. After rotating these two rows we get sequences $xAc$ and $yBc$
+respectively. It can be observed that $xAc$ preceeds $yBc$ when either $x<y$ or $x=y$ and $A<B$.
+From this observation, it follows that the relative ordering of the same character is maintained
+from $F$ to $L$.
 
-The search for rows where pattern $P$ is located will proceed from the end of $P$. This works by
+The search for rows where pattern $P$ is located proceeds from the end of $P$. This works by
 finding rows where suffixes $P[n\ldots], P[n-1\ldots]$ etc. are located. At every step, these
-rows will form a continuous subsequence of rows of $M$ so we will store only its beginning and end.
+rows will form a continuous subsequence of rows of $M$ so we store only its beginning and end.
 This follows from the observation \ref{chapter1:fmindexprop:prop1}. Let us assume that we are
 looking for a word {\tt house} and we already found the range of rows in $M$ that have {\tt ouse}
-as their prefix. If we look to the last column, these symbols correspond to the symbols preceding
-{\tt ouse} in the text. We can maybe see there in arbitrary order symbols like {\tt m} for word
-{\tt mouse} or {\tt h} for {\tt house}. To search for the range of rows in $M$ that have as a prefix
-word ({\tt house}) we shall look into the range of all prefixes beginning with {\tt h}. Locating this
+as their prefix. If we look to the last column in this range, these symbols correspond to the symbols
+preceding {\tt ouse} in the text. We can maybe observe there in arbitrary order symbols like {\tt m}
+for word {\tt mouse} or {\tt h} for {\tt house}. To search for the range of rows in $M$ that have as a prefix
+word ({\tt house}) we look into the range of all prefixes beginning with {\tt h}. Locating this
 range is easy thanks to the $\Count$ helper array. Lines in this range are sorted according to the
 second character so there will be some lines continuing with {\tt a} if the text contained for example
 word {\tt hashtag} or {\tt e} if the word {\tt head} was in the text. Somewhere the lines starting with 
@@ -271,28 +271,29 @@ number and the property \ref{chapter1:fmindexprop:prop2}, we know where in $F$ t
 containing the prefix {\tt house} begins.
 
 % TODO: mozno obrazok
+% TODO: fixnut indexovanie
 
 The process will in general proceed in these steps:
 
 \begin{itemize}
-	\item We find where $P[n-1]$ is located in $M$. This means setting beginning~($b_{n-1}$) and
-	the end~($e_{n-1}$) of the current subsequence to $\Count[P[n-1]]+1$ and $\Count[P[n-1]+1]$
+	\item We find where $P[n]$ is located in $M$. This means setting beginning~($b_{n}$) and
+	the end~($e_{n}$) of the current subsequence to $\Count[P[n]]+1$ and $\Count[P[n]+1]$
 	respectively.
-	\item Now, to found where $P[n-2..]$ is located in $M$, we would like to locate occurrences
-	of $P[n-1]$ that are preceded by $P[n-2]$. In other words, would like to find all
-	occurrences of symbol $P[n-2]$ in $L[b_{n-1}..e_{n-1}]$. However, this is not trivial
+	\item Now, to found where $P[n-1..]$ is located in $M$, we would like to locate occurrences
+	of $P[n]$ that are preceded by $P[n-1]$. In other words, would like to find all
+	occurrences of symbol $P[n-1]$ in $L[b_{n}..e_{n}]$. However, this is not trivial
 	as they can be at arbitrary places in this subsequence, even not in a continuous
-	subsequence. Instead of searching in $L$ we look at the occurrences of symbol $P[n-2]$ in
+	part. Instead of searching in $L$ we look at the occurrences of symbol $P[n-1]$ in
 	$F$. Here, they are sorted and it is easy to tell, which of these are followed by
-	$P[n-1]$ as $i$-th occurence of character $P[n-1]$ in $L$ corresponds to $i$-th
-	occurence of $P[n-1]$ in $F$. Using this fact, we set
-	$b_{n-2} = \Count[P[n-2]] + \rank_{P[n-2]}(b_{n-1})$ and
-	$e_{n-2} = \Count[P[n-2]] + \rank_{P[n-2]}(e_{n-1})$. Here $\Count[P[n-2]]$
-	is the index where run of character $P[n-2]$ starts. $\rank_{P[n-2]}(b_{n-1})$
-	is number that gives us number of occurrences of character $Count[P[n-2]]$ in $L$ that
-	preceded the index $b_{n-1}$ (starting index of the previous subsequence).
+	$P[n]$ as $i$-th occurence of character $P[n]$ in $L$ corresponds to $i$-th
+	occurence of $P[n]$ in $F$. Using this fact, we set
+	$b_{n-1} = \Count[P[n-1]] + \rank_{P[n-1]}(b_{n})$ and
+	$e_{n-1} = \Count[P[n-1]] + \rank_{P[n-1]}(e_{n})$. Here $\Count[P[n-1]]$
+	is the index where run of character $P[n-1]$ starts. $\rank_{P[n-1]}(b_{n})$
+	is number that gives us number of occurrences of character $Count[P[n-1]]$ in $L$ that
+	preceded the index $b_{n}$ (starting index of the previous subsequence).
 	\item We continue and repeat this process until we compute $b_1$ and $e_1$ or until
-	$b_i=e_i$.
+	$b_i=e_i$ for some $i$.
 \end{itemize}
 
 As we can see, we are not only interested in $\rank$ over a bit vector but also over an arbitrary
@@ -306,12 +307,13 @@ implementation also for the $\rank$ and $\select$ over the general alphabet.
 We shall assume for a moment that we have a bit vector implementation supporting
 $\access$, $\rank$ and $\select$ methods. We show how this may be used to create
 a more general version of this implementation representing sequence over arbitrary
-alphabet still supporting $\access$, $\rank$ and $\select$ queries in reasonable time complexity.
+alphabet still providing support for $\access$, $\rank$ and $\select$ queries in
+reasonable time complexity for sequence $S$ over some alphabet $\Sigma$.
 
 The most straightforward approach is to store one bit vector of size $|S|$,
 per every character of the alphabet $\Sigma$. Let us call these bit vectors $B_1,
-B_2, \ldots B_{\sigma}$. Each of them stores ones on positions where the symbol corresponding
-to this bit vector is located, according to the formula
+B_2, \ldots B_{\sigma}$ where $\sigma=|\Sigma|$. Each of them stores ones on positions
+where the symbol corresponding to this bit vector is located, according to the formula
 
 \[
     B_i[j]= 
