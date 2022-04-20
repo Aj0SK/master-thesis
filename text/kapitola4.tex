@@ -307,7 +307,7 @@ in AppendixTODO.
 
 To benchmark operation $\countOp$, the index over the text is built. Then, random patterns of
 various lengths are extracted from the text and subsequently used for benchmarking. Code
-generating these patterns used in \texttt{SDSL} is a slight modification of a version provided
+that generates these patterns in \texttt{SDSL} is a slight modification of a version provided
 by \texttt{Pizza\&Chili}.
 
 \begin{figure}
@@ -320,11 +320,11 @@ by \texttt{Pizza\&Chili}.
 \end{figure}
 
 For benchmarking of operation $\extractOp$, \texttt{SDSL} uses a methodology proposed by
-\cite{ferragina2009compressed}. This basically consists of extracting numerous substrings of
-length 512 starting at random positions in text. There is additional parameter that is explored
-in this benchmark - sampling rate of suffix array and inverse suffix array. This is basically
-a parameter that can be used to balance the speed of FM-index and its memory usage. Options
-for this sampling ratio are the powers of 2 from 4 up to 256. 
+\cite{ferragina2009compressed} (Section 5.4). This basically consists of extracting numerous
+substrings of length 512 starting at random positions in text. There is additional parameter
+that is explored in this benchmark - sampling rate of suffix array and inverse suffix array.
+This is basically a parameter that can be used to balance the speed of FM-index and its memory
+usage. Options for this sampling ratio are the powers of 2 from 4 up to 256. 
 
 \begin{figure}
 	\centerline{
@@ -335,6 +335,10 @@ for this sampling ratio are the powers of 2 from 4 up to 256.
 	\label{obr:benchmark_sdsl_extract}
 \end{figure}
 
+Benchmarking of $\locateOp$ again uses a methodology proposed by \cite{ferragina2009compressed} 
+(Section 5.3). This consists of at first locating random patterns of length 5 in the text such
+that 2 to 3 millions of occurences are found in the text.
+
 \begin{figure}
 	\centerline{
 		\includegraphics[width=\textwidth, height=0.7\textheight]{images/vysledky_sdsl_locate}
@@ -343,6 +347,16 @@ for this sampling ratio are the powers of 2 from 4 up to 256.
 	}
 	\label{obr:benchmark_sdsl_locate}
 \end{figure}
+
+\paragraph{Correctness}
+
+We wanted to make sure that our implementation is also correct. For this purpose we used mainly
+two types of tests. The first are the tests of $\access$, $\rank$ and $\select$ functionality in
+\texttt{SDSL} that run mainly on smaller bit vectors and also special cases that do not happen
+often in practice such as bit vector full of zeroes/ones. The second type of tests used was the
+benchmark running on wavelet trees of real data. Alongside the individual timings, this benchmark
+produces also the checksum the sum of all the results of the $\access$, $\rank$ and $\select$
+operations.
 
 \section{Hybrid encoding}
 
