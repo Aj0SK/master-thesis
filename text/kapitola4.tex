@@ -202,6 +202,37 @@ neccessary to explain the measured phenomenons later when exploring the results 
 
 \paragraph{RRR microbenchmarks}
 
+\begin{figure}
+	\centerline{
+	\begin{tabular}{l|r|}
+		Method									&	$\mu s$ per 10k queries \\
+		\hline
+		SDSL\_Table\_15                         &    36  \\
+		SDSL\_ON\_THE\_FLY\_15  				&   477  \\
+		OUR\_30\_LINEAR\_15\_15                 &   196  \\
+		OUR\_30\_SIMD\_15\_15                   &   115  \\
+		OUR\_30\_BINARY\_15\_15                 &   295  \\
+		SDSL\_ON\_THE\_FLY\_30  				&  1\,322  \\
+		OUR\_31\_LINEAR\_1\_30                  &   211  \\
+		SDSL\_ON\_THE\_FLY\_31  				&  1\,413  \\
+		OUR\_62\_LINEAR\_31\_31                 &   445  \\
+		OUR\_62\_BINARY\_31\_31                 &   541  \\
+		SDSL\_ON\_THE\_FLY\_62  				&  1\,460  \\
+		OUR\_63\_LINEAR\_1\_62                  &   469  \\
+		OUR\_63\_LINEAR\_3\_30\_30              &   445  \\
+		SDSL\_ON\_THE\_FLY\_63  				&  1\,328  \\
+		OUR\_127\_LINEAR\_1\_63\_63             &   909  \\
+		OUR\_127\_BINARY\_1\_63\_63             &   964  \\
+	\end{tabular}
+	}
+	\caption[TODO]{Results of microbenchmarking various types of decoding implementations.
+	Names starting with SDSL are all on the fly decoding with the exception of 15 bit implementation.
+	The first number in the name is always block size. Subsequent numbers denote to what block sizes
+	was the problem broken into.
+	}
+	\label{obr:simple_benchmark}
+\end{figure}
+
 These benchmarks were used in the early stage of the development to measure a potential gain from
 our new method of encoding and decoding. We mainly focused on measuring different block sizes
 in combination with different methods used for dividing block to subproblems and with different

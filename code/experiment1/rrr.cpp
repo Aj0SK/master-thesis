@@ -61,7 +61,7 @@ static void SDSL_Table_15(benchmark::State& state)
   }
 }
 
-static void OUR_30_LINEAR(benchmark::State& state)
+static void OUR_30_LINEAR_15_15(benchmark::State& state)
 {
   auto test = get_test(30);
   for (auto _ : state)
@@ -74,7 +74,7 @@ static void OUR_30_LINEAR(benchmark::State& state)
   }
 }
 
-static void OUR_30_SIMD(benchmark::State& state)
+static void OUR_30_SIMD_15_15(benchmark::State& state)
 {
   auto test = get_test(30);
   for (auto _ : state)
@@ -87,7 +87,7 @@ static void OUR_30_SIMD(benchmark::State& state)
   }
 }
 
-static void OUR_30_BINARY(benchmark::State& state)
+static void OUR_30_BINARY_15_15(benchmark::State& state)
 {
   auto test = get_test(30);
   for (auto _ : state)
@@ -100,7 +100,7 @@ static void OUR_30_BINARY(benchmark::State& state)
   }
 }
 
-static void OUR_31_SIMD_1_30(benchmark::State& state)
+static void OUR_31_LINEAR_1_30(benchmark::State& state)
 {
   auto test = get_test(31);
   for (auto _ : state)
@@ -113,7 +113,7 @@ static void OUR_31_SIMD_1_30(benchmark::State& state)
   }
 }
 
-static void OUR_62_LINEAR(benchmark::State& state)
+static void OUR_62_LINEAR_31_31(benchmark::State& state)
 {
   auto test = get_test(62);
   for (auto _ : state)
@@ -126,7 +126,7 @@ static void OUR_62_LINEAR(benchmark::State& state)
   }
 }
 
-static void OUR_62_BINARY(benchmark::State& state)
+static void OUR_62_BINARY_31_31(benchmark::State& state)
 {
   auto test = get_test(62);
   for (auto _ : state)
@@ -178,7 +178,7 @@ static void OUR_127_LINEAR_1_63_63(benchmark::State& state)
   }
 }
 
-static void OUR_127_BINARY(benchmark::State& state)
+static void OUR_127_BINARY_1_63_63(benchmark::State& state)
 {
   auto test = get_test(63);
   for (auto _ : state)
@@ -192,7 +192,7 @@ static void OUR_127_BINARY(benchmark::State& state)
 }
 
 template <typename T, size_t N>
-static void SDSL_ON_THE_FLY_DECODING(benchmark::State& state)
+static void SDSL_ON_THE_FLY(benchmark::State& state)
 {
   auto test = get_test(N);
   for (auto _ : state)
@@ -206,21 +206,21 @@ static void SDSL_ON_THE_FLY_DECODING(benchmark::State& state)
 }
 
 BENCHMARK(SDSL_Table_15);
-BENCHMARK_TEMPLATE(SDSL_ON_THE_FLY_DECODING, uint32_t, 15);
-BENCHMARK(OUR_30_LINEAR);
-BENCHMARK(OUR_30_SIMD);
-BENCHMARK(OUR_30_BINARY);
-BENCHMARK_TEMPLATE(SDSL_ON_THE_FLY_DECODING, uint32_t, 30);
-BENCHMARK(OUR_31_SIMD_1_30);
-BENCHMARK_TEMPLATE(SDSL_ON_THE_FLY_DECODING, uint32_t, 31);
-BENCHMARK(OUR_62_LINEAR);
-BENCHMARK(OUR_62_BINARY);
-BENCHMARK_TEMPLATE(SDSL_ON_THE_FLY_DECODING, uint64_t, 62);
+BENCHMARK_TEMPLATE(SDSL_ON_THE_FLY, uint32_t, 15);
+BENCHMARK(OUR_30_LINEAR_15_15);
+BENCHMARK(OUR_30_SIMD_15_15);
+BENCHMARK(OUR_30_BINARY_15_15);
+BENCHMARK_TEMPLATE(SDSL_ON_THE_FLY, uint32_t, 30);
+BENCHMARK(OUR_31_LINEAR_1_30);
+BENCHMARK_TEMPLATE(SDSL_ON_THE_FLY, uint32_t, 31);
+BENCHMARK(OUR_62_LINEAR_31_31);
+BENCHMARK(OUR_62_BINARY_31_31);
+BENCHMARK_TEMPLATE(SDSL_ON_THE_FLY, uint64_t, 62);
 BENCHMARK(OUR_63_LINEAR_1_62);
 BENCHMARK(OUR_63_LINEAR_3_30_30);
-BENCHMARK_TEMPLATE(SDSL_ON_THE_FLY_DECODING, uint64_t, 63);
+BENCHMARK_TEMPLATE(SDSL_ON_THE_FLY, uint64_t, 63);
 BENCHMARK(OUR_127_LINEAR_1_63_63);
-BENCHMARK(OUR_127_BINARY);
+BENCHMARK(OUR_127_BINARY_1_63_63);
 
 int main(int argc, char** argv)
 {

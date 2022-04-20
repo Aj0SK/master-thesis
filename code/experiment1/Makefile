@@ -5,13 +5,16 @@ SDSL = -lsdsl -ldivsufsort -ldivsufsort64
 BENCHMARK = -isystem benchmark/include -Lbenchmark/build/src -lbenchmark -lpthread
 BUILD = build
 
-all: clean prepare rrr
+all: clean prepare benchmark rrr
 
 clean:
 	rm -r -f $(BUILD)
 
 prepare:
 	mkdir -p $(BUILD)
+
+benchmark:
+	sudo cpupower frequency-set --governor performance
 
 $(BUILD)/rrr.out: rrr.cpp ../shared/*.h
 	$(CXX) $(CXXFLAGS) $(MY) $< $(BENCHMARK) $(SDSL) -o $@
