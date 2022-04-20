@@ -11,9 +11,9 @@ of \textit{succinct data structures} focuses on representing data using as littl
 space as possible but at the same time tries not to hurt the time complexity and
 performance of methods that these structures support. In this field, data structures for many
 varied problems have been devised such as succinct dictionaries~\citep{raman2007succinct},
-fenwick tree~\citep{bille2017succinct} or trie~\citep{grossi2015fast}. While many of
-the resulting structures give some solid theoretical bounds on the used space, others look
-into real-world space usage and performance.
+fenwick tree~\citep{bille2017succinct}, trie~\citep{grossi2015fast} or various text indexes.
+While many of the resulting structures give some solid theoretical bounds on the used space,
+others look into real-world space usage and performance.
 
 Succinct data structures are very helpful in scenarios where we work with massive
 amount of data. In these scenarios, using the ordinary data structures may limit us to place
@@ -37,8 +37,7 @@ returns the index of $i$-th occurrence of symbol $c$ in $S$.
 
 The reason behind our focus on bit vector and particularly its compressed version
 is that it is one of the main building blocks of many succinct data structures.
-In the next sections, we introduce some of its interesting and useful applications
-bit vector.
+In the next sections, we introduce some of its interesting and useful applications.
 
 \section{Application 1: Sparse array}
 
@@ -47,7 +46,7 @@ accessing the $i$-th element of $A$. For simplicity, we assume that the elements
 not change after the construction. A straightforward representation of this array takes $N\cdot k$
 bits of space. However, imagine a scenario where significant portion of the array is empty
 and just a handful of elements are filled in. Take for example a sparse vector of numbers,
-where most of the elements are 0. Then we could maybe use a more space-efficient approach.
+where most of the elements are 0. Then we could use a more space-efficient approach.
 Let us assume that from $N$ elements only $n$ are non-default/non-zero and also that $n\ll N$.
 First approach using the sparseness of an array is to store only the non-default elements as
 pairs $(\text{position}, \text{value})$ where $\text{position}$ is an index where $\text{value}$
@@ -55,8 +54,8 @@ is located in $A$. This representation of pairs consumes $n\cdot (k+\log n)$ bit
 If we just store the pairs sorted by the position, accessing $i$-th element takes time $O(\log n)$.
 We may use the hash table to obtain the constant time solution but this comes with additional
 memory overhead. The alternative approach using the bit vector is to store non-default elements in
-a packed array $P$ of size $n$. Alongside $P$ we store a bit vector $B$ of size $N$ where
-
+a packed array $P$ of length $n$ and size $nk$ bits. Alongside $P$ we store a bit vector $B$ of length
+$N$ where
 \[
    B[i]=
 \begin{cases}
@@ -74,13 +73,14 @@ representation is $N+n\cdot k+R$ where $R$ is the space needed to support an eff
 As we shall show in section~\ref{section:rank}, $\rank$ can be implemented in constant time with
 sublinear space overhead, i.e., $R = o(N)$. If we are provided with bit vector implementation along
 with $\access$ and $\rank$ methods we are able to reduce the total space used from $k\cdot N$ to
-$N+n\cdot k+o(N)$ bits. This may be in some cases better than $n\cdot (k+\log n)$, especially if
-we need to use the hash table to get the constant time solution.
+$N+n\cdot k+o(N)$ bits. Note that in practice, for really small number of non-default values, the
+sparse array is still more interesting solution, however, bit vector provides us with a solution that
+is often interesting in practice.
 
-\section{Application 2: Storing elements of non-uniform size}
+\section{Application 2: Storing elements of non-uniform length}
 
-Let us consider another problem of representing an array of elements of variable size.
-Elements of variable length may often arise in succinct data structures when trying to
+Let us consider another problem of representing an array of elements that are of variable length.
+This type of elements can often arise in succinct data structures when trying to
 optimise the amount of space used. An example of this is a \textit{Huffman code}
 proposed by \cite{huffman1952method} that constructs the optimal code for symbols based
 on the frequencies with which the symbols occur. This works in a way that more frequent
@@ -92,12 +92,13 @@ First solution is to allocate the array of length $nk_{MAX}$ bits where $k_{MAX}
 of bits used for the element with the longest bit representation. This enables constant time access
 but wastes a lot of space. The second possible solution is to allocate a bit array $R$ where
 the elements are stored one after another in their raw bit representation. To locate the $i$-th element
-we shall store alongside this a helper array $P$. Number on $i$-th position is the index where the $i$-th
+we store alongside $R$ a helper array $P$. Number on $i$-th position is the index where the $i$-th
 element begins in $R$. This helper array consumes at least $O(n\log n)$ bits as every entry
 contains the number that is the index into the array $R$. This helper array can be replaced by bit vector.
-The solution is to store the raw sequence of bits that store the elements one after another as in previous
+The idea is to store the raw sequence of bits that store the elements one after another as in previous
 solution. On top of that, we shall use a helper bit vector of the same size. This bit vector has ones on
-places where the representation of some element starts and zeroes on the other places.
+places where the representation of some element starts and zeroes on all the other places. Example
+of this representation can be seen in Fig.~\ref{obr:VariableSizedElements}.
 
 Identifying the beginning of $i$-th element now boils down to efficiently locating the
 $i$-th one in the helper bit vector. If we are provided with the bit vector implementation,
@@ -120,18 +121,18 @@ this method can be implemented efficiently.
 \section{Application 3: FM-index}
 % sources to help understand https://www.dcc.uchile.cl/TR/2005/TR_DCC-2005-004.pdf
 
-For simplicity, most of the time we shall assume in this section that every text $T$
-contains a special character {\tt \$} located only at its end that is lexicographically
-smallest.
+For simplicity, in this section we assume that every text $T$ contains a special character
+{\tt \$} located only at its end that is lexicographically smaller than any other character
+contained in $T$.
 
 Let us now consider another practically interesting problem. As we shall see, solution
 to this problem also uses bit vector and other building blocks commonly used in succinct
 data structures. This time, we have a text $T$ and are interested in \textit{indexing} it.
-This means if we get some pattern $P$, we would like to quickly answer questions such as
+This means that if we get some pattern $P$, we would like to quickly answer questions such as
 how many times is $P$ contained in $T$ and also where in $T$ these occurrences are located.
-This is particularly useful in bioinformatics, where we have a very long sequence
-of DNA and are interested in searching for some subsequences in it. One of the solutions that
-is reasonable and may be used is constructing \textit{suffix array} of $T$. Suffix array of $T$
+This is particularly useful in bioinformatics, where we can have a very long sequence of DNA and
+are interested in searching for some subsequences in it. One of the solutions that is reasonably
+fast and may be used is constructing \textit{suffix array} of $T$. Suffix array of $T$
 is data structure that stores information about the lexicographical order of suffixes of $T$.
 
 \begin{figure}
@@ -155,40 +156,38 @@ is data structure that stores information about the lexicographical order of suf
 \end{figure}
 
 More precisely, on $i$-th position of suffix array $S$, it stores the starting position of
-suffix that comes $i$-th in lexicographical order. The example of suffix array is on
-Fig.~\ref{obr:suffixArray} Searching for pattern $P$ in suffix
-array of $T$ uses fact that if $P$ is contained in $T$ it will be at the beginning of some
-suffixes that make up a continuous subsequence of $S$. Succinct data structure that is in
-some aspects similar to suffix array was proposed by \cite{ferragina2000opportunistic} and
-is called \textit{FM-index}. FM-index can find the pattern in the preprocessed text in time
-complexity $\BigO(|P|)$. On top of this, the resulting space used by FM-index can be
-smaller than the space used for the original text $T$. This makes FM-index particularly useful
-for searching in very long DNA sequences where FM-index many times takes just 30-40\% of the
-space needed for the representation of original text $T$ as was demonstrated by
-\cite{ferragina2001experimental}. We shall now look at how the FM-index is obtained for the text
-$T$.
+suffix that comes $i$-th in lexicographical order. The example of suffix array is in
+Fig.~\ref{obr:suffixArray}. Searching for pattern $P$ in suffix array of $T$ uses fact that
+if $P$ is contained in $T$ it will be at the beginning of some suffixes that make up a
+continuous subsequence of $S$. Succinct data structure that is in some aspects similar to
+suffix array was proposed by \cite{ferragina2000opportunistic} and is called \textit{FM-index}.
+FM-index can find the pattern in the preprocessed text in time complexity $\BigO(|P|)$. On top
+of this, the resulting space used by FM-index can be even smaller than the space used for the original
+text $T$. This makes FM-index particularly useful for searching in very long DNA sequences where
+FM-index many times takes just 30-40\% of the space needed for the representation of original text
+$T$ as was observed by \cite{ferragina2001experimental}. We shall now look at how the FM-index
+is obtained for the text $T$.
 
 \paragraph{Burrows-Wheeler transformation}
 
-\textit{Burrows-Wheeler transformation~(BWT)} proposed by \cite{burrows1994block} lies at the
-heart of the FM-index. BWT of a text $T$ gives us a sequence $\mathit{T_{BWT}}$ of the same
+\textit{Burrows-Wheeler transformation~(BWT)} proposed by \cite{burrows1994block} is a pivotal
+part of the FM-index. BWT of a text $T$ gives us a sequence $\mathit{T_{BWT}}$ of the same
 length. Furthermore, this operation is reversible in a sense that only using $\mathit{T_{BWT}}$
 we are able to reconstruct the original text $T$. This transformation is used as a
-preprocessing step of compression algorithms such as in \textit{bzip2} introduced by
+preprocessing step of some compression algorithms such as \textit{bzip2} introduced by
 \cite{seward1996bzip2} and was studied more by \cite{manzini2001analysis}. This is because
 BWT is oftentimes easier to compress. We shall show how it is constructed and then give 
-intuition why it has these properties. We consider the sequence $T$ of symbols over some
+intuition why it has this property. We consider the sequence $T$ of symbols over some
 alphabet $\Sigma$. Now we take all the cyclical rotations $T_1, T_2, \ldots T_n$ of
 the sequence $T$ and imagine putting them sorted by their lexicographical order into the
 rows of table $M$ as seen in Fig.~\ref{obr:BWT}. We name the sequence created by the
 concatenation of symbols in first and last column $F$ and $L$ respectively. Last column $L$
 is what we call the BWT of $T$. Note that the sequence $F$ can be obtained from $L$ just by
-sorting all the characters in $\mathit{T_{BWT}}$ and has some nice properties. $F$ consists of
-runs of symbols that are sorted according to the lexicographical ordering of alphabet symbols.
-We shall use the helper sequence $\Count$ where $\Count[c]$ is number of
-occurrences of symbols smaller than $c$. Note that the run of symbol $c$ in $F$ starts at
-the index $\Count[c]+1$. The matrix $M$ contains all the suffixes sorted according to their
-lexicographical order.
+sorting all the characters in $\mathit{T_{BWT}}$ and has also some useful properties. $F$ consists
+of runs of symbols that are sorted according to the lexicographical ordering of alphabet symbols.
+We shall use the helper sequence $\Count$ where $\Count[c]$ is number of occurrences of symbols
+smaller than $c$. Note that the run of symbol $c$ in $F$ starts at the index $\Count[c]+1$. The
+matrix $M$ contains all the suffixes sorted according to their lexicographical order.
 
 \begin{figure}
 	\centerline{
@@ -216,7 +215,7 @@ lexicographical order.
 		\tt nana\$ \\
 	\end{tabular}
 	}
-	\caption[TODO]{On the left we can see the matrix $M$ full of cyclic rotations of sequence
+	\caption[TODO]{On the left we can see the matrix $M$ filled with cyclic rotations of sequence
 	$S = \mathtt{banana\$}$. On the right, we can see the sorted suffixes (content of suffix array). The
 	Burrows-Wheeler transformation of $S$ is string $L=\mathtt{annb\$aa}$ -- the last column of $M$.
 	Note that in practice, we do not need to construct the whole table as more efficient algorithms exist.
@@ -229,8 +228,8 @@ The reason that BWT is more compressible is that it frequently contains runs of 
 symbol. This can be better explained on an example. Let us create BWT of a text containing
 a lot of mentions of word {\tt computer}. All the rotations prefixed with {\tt omputer} will form a
 continuous subsequence of rows of $M$. If we assume, that word {\tt computer} is very frequent
-in the text, most of these rows will end in {\tt \$} as this is the most common symbol preceding
-word {\tt omputer}. This will for example create the common run of symbol {\tt \$} in BWT.
+in the text, most of these rows will contain {\tt c} at the end as this is the most common symbol
+preceding word {\tt omputer}. This will for example create the common run of symbol {\tt c} in BWT.
 
 \paragraph{Searching in an FM-index}
 

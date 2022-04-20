@@ -1,8 +1,8 @@
 \chapter{Implementation and results}
 \label{kap:kap4}
 
-In this chapter, we describe the implementation of ideas proposed in previous chapter
-and the practical results we obtained when measuring experimentally their performance.
+In this chapter, we describe our implementation of ideas proposed in the previous chapter
+and practical results we obtained when measuring experimentally their performance.
 This chapter is split into two main parts according to the two main topics discussed
 in previous chapter namely our new encoding and decoding method and hybrid encoding.
 In both of these sections, we first describe the important parts and decisions in our
@@ -11,7 +11,7 @@ the results we obtained.
 
 The source code to all benchmarks can be found in electronic attachment to this work
 and also on \texttt{Github}. More about how to reproduce our results can be found in
-appendix A. However, to obtain the best possible results, our implementation requires
+appendix A. To obtain the best possible results, our implementation requires
 a processor with support for \texttt{SSE2} instruction set. All the results presented
 in this chapter were obtained on a machine with 8-core AMD~Ryzen~7~2700X with 16~MB of
 cache, running at 3.7~GHz with 16~GB of RAM. The running operating system was Ubuntu~20.04.3~LTS.
@@ -290,7 +290,10 @@ by \texttt{Pizza\&Chili}.
 
 For benchmarking of operation $\extractOp$, \texttt{SDSL} uses a methodology proposed by
 \cite{ferragina2009compressed}. This basically consists of extracting numerous substrings of
-length 512 starting at random positions in text.
+length 512 starting at random positions in text. There is additional parameter that is explored
+in this benchmark - sampling rate of suffix array and inverse suffix array. This is basically
+a parameter that can be used to balance the speed of FM-index and its memory usage. Options
+for this sampling ratio are the powers of 2 from 4 up to 256. 
 
 \begin{figure}
 	\centerline{
