@@ -138,23 +138,30 @@ There is also a constant time solution for $\select$ using the sublinear memory 
 This solution is just like solution for the constant time $\rank$, based on a division
 to superblocks and blocks. We begin by precomputing $select(i)$ for every $i$ that is
 multiple of $t_1=...$. These precomputed values take $\BigO(n/\log\log n)$ bits of space.
-This also splits the bit sequence into superblocks that contain exactly $t_1$ ones (possibly
-except for the last). There are
+This also splits the bit sequence into superblocks of possibly variable length such that
+every of them contains exactly $t_1$ ones (possibly except for the last). There are
 now two categories of superblocks. The ones called \textit{long} that are of size bigger
 than $t_1^2$. In these superblocks, we can store the positions of ones as they are sparse
-and there is not many of them. The total memory used shall be $\BigO(n/t_1^2\cdot t_1\cdot
-\log n) = \BigO(n/\log\log n)$. Then there are superblocks of size smaller than $t_1^2$ called
-\textit{short} that we shall solve using the same idea that we used for the original bit sequence
-and superblocks. We precompute the $\select$ from the beginning of the superblock for every
+and there is not many of them as they are long. The total memory used is $\BigO(n/t_1^2\cdot t_1\cdot
+\log n) = \BigO(n/\log\log n)$. Then there are superblocks shorter than $t_1^2$ called
+\textit{short}. We apply the idea that we already used for the original bit sequence. Inside of
+every such superblock, we precompute the $\select$ from the beginning of the superblock for every
 multiple of $t_2=(\log\log n)^2$. These precomputed values are small as they are only from the
 beginning of short superblock. Every one of these values takes $\log\log n$ of space so the
 total amount of space used for the values is $\BigO(n/t_2\cdot \log\log n) = \BigO(n/\log\log n)$.
-For blocks of size bigger than $t_2^2$ we shall store the positions of ones as there is not
-many of them in long block. We may use the same reasoning as in the previous part to conclude
-that this takes $\BigO(n/t_2^2\cdot t_2\cdot \log\log n) = \BigO(n/\log\log n)$ of bits. To
-take care of the blocks of size smaller than $t_2^2$ we can precompute a table of all the
-possible ways how the block may look and all the possible $\select$ queries over it with
-their responses. This is possible as $t_2^2 = o(n)$.
+This breaks the short superblock into blocks. Again, each of these blocks except for maybe the
+last one contains $t_2$ ones. For blocks of size bigger than $t_2^2$ we store the positions of
+ones as there is not many of these blocks and they are sparse. We may use the same reasoning as
+in the previous part to conclude that this takes $\BigO(n/t_2^2\cdot t_2\cdot \log\log n) = \BigO(n/\log\log n)$
+of bits. To take care of the blocks of size smaller than $t_2^2$ we can precompute a table of all
+the possible ways how the block may look and all the possible $\select$ queries over it with
+their $\select$ result. This is possible as $t_2^2 = o(n)$ and give us a constant time $\select$.
+When answering $select_1(i)$ we can easily found in which superblock the answer is located. If this
+is a long superblock, we just look to the precomputed positions of ones in the superblock. The matter
+is more complicated if we fall into a short superblock. We then need to find, in which block the answer
+is located. If this is a long block, we can once again just look at the position of one we are interested
+in. If it is a short block, we have the precomputed table where we index with the block and the position of
+one in the block, we are interested in.
 
 \section{Compressed representation}
 \label{section:compressed_bv}
