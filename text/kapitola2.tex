@@ -166,20 +166,19 @@ one in the block, we are interested in.
 \section{Compressed representation}
 \label{section:compressed_bv}
 
-The main idea of \textit{RRR} is to split the bit sequence into blocks of constant length
+The main idea of \textit{RRR}, a widely used implementation of bit vector proposed by
+\cite{raman2007succinct} is to split the bit sequence into blocks of constant length
 $b$. This length is a parameter of the algorithm. After this division, instead
 of storing a single block as a bit sequence, we store each block encoded as a pair
 of numbers $(c, o)$. Here, $c$ labels the class of the block and $o$ an offset into
-the sequence of all blocks in this particular class. In most of the implementations,
-$c$ is equal to the number of ones in the block. Offset, on the other hand, is the
-index of block along the sequence of all the blocks with $c$ ones that are lexicographically
-sorted. Note that class $c$ contains ${b\choose c}$ blocks. The offset is then bounded by:
-
-				$$0 \leq o < {b\choose c}$$.
+the sequence of all blocks in this particular class. In most implementations,
+$c$ is equal to the number of ones in the block. Offset is the index of block along
+the lexicographically sorted sequence of all blocks with $c$ ones. Note that class
+$c$ contains ${b\choose c}$ blocks. The offset is then bounded by $$0 \leq o < {b\choose c}$$.
 
 The process of obtaining $c$ and $o$ from the raw representation of block is called
 \textit{encoding}. The opposite process is called \textit{decoding}. Although we would
-like both processes to be fast. We do the encoding just once, at the initial construction
+like both processes to be fast, we do the encoding just once, at the initial construction
 of the bit vector. On the other hand, decoding is done any time we are accessing a particular
 bit in $B$ so it is more important to optimise so that decoding is as fast as possible.
 
@@ -192,47 +191,43 @@ is associated with pair $(c, o)$. In other words, this is a block containing $c$
 and at the same time being $o$-th in the sequence of all lexicographically sorted
 blocks containing $c$ ones. Both these tables $E$ and $D$ can be computed
 by generating all the possible blocks in lexicographical order before we even
-obtain the sequence that we will want to represent. After this precomputation,
+obtain the sequence that we want to represent. After this precomputation,
 the encoding and decoding of a block takes constant time.
 
-For smaller values of $b$, it is possible to store the whole table $T$ which helps us
+For smaller values of $b$, it is possible to store the tables $E$ and $D$ that help us
 to encode and decode the block. For bigger $b$ it is not practical and many times
-impossible to store huge helper tables $E$ and $D$. On the other hand, the bigger
-block size yields a better compression because of smaller per block overhead. This limitation
-is something that was to some extent overcame by \cite{navarro2012fast}. They came up with the
-method we shall call \textit{on the fly-decoding}. This works by encoding and decoding without
-the need for helper tables. This method instead relies on a bit by bit decoding of the block
-thus taking $\BigO(b)$ time instead of a constant time lookup with the help of table.
-
-Idea is that we are decoding the block from the beginning, bit by bit until the end. On every bit,
+impossible to store huge helper tables. On the other hand, the bigger block size yields a
+better compression because of smaller per block overhead. This limitation is something that
+was to some extent overcame by \cite{navarro2012fast}. They came up with the method we shall
+call \textit{on the fly-decoding}. This method does not use helper tables $E$ and $D$ for
+encoding and decoding but instead relies on a bit by bit encoding and decoding of the block
+thus taking $\BigO(b)$ time compared to a constant time lookup with the help of table.
+For decoding, idea is that we decode the block from the beginning, bit by bit. On every bit,
 we consider putting a zero bit on this position and count $comb$ -- the number of all
 combinations how the block can look in this scenario. If the sequence number of the block --
 $o$ is bigger than this number, we know that the decoded block will have one on this place.
 We proceed by subtracting the number $comb$ from $o$ and proceed sequentially further.
 
 After slicing the sequence $B$ into blocks, we need to find a way how to store pairs $(c, o)$.
-We shall store all the classes and offsets in separate arrays $C$ and $O$. The array $C$ shall
-be implemented as an array of fixed length elements with a length equal to
-$\ceil{\log_2(b+1)}$ bits. The array $O$ shall be on the other hand implemented as an array of
-variable length elements with the size needed to store $i$-th element $O[i]$ being
-$\ceil{\log_2{b\choose C[i]}}$ bits.
-
-To provide access to the particular bit, we need to first find out at which block this bit is located.
-Let this be $i$-th block. To decode the block we at first need to get corresponding $C[i]$ and
-$O[i]$ and then we can use a pre-computed table $D$ that matches $(c_i, o_i)$ to the original
-block. Obtaining $C[i]$ is trivial as it is at a fixed offset in memory. Getting the value of
-$O[i]$ is harder as it is not at a known offset but generally on an offset that can be expressed
-as $$\sum_{j=1}^{i-1} \ceil{\log_2{b\choose C[i]}}$$ but can not be precomputed. To compute it
-without any precomputed information, we need to basically one by one skip over elements that come
-before $O[i]$. Note that to compute the previous sum, we need only successive information from $C$
-so these accesses tend to be cache-friendly and fast. However, to access the $i$-th block, we need
-in the worst case to look at all the elements of $C$ and this takes $\BigO(n/b)$ time. To support
-this version of access, we need to store the arrays $C, O$ and helper table $D$. We shall
-now argue about the size of these structures. The size of these structures is as follows:
-
-$C$ is array of $\ceil{n/b}$ elements of fixed size $\ceil{\log(b+1)}$.
-
-For array $O$ we argue that its size is bounded by
+We shall store all the classes and offsets in separate arrays $C$ and $O$. Even if both of these
+are arrays, they do not store the data in a same way. The array $C$ is an array of fixed length
+elements with a length equal to $\ceil{\log_2(b+1)}$ bits. The array $O$, on the other hand, is
+an array of variable length elements with the size needed to store $i$-th element $O[i]$ being
+$\ceil{\log_2{b\choose C[i]}}$ bits. Accessing $i$-th position in array $C$ is thus easy on
+contrary to array $O$. To provide access to the particular bit of original sequence $B$, we
+need to first find out at which block this bit is located. Let this be $i$-th block. To decode
+the block we at need to get its class $C[i]$ and offset $O[i]$ and then we can use a pre-computed
+table $D$ that matches $(c_i, o_i)$ to the original block. Obtaining $C[i]$ is trivial as it is at
+a fixed offset in memory. Getting the value of $O[i]$ is harder as it is not at a known offset but
+generally on an offset that can be expressed as $$\sum_{j=1}^{i-1} \ceil{\log_2{b\choose C[i]}}$$ but
+can not be computed easily. To locate $O[i]$ without any precomputed information, we need to basically
+one by one skip over elements that come before $O[i]$. Note that to compute the previous sum, we need
+only successive information from $C$ so these accesses tend to be cache-friendly and fast. However,
+to access the $i$-th block, we need in the worst case to look at all the elements of $C$ and this
+takes $\BigO(n/b)$ time. For now, we stay with this solution and try to analyze its space usage. To
+support this version of access, we need to store the arrays $C, O$ and helper table $D$. We now
+argue about the size of these structures. $C$ is array of $\ceil{n/b}$ elements of fixed size
+$\ceil{\log(b+1)}$. For array $O$ we argue that its size is bounded by
 
 \begin{align*}
     \sum_{i=1}^{n/b} \ceil{{\log b\choose c_i}}
@@ -246,12 +241,12 @@ observation that ${n\choose k} {m\choose \ell} \leq {n+m\choose k+\ell}$. This c
 when we interpret the left side of the equation as a number of ways we can choose $k$ elements
 from $n$ elements and $\ell$ elements from another $m$ elements. This is all contained on the
 right side of the equation that includes all these combinations. $D$ is storing $2^b$ entries
-and each entry is using $b$ bits of storage.
-The total space used is then $$nH_0(B) + \ceil{n/b} + \ceil{n/b} \cdot \ceil{\log(b+1)} + b2^b$$.
-To speed up the process of accessing block, we shall store the pointers into every $k$-th element
-of $O$. This divides the process of locating $O[i]$ into two parts. The first is to find the nearest
-pointer leading to element before $i$ and then move at most $k$ places. This additional structure of
-roughly $\frac{n}{bk}$ integers takes the space $\BigO(\log(n)\cdot \frac{n}{bk})$.
+and each entry is using $b$ bits of storage. The total space used is then
+$$nH_0(B) + \ceil{n/b} + \ceil{n/b} \cdot \ceil{\log(b+1)} + b2^b$$. To speed up the process
+of accessing block, we can store the pointers into every $k$-th element of $O$. This divides
+the process of locating $O[i]$ into two parts. The first is to find the nearest pointer leading
+to element before $i$ and then move at most $k$ places. This additional structure of roughly
+$n/(bk)$ integers uses $\BigO(\log(n)\cdot \frac{n}{bk})$ bits of space.
 
 \begin{figure}
 	\centerline{
@@ -270,7 +265,7 @@ roughly $\frac{n}{bk}$ integers takes the space $\BigO(\log(n)\cdot \frac{n}{bk}
 
 When setting the block size to $\log(n)/2$ we obtain interesting practical results as
 the total space used by our representation is equal to $nH_0(B) + o(n)$ bits. This means
-that we are storing only a sublinear amount of data on top of the compressed data.
+that we are storing only a sublinear amount of data on top of the zeroth order empirical entropy.
 
 When we are interested in obtaining the best practical results, block size becomes
 one of the most important parameters of RRR implementation. As we shall show in the next
