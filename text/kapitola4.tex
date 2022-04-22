@@ -1,8 +1,8 @@
 \chapter{Implementation and results}
 \label{kap:kap4}
 
-In this chapter, we describe our implementation of ideas proposed in the previous chapter
-and practical results we obtained when measuring experimentally their performance.
+In this chapter, we describe our implementation of the ideas proposed in the previous
+chapter and practical results we obtained when measuring experimentally their performance.
 This chapter is split into two main parts according to the two main topics discussed
 in previous chapter namely our new encoding and decoding method and hybrid encoding.
 In both of these sections, we first describe the important parts and decisions in our
@@ -185,6 +185,19 @@ uint32_t get_left_class(uint8_t k, uint32_t nr)  {
 }
 \end{lstlisting}
 
+\paragraph{Choosing the sub-problem size}
+
+In previous chapter, we noted that our new method can take encoding/decoding subroutines
+of sizes $b_1$ and $b_2$ and combine them together to obtain routine for encoding and
+decoding of size $b_1+b_2$. Thus it is up to us, how we obtain the decoding for block sizes
+bigger than 15. As it is not possible to obtain the block size 30 using table method,
+it is quite reasonable to obtain this solution using combination of two sub-routines for block
+size 15. To obtain block size 63, however, there are more possible options. We may combine
+solution for 1 bit and 62 bits and then obtain 62-bit block size using combination of
+solution for block size 31. On the other hand, it may be more beneficial, to do 63-bit
+block size by splitting it into 3 bits and 60 bits. To get a viable combination, we
+tried several promising combinations and microbenchmarked it.
+
 \subsection{Experimental results}
 
 We benchmarked our code using two types of benchmarks. The first type of benchmarks used
@@ -245,7 +258,8 @@ binary search and linear scan enhanced by \texttt{SIMD} instructions. In order t
 solution for 127 bit block size, we used the 128 bit type \texttt{\_\_uint128\_t} provided by both
 \texttt{GCC} and \texttt{Clang} compilers. This type is implemented on platform \texttt{x86\_64}
 as a combination of two 64 bit numbers. We compared these results with the table decoding specialization
-in \texttt{SDSL} and with on the fly decoding for all the other block sizes. 
+in \texttt{SDSL} and with on the fly decoding for all the other block sizes. The results we obtained
+are shown in Fig.~\ref{obr:simple_benchmark}.
 
 \paragraph{Bit vector on real data}
 
@@ -350,8 +364,8 @@ that 2 to 3 millions of occurences are found in the text.
 
 \paragraph{Correctness}
 
-We wanted to make sure that our implementation is also correct. For this purpose we used mainly
-two types of tests. The first are the tests of $\access$, $\rank$ and $\select$ functionality in
+We wanted to make sure that our implementation is also correct. We used mainly two types of tests
+for this purpose. The first are the tests of $\access$, $\rank$ and $\select$ functionality in
 \texttt{SDSL} that run mainly on smaller bit vectors and also special cases that do not happen
 often in practice such as bit vector full of zeroes/ones. The second type of tests used was the
 benchmark running on wavelet trees of real data. Alongside the individual timings, this benchmark
