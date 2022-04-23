@@ -56,8 +56,8 @@ sub-blocks. We provided specialized implementations for block sizes 31, 63 and 1
 in practical scenarios. We based our specializations on the general implementation of
 \texttt{rrr\_vector} and tried to keep the number of changes as small as possible to easily observe the
 effects of our new decoding method. We have been able to implement our changes and at the same time alter
-only two methods that the \texttt{SDSL} uses for encoding and decoding namely \texttt{bin\_to\_nr} and
-\texttt{nr\_to\_bin}. As we mentioned, the encoding is less performance-critical for most of the applications
+only two methods that the \texttt{SDSL} uses for encoding and decoding namely \texttt{bin\_to\_nr(bin)} and
+\texttt{nr\_to\_bin(k, nr)}. As we mentioned, the encoding is less performance-critical for most of the applications
 as encoding is done only once when constructing bit vector. This is why we focused more on the decoding
 part of the implementation.
 
@@ -114,6 +114,10 @@ search using the \texttt{SIMD} instructions. These can be used to do 4 compariso
 special 128-bit register. In practice, we found that sequential search using the \texttt{SIMD}
 instructions leads to the best results for smaller block sizes. Possible implementations that we
 tested, follow in listings \ref{code:linear}, \ref{code:linearSimd} and \ref{code:binary}.
+The naming convention adheres to \texttt{SDSL} naming of $k$ for class, $nr$ for offset.
+To also simplify naming, if block $B$ was encoded using division to subblocks $B_1$ and
+$B_2$ such that $B=B_1\cdot B_2$ then we call the $B_1$ the \textit{left sub-block} and
+consequently its class $\text{left\_k}$ while $B_2$ is called \textit{right sub-block}.
 
 \lstset{language=C++,caption={Linear search for classes of sub-blocks},label=code:linear}
 \begin{lstlisting}
@@ -189,7 +193,7 @@ uint32_t get_left_class(uint8_t k, uint32_t nr)  {
 
 \paragraph{Choosing the sub-problem size}
 
-In previous chapter, we noted that our new method can take encoding/decoding subroutines
+In previous chapter, we noted that our new method can take encoding and decoding subroutines
 of sizes $b_1$ and $b_2$ and combine them together to obtain routine for encoding and
 decoding of size $b_1+b_2$. Thus it is up to us, how we obtain the decoding for block sizes
 bigger than 15. As it is not possible to obtain the block size 30 using table method,
@@ -197,8 +201,8 @@ it is quite reasonable to obtain this solution using combination of two sub-rout
 size 15. To obtain block size 63, however, there are more possible options. We may combine
 solution for 1 bit and 62 bits and then obtain 62-bit block size using combination of
 solution for block size 31. On the other hand, it may be more beneficial, to do 63-bit
-block size by splitting it into 3 bits and 60 bits. To get a viable combination, we
-tried several promising combinations and microbenchmarked it.
+block size by splitting it into 3 bits and 60 bits. Thus, before implementing these into
+\texttt{SDSL}, we explored and tried several promising combinations and microbenchmarked them.
 
 \subsection{Experimental results}
 
@@ -260,8 +264,12 @@ binary search and linear scan enhanced by \texttt{SIMD} instructions. In order t
 solution for 127 bit block size, we used the 128 bit type \texttt{\_\_uint128\_t} provided by both
 \texttt{GCC} and \texttt{Clang} compilers. This type is implemented on platform \texttt{x86\_64}
 as a combination of two 64 bit numbers. We compared these results with the table decoding specialization
-in \texttt{SDSL} and with on the fly decoding for all the other block sizes. The results we obtained
-are shown in Fig.~\ref{obr:simple_benchmark}.
+in \texttt{SDSL} and with on the fly decoding for all the other block sizes. The data we run the decoding
+on were radomly generated. To generate them, we picked 10\,000 pairs of class and offset by first randomly
+picking class of the block and then the offset along this class. The results we obtained are shown in
+Fig.~\ref{obr:simple_benchmark}. Although, these tests are not made on real life data, they were mainly
+used as an indication which implementations are interesting and should be the best candidates for further
+evaluation.  
 
 \paragraph{Bit vector on real data}
 
@@ -276,7 +284,6 @@ to find significant practical usability for other access patterns. As a baseline
 bit specialized implementation already implemented in \texttt{SDSL} that uses the table decoding
 method. We present the measured results of our and the original implementation in
 Fig.~\ref{obr:benchmark_sdsl_new_method}.
-
 \begin{figure}
 	\centerline{
 		\includegraphics[width=\textwidth, height=0.7\textheight]{images/benchmark_sdsl_new_method}
@@ -286,15 +293,14 @@ Fig.~\ref{obr:benchmark_sdsl_new_method}.
 	}
 	\label{obr:benchmark_sdsl_new_method}
 \end{figure}
-
-There are several interesting things to observe on these results. We can see that our new implementation
+There are several interesting things to observe in these results. We can see that our new implementation
 beats older implementations on almost all block sizes and all types of data. We can observe that the
 results are more clear on random data and DNA sequence. On web data however, the difference is less
 noticable. We attribute this behaviour to the fact, that was observed by \cite{gog2014optimized},
-creators of this dataset. As they observed, the number of uniform blocks (full of either zeroes or ones)
+creators of this dataset. They observed that the number of uniform blocks (full of either zeroes or ones)
 is much bigger in \texttt{WT-WEB} data than in \texttt{WT-DNA}. For block size 63, they observed ratio of
 uniform blocks in \texttt{WT-WEB-1GB} to be 84\% compared to 28\% in \texttt{WT-DNA}. As the uniform
-blocks are decoded trivially in both implementations, this creates less opportunities for our implementation
+blocks are decoded trivially in both implementations, this makes less opportunities for our implementation
 to save time.
 
 \paragraph{Bit vector in FM-index}
@@ -351,7 +357,7 @@ usage. Options for this sampling ratio are the powers of 2 from 4 up to 256.
 	\label{obr:benchmark_sdsl_extract}
 \end{figure}
 
-Benchmarking of $\locateOp$ again uses a methodology proposed by \cite{ferragina2009compressed} 
+Benchmarking of operation $\locateOp$ again uses a methodology proposed by \cite{ferragina2009compressed} 
 (Section 5.3). This consists of at first locating random patterns of length 5 in the text such
 that 2 to 3 millions of occurences are found in the text.
 
@@ -366,13 +372,13 @@ that 2 to 3 millions of occurences are found in the text.
 
 \paragraph{Correctness}
 
-We wanted to make sure that our implementation is also correct. We used mainly two types of tests
-for this purpose. The first are the tests of $\access$, $\rank$ and $\select$ functionality in
-\texttt{SDSL} that run mainly on smaller bit vectors and also special cases that do not happen
-often in practice such as bit vector full of zeroes/ones. The second type of tests used was the
-benchmark running on wavelet trees of real data. Alongside the individual timings, this benchmark
-produces also the checksum the sum of all the results of the $\access$, $\rank$ and $\select$
-operations.
+We wanted to make sure that our implementation is not only as fast possible but also correct. We
+used mainly two types of tests for this purpose. The first are the tests of $\access$, $\rank$
+and $\select$ functionality in \texttt{SDSL} that run mainly on smaller bit vectors and also cover
+special cases that do not happen often in practice such as bit vector full of zeroes/ones. The
+second type of tests used was the benchmark running on wavelet tree representation of real data.
+Alongside the individual timings, this benchmark produces also as checksum the sum of all the
+results of the $\access$, $\rank$ and $\select$ operations.
 
 \section{Hybrid encoding}
 
