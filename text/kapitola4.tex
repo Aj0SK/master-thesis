@@ -48,7 +48,7 @@ can be answered using the binary search and $\rank$ functionality, the first par
 binary search between precomputed values of $\rank$, then to do the $\select$ inside of the superblock.
 This demonstrates, how the size of superblock can be used to balance the ratio of space used and the
 speed of the $\access$, $\rank$ and $\select$ methods. Although size of superblock is one of the parameters
-of \texttt{rrr\_vector}, we did not made any changes to the preset number of blocks per superblock that is
+of \texttt{rrr\_vector}, we did not make any changes to the preset number of blocks per superblock that is
 set in \texttt{SDSL} to 32.
 
 We decided to use the 15-bit specialization as an underlying solution for the encoding and decoding of
@@ -63,7 +63,7 @@ part of the implementation.
 
 \paragraph{Breaking decoding into sub-problems}
 
-When implementing our decoding routine, we put most of our focus on the process of dividing problem to
+When implementing our decoding routine, we put most of our focus on the process of dividing problem into
 sub-problems of smaller size. This is a part, where we obtain pairs $(c_1, o_1)$ and $(c_2, o_2)$
 from the encoded pair $(c, o)$ and call another decoding subroutine on these two pairs.
 There are various reasons why we focus on this part of the algorithm. The first one is that for smaller
@@ -71,8 +71,7 @@ blocks solving the sub-problems is done using the table approach which is very f
 made faster as it consists only of one table lookup. The second one is that this part is
 inherently blocking us from solving the sub-problems. Even though sub-problems may be potentially
 solved in parallel (by instruction-level parallelism), this part is harder to parallelize. Let us
-now break down the process of dividing problem into sub-problems into 3 steps:
-
+now break down the process of dividing problem into sub-problems into following 3 steps:
 \begin{enumerate}
 	\item Finding the class pair $(c_1, c_2)$.
 	\item Counting the number of possibilities for first and second sub-block $\text{comb}_1, \text{comb}_2$.
@@ -217,7 +216,7 @@ and include many types of data such as DNA sequences, \texttt{C} and \texttt{Jav
 \texttt{Linux} and \texttt{GCC} projects as well as English texts from the Gutenberg project.
 More information about this data such as some statistics about the compressibility and much
 more can be found in section 4.2 of \cite{ferragina2009compressed}. We only provide information
-neccessary to explain the measured phenomenons later when exploring the results of our benchmarks.
+necessary to explain the measured phenomenons later when exploring the results of our benchmarks.
 
 \paragraph{RRR microbenchmarks}
 
@@ -385,23 +384,24 @@ results of the $\access$, $\rank$ and $\select$ operations.
 \subsection{Implementation}
 
 Implementing hybrid encoding required changes to more than encoding and decoding
-subroutines. The first neccessary change is addition of hybrid cutoff parameter
-to the \texttt{rrr\_vector} class. The second change relates to the way how we work
-with superblocks. When computing $\rank$ of a bit in particular block, we can still binary
-search for the superblock where the $i$-th one is located. To linearly search for a result
-inside of the superblock, we need only information from the array of classes $C$.
-This is because this array stores the number of ones in the blocks and we can linearly
-search for the answer using successive entries of $C$. When we overrun the block, where
-the result is located, we go back and find finally answer to $\rank$ inside of a
-single block. To locate the beginning of the block, we take the offset of this superblock
-in $O$ and add the offset of this block inside of the superblock. The offset from the
-beginning of superblock can be counted along with the linear search for $\rank$ result.
-With cutoff in place, however, we are not able to linearly scan through the superblock
+subroutines. The first necessary change is addition of hybrid cutoff parameter
+to the \texttt{rrr\_vector} class. The second change, more impactful on a runtime
+of \texttt{rrr\_vector}, changes how we work inside of a superblock. Until now, when
+accessing $i$-th bit, we would find the block where the bit is located. To decode the
+block and thus obtain this bit, we would need its class and offset. Getting class
+is easy as it is located on index $\floor{i/b}$ in array $C$ at an offset that can be easily
+computed as $C$ contains elements of the fixed size. Offset is also stored on index
+$\floor{i/b}$ in array $O$ but on otherwise unknown offset. To find the offset in array $O$,
+we first use the array $P$ that stores offsets to beginnings of superblocks. To continue
+further along the superblock, we just need to shift along the blocks preceding the one
+we are interested in. As we shown in TODOchapter2, we can do this shifting just using the
+information in array $C$ as to shift over $k$-th block, we need to shift by $$\ceil{\log_2 {b\choose C[k]}}$$
+bits. With cutoff in place, however, we are not able to linearly scan through the superblock
 only using information contained in $C$. This is because now, for some classes, $C$ does
-not store the number of ones in the block. Thus when we are linearly searching for the result
-of $\rank$ query along the block, we need to also from time to time count number of ones
-for some block in $O$. This creates some additional memory accesses that may slow down the
-hybrid implementation.
+not store the number of ones in the block. Thus when we are shifting across the superblock,
+we need to also from time to time access the array $O$, to get the representation of a hybridly
+encoded block and count the true number of ones in it. This creates some additional memory accesses
+that may slow down the hybrid implementation.
 
 \subsection{Experimental results}
 
