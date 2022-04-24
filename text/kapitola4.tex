@@ -381,6 +381,8 @@ results of the $\access$, $\rank$ and $\select$ operations.
 
 \section{Hybrid encoding}
 
+% TODO: tu su len zakladne myslienky, ktore chcem ukazat, zatial to nie je hotove
+
 \subsection{Implementation}
 
 Implementing hybrid encoding required changes to more than encoding and decoding
@@ -463,6 +465,44 @@ int rank(int i)
 }
 \end{lstlisting}
 
+\paragraph{Hybrid version for balanced sequences}
+
+The major change from the previous version of hybrid encoding are two helper
+functions that are used for mapping or as we call it compressing and decompressing
+the blocks class before any of its use.
+
+\lstset{language=C++,caption={Compressing blocks class},label=code:hybrid_valley_compress}
+\begin{lstlisting}
+int compress_class(int k) const {
+	if (!is_hybrid_impl) return k;
+	if (k < cut_from) {
+		return k;
+	}
+	else if (k <= cut_to) {
+		return cutoff;
+	}
+	else {
+		return k-(cut_to-cut_from+1);
+	}
+}
+\end{lstlisting}
+
+\lstset{language=C++,caption={Decompressing blocks class},label=code:hybrid_valley_decompress}
+\begin{lstlisting}
+int decompress_class(int k) const {
+	if (!is_hybrid_impl) return k;
+	if (k < cut_from) {
+		return k;
+	}
+	else if (k == cutoff) {
+		return cut_to;
+	}
+	else {
+		return k+(cut_to-cut_from+1);
+	}
+}
+\end{lstlisting}
+
 \subsection{Experimental results}
 
 \begin{figure}
@@ -474,3 +514,5 @@ int rank(int i)
 	}
 	\label{obr:benchmark_sdsl_hybrid}
 \end{figure}
+
+% TODO: FM-indexove grafy
