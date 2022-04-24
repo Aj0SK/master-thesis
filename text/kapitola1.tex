@@ -11,8 +11,8 @@ of \textit{succinct data structures} focuses on representing data using as littl
 space as possible but at the same time tries not to hurt the time complexity and
 performance of methods that these structures support. In this field, data structures for many
 varied problems have been devised such as succinct dictionaries~\citep{raman2007succinct},
-fenwick tree~\citep{bille2017succinct}, trie~\citep{grossi2015fast} or various text indexes.
-While many of the resulting structures give some solid theoretical bounds on the used space,
+Fenwick tree~\citep{bille2017succinct}, trie~\citep{grossi2015fast} or various text indexes.
+While many of the resulting structures come with solid theoretical bounds on the used space,
 others look into real-world space usage and performance.
 
 Succinct data structures are very helpful in scenarios where we work with massive
@@ -28,12 +28,13 @@ instead of the slower disk). Thus, even if they use slower, more advanced concep
 runtime may decrease due to the lower amount of slow \textit{I/O operations}.
 
 In this work, we are mainly concerned with \textit{bit vector}. One of the simplest
-data structures that represents the sequence of zeroes and ones while supporting the
-methods $\access$, $\rank$ and $\select$. Let us have a bit sequence $S$ and a bit
-vector $B$ built on top of $S$. Using method $\access(i)$ over the $B$ simply returns
-the $i$-th symbol in $S$. Method $\rank_c(i)$ returns the number of occurrences of
-symbol $c$ in $S$ up to the $i$-th index. Method $\select_c(i)$ on the other hand
-returns the index of $i$-th occurrence of symbol $c$ in $S$.
+data structures that represents a sequence of zeroes and ones while supporting the
+following methods:
+\begin{itemize}
+\item $\access(i)$ - returns the $i$-th symbol of the sequence,
+\item $\rank_c(i)$ - returns the number of occurrences of symbol $c$up to the $i$-th index
+\item $\select_c(i)$ - returns the index of $i$-th occurrence of symbol $c$ in the sequence.
+\end{itemize}
 
 The reason behind our focus on bit vector and particularly its compressed version
 is that it is one of the main building blocks of many succinct data structures.
@@ -42,63 +43,72 @@ In the next sections, we introduce some of its interesting and useful applicatio
 \section{Application 1: Sparse array}
 
 Let $A$ be an array of $N$ elements each taking $k$ bits of space. We shall be interested in
-accessing the $i$-th element of $A$. For simplicity, we assume that the elements of array may
+accessing the $i$-th element of $A$. For simplicity, we assume that the elements of the array may
 not change after the construction. A straightforward representation of this array takes $N\cdot k$
-bits of space. However, imagine a scenario where significant portion of the array is empty
-and just a handful of elements are filled in. Take for example a sparse vector of numbers,
+bits of space. However, imagine a scenario where a significant portion of the array is empty
+and just a handful of elements are present. Take for example a sparse vector of numbers,
 where most of the elements are 0. Then we could use a more space-efficient approach.
-Let us assume that from $N$ elements only $n$ are non-default/non-zero and also that $n\ll N$.
+Let us assume that only $n$ out of $N$ elements are present and also that $n\ll N$.
+
 First approach using the sparseness of an array is to store only the non-default elements as
-pairs $(\text{position}, \text{value})$ where $\text{position}$ is an index where $\text{value}$
-is located in $A$. This representation of pairs consumes $n\cdot (k+\log n)$ bits of space.
-If we just store the pairs sorted by the position, accessing $i$-th element takes time $O(\log n)$.
-We may use the hash table to obtain the constant time solution but this comes with additional
-memory overhead. The alternative approach using the bit vector is to store non-default elements in
+pairs $(\text{position}, \text{value})$, which takes $n\cdot (k+\ceil{\log n})$ bits of space.
+If we just store the pairs sorted by the position, accessing the $i$-th element takes $O(\log n)$ time.
+
+We may use a hash table to obtain a constant time solution but this comes with additional
+memory overhead.
+
+An alternative approach using the bit vector is to store non-default elements in
 a packed array $P$ of length $n$ and size $nk$ bits. Alongside $P$ we store a bit vector $B$ of length
 $N$ where
 \[
    B[i]=
 \begin{cases}
    1,& \text{if $A[i]$ is occupied} \\
-   0,& \text{if $A[i]$ is empty/default value}
+   0,& \text{if $A[i]$ is empty/default value.}
 \end{cases}
-\].
+\]
 
-Using this representation of $A$, if we want to access $i$-th element in $A$, we first check for
+Using this representation of $A$, if we want to access the $i$-th element, we first check for
 the value of $B[i]$. If it is zero, we return the default value. If it is one, we need to find
-how many ones are preceding this particular one in $B$ to locate where in array $P$ our non-default
-value is placed. For this, we may use the $\rank_1$ method. Note, that method $\select_1$ can
-be used to obtain the position of $i$-th non-default value in $A$. The total space used by this
-representation is $N+n\cdot k+R$ where $R$ is the space needed to support an efficient $\rank$ query.
-As we shall show in section~\ref{section:rank}, $\rank$ can be implemented in constant time with
-sublinear space overhead, i.e., $R = o(N)$. If we are provided with bit vector implementation along
-with $\access$ and $\rank$ methods we are able to reduce the total space used from $k\cdot N$ to
-$N+n\cdot k+o(N)$ bits. Note that in practice, for really small number of non-default values, the
-sparse array is still more interesting solution, however, bit vector provides us with a solution that
-is often interesting in practice.
+how many ones are preceding this particular one in $B$ to locate where our value is placed in
+array $P$. For this, we may use the $\rank_1$ method. Similarly, to obtain the position of $i$-th
+non-empty value in $A$, we use $\select_1$.
+
+
+The total space used by this representation is $N+n\cdot k+R$ where $R$ is the space needed to
+support an efficient $\rank$ query. As we shall show in Section~\ref{section:rank}, $\rank$ can
+be implemented in constant time with sublinear space overhead, i.e., $R = o(N)$. If we are provided
+with bit vector implementation along with $\access$ and $\rank$ methods we are able to reduce the
+total space used from $k\cdot N$ to $N+n\cdot k+o(N)$ bits. Note that in practice, for a really small
+number of non-default values, the hashtable representation takes up less space, however, bit
+vector provides us with a solution that is usable for scenarios when $A$ is mediumly filled in,
+e.g. $n/N>0.10$.
 
 \section{Application 2: Storing elements of non-uniform length}
 
 Let us consider another problem of representing an array of elements that are of variable length.
 This type of elements can often arise in succinct data structures when trying to
-optimise the amount of space used. An example of this is a \textit{Huffman code}
-proposed by \cite{huffman1952method} that constructs the optimal code for symbols based
-on the frequencies with which the symbols occur. This works in a way that more frequent
-symbols are assigned bit code that is shorter while less frequent symbols get a longer code.
+optimise the amount of space used. An example of this is a \textit{Huffman code} \citep{huffman1952method}
+that constructs the optimal code for symbols based on the symbol frequencies. More frequent
+symbols are assigned shorter code while less frequent symbols get longer code.
 Even though we can store these elements one after another in memory, with the variable-length
-elements, we do not have an easy and fast way to tell at which offset from the beginning of the
-array the $i$-th is element located. Let us assume that we have $n$ elements of variable length.
-First solution is to allocate the array of length $nk_{MAX}$ bits where $k_{MAX}$ is the number
-of bits used for the element with the longest bit representation. This enables constant time access
-but wastes a lot of space. The second possible solution is to allocate a bit array $R$ where
-the elements are stored one after another in their raw bit representation. To locate the $i$-th element
-we store alongside $R$ a helper array $P$. Number on $i$-th position is the index where the $i$-th
-element begins in $R$. This helper array consumes at least $O(n\log n)$ bits as every entry
-contains the number that is the index into the array $R$. This helper array can be replaced by bit vector.
-The idea is to store the raw sequence of bits that store the elements one after another as in previous
-solution. On top of that, we shall use a helper bit vector of the same size. This bit vector has ones on
-places where the representation of some element starts and zeroes on all the other places. Example
-of this representation can be seen in Fig.~\ref{obr:VariableSizedElements}.
+elements, we do not have an easy and fast way to tell where is the $i$-th element located.
+
+Let us assume that we have $n$ elements of variable length. The first solution is to allocate
+the array of length $nk_{MAX}$ bits where $k_{MAX}$ is the number of bits used for the element
+with the longest bit representation. This enables constant time access but wastes a lot of space.
+
+A second possible solution is to allocate a bit array $R$ where the elements are stored one after
+another in their raw bit representation. To locate the $i$-th element we store alongside $R$ a
+helper array $P$. Number on $i$-th position is the index where the $i$-th element begins in $R$.
+This helper array consumes at least $\Theta(n\log n)$ bits as every entry contains an index into
+the array $R$.
+
+This helper array can be replaced by bit vector. The idea is to store
+the raw sequence of bits that store the elements one after another as in previous solution. On
+top of that, we shall use a helper bit vector of the same size. This bit vector has ones on places
+where the representation of some element starts and zeroes on all the other places. Example of
+this representation can be seen in Fig.~\ref{obr:VariableSizedElements}.
 
 Identifying the beginning of $i$-th element now boils down to efficiently locating the
 $i$-th one in the helper bit vector. If we are provided with the bit vector implementation,
