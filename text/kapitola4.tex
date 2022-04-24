@@ -425,7 +425,7 @@ int rank(int i)
 	uint16_t c = C[block_idx];
 
 	uint16_t block_length = rrr_helper::space_for_class(c);
-	uint32_t o = rrr_helper::get_block_offset(O, offset, block_length);
+	uint32_t o = rrr_helper::get_blocks_offset(O, offset, block_length);
 	uint16_t popcnt  = __popcount(rrr_helper::nr_to_bin(c, o) << (32-off));
 	return rank + popcnt;
 }
@@ -442,7 +442,7 @@ int rank(int i)
 	for (int j = superblock_idx*BLOCKS_PER_SUPERBLOCK; j < block_idx; ++j) {
 		uint16_t r = C[j];
 		if (r >= c_k) {
-			uint32_t o = rrr_helper::get_block_offset(O, offset, BLOCK_SIZE);
+			uint32_t o = rrr_helper::get_blocks_offset(O, offset, BLOCK_SIZE);
 			rank += __popcount(btnr);
 		}
 		else {
@@ -457,7 +457,7 @@ int rank(int i)
 	uint16_t c = C[block_idx];
 
 	uint16_t block_length = rrr_helper::space_for_class(c);
-	uint32_t o = rrr_helper::get_block_offset(O, offset, block_length);
+	uint32_t o = rrr_helper::get_blocks_offset(O, offset, block_length);
 	uint16_t popcnt  = __popcount(rrr_helper::nr_to_bin(c, o) << (32-off));
 	return rank + popcnt;
 }
