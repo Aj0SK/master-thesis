@@ -1,31 +1,29 @@
 \chapter{Introduction to succinct data structures}
 \label{kap:kap1}
 
-% TODOs: fixnut indexovanie, pridat viac prikladov pre succinct DS 
-
 \section{Motivation}
+
+% TODOs: fixnut indexovanie, pridat viac prikladov pre succinct DS 
 
 In many applications, the amount of data is so significant that our choice of
 the data structures we use is heavily influenced by their space usage. The field
 of \textit{succinct data structures} focuses on representing data using as little
 space as possible but at the same time tries not to hurt the time complexity and
-performance of methods that these structures support. In this field, data structures for many
-varied problems have been devised such as succinct dictionaries~\citep{raman2007succinct},
-Fenwick tree~\citep{bille2017succinct}, trie~\citep{grossi2015fast} or various text indexes.
+performance of methods that these structures support. In this field, many data structures
+for varied problems have been devised such as succinct dictionaries~\citep{raman2007succinct},
+succinct trees (Fenwick tree by \cite{bille2017succinct}, trie by \cite{grossi2015fast}),
+graphs \citep{farzan2013succinct} or text collections \citep{ferragina2000opportunistic}.
 While many of the resulting structures come with solid theoretical bounds on the used space,
 others look into real-world space usage and performance.
 
-Succinct data structures are very helpful in scenarios where we work with massive
-amount of data. In these scenarios, using the ordinary data structures may limit us to place
-the entire representation of data structure onto the slower type of memory storage. As succinct
-data structures need to do the work of regular data structures but with additional constraints
-on space used, they are often slower and more complicated than the alternatives using more
-space. This is mainly because they do more work behind the scene and at the same time contain
-concepts and computation patterns that are slow on modern computers. However, as we hinted
-there are cases in which usage of space-efficient data structures speeds up the overall
-running time as they enable us to store the data in a faster type of memory (e.g. fast RAM
-instead of the slower disk). Thus, even if they use slower, more advanced concepts, the overall
-runtime may decrease due to the lower amount of slow \textit{I/O operations}.
+Succinct data structures are very helpful in scenarios where we work with a massive amount of
+data. In these scenarios, using the ordinary data structures may force us to place
+the entire representation of data structure onto the slower type of memory storage, thus
+reducing the usability of our data structure and often completely ruining its runtime due to
+high amount of slow \textit{I/O operations}. Even if a succinct version of the data structure
+may help us to store the data in a faster type of memory (e.g. fast RAM instead of the slower disk),
+we pay some price for using the succinct data structure. It comes mostly in the form of more
+complex implementation.
 
 In this work, we are mainly concerned with \textit{bit vector}. One of the simplest
 data structures that represents a sequence of zeroes and ones while supporting the
@@ -149,14 +147,14 @@ continuous subsequence of $S$.
 
 \textit{FM-index}, proposed by \cite{ferragina2000opportunistic} is a succinct data structure that
 is in some aspects similar to suffix array. FM-index can find the pattern in the preprocessed text
-in time complexity $\BigO(|P|)$. Its space usage depends on the compressibility of the text but the
+in time complexity close to linear from $|P|$. Its space usage depends on the compressibility of the text but the
 resulting space used by FM-index is in many cases smaller than the space used for the original text $T$.
 For instance, FM-index over the DNA sequence can take just 30--40\% of the space taken by the original text
 $T$ as was observed by \cite{ferragina2001experimental}.
 
 In the rest of this section, let us now explain how the FM-index is constructed, how we search in an
 FM-index and how/why FM-index uses rank computation on general strings, which are implemented via
-wavelet trees based on bitvecors.
+wavelet trees based on bit vectors.
 
 \paragraph{Burrows-Wheeler transformation}
 
@@ -178,20 +176,20 @@ is what we call the BWT of $T$. Note that the sequence $F$ can be obtained from 
 sorting all the characters in $\mathit{T_{BWT}}$. $F$ consists of runs of symbols that are
 sorted according to the lexicographical ordering of alphabet symbols. We shall use the helper
 sequence $\Count$ where $\Count[c]$ is number of occurrences of symbols smaller than $c$.
-Note that the run of symbol $c$ in $F$ starts at the index $\Count[c]+1$.
+Note that the run of symbol $c$ in $F$ starts at the index $\Count[c]$.
 
 \begin{figure}
 	\centerline{
 	\begin{tabular}{l|c|ccccc|c|}
 	\cline{2-8}
 	  & $F$ & \multicolumn{5}{l|}{} & $L$   \\ \cline{2-8} 
-	1 & {\tt \$}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt b}}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt n}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}	& {\color[HTML]{C0C0C0} \tt n}  & {\tt a}  \\ \cline{2-8} 
-	2 & {\tt a}  		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt \$}} 	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt b}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt n}}	& {\color[HTML]{C0C0C0} \tt a}  & {\tt n}  \\ \cline{2-8} 
-	3 & {\tt a}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt n}}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt \$}}& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt b}}	& {\color[HTML]{C0C0C0} \tt a}	& {\tt n}  \\ \cline{2-8} 
-	4 & {\tt a}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt n}}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt n}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}	& {\color[HTML]{C0C0C0} \tt \$}	& {\tt b}  \\ \cline{2-8} 
-	5 & {\tt b}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt n}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt n}}	& {\color[HTML]{C0C0C0} \tt a}  & {\tt \$} \\ \cline{2-8} 
-	6 & {\tt n}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt \$}}& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt b}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}	& {\color[HTML]{C0C0C0} \tt n}  & {\tt a}  \\ \cline{2-8} 
-	7 & {\tt n}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt n}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt \$}}& {\color[HTML]{C0C0C0} \tt b}  & {\tt a}  \\ \cline{2-8} 
+	0 & {\tt \$}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt b}}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt n}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}	& {\color[HTML]{C0C0C0} \tt n}  & {\tt a}  \\ \cline{2-8} 
+	1 & {\tt a}  		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt \$}} 	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt b}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt n}}	& {\color[HTML]{C0C0C0} \tt a}  & {\tt n}  \\ \cline{2-8} 
+	2 & {\tt a}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt n}}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt \$}}& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt b}}	& {\color[HTML]{C0C0C0} \tt a}	& {\tt n}  \\ \cline{2-8} 
+	3 & {\tt a}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt n}}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt n}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}	& {\color[HTML]{C0C0C0} \tt \$}	& {\tt b}  \\ \cline{2-8} 
+	4 & {\tt b}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt n}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt n}}	& {\color[HTML]{C0C0C0} \tt a}  & {\tt \$} \\ \cline{2-8} 
+	5 & {\tt n}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt \$}}& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt b}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}	& {\color[HTML]{C0C0C0} \tt n}  & {\tt a}  \\ \cline{2-8} 
+	6 & {\tt n}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}		& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt n}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt a}}	& \multicolumn{1}{c|}{{\color[HTML]{C0C0C0} \tt \$}}& {\color[HTML]{C0C0C0} \tt b}  & {\tt a}  \\ \cline{2-8} 
 	\end{tabular}
 	\hspace{4em}
 	\begin{tabular}{l l l}
