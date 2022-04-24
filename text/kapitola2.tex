@@ -86,14 +86,14 @@ superblock into blocks of size $(\log n)/2$. We precompute $\rank$s for all of t
 smaller blocks, but to save space, we only precompute it from the beginning of the corresponding
 superblock.
 
-Now, when queried for $\rank_1$ of some position, we know in which superblock this
-position is located, so we know what is the number of ones up to the beginning of the superblock.
-We also precomputed what is the number of ones from the beginning of the superblock up to this
-block. The last step is to find out the number of ones that are before the queried index inside of
-this small block. This can be done by simple table lookup in constant time.
+Now, when queried for $\rank_1$ of some position, we combine:
+1. Number of ones up to the beginning of its superblock.
+2. Precomputed number of ones from the beginning of the superblock up to its block.
+3. The number of ones that are before the queried position inside of its block (done by simple
+table lookup in constant time).
 
 The space overhead that this solution adds consists of three parts:
-1.Precomputed $\rank$ for every
+1. Precomputed $\rank$ for every
 superblock. Number of superblocks is $\BigO(n/\log^2 n)$ and we need $\BigO(\log n)$ bits to store every
 single $\rank$ value so the total amount is
 \begin{equation}
@@ -130,14 +130,16 @@ of the block.
 \subsection{Select}
 \label{section:select}
 
-It is important to note that in bit vector we are again interested in methods $\select_0$
-and $select_1$. Although there is not a simple way how to convert the result of one one to
+In case of a $\select$ over bit vector, we are again interested in two methods $\select_0$
+and $select_1$. Although there is not a simple way how to convert the result of one to
 another just like with $rank$, we shall be interested mainly in $select_1$ version as the
 other one can be easily implemented using the same ideas. The important property of the
 $\select$ method is that it works much like an inverse to $\rank$. This is given by the fact that
-$$\rank_c(\select_c(i)) = i$$. Thanks to $\rank$ being a nondecreasing function, it is possible
+$$\rank_c(\select_c(i)) = i.$$
+
+Thanks to $\rank$ being a nondecreasing function, it is possible
 to binary search for the result of $\select_c(i)$ if we have an efficient implementation of
-$\rank$. This can be nicely combined with the solution from the previous section~\ref{section:rank}.
+$\rank$. This can be nicely combined with the solution from the previous section.
 At first, we binary search for the solution in the samples of $\rank$ stored in superblocks. When we
 identify the correct superblock of length $k$ bits, we simply linearly scan for the solution. This
 solution is not asking for any additional memory on top of the space used for $\rank$. The answer
@@ -148,14 +150,18 @@ can see that the binary search may create more cache misses than the solution fo
 
 There is also a constant time solution for $\select$ using the sublinear memory overhead.
 This solution is just like solution for the constant time $\rank$, based on a division
-to superblocks and blocks. We begin by precomputing $select(i)$ for every $i$ that is
+to superblocks and blocks.
+
+We begin by precomputing $select(i)$ for every $i$ that is
 multiple of $t_1=...$. These precomputed values take $\BigO(n/\log\log n)$ bits of space.
 This also splits the bit sequence into superblocks of possibly variable length such that
 every of them contains exactly $t_1$ ones (possibly except for the last). There are
 now two categories of superblocks. The ones called \textit{long} that are of size bigger
 than $t_1^2$. In these superblocks, we can store the positions of ones as they are sparse
 and there is not many of them as they are long. The total memory used is $\BigO(n/t_1^2\cdot t_1\cdot
-\log n) = \BigO(n/\log\log n)$. Then there are superblocks shorter than $t_1^2$ called
+\log n) = \BigO(n/\log\log n)$.
+
+Then there are superblocks shorter than $t_1^2$ called
 \textit{short}. We apply the idea that we already used for the original bit sequence. Inside of
 every such superblock, we precompute the $\select$ from the beginning of the superblock for every
 multiple of $t_2=(\log\log n)^2$. These precomputed values are small as they are only from the
@@ -168,6 +174,7 @@ in the previous part to conclude that this takes $\BigO(n/t_2^2\cdot t_2\cdot \l
 of bits. To take care of the blocks of size smaller than $t_2^2$ we can precompute a table of all
 the possible ways how the block may look and all the possible $\select$ queries over it with
 their $\select$ result. This is possible as $t_2^2 = o(n)$ and give us a constant time $\select$.
+
 When answering $select_1(i)$ we can easily found in which superblock the answer is located. If this
 is a long superblock, we just look to the precomputed positions of ones in the superblock. The matter
 is more complicated if we fall into a short superblock. We then need to find, in which block the answer
@@ -178,15 +185,18 @@ one in the block, we are interested in.
 \section{Compressed representation}
 \label{section:compressed_bv}
 
-The main idea of \textit{RRR}, a widely used implementation of bit vector proposed by
-\cite{raman2007succinct} is to split the bit sequence into blocks of constant length
-$b$. This length is a parameter of the algorithm. After this division, instead
+In this section, we introduce a compressed representation of a bit vector. Its goal is to
+compress the bit sequence and provide the $\access$ method over the original bit sequence.
+
+One of the most popular implementations of a compressed bit vector is \textit{RRR} proposed by
+\cite{raman2007succinct}. The main idea of RRR is to split the bit sequence into blocks
+of constant length $b$. This length is a parameter of the algorithm. After this division, instead
 of storing a single block as a bit sequence, we store each block encoded as a pair
-of numbers $(c, o)$. Here, $c$ labels the class of the block and $o$ an offset into
-the sequence of all blocks in this particular class. In most implementations,
-$c$ is equal to the number of ones in the block. Offset is the index of block along
-the lexicographically sorted sequence of all blocks with $c$ ones. Note that class
-$c$ contains ${b\choose c}$ blocks. The offset is then bounded by $$0 \leq o < {b\choose c}$$.
+of numbers $(c, o)$, where $c$ is the number of ones in the block, called \emph{class}
+of the block and $o$ is an offset into the sequence of all blocks in this particular class.
+Offset is the index of block along the lexicographically sorted sequence of all blocks with
+$c$ ones. Note that class $c$ contains ${b\choose c}$ blocks. The offset is then bounded by
+$$0 \leq o < {b\choose c}.$$
 
 The process of obtaining $c$ and $o$ from the raw representation of block is called
 \textit{encoding}. The opposite process is called \textit{decoding}. Although we would
@@ -194,11 +204,11 @@ like both processes to be fast, we do the encoding just once, at the initial con
 of the bit vector. On the other hand, decoding is done any time we are accessing a particular
 bit in $B$ so it is more important to optimise so that decoding is as fast as possible.
 
-For smaller block sizes, such as $b\leq 15$, it is in most cases reasonable to
+For smaller block sizes, such as $b\leq 15$, it is reasonable to
 generate two helper tables. One is named $E$, used for the encoding, where we can
 index using the block casted to a number and get the offset of this particular block.
-The class can be computed trivially by counting a number of ones. The other table
-named $D$ is two dimensional. On position $D[c][o]$ we store the block that
+The class can be computed trivially by counting the number of ones. The other table
+named $D$ is two dimensional. At position $D[c][o]$ we store the block that
 is associated with pair $(c, o)$. In other words, this is a block containing $c$ ones
 and at the same time being $o$-th in the sequence of all lexicographically sorted
 blocks containing $c$ ones. Both these tables $E$ and $D$ can be computed
@@ -210,10 +220,10 @@ For smaller values of $b$, it is possible to store the tables $E$ and $D$ that h
 to encode and decode the block. For bigger $b$ it is not practical and many times
 impossible to store huge helper tables. On the other hand, the bigger block size yields a
 better compression because of smaller per block overhead. This limitation is something that
-was to some extent overcame by \cite{navarro2012fast}. They came up with the method we shall
+was to some extent overcome by \cite{navarro2012fast}. They came up with the method we shall
 call \textit{on the fly-decoding}. This method does not use helper tables $E$ and $D$ for
 encoding and decoding but instead relies on a bit by bit encoding and decoding of the block
-thus taking $\BigO(b)$ time compared to a constant time lookup with the help of table.
+thus taking $\BigO(b)$ time compared to a constant time lookup with the help of a table.
 For decoding, idea is that we decode the block from the beginning, bit by bit. On every bit,
 we consider putting a zero bit on this position and count $comb$ -- the number of all
 combinations how the block can look in this scenario. If the sequence number of the block --
