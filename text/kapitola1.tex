@@ -327,7 +327,7 @@ where
 Then it creates two strings $S_0$ and $S_1$ from $S$ by taking just symbols
 from $\Sigma_0$ and $\Sigma_1$, respectively. The left and right children of the root node
 are then built by recursively applying the same idea on subsequences $S_0$ and $S_1$ until
-we end up with trivial unary alphabet at the leaves.
+we end up with trivial unary alphabet at the leafs.
 
 \begin{figure}
 	\centerline{
@@ -343,11 +343,23 @@ we end up with trivial unary alphabet at the leaves.
 	% source at https://docs.google.com/drawings/d/1cJyda3bdTluajr3iXu1x1iL5HF0JPZqAHw6jwct9KLI/edit
 \end{figure}
 
-Both $\rank$ and $\select$ methods on the original sequence can be implemented using the tree
-traversal and $\rank$/$\select$ methods on the individual bit vectors. Another modification
-studied by \cite{makinen2005succinct} is to shape the binary tree in a way that a Huffman
-tree of the sequence symbols is shaped. Huffman tree is a tree constructed in the
-process of creating Huffman encoding of the characters contained in the sequence.
+Both $\rank_c$ and $\select_c$ methods on the original sequence can be implemented
+using $\rank$/$\select$ methods applied on bit sequences that are along the path
+from the root to the leaf containing character $c$. It follows that the number of
+$\rank$ and $\select$ queries on individual bit vectors depends on the depth of
+a leaf containing queried character $c$.
+
+If we assign to every node except the root a {\tt 0} if it is the left son and {\tt 1}
+otherwise, we can look at the wavelet tree as an assignment of a binary code to every
+alphabets character. Code of a character $c$ in some leaf node is equal to concatenation of
+bits that are contained in nodes on a path from root to the leaf node.
+
+The idea proposed by \cite{makinen2005succinct} is to shape the wavelet tree in such a way
+that a code of every character is equal to Huffman code of this character.
+
+% TODO: ze vyska je log n, aj v pripade Huffmana; average depth u Huffmana (ak by sme pristupovali k pismenam podla ich frekvencie, je H_0)
+% TODO: chcelo by to nejaky sumar, lebo uz z toho mam nafuknutu hlavu: Cize: Hladanie v FM-indexe potrebuje rank a rank v stringu sa robi cez wavelet a ten pouziva rank na bitvektoroch (pripadne, ze v kapitole 4 ukazeme, ako zlepsenie bitvektorov zlepsi vyhladavanie v FM-indexe 
+% TODO: chyba pojednanie o pamatovej zlozitosti: 1. wavelet stromzabera +/- tolko, co povodny text, 2. ak stlacime bitvektory na H_0, tak wavelet strom bude mat H_0(S) + cosi, 3. kolko zabera FM-index? za istych okolnosti H_k (+ citacie ku vsetkemu)
 
 \section{Space efficiency}
 
