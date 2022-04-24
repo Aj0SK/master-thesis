@@ -104,23 +104,18 @@ helper array $P$. Number on $i$-th position is the index where the $i$-th elemen
 This helper array consumes at least $\Theta(n\log n)$ bits as every entry contains an index into
 the array $R$.
 
-This helper array can be replaced by bit vector. The idea is to store
-the raw sequence of bits that store the elements one after another as in previous solution. On
-top of that, we shall use a helper bit vector of the same size. This bit vector has ones on places
-where the representation of some element starts and zeroes on all the other places. Example of
-this representation can be seen in Fig.~\ref{obr:VariableSizedElements}.
-
-Identifying the beginning of $i$-th element now boils down to efficiently locating the
-$i$-th one in the helper bit vector. If we are provided with the bit vector implementation,
-we can answer this using the $\select_1$ method. In chapter~\ref{kap:kap2}, we shall see how
-this method can be implemented efficiently.
+The helper array $P$ can be replaced by a bit vector of the same length as is $R$, storing ones at
+positions where some element in $R$ begins (see an example in Fig.~\ref{obr:VariableSizedElements}).
+Identifying the beginning of the $i$-th element now boils down to efficiently locating the
+$i$-th one in the helper bit vector, which can be answered using the $\select_1$ method.
+In Chapter~\ref{kap:kap2}, we shall see how this method can be implemented efficiently.
 
 \begin{figure}
 	\centerline{
 	\begin{tabular}{l|l|l|l|l|l|l|l|l|l|l|}
 	\cline{2-11}
 	\textbf{Raw binary representation} & 1          & 1 & 0 & 1 & 1          & 1 & 1          & 0 & 1 & 0          \\ \cline{2-11} 
-	\textbf{Beginning of an element}          & \textbf{1} & 0 & 0 & 0 & \textbf{1} & 0 & \textbf{1} & 0 & 0 & \textbf{1} \\ \cline{2-11} 
+	\textbf{Beginnings of an elements}          & \textbf{1} & 0 & 0 & 0 & \textbf{1} & 0 & \textbf{1} & 0 & 0 & \textbf{1} \\ \cline{2-11} 
 	\end{tabular}
 	}
 	\caption[TODO]{Raw binary representation of elements 1101, 11, 101 and 0 stored one after another.
@@ -131,50 +126,32 @@ this method can be implemented efficiently.
 \section{Application 3: FM-index}
 % sources to help understand https://www.dcc.uchile.cl/TR/2005/TR_DCC-2005-004.pdf
 
-For simplicity, in this section we assume that every text $T$ contains a special character
-{\tt \$} located only at its end that is lexicographically smaller than any other character
-contained in $T$.
-
-Let us now consider another practically interesting problem. As we shall see, solution
+Let us now consider practically more interesting application within a more complex data structure.
+As we shall see, solution
 to this problem also uses bit vector and other building blocks commonly used in succinct
-data structures. This time, we have a text $T$ and are interested in \textit{indexing} it.
-This means that if we get some pattern $P$, we would like to quickly answer questions such as
-how many times is $P$ contained in $T$ and also where in $T$ these occurrences are located.
-This is particularly useful in bioinformatics, where we can have a very long sequence of DNA and
-are interested in searching for some subsequences in it. One of the solutions that is reasonably
-fast and may be used is constructing \textit{suffix array} of $T$. Suffix array of $T$
-is data structure that stores information about the lexicographical order of suffixes of $T$.
+data structures. This time, we have a text $T$ and we are interested in \textit{indexing} it.
+After preprocessing text, we would like to quickly answer questions such as “how many times is
+some pattern $P$ contained in $T$“ and also “where in $T$ are these occurrences located“.
 
-\begin{figure}
-	\centerline{
-        \begin{tabular}{l l l}
-            i  & $S$ & suffix\\
-        \hline
-            \small 0& 7	& \tt \$ \\
-            \small 1& 6 & \tt a\$ \\
-            \small 2& 4 & \tt ana\$ \\
-            \small 3& 2 & \tt anana\$ \\
-            \small 4& 1 & \tt banana\$ \\
-            \small 5& 5 & \tt na\$ \\
-            \small 6& 3 & \tt nana\$ \\
-        \end{tabular}
-	}
-	\caption[TODO]{
-        Suffix array $S$ of $T = \mathtt{banana\$}$
-    }
-	\label{obr:suffixArray}
-\end{figure}
+This is particularly useful in bioinformatics, where we have a very long sequence of DNA and
+are interested in searching for some subsequences in it such as a \emph{read mapping}
+\citep{simpson2010efficient} problem.
 
-More precisely, on $i$-th position of suffix array $S$, it stores the starting position of
-suffix that comes $i$-th in lexicographical order. The example of suffix array is in
-Fig.~\ref{obr:suffixArray}. Searching for pattern $P$ in suffix array of $T$ uses fact that
+One of the solutions that is reasonably fast and may be used is constructing a \textit{suffix array}
+of $T$. Suffix array of $T$ is a data structure that stores information about the lexicographical
+order of suffixes of $T$. More precisely, on $i$-th position of suffix array $S$, it stores the
+starting position of suffix that comes $i$-th in lexicographical order. An example of suffix array is in
+Fig.~\ref{obr:suffixArray}. For simplicity, in this section, we assume that every text
+$T$ contains a special character {\tt \$} located only at its end that is lexicographically
+smaller than any other character contained in $T$. Searching for pattern $P$ in suffix array of $T$ uses fact that
 if $P$ is contained in $T$ it will be at the beginning of some suffixes that make up a
-continuous subsequence of $S$. Succinct data structure that is in some aspects similar to
-suffix array was proposed by \cite{ferragina2000opportunistic} and is called \textit{FM-index}.
-FM-index can find the pattern in the preprocessed text in time complexity $\BigO(|P|)$. On top
-of this, the resulting space used by FM-index can be even smaller than the space used for the original
-text $T$. This makes FM-index particularly useful for searching in very long DNA sequences where
-FM-index many times takes just 30-40\% of the space needed for the representation of original text
+continuous subsequence of $S$.
+
+\textit{FM-index}, proposed by \cite{ferragina2000opportunistic} is a succinct data structure that
+is in some aspects similar to suffix array. FM-index can find the pattern in the preprocessed text
+in time complexity $\BigO(|P|)$. Its space usage depends on the compressibility of the text but the
+resulting space used by FM-index is in many cases smaller than the space used for the original text $T$.
+For instance, FM-index over the DNA sequence can take just 30--40\% of the space taken by the original text
 $T$ as was observed by \cite{ferragina2001experimental}. We shall now look at how the FM-index
 is obtained for the text $T$.
 
