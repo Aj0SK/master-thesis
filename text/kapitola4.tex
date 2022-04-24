@@ -385,23 +385,83 @@ results of the $\access$, $\rank$ and $\select$ operations.
 
 Implementing hybrid encoding required changes to more than encoding and decoding
 subroutines. The first necessary change is addition of hybrid cutoff parameter
-to the \texttt{rrr\_vector} class. The second change, more impactful on a runtime
-of \texttt{rrr\_vector}, changes how we work inside of a superblock. Until now, when
-accessing $i$-th bit, we would find the block where the bit is located. To decode the
-block and thus obtain this bit, we would need its class and offset. Getting class
-is easy as it is located on index $\floor{i/b}$ in array $C$ at an offset that can be easily
-computed as $C$ contains elements of the fixed size. Offset is also stored on index
-$\floor{i/b}$ in array $O$ but on otherwise unknown offset. To find the offset in array $O$,
-we first use the array $P$ that stores offsets to beginnings of superblocks. To continue
-further along the superblock, we just need to shift along the blocks preceding the one
-we are interested in. As we shown in TODOchapter2, we can do this shifting just using the
-information in array $C$ as to shift over $k$-th block, we need to shift by $$\ceil{\log_2 {b\choose C[k]}}$$
-bits. With cutoff in place, however, we are not able to linearly scan through the superblock
+to the \texttt{rrr\_vector} class and reimplementation of function \texttt{space\_for\_bt(c)}
+that is used in \texttt{SDSL} to get the number of bits that are needed to store offset
+of block with class $c$. The second change, more impactful on a runtime
+of \texttt{rrr\_vector}, relates to the way how we work with superblocks. When
+computing $\rank$ of a bit in particular block, we can still binary search for
+the superblock where the $i$-th one is located. To linearly search for a result
+inside of the superblock, we need only information from the array of classes $C$.
+This is because this array stores the number of ones in the blocks and we can linearly
+search for the answer using successive entries of $C$. When we overrun the block, where
+the result is located, we go back and find finally answer to $\rank$ inside of a
+single block. To locate the beginning of the block, we take the offset of this superblock
+in $O$ and add the offset of this block inside of the superblock. The offset from the
+beginning of superblock can be counted along with the linear search for $\rank$ result.
+With cutoff in place, however, we are not able to linearly scan through the superblock
 only using information contained in $C$. This is because now, for some classes, $C$ does
-not store the number of ones in the block. Thus when we are shifting across the superblock,
-we need to also from time to time access the array $O$, to get the representation of a hybridly
-encoded block and count the true number of ones in it. This creates some additional memory accesses
-that may slow down the hybrid implementation.
+not store the number of ones in the block. Thus when we are linearly searching for the result
+of $\rank$ query along the block, we need to also from time to time count number of ones
+for some block in $O$. This creates some additional memory accesses that may slow down the
+hybrid implementation.
+
+\lstset{language=C++,caption={Rank query, SDSL implementation (pseudo-code)},label=code:binary}
+\begin{lstlisting}
+int rank(int i)
+{
+	int block_idx = i/BLOCK_SIZE;
+	int superblock_index = block_idx/BLOCKS_PER_SUPERBLOCK;
+	int offset = P[superblock_idx];
+	int rank  = R[superblock_idx]; // precomputed rank for superblock
+	for (int j = superblock_idx*BLOCKS_PER_SUPERBLOCK; j < block_idx; ++j) {
+		uint16_t r = C[j];
+		rank  += r;
+		offset += rrr_helper::space_for_class(r);
+	}
+	uint16_t off = i % BLOCK_SIZE;
+	if (!off) {
+		return rank;
+	}
+	uint16_t c = C[block_idx];
+
+	uint16_t block_length = rrr_helper::space_for_class(c);
+	uint32_t o = rrr_helper::get_block_offset(O, offset, block_length);
+	uint16_t popcnt  = __popcount(rrr_helper::nr_to_bin(c, o) << (32-off));
+	return rank + popcnt;
+}
+\end{lstlisting}
+
+\lstset{language=C++,caption={Rank query, hybrid implementation (pseudo-code)},label=code:binary}
+\begin{lstlisting}
+int rank(int i)
+{
+	int block_idx = i/BLOCK_SIZE;
+	int superblock_index = block_idx/BLOCKS_PER_SUPERBLOCK;
+	int offset = P[superblock_idx];
+	int rank  = R[superblock_idx]; // precomputed rank for superblock
+	for (int j = superblock_idx*BLOCKS_PER_SUPERBLOCK; j < block_idx; ++j) {
+		uint16_t r = C[j];
+		if (r >= c_k) {
+			uint32_t o = rrr_helper::get_block_offset(O, offset, BLOCK_SIZE);
+			rank += __popcount(btnr);
+		}
+		else {
+			rank  += r;
+		}
+		offset += rrr_helper::space_for_class(r);
+	}
+	uint16_t off = i % BLOCK_SIZE;
+	if (!off) {
+		return rank;
+	}
+	uint16_t c = C[block_idx];
+
+	uint16_t block_length = rrr_helper::space_for_class(c);
+	uint32_t o = rrr_helper::get_block_offset(O, offset, block_length);
+	uint16_t popcnt  = __popcount(rrr_helper::nr_to_bin(c, o) << (32-off));
+	return rank + popcnt;
+}
+\end{lstlisting}
 
 \subsection{Experimental results}
 
