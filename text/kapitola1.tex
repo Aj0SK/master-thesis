@@ -1,9 +1,9 @@
+% TODOs: skontrolovat indexovanie, polo-otvorene intervaly, pridat viac prikladov pre succinct DS 
+
 \chapter{Introduction to succinct data structures}
 \label{kap:kap1}
 
 \section{Motivation}
-
-% TODOs: fixnut indexovanie, pridat viac prikladov pre succinct DS 
 
 In many applications, the amount of data is so significant that our choice of
 the data structures we use is heavily influenced by their space usage. The field
@@ -241,7 +241,7 @@ From this observation, we get that the relative ordering of the same character i
 from $F$ to $L$.
 
 The search for rows where pattern $P$ is located proceeds from the end of $P$. This works by
-finding rows where suffixes $P[n\ldots], P[n-1\ldots]$ etc. are located. In every step, these
+finding rows where suffixes $P[n-1\ldots], P[n-2\ldots]$ etc. are located. In every step, these
 rows will form a continuous subsequence of rows of $M$ so we store only its beginning and end.
 This follows from the observation \ref{chapter1:fmindexprop:prop1}. Let us assume that we are
 looking for a word {\tt house} and we already found the range of rows in $M$ that have {\tt ouse}
@@ -256,33 +256,33 @@ word {\tt hashtag} or {\tt e} if the word {\tt head} was in the text. Somewhere 
 However, we already located the range where suffixes starting with {\tt ouse} are located in.
 We can look how many times {\tt h} is located before this range in $T_{BWT}$. Thanks to this
 number and the property \ref{chapter1:fmindexprop:prop2}, we know where in $F$ the subsequence
-containing the prefix {\tt house} begins.
+containing the prefix {\tt house} begins. 
 
 % TODO: mozno obrazok
 % TODO: fixnut indexovanie
 
-The process will in general proceed in these steps:
+In general, we first find the subsequence of $M$s row,
+where $P[n-1\ldots]$ is located. As this is just a one symbol $P[n-1]$ the initial subsequence is
+just a run of symbol $P[n-1]$ in $F$ given by
+\begin{align*}
+	b_{n-1}&=\Count[P[n]] \\
+	e_{n-1}&=\Count[P[n]+1].\\
+\end{align*}
+to find where $P[n-1\ldots]$ is located in $M$, we would like to locate occurrences of $P[n]$ that
+are preceded by $P[n-1]$. We thus look at the run of symbol $P[n-1]$ in $F$ that spans from $\Count[P[n-1]]$
+up to $\Count[P[n-1]+1]$. To find the sequence of rows starting with $P[n-2\ldots ]$, given by $b_{n-2}$
+and $e_{n-2}$, we need to find where it beggins and ends in the run of character $P[n-2]$ in $F$. Thanks
+to property \ref{chapter1:fmindexprop:prop2}, we just need to find the number of occurences of character
+$P[n-2]$ in $L$ up to the $b_{n-1}$, the start of previous subsequence of rows that contain $P[n-1\ldots ]$ as
+prefix and also the number of occurences of character $P[n-2]$ in $L$ up to the $e_{n-1}$ giving us 
+\begin{align*}
+	b_{n-2}&=\Count[P[n-2]] + \rank_{P[n-2]}(b_{n-1}) \\
+	e_{n-2}&=\Count[P[n-2]] + \rank_{P[n-2]}(e_{n-1}).\\
+\end{align*}
+We continue and repeat the previous step until we compute $b_0$ and $e_0$ or until $b_i=e_i$ for some $i$
+(in which case the searched word is not present in the text).
 
-\begin{itemize}
-	\item We find where $P[n]$ is located in $M$. This means setting beginning~($b_{n}$) and
-	the end~($e_{n}$) of the current subsequence to $\Count[P[n]]+1$ and $\Count[P[n]+1]$,
-	respectively.
-	\item Now, to find where $P[n-1..]$ is located in $M$, we would like to locate occurrences
-	of $P[n]$ that are preceded by $P[n-1]$. In other words, would like to find all
-	occurrences of symbol $P[n-1]$ in $L[b_{n}\ldots e_{n}]$. However, this is not trivial
-	as they can be at arbitrary places in this subsequence, even not in a continuous
-	part. Instead of searching in $L$ we look at the occurrences of symbol $P[n-1]$ in
-	$F$. Here, they are sorted and it is easy to tell, which of these are followed by
-	$P[n]$ as $i$-th occurence of character $P[n]$ in $L$ corresponds to $i$-th
-	occurence of $P[n]$ in $F$. Using this fact, we set
-	$b_{n-1} = \Count[P[n-1]] + \rank_{P[n-1]}(b_{n})$ and
-	$e_{n-1} = \Count[P[n-1]] + \rank_{P[n-1]}(e_{n})$. Here $\Count[P[n-1]]$
-	is the index where run of character $P[n-1]$ starts. $\rank_{P[n-1]}(b_{n})$
-	is number that gives us number of occurrences of character $Count[P[n-1]]$ in $L$ that
-	preceded the index $b_{n}$ (starting index of the previous subsequence).
-	\item We continue and repeat this process until we compute $b_1$ and $e_1$ or until
-	$b_i=e_i$ for some $i$ (in which case the searched word is not present in the text).
-\end{itemize}
+% TODO: pseudocode
 
 As we can see, we are not only interested in $\rank$ over a bit vector but over an arbitrary
 alphabet that we would like to use in the FM-index. In the next section, we show how we can
@@ -325,8 +325,8 @@ where
 Then it creates two strings $S_0$ and $S_1$ from $S$ by taking just symbols
 from $\Sigma_0$ and $\Sigma_1$, respectively. The left and right children of the root node
 are then built by recursively applying the same idea on subsequences $S_0$ and $S_1$ until
-we end up with trivial unary alphabet at the leafs.
-
+we end up with a trivial unary alphabet at the leaves. It follows that the depth of the
+wavelet tree is $\ceil{\log |\Sigma|}$.
 \begin{figure}
 	\centerline{
 		\includegraphics[width=0.9\textwidth, height=0.3\textheight]{images/wavelet_tree}
@@ -340,7 +340,6 @@ we end up with trivial unary alphabet at the leafs.
 	% based on https://simongog.github.io/assets/data/sdsl-slides/tutorial#23
 	% source at https://docs.google.com/drawings/d/1cJyda3bdTluajr3iXu1x1iL5HF0JPZqAHw6jwct9KLI/edit
 \end{figure}
-
 Both $\rank_c$ and $\select_c$ methods on the original sequence can be implemented
 using $\rank$/$\select$ methods applied on bit sequences that are along the path
 from the root to the leaf containing character $c$. It follows that the number of
@@ -350,10 +349,9 @@ a leaf containing queried character $c$.
 If we assign to every node except the root a {\tt 0} if it is the left son and {\tt 1}
 otherwise, we can look at the wavelet tree as an assignment of a binary code to every
 alphabets character. Code of a character $c$ in some leaf node is equal to concatenation of
-bits that are contained in nodes on a path from root to the leaf node.
-
-The idea proposed by \cite{makinen2005succinct} is to shape the wavelet tree in such a way
-that a code of every character is equal to Huffman code of this character.
+bits that are contained in nodes on a path from root to the leaf node. The idea proposed
+by~\cite{makinen2005succinct} is to shape the wavelet tree in such a way that a code of every
+character is equal to Huffman code of this character.
 
 % TODO: ze vyska je log n, aj v pripade Huffmana; average depth u Huffmana (ak by sme pristupovali k pismenam podla ich frekvencie, je H_0)
 % TODO: chcelo by to nejaky sumar, lebo uz z toho mam nafuknutu hlavu: Cize: Hladanie v FM-indexe potrebuje rank a rank v stringu sa robi cez wavelet a ten pouziva rank na bitvektoroch (pripadne, ze v kapitole 4 ukazeme, ako zlepsenie bitvektorov zlepsi vyhladavanie v FM-indexe 
