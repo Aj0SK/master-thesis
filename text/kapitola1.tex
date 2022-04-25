@@ -261,20 +261,23 @@ containing the prefix {\tt house} begins.
 % TODO: mozno obrazok
 % TODO: fixnut indexovanie
 
-In general, we first find the subsequence of $M$s row,
-where $P[n-1\ldots]$ is located. As this is just a one symbol $P[n-1]$ the initial subsequence is
-just a run of symbol $P[n-1]$ in $F$ given by
+In general, we first find the subsequence of $M$s rows, where suffix $P[n-1\ldots]$ is located.
+As this is just a one symbol, $P[n-1]$, the initial subsequence is just a run of symbol $P[n-1]$
+in $F$ given by
 \begin{align*}
-	b_{n-1}&=\Count[P[n]] \\
-	e_{n-1}&=\Count[P[n]+1].\\
+	b_{n-1}&=\Count[P[n-1]] \\
+	e_{n-1}&=\Count[P[n-1]+1].\\
 \end{align*}
-to find where $P[n-1\ldots]$ is located in $M$, we would like to locate occurrences of $P[n]$ that
-are preceded by $P[n-1]$. We thus look at the run of symbol $P[n-1]$ in $F$ that spans from $\Count[P[n-1]]$
-up to $\Count[P[n-1]+1]$. To find the sequence of rows starting with $P[n-2\ldots ]$, given by $b_{n-2}$
-and $e_{n-2}$, we need to find where it beggins and ends in the run of character $P[n-2]$ in $F$. Thanks
-to property \ref{chapter1:fmindexprop:prop2}, we just need to find the number of occurences of character
-$P[n-2]$ in $L$ up to the $b_{n-1}$, the start of previous subsequence of rows that contain $P[n-1\ldots ]$ as
-prefix and also the number of occurences of character $P[n-2]$ in $L$ up to the $e_{n-1}$ giving us 
+
+The next step is to find where the subsequence of $M$s rows, given by $b_{n-2}$ and $e_{n-2}$ is located,
+that has as a prefix $P[n-2\ldots]$. As we already located rows beginning with $P[n-1\ldots]$, we can reuse
+this information. In a range from $b_{n-1}$ to $e_{n-1}$ some rows end with character $P[n-2]$. These are rows
+that after being rotated, create subsequence we are looking for. Subsequence we are looking for is also
+subsequence of a run of character $P[n-2]$ in $F$, starting from $\Count[P[n-2]]$ spanning rows up to
+$\Count[P[n-2]+1]$. To find the offset of beginning and end of our subsequence along this run, we compute the
+number of occurences of character $P[n-2]$ in $L$ up to the $b_{n-1}$, the start of previous subsequence of
+rows and also the number of occurences of character $P[n-2]$ in $L$ up to the $e_{n-1}$ giving us its end.
+This works thanks to the property \ref{chapter1:fmindexprop:prop2}. Thus giving us the new subsequence
 \begin{align*}
 	b_{n-2}&=\Count[P[n-2]] + \rank_{P[n-2]}(b_{n-1}) \\
 	e_{n-2}&=\Count[P[n-2]] + \rank_{P[n-2]}(e_{n-1}).\\
@@ -284,9 +287,10 @@ We continue and repeat the previous step until we compute $b_0$ and $e_0$ or unt
 
 % TODO: pseudocode
 
-As we can see, we are not only interested in $\rank$ over a bit vector but over an arbitrary
-alphabet that we would like to use in the FM-index. In the next section, we show how we can
-reduce this problem and solve it using rank and select on bit vectors.
+The most important fact from this application is that we are not only interested in $\rank$ over a bit vector
+and $\rank$/$\select$ functionality over general aphabet has particular use case in the FM-index. In the part
+of this section, we show how we can reduce this problem with general alphabet to bit sequence version and
+solve it using $\rank$ and $\select$ on bit vectors.
 
 \paragraph{Wavelet tree}
 \label{section:WaweletTree}
