@@ -26,7 +26,8 @@ constexpr bool kTest30 = false, kTest31 = false, kTest62 = false,
 ////////////////////////////////////////////////////////////////////////////////
 // Benchmarks
 
-constexpr size_t kPerTestQueries = 10'000;
+constexpr size_t kPerTestQueries = 1'000;
+constexpr auto kTimeUnit = benchmark::kMicrosecond;
 
 binomial15::impl binomial15::iii;
 
@@ -205,22 +206,22 @@ static void SDSL_ON_THE_FLY(benchmark::State& state)
   }
 }
 
-BENCHMARK(SDSL_Table_15);
-BENCHMARK_TEMPLATE(SDSL_ON_THE_FLY, uint32_t, 15);
-BENCHMARK(OUR_30_LINEAR_15_15);
-BENCHMARK(OUR_30_SIMD_15_15);
-BENCHMARK(OUR_30_BINARY_15_15);
-BENCHMARK_TEMPLATE(SDSL_ON_THE_FLY, uint32_t, 30);
-BENCHMARK(OUR_31_LINEAR_1_30);
-BENCHMARK_TEMPLATE(SDSL_ON_THE_FLY, uint32_t, 31);
-BENCHMARK(OUR_62_LINEAR_31_31);
-BENCHMARK(OUR_62_BINARY_31_31);
-BENCHMARK_TEMPLATE(SDSL_ON_THE_FLY, uint64_t, 62);
-BENCHMARK(OUR_63_LINEAR_1_62);
-BENCHMARK(OUR_63_LINEAR_3_30_30);
-BENCHMARK_TEMPLATE(SDSL_ON_THE_FLY, uint64_t, 63);
-BENCHMARK(OUR_127_LINEAR_1_63_63);
-BENCHMARK(OUR_127_BINARY_1_63_63);
+BENCHMARK(SDSL_Table_15)->Unit(kTimeUnit);
+BENCHMARK_TEMPLATE(SDSL_ON_THE_FLY, uint32_t, 15)->Unit(kTimeUnit);
+BENCHMARK(OUR_30_LINEAR_15_15)->Unit(kTimeUnit);
+BENCHMARK(OUR_30_SIMD_15_15)->Unit(kTimeUnit);
+BENCHMARK(OUR_30_BINARY_15_15)->Unit(kTimeUnit);
+BENCHMARK_TEMPLATE(SDSL_ON_THE_FLY, uint32_t, 30)->Unit(kTimeUnit);
+BENCHMARK(OUR_31_LINEAR_1_30)->Unit(kTimeUnit);
+BENCHMARK_TEMPLATE(SDSL_ON_THE_FLY, uint32_t, 31)->Unit(kTimeUnit);
+BENCHMARK(OUR_62_LINEAR_31_31)->Unit(kTimeUnit);
+BENCHMARK(OUR_62_BINARY_31_31)->Unit(kTimeUnit);
+BENCHMARK_TEMPLATE(SDSL_ON_THE_FLY, uint64_t, 62)->Unit(kTimeUnit);
+BENCHMARK(OUR_63_LINEAR_1_62)->Unit(kTimeUnit);
+BENCHMARK(OUR_63_LINEAR_3_30_30)->Unit(kTimeUnit);
+BENCHMARK_TEMPLATE(SDSL_ON_THE_FLY, uint64_t, 63)->Unit(kTimeUnit);
+BENCHMARK(OUR_127_LINEAR_1_63_63)->Unit(kTimeUnit);
+BENCHMARK(OUR_127_BINARY_1_63_63)->Unit(kTimeUnit);
 
 int main(int argc, char** argv)
 {
