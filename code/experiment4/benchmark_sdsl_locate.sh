@@ -24,3 +24,7 @@ make clean-build
 make cleanresults
 make timing
 cp ./results/all.txt ../../../res2-locate.txt
+
+cd ../../../
+
+python3 visual_sdsl_locate.py

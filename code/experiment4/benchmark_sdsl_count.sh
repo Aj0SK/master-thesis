@@ -27,4 +27,4 @@ cp ./results/all.txt ../../../res2-count.txt
 
 cd ../../../
 
-python3 benchmark_sdsl_count_visual.py
+python3 visual_sdsl_count.py
