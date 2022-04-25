@@ -17,8 +17,8 @@ def return_results(path):
                 continue
             else:
                 #opt_lvl = lines[i+2].split()[3]
-                #if opt_lvl != "SSE":
-                #    continue
+                if lines[i+3].split()[3] != "16x16":
+                    continue
                 test_name = initial_line_split[3]
                 test_structure = lines[i+1].split()[3]
                 test_text_size = int(lines[i + 8].split()[3])
