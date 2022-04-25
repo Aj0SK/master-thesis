@@ -39,8 +39,7 @@ reimplemented = ["FM_HUFF_RRR31", "FM_HUFF_RRR63", "FM_HUFF_RRR127"]
 old_version_path = "./res1-count.txt"
 new_version_path = "./res2-count.txt"
 
-rows = 2
-cols = 2
+rows, cols = 2, 2
 
 res1 = return_results(old_version_path)
 res2 = return_results(new_version_path)

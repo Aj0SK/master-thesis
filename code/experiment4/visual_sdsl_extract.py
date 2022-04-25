@@ -4,7 +4,6 @@ from os.path import isfile, join
 import numpy as np
 import matplotlib.pyplot as plt
 
-plt.rcParams["figure.figsize"] = (10,12)
 markers = ["s", "x"]
 names = ["sdsl", "our"]
 
@@ -33,12 +32,14 @@ def return_results(path):
 map_name = {"FM_HUFF" : "bv", "FM_HUFF_RRR15": "rrr_15",
             "FM_HUFF_RRR31": "rrr_31",
             "FM_HUFF_RRR63": "rrr_63",
-            "FM_HUFF_RRR127": "rrr_127"}
+            "FM_HUFF_RRR127": "rrr_127", "CSA_SADA": "sparse"}
 
 reimplemented = ["FM_HUFF_RRR31", "FM_HUFF_RRR63", "FM_HUFF_RRR127"]
 
 old_version_path = "./res1-extract.txt"
 new_version_path = "./res2-extract.txt"
+
+rows, cols = 2, 2
 
 res1 = return_results(old_version_path)
 res2 = return_results(new_version_path)
@@ -51,9 +52,15 @@ for r in res:
         if dataset_name not in datasets:
             datasets.append(dataset_name)
 
-fig, axs = plt.subplots(len(datasets))
+if rows*cols != len(datasets):
+    print("Not enough of space in graph.")
+    exit(1)
+
+fig, axs = plt.subplots(rows, cols, figsize=(10,6))
 pts = [set() for i in range(len(datasets))]
 fig.suptitle('FM-index extract')
+
+labels = set()
 
 for r in range(len(res)):
     for dataset_name, structure in res[r].keys():
@@ -63,18 +70,41 @@ for r in range(len(res)):
         dataset_index = datasets.index(dataset_name)
         x = [memory]
         y = [time]
-        axs[dataset_index].scatter(x, y, label = names[r] + "-" + map_name[structure], marker = markers[r])
-        axs[dataset_index].legend(loc='center left', bbox_to_anchor=(1, 0.5))
-        axs[dataset_index].set_title(dataset_name)
+        row = dataset_index//rows
+        col = dataset_index%cols
+        l = names[r] + "-" + map_name[structure]
+        labels.add(l)
+        axs[row][col].scatter(x, y, label = l, marker = markers[r])
+        axs[row][col].set_title(dataset_name)
         for yy in y:
             pts[dataset_index].add(yy)
 
-for i in range(len(datasets)):
-    axs[i].set_yticks(list(pts[i]))
-    axs[i].set_ylabel("time (ms)")
-    axs[i].set_xlabel("bits per symbol")
+for i in range(rows):
+    axs[i][0].set_ylabel("time (ms)")
 
-fig.tight_layout(pad=3.0)
+for i in range(cols):
+    axs[-1][i].set_xlabel("bits per symbol")
+
+for i in range(rows):
+    for j in range(cols):
+        axs[i][j].set_yticks(list(pts[i*rows+j]))
+
+fig.subplots_adjust(bottom=0.3, wspace=0.33)
+
+labels_handles = {
+  label: handle for ax in fig.axes for handle, label in zip(*ax.get_legend_handles_labels())
+}
+
+fig.legend(
+  labels_handles.values(),
+  labels_handles.keys(),
+  loc="upper center",
+  bbox_to_anchor=(0.5, 0),
+  bbox_transform=plt.gcf().transFigure,
+  ncol=len(list(labels))
+)
+
+fig.tight_layout(pad=1.0)
 
 plt.savefig("vysledky_sdsl_extract.png", bbox_inches='tight')
 plt.clf()
