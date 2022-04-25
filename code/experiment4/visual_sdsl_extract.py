@@ -24,7 +24,7 @@ def return_results(path):
                 test_text_size = int(lines[i + 8].split()[3])
                 test_index_size = 8*float(lines[i + 9].split()[3])
                 test_memory = test_index_size/test_text_size
-                test_time = float(lines[i + 12].split()[3])
+                test_time = float(lines[i + 13].split()[3])*1000.0
                 
             results[(test_name, test_structure)] = (test_time, test_memory)
     return results
@@ -80,7 +80,7 @@ for r in range(len(res)):
             pts[dataset_index].add(yy)
 
 for i in range(rows):
-    axs[i][0].set_ylabel("time (ms)")
+    axs[i][0].set_ylabel("Time per character")
 
 for i in range(cols):
     axs[-1][i].set_xlabel("bits per symbol")
