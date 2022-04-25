@@ -4,7 +4,6 @@ from os.path import isfile, join
 import matplotlib.pyplot as plt
 import numpy as np
 
-
 def return_results(path):
     results = {}
     with open(path, "r") as f:
@@ -24,16 +23,17 @@ def return_results(path):
                 if len(used_structure_split) == 2:
                     test_cutoff = int(used_structure_split[1])
 
-                test_rrr_size = 8*int(lines[i + 7].split()[3])
-                test_memory = float(lines[i + 8].split()[3])/test_rrr_size
-                test_time = float(lines[i + 16].split()[3])
+                test_text_size = int(lines[i + 7].split()[3])
+                test_index_size = 8*int(lines[i + 8].split()[3])
+                test_memory = test_index_size/test_text_size
+                test_time = float(lines[i + 17].split()[3])*1000.0
                 
             results[(test_name,
                     test_block_size, test_cutoff)] = (test_time, test_memory)
     return results
 
 
-path = "../experiment3/sdsl-lite/benchmark/indexing_count/results/all.txt"
+path = "./res-count.txt"
 
 colors = ['r', 'g', 'b', 'darkorange']
 block_size_color = {15: 'r', 31: 'g', 63: 'b', 127: 'darkorange' }
@@ -50,34 +50,61 @@ for file, block_size, cutoff in res.keys():
 test_cases = list(test_cases)
 block_sizes = list(block_sizes)
 
-fig, axs = plt.subplots(len(test_cases))
-slovak_title = 'Čas pre 10^7 operácií prístup, rank, select'
-english_title = 'Access, rank and select query time as a function of block size '
-fig.suptitle(english_title)
+rows, cols = 2, 2
+
+fig, axs = plt.subplots(rows, cols, figsize=(11,6))
+fig.suptitle('FM-index count')
+
+if rows*cols != len(test_cases):
+    print("Not enough of space in graph.")
+    exit(1)
 
 for i in range(len(test_cases)):
-    axs[i].set_title(test_cases[i])
-    #axs[i][1].set_title(test_cases[i] + " rank")
-    #axs[i][2].set_title(test_cases[i] + " select")
-    #axs[i][0].set_xticks([15, 31, 63, 127])
-    #axs[i][1].set_xticks([15, 31, 63, 127])
-    #axs[i][2].set_xticks([15, 31, 63, 127])
+    axs[i//cols][i%cols].set_title(test_cases[i])
+
+labels = set()
 
 for file, block_size, cutoff in res.keys():
     time, memory = res[file, block_size, cutoff]
-    print(file, block_size, cutoff)
     file_index = test_cases.index(file)
     m = 'o'
-    marker_size = 30
+    marker_size = 20
     if cutoff != block_size:
         m = "${}$".format(cutoff)
         marker_size = 100
     
+    row = file_index//rows
+    col = file_index%cols
     color = block_size_color[block_size]
-    print(memory)
-    axs[file_index].scatter(memory, time, c=color, marker=m, s=marker_size)
+    l = '_nolegend_'
+    if cutoff == block_size:
+        l = str(block_size)
+    labels.add(l)
+    axs[row][col].scatter([memory], [time], c=color, marker=m, s=marker_size, label=l)
 
-fig.set_size_inches(7, 15)
-plt.tight_layout()
-plt.savefig("vysledky_sdsl.png")
+for i in range(rows):
+    axs[i][0].set_ylabel("Time in µsec per pattern symbol")
+
+for i in range(cols):
+    axs[-1][i].set_xlabel("bits per symbol")
+
+fig.subplots_adjust(bottom=0.3, wspace=0.33)
+
+labels_handles = {
+  label: handle for ax in fig.axes for handle, label in zip(*ax.get_legend_handles_labels())
+}
+
+fig.legend(
+  labels_handles.values(),
+  labels_handles.keys(),
+  loc="upper center",
+  bbox_to_anchor=(0.5, 0.1),
+  bbox_transform=plt.gcf().transFigure,
+  ncol=len(list(labels)),
+  handletextpad=0.01
+)
+
+fig.tight_layout(pad=3.0)
+
+plt.savefig("vysledky_sdsl_hybrid_count.png")
 plt.clf()
