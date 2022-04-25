@@ -226,29 +226,29 @@ necessary to explain the measured phenomenons later when exploring the results o
 	\centerline{
 	\begin{tabular}{|l|l|r|}
 		\hline
-		Block size &	Method									&	$\mu s$ per 10k queries \\
+		Block size &	Method									&	$\mu s$ per 1k queries \\
 		\hline
-		\multirow{2}{*}{15} & SDSL\_Table                         &    36  \\
-		& SDSL\_ON\_THE\_FLY  				&   477  \\
+		\multirow{2}{*}{15} & SDSL\_Table                         	&    2  \\
+		& SDSL\_ON\_THE\_FLY  										&   45  \\
 		\hline
-		\multirow{4}{*}{30} & OUR\_LINEAR\_15\_15                 &   196  \\
-		& OUR\_SIMD\_15\_15                   &   115  \\
-		& OUR\_BINARY\_15\_15                 &   295  \\
-		& SDSL\_ON\_THE\_FLY  				&  1\,322  \\
+		\multirow{4}{*}{30} & OUR\_LINEAR\_15\_15                 	&   9  \\
+		& OUR\_SIMD\_15\_15                   						&   8  \\
+		& OUR\_BINARY\_15\_15                 						&  15  \\
+		& SDSL\_ON\_THE\_FLY  										&  93  \\
 		\hline
-		\multirow{2}{*}{31} & OUR\_LINEAR\_1\_30                  &   211  \\
-		& SDSL\_ON\_THE\_FLY  				&  1\,413  \\
+		\multirow{2}{*}{31} & OUR\_LINEAR\_1\_30                  	&  11  \\
+		& SDSL\_ON\_THE\_FLY  										&  96  \\
 		\hline
-		\multirow{3}{*}{62} & OUR\_LINEAR\_31\_31                 &   445  \\
-		& OUR\_BINARY\_31\_31                 &   541  \\
-		& SDSL\_ON\_THE\_FLY  				&  1\,460  \\
+		\multirow{3}{*}{62} & OUR\_LINEAR\_31\_31                 	&  36  \\
+		& OUR\_BINARY\_31\_31                 						&  42  \\
+		& SDSL\_ON\_THE\_FLY  										& 130  \\
 		\hline
-		\multirow{3}{*}{63} & OUR\_LINEAR\_1\_62                  &   469  \\
-		& OUR\_LINEAR\_3\_30\_30              &   445  \\
-		& SDSL\_ON\_THE\_FLY  				&  1\,328  \\
+		\multirow{3}{*}{63} & OUR\_LINEAR\_1\_62                  	&  33  \\
+		& OUR\_LINEAR\_3\_30\_30              						&  32  \\
+		& SDSL\_ON\_THE\_FLY  										& 148  \\
 		\hline
-		\multirow{2}{*}{127} & OUR\_LINEAR\_1\_63\_63             &   909  \\
-		& OUR\_BINARY\_1\_63\_63             &   964  \\
+		\multirow{2}{*}{127} & OUR\_LINEAR\_1\_63\_63             	&  88  \\
+		& OUR\_BINARY\_1\_63\_63             						&  91  \\
 		\hline
 	\end{tabular}
 	}
@@ -521,6 +521,15 @@ int decompress_class(int k) const {
 	on the block size. Our implementations are marked using cross.
 	}
 	\label{obr:benchmark_sdsl_hybrid}
+\end{figure}
+
+\begin{figure}
+	\centerline{
+		\includegraphics[width=\textwidth, height=0.35\textheight]{images/vysledky_sdsl_hybrid_count}
+	}
+	\caption[TODO]{TODO: Zatial iba placeholder obrazok.
+	}
+	\label{obr:benchmark_sdsl_hybrid_count}
 \end{figure}
 
 % TODO: FM-indexove grafy
