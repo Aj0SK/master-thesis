@@ -5,7 +5,7 @@ rm -f res-count.txt
 git clone "$REPOSRC" sdsl-lite 2> /dev/null || (cd "sdsl-lite" ; git pull ; cd ..)
 cd sdsl-lite/build
 
-#git checkout benchmark_our_hybrid
+git checkout benchmark_our_hybrid
 ./build.sh
 cd ../benchmark/indexing_count
 make clean-build

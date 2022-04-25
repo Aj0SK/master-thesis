@@ -70,8 +70,10 @@ for file, block_size, cutoff in res.keys():
     m = 'o'
     marker_size = 20
     if cutoff != block_size:
-        m = "${}$".format(cutoff)
+        m = fr"${cutoff}$"
         marker_size = 100
+        if len(m) == 3:
+            marker_size = 45
     
     row = file_index//rows
     col = file_index%cols
