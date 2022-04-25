@@ -3,22 +3,21 @@
 
 In this chapter, we describe the implementation of ideas proposed in the previous
 chapter and practical results we obtained when measuring experimentally their performance.
-This chapter is split into two main parts according to the two main topics discussed
-in previous chapter namely our new encoding and decoding method and hybrid encoding.
+This chapter is split into two main parts according to the main topics discussed
+in previous chapter namely our new general encoding and decoding routine and hybrid encoding.
 In both of these sections, we first describe the important parts and decisions in our
 implementation. Subsequently, we describe how we benchmarked our implementation and present
 the results we obtained.
 
 The source code to all benchmarks can be found in electronic attachment to this work
 and also on \texttt{Github}. More about where to find individual parts of code and how
-to reproduce our results can be found in
-appendix A. All the results presented in this chapter were obtained on a machine with
-8-core AMD~Ryzen~7~2700X with 16~MB of cache, running at 3.7~GHz with 16~GB of RAM.
-The running operating system was Ubuntu~20.04.3~LTS. We used both \texttt{GCC} version
-9.4.0 and \texttt{Clang} version 10.0.0 compilers with the optimizations level most of
-the time set to \texttt{O3}. Although there are no special hardware requirements, to
-obtain the best possible results, our implementation requires a processor with support
-for \texttt{SSE2} instruction set.
+to reproduce our results can be found in appendix A. All the results presented in this
+chapter were obtained on a machine with 8-core AMD~Ryzen~7~2700X with 16~MB of cache,
+running at 3.7~GHz with 16~GB of RAM. The running operating system was Ubuntu~20.04.3~LTS.
+We used both \texttt{GCC} version 9.4.0 and \texttt{Clang} version 10.0.0 compilers with
+the optimizations level most of the time set to \texttt{O3}. Although there are no special
+hardware requirements, to obtain the best possible results, our implementation requires a
+processor with support for \texttt{SSE2} instruction set.
 
 \section{New decoding method}
 
@@ -27,13 +26,16 @@ for \texttt{SSE2} instruction set.
 \paragraph{SDSL library}
 
 We decided to make our solution a part of the \texttt{SDSL} library~\citep{gog2014theory}. This
-is one of the most matured and versatile libraries implementing succinct data structures.
+is one of the most matured and versatile libraries implementing succinct data structures, written
+in \texttt{C++}.
 With almost 2\,000 commits from more than 30 contributors, \texttt{SDSL} is a heavily tested library
 offering various implementations of succinct structures such as wavelet tree, FM-index,
 bit vector, suffix array and many more. It allows easy use of different building blocks
 to implement more complex structures, i.e. using different bit vector implementations inside
 of the wavelet tree. On top of this, thorough tests and benchmarks were implemented alongside
-the main functionality. The RRR implementation is provided by templated class \texttt{rrr\_vector}
+the main functionality.
+
+The RRR implementation is provided by templated class \texttt{rrr\_vector}
 that generally uses the on the fly-decoding enabling us to use block sizes from 3 up to 256. To support
 these long block sizes, \texttt{SDSL} implements 128-bit and 256-bit integers. On top of this, \texttt{SDSL}
 provides template specialization for block size 15 that uses the table decoding method. To support $\access$,
@@ -222,31 +224,37 @@ necessary to explain the measured phenomenons later when exploring the results o
 
 \begin{figure}
 	\centerline{
-	\begin{tabular}{l|r|}
-		Method									&	$\mu s$ per 10k queries \\
+	\begin{tabular}{|l|l|r|}
 		\hline
-		SDSL\_Table\_15                         &    36  \\
-		SDSL\_ON\_THE\_FLY\_15  				&   477  \\
-		OUR\_30\_LINEAR\_15\_15                 &   196  \\
-		OUR\_30\_SIMD\_15\_15                   &   115  \\
-		OUR\_30\_BINARY\_15\_15                 &   295  \\
-		SDSL\_ON\_THE\_FLY\_30  				&  1\,322  \\
-		OUR\_31\_LINEAR\_1\_30                  &   211  \\
-		SDSL\_ON\_THE\_FLY\_31  				&  1\,413  \\
-		OUR\_62\_LINEAR\_31\_31                 &   445  \\
-		OUR\_62\_BINARY\_31\_31                 &   541  \\
-		SDSL\_ON\_THE\_FLY\_62  				&  1\,460  \\
-		OUR\_63\_LINEAR\_1\_62                  &   469  \\
-		OUR\_63\_LINEAR\_3\_30\_30              &   445  \\
-		SDSL\_ON\_THE\_FLY\_63  				&  1\,328  \\
-		OUR\_127\_LINEAR\_1\_63\_63             &   909  \\
-		OUR\_127\_BINARY\_1\_63\_63             &   964  \\
+		Block size &	Method									&	$\mu s$ per 10k queries \\
+		\hline
+		\multirow{2}{*}{15} & SDSL\_Table                         &    36  \\
+		& SDSL\_ON\_THE\_FLY  				&   477  \\
+		\hline
+		\multirow{4}{*}{30} & OUR\_LINEAR\_15\_15                 &   196  \\
+		& OUR\_SIMD\_15\_15                   &   115  \\
+		& OUR\_BINARY\_15\_15                 &   295  \\
+		& SDSL\_ON\_THE\_FLY  				&  1\,322  \\
+		\hline
+		\multirow{2}{*}{31} & OUR\_LINEAR\_1\_30                  &   211  \\
+		& SDSL\_ON\_THE\_FLY  				&  1\,413  \\
+		\hline
+		\multirow{3}{*}{62} & OUR\_LINEAR\_31\_31                 &   445  \\
+		& OUR\_BINARY\_31\_31                 &   541  \\
+		& SDSL\_ON\_THE\_FLY  				&  1\,460  \\
+		\hline
+		\multirow{3}{*}{63} & OUR\_LINEAR\_1\_62                  &   469  \\
+		& OUR\_LINEAR\_3\_30\_30              &   445  \\
+		& SDSL\_ON\_THE\_FLY  				&  1\,328  \\
+		\hline
+		\multirow{2}{*}{127} & OUR\_LINEAR\_1\_63\_63             &   909  \\
+		& OUR\_BINARY\_1\_63\_63             &   964  \\
+		\hline
 	\end{tabular}
 	}
 	\caption[TODO]{Results of microbenchmarking various types of decoding implementations.
-	Names starting with SDSL are all on the fly decoding with the exception of 15 bit implementation.
-	The first number in the name is always block size. Subsequent numbers denote to what block sizes
-	was the problem broken into.
+	The numbers in method name denote to what block sizes was the problem broken into. The name also
+	says what method was used to broke the problem into subproblems.
 	}
 	\label{obr:simple_benchmark}
 \end{figure}
