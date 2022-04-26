@@ -196,35 +196,43 @@ uint32_t get_left_class(uint8_t k, uint32_t nr)  {
 }
 \end{lstlisting}
 
-\paragraph{Choosing the sub-problem size}
+\paragraph{Choosing the right sub-problem size}
 
-In previous chapter, we showed that our new method can take encoding and decoding subroutines
+In previous chapter, we showed that our method can take encoding and decoding subroutines
 of sizes $b_1$ and $b_2$ and combine them together to obtain routine for encoding and
 decoding of size $b_1+b_2$. Thus it is up to us, how we obtain the decoding for block sizes
-bigger than 15. As it is not possible to obtain the block size 30 using table method,
-it is quite reasonable to obtain this solution using combination of two sub-routines for block
-size 15. To obtain block size 63, however, there are more possible options. We may combine
-solution for 1 bit and 62 bits and then obtain 62-bit block size using combination of
-solution for block size 31. On the other hand, it may be more beneficial, to do 63-bit
-block size by splitting it into 3 bits and 60 bits. Thus, before implementing these into
-\texttt{SDSL}, we explored and tried several promising combinations and microbenchmarked them.
+bigger than 15. Minor inconvenience is, that the most used block sizes are of form $2^i-1$.
+Combining two block sizes of this form, however, leads only to block size of length $2^j-2$
+so to obtain the usable block length, we need to "extend" this solution by one bit.
+
+As we wanted to base our solutions on table decoding routine for block size 15, it is most
+reasonable to obtain the next interesting block size - 31, by at first splitting block into
+single-bit and 30-bit sub-problem and then obtaining 30-bit solution using two 15-bit
+subroutine calls. For 63, the next interesting block size, there are unfortunately more
+possible combinations that make sense. We may combine solution for single-bit and 62-bits
+and then obtain 62-bit block size using combination of solution for block size 31. On the
+other hand, it may be more beneficial, to do 63-bit block size by splitting it into 3 bits
+and 60 bits. Thus, before choosing what solution we want to fully include into \texttt{SDSL},
+we explored and tried several promising combinations and microbenchmarked them.
 
 \subsection{Experimental results}
 
-We benchmarked our code using two types of benchmarks. The first type of benchmarks used
-a \texttt{Google Benchmark} library. This is one of the standard libraries used to
+We benchmarked our code using two types of benchmarks. The first type of benchmarks
+used a \texttt{Google Benchmark} library. This is one of the standard libraries used to
 microbenchmark code. A code snippet that is being benchmarked is run several times until
 stable results are obtained. This makes the results reliable even if the measured time is
 very small and also limits the interference of other running processes on the result of
-benchmark. The second type of benchmarks used were the ones that are included in \texttt{SDSL}.
-These are built on top of a data from the \texttt{Pizza\&Chili} datasets \citep{ferragina2005pizza}
-and include many types of data such as DNA sequences, \texttt{C} and \texttt{Java} source codes from
+benchmark. Although reliable, this types of benchmarks are more artificial in nature and
+do not give a best sense, how the solution may behave on real data. The second type of
+benchmarks used were the ones that are included in \texttt{SDSL}. These are built on top
+of a data from the \texttt{Pizza\&Chili} datasets \citep{ferragina2005pizza} and include
+many types of data such as DNA sequences, \texttt{C} and \texttt{Java} source codes from
 \texttt{Linux} and \texttt{GCC} projects as well as English texts from the Gutenberg project.
 More information about this data such as some statistics about the compressibility and much
 more can be found in section 4.2 of \cite{ferragina2009compressed}. We only provide information
-necessary to explain the measured phenomenons later when exploring the results of our benchmarks.
+necessary to explain the measured phenomenons later when exploring the results of our benchmarks. 
 
-\paragraph{RRR microbenchmarks}
+\paragraph{Microbenchmarks of random block decoding}
 
 \begin{figure}
 	\centerline{
@@ -233,32 +241,32 @@ necessary to explain the measured phenomenons later when exploring the results o
 		Block size &	Method									&	$\mu s$ per 1k queries \\
 		\hline
 		\multirow{2}{*}{15} & SDSL\_Table                         	&    2  \\
-		& SDSL\_ON\_THE\_FLY  										&   45  \\
+							& SDSL\_ON\_THE\_FLY  					&   45  \\
 		\hline
 		\multirow{4}{*}{30} & OUR\_LINEAR\_15\_15                 	&   9  \\
-		& OUR\_SIMD\_15\_15                   						&   8  \\
-		& OUR\_BINARY\_15\_15                 						&  15  \\
-		& SDSL\_ON\_THE\_FLY  										&  93  \\
+							& OUR\_SIMD\_15\_15                   	&   8  \\
+							& OUR\_BINARY\_15\_15                 	&  15  \\
+							& SDSL\_ON\_THE\_FLY  					&  93  \\
 		\hline
 		\multirow{2}{*}{31} & OUR\_LINEAR\_1\_30                  	&  11  \\
-		& SDSL\_ON\_THE\_FLY  										&  96  \\
+							& SDSL\_ON\_THE\_FLY  					&  96  \\
 		\hline
 		\multirow{3}{*}{62} & OUR\_LINEAR\_31\_31                 	&  36  \\
-		& OUR\_BINARY\_31\_31                 						&  42  \\
-		& SDSL\_ON\_THE\_FLY  										& 130  \\
+							& OUR\_BINARY\_31\_31                 	&  42  \\
+							& SDSL\_ON\_THE\_FLY  					& 130  \\
 		\hline
 		\multirow{3}{*}{63} & OUR\_LINEAR\_1\_62                  	&  33  \\
-		& OUR\_LINEAR\_3\_30\_30              						&  32  \\
-		& SDSL\_ON\_THE\_FLY  										& 148  \\
+							& OUR\_LINEAR\_3\_30\_30              	&  32  \\
+							& SDSL\_ON\_THE\_FLY  					& 148  \\
 		\hline
 		\multirow{2}{*}{127} & OUR\_LINEAR\_1\_63\_63             	&  88  \\
-		& OUR\_BINARY\_1\_63\_63             						&  91  \\
+							 & OUR\_BINARY\_1\_63\_63             	&  91  \\
 		\hline
 	\end{tabular}
 	}
 	\caption[TODO]{Results of microbenchmarking various types of decoding implementations.
-	The numbers in method name denote to what block sizes was the problem broken into. The name also
-	says what method was used to broke the problem into subproblems.
+	The numbers in method name denote to what block sizes the problem was broken. The name
+	reflects what method was used to broke the problem into subproblems.
 	}
 	\label{obr:simple_benchmark}
 \end{figure}
@@ -269,7 +277,10 @@ in combination with different methods used for dividing block to subproblems and
 approaches to obtain particular block size. The mainly tested block sizes were 15, 30, 31, 62, 63
 and 127. Sizes 15, 31, 63 and 127 are most useful in practice however they can be obtained using
 different combinations of block size 30 and 62, i.e. 31 can be combined as 1 bit and 30 bit solution,
-63 can be divided to 1 and 62 as well as to 3 and two sub-problems of length 30.
+63 can be divided to 1 and 62 as well as to 3 and two sub-problems of length 30. Although, these
+tests are not made on real life data, they were mainly used as an indication which implementations
+are interesting and should be the best candidates for further evaluation.
+
 We used 3 different techniques to divide a problem into sub-problems, these were the linear scan,
 binary search and linear scan enhanced by \texttt{SIMD} instructions. In order to implement the
 solution for 127 bit block size, we used the 128 bit type \texttt{\_\_uint128\_t} provided by both
@@ -278,9 +289,7 @@ as a combination of two 64 bit numbers. We compared these results with the table
 in \texttt{SDSL} and with on-the-fly decoding for all the other block sizes. The data we run the decoding
 on were radomly generated. To generate them, we picked 1\,000 pairs of class and offset by first randomly
 picking class of the block and then the offset along this class. The results we obtained are shown in
-Fig.~\ref{obr:simple_benchmark}. Although, these tests are not made on real life data, they were mainly
-used as an indication which implementations are interesting and should be the best candidates for further
-evaluation.
+Fig.~\ref{obr:simple_benchmark}.
 
 \paragraph{Bit vector on real data}
 
