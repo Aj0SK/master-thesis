@@ -232,7 +232,7 @@ More information about this data such as some statistics about the compressibili
 more can be found in section 4.2 of \cite{ferragina2009compressed}. We only provide information
 necessary to explain the measured phenomenons later when exploring the results of our benchmarks. 
 
-\paragraph{Microbenchmarks of random block decoding}
+\paragraph{Microbenchmarks of block decoding}
 
 \begin{figure}
 	\centerline{
@@ -299,11 +299,11 @@ usage of bit vectors. We picked a benchmarking part of \texttt{SDSL} library tha
 on a randomly generated sequence with fixed number of ones and on raw representation of a wavelet
 tree built on top of data from the DNA sequence, XML web data taken from \texttt{DBLP}, computer
 science bibliography. Among the explored dimensions is block size and size of the underlying data.
-\texttt{SDSL} uses the random pattern for $\access$, $\rank$ and $\select$ queries. We were not able
-to find significant practical usability for other access patterns. As a baseline, we choose the 15
-bit specialized implementation already implemented in \texttt{SDSL} that uses the table decoding
-method. We present the measured results of our and the original implementation in
-Fig.~\ref{obr:benchmark_sdsl_new_method}.
+\texttt{SDSL} generates $\access$, $\rank$ and $\select$ queries randomly. We were not able
+to find significant practical usability for other access patterns and thus stick with this one.
+As a baseline, we choose the 15 bit specialized implementation already implemented in \texttt{SDSL}
+that uses the table decoding method. We present the measured results of our and the original
+implementation in Fig.~\ref{obr:benchmark_sdsl_new_method}.
 \begin{figure}
 	\centerline{
 		\includegraphics[width=\textwidth, height=0.7\textheight]{images/benchmark_sdsl_new_method}
@@ -313,25 +313,28 @@ Fig.~\ref{obr:benchmark_sdsl_new_method}.
 	}
 	\label{obr:benchmark_sdsl_new_method}
 \end{figure}
+
 There are several interesting things to observe in these results. We can see that our new implementation
-beats older implementations on almost all block sizes and all types of data. We can observe that the
-results are more clear on random data and DNA sequence. On web data however, the difference is less
-noticable. We attribute this behaviour to the fact, that was observed by \cite{gog2014optimized},
-creators of this dataset. They observed that the number of uniform blocks (full of either zeroes or ones)
-is much bigger in \texttt{WT-WEB} data than in \texttt{WT-DNA}. For block size 63, they observed ratio of
-uniform blocks in \texttt{WT-WEB-1GB} to be 84\% compared to 28\% in \texttt{WT-DNA}. As the uniform
-blocks are decoded trivially in both implementations, this makes less opportunities for our implementation
-to save time.
+beats older implementations on almost all block sizes and all types of data. We can observe that our
+implementation achieves interesting results, beating the original implementation in every dataset and
+every method benchmarked. Note, that results are more clear on random data and DNA data. On web data,
+however, the difference is less noticable. We attribute this behaviour to the fact, that was observed by
+\cite{gog2014optimized}, creators of this dataset. They observed that the number of uniform blocks
+(full of either zeroes or ones) is much bigger in \texttt{WT-WEB} data than in \texttt{WT-DNA}. For
+block size 63, they observed ratio of uniform blocks in \texttt{WT-WEB-1GB} to be 84\% compared to
+28\% in \texttt{WT-DNA}. As the uniform blocks are decoded trivially in both implementations, this makes
+less opportunities for our implementation to save time.
 
 \paragraph{Bit vector in FM-index}
 
-We further benchmarked our bit vector implementation as a part of Huffman shaped wavelet tree
-used inside of the FM-index. Implementation of FM-index in \texttt{SDSL}, as most of other
-implementations of FM-index, provides 3 basic methods:
+Even if previous benchmark was done on real data, it was not done in application that is
+practically useful. Thus, we further benchmarked our bit vector implementation as a part
+of Huffman shaped wavelet tree used inside of the FM-index. Implementation of FM-index in
+\texttt{SDSL}, as most of other implementations of FM-index, provides mainly 3 methods:
 \begin{itemize}
-	\item $\countOp(P)$ returns the number of occurrences of $P$ in text $T$
-	\item $\locateOp(P)$ returns all positions of pattern $P$ in text $T$
-	\item $\extractOp(i, j)$ returns the subsequence $T[i..j]$
+	\item $\countOp(P)$ - returns the number of occurrences of $P$ in text $T$
+	\item $\locateOp(P)$ - returns all positions of pattern $P$ in text $T$
+	\item $\extractOp(i, j)$ - returns the subsequence $T[i..j]$
 \end{itemize}
 The reason that the $\extractOp$ method is useful and non-trivial is that FM-index
 does not store the original sequence $T$ -- at least not in an easily readable form.
@@ -340,64 +343,66 @@ These benchmarks are provided by $\texttt{SDSL}$ library. They are based on data
 the \texttt{Pizza\&Chili} dataset and use mainly methodology proposed by \cite{ferragina2009compressed}.
 The data we used are English texts from Gutenber project, source codes, DNA and protein
 sequences. In most of these benchmarks, we used as a baseline the FM-index version based
-on uncompressed bit vector. For informative purposes, we also include the version based
-on block size of 15 using the table decoding and sparse bit vector.
+on uncompressed bit vector. For informative purposes, we also included the version based
+on block size 15, using the table decoding, and sparse bit vector.
 
 To benchmark operation $\countOp$, the index over the text is built. Then, random patterns of
 various lengths are extracted from the text and subsequently used for benchmarking. Code
 that generates these patterns in \texttt{SDSL} is a slight modification of a version provided
-by \texttt{Pizza\&Chili}. We present the results in Fig.~\ref{obr:benchmark_sdsl_count}.
+by \texttt{Pizza\&Chili}. We measure, as in other places where this benchmark was used, the
+ratio between space used for index and the speed normalized by the number of symbols contained
+in all searched patterns. We present the results in Fig.~\ref{obr:benchmark_sdsl_count}.
 
 \begin{figure}
 	\centerline{
 		\includegraphics[width=\textwidth, height=0.35\textheight]{images/vysledky_sdsl_count}
 	}
-	\caption[TODO]{TODO: Zatial iba placeholder obrazok.
+	\caption[TODO]{TODO: Zatial iba placeholder obrazok pre FM-index count.
 	}
 	\label{obr:benchmark_sdsl_count}
 \end{figure}
 
 For benchmarking of operation $\extractOp$, \texttt{SDSL} uses a methodology proposed by
 \cite{ferragina2009compressed} in Section~5.4. This consists of extracting numerous
-substrings of length 512 starting at random positions in text. There is additional parameter
-that is explored in this benchmark - sampling rate of suffix array and inverse suffix array.
-This is basically a parameter that can be used to balance the speed of FM-index and its memory
-usage. Options for this sampling ratio are the powers of 2 from 4 up to 256. We show the
-results for sampling rate equal to 16 in Fig.~\ref{obr:benchmark_sdsl_extract}. Note that the
-trends that can be seen in these results are the same for every sampling rate.
+substrings of length 512 starting at random positions in text. The additional parameter
+that is explored in this benchmark is sampling rate of suffix array and inverse suffix array.
+This is basically a parameter that can be used to balance between the speed of FM-index and
+its memory usage. Options for this sampling ratio are by default the powers of 2 from 4 up to
+256. We show the results for sampling rate equal to 16 in Fig.~\ref{obr:benchmark_sdsl_extract}.
+Note that the trends that can be seen in these results are the same for every sampling rate.
 
 \begin{figure}
 	\centerline{
 		\includegraphics[width=\textwidth, height=0.35\textheight]{images/vysledky_sdsl_extract}
 	}
-	\caption[TODO]{TODO: Zatial iba placeholder obrazok.
+	\caption[TODO]{TODO: Zatial iba placeholder obrazok pre FM-index extract.
 	}
 	\label{obr:benchmark_sdsl_extract}
 \end{figure}
 
 Benchmarking of operation $\locateOp$ again uses a methodology proposed by \cite{ferragina2009compressed} 
-in Section 5.3. This consists of at first locating random patterns of length 5 in the text such
+in Section~5.3. This consists of at first locating random patterns of length 5 in the text such
 that 2--3 millions of occurences are found in the text. We present our results in Fig.~\ref{obr:benchmark_sdsl_locate}.
 
 \begin{figure}
 	\centerline{
 		\includegraphics[width=\textwidth, height=0.35\textheight]{images/vysledky_sdsl_locate}
 	}
-	\caption[TODO]{TODO: Zatial iba placeholder obrazok.
+	\caption[TODO]{TODO: Zatial iba placeholder obrazok pre FM-index locate.
 	}
 	\label{obr:benchmark_sdsl_locate}
 \end{figure}
 
 \paragraph{Correctness}
 
-Besides making sure that our solution is as fast possible we also wanted to make sure it is
-correct. We mainly used two types of tests for this purpose. The first are the tests of $\access$,
-$\rank$ and $\select$ functionality in \texttt{SDSL} that run mainly on smaller bit vectors
-but also cover special cases such as bit vector full of zeroes/ones and certain special
-patterns that do not happen often in practice. The second type of tests used was the benchmark
+On top of making sure that our solution is as fast possible we also wanted to make sure it is
+correct. We used mainly two types of tests for this purpose. The first are the tests of $\access$,
+$\rank$ and $\select$ functionality in \texttt{SDSL} that run mainly on smaller bit sequences
+but cover special cases such as bit vector full of zeroes/ones and certain special patterns
+that are not encountered often in practice. The second type of tests used was the benchmark
 running on wavelet tree representation of real data. Alongside the individual timings, this
 benchmark produces, as a checksum, sum of all the results of the $\access$, $\rank$ and $\select$
-queries.
+queries. These checksums can be compared between our and original implementation.
 
 \section{Hybrid encoding}
 
