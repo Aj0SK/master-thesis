@@ -27,7 +27,7 @@ complex implementation.
 
 In this work, we are mainly concerned with \textit{bit vector}. One of the simplest
 data structures that represents a sequence of zeroes and ones while supporting the
-following methods:
+methods:
 \begin{itemize}
 \item $\access(i)$ - returns the $i$-th symbol of the sequence,
 \item $\rank_c(i)$ - returns the number of occurrences of symbol $c$up to the $i$-th index
@@ -71,7 +71,6 @@ the value of $B[i]$. If it is zero, we return the default value. If it is one, w
 how many ones are preceding this particular one in $B$ to locate where our value is placed in
 array $P$. For this, we may use the $\rank_1$ method. Similarly, to obtain the position of $i$-th
 non-empty value in $A$, we use $\select_1$.
-
 
 The total space used by this representation is $N+n\cdot k+R$ where $R$ is the space needed to
 support an efficient $\rank$ query. As we shall show in Section~\ref{section:rank}, $\rank$ can
@@ -283,9 +282,23 @@ This works thanks to the property \ref{chapter1:fmindexprop:prop2}. Thus giving 
 	e_{n-2}&=\Count[P[n-2]] + \rank_{P[n-2]}(e_{n-1}).\\
 \end{align*}
 We continue and repeat the previous step until we compute $b_0$ and $e_0$ or until $b_i=e_i$ for some $i$
-(in which case the searched word is not present in the text).
+(in which case the searched word is not present in the text). The possible pseudocode for counting the number
+of occcurences of $P$ in $T$ is in listing \ref{alg:fm_index_count}.
 
-% TODO: pseudocode
+\begin{algorithm}
+\caption{FM-index count method pseudocode}\label{alg:fm_index_count}
+\KwData{$P = \Sigma^n$}
+$b \gets \Count[P[n-1]]$\;
+$e \gets \Count[P[n-1]+1]$\;
+\For{$i=n-2$ \KwTo $0$} {
+	\If{$e-b = 0$}{
+		break\;
+	}
+	$b \gets \Count[P[i]] + \rank_{P[i]}(b)$\;
+	$e \gets \Count[P[i]] + \rank_{P[i]}(e)$\;
+}
+\KwRet{$e-b$}
+\end{algorithm}
 
 The most important fact from this application is that we are not only interested in $\rank$ over a bit vector
 and $\rank$/$\select$ functionality over general aphabet has particular use case in the FM-index. In the part
