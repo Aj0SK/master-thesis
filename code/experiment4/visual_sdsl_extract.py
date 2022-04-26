@@ -80,10 +80,10 @@ for r in range(len(res)):
             pts[dataset_index].add(yy)
 
 for i in range(rows):
-    axs[i][0].set_ylabel("Time per character")
+    axs[i][0].set_ylabel("ms/extracted symbol")
 
 for i in range(cols):
-    axs[-1][i].set_xlabel("bits per symbol")
+    axs[-1][i].set_xlabel("bits per text symbol")
 
 for i in range(rows):
     for j in range(cols):
