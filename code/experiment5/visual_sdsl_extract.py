@@ -23,17 +23,17 @@ def return_results(path):
                 if len(used_structure_split) == 2:
                     test_cutoff = int(used_structure_split[1])
 
-                test_text_size = int(lines[i + 7].split()[3])
-                test_index_size = 8*int(lines[i + 8].split()[3])
+                test_text_size = int(lines[i + 8].split()[3])
+                test_index_size = 8*int(lines[i + 9].split()[3])
                 test_memory = test_index_size/test_text_size
-                test_time = float(lines[i + 17].split()[3])*1000.0
+                test_time = float(lines[i + 13].split()[3])*1000.0
                 
             results[(test_name,
                     test_block_size, test_cutoff)] = (test_time, test_memory)
     return results
 
 
-path = "./res-count.txt"
+path = "./res-extract.txt"
 
 colors = ['r', 'g', 'b', 'darkorange']
 block_size_color = {15: 'r', 31: 'g', 63: 'b', 127: 'darkorange' }
@@ -53,7 +53,7 @@ block_sizes = list(block_sizes)
 rows, cols = 2, 2
 
 fig, axs = plt.subplots(rows, cols, figsize=(11,6))
-fig.suptitle('FM-index count')
+fig.suptitle('FM-index extract')
 
 if rows*cols != len(test_cases):
     print("Not enough of space in graph.")
@@ -85,7 +85,7 @@ for file, block_size, cutoff in res.keys():
     axs[row][col].scatter([memory], [time], c=color, marker=m, s=marker_size, label=l)
 
 for i in range(rows):
-    axs[i][0].set_ylabel("µs per pattern symbol")
+    axs[i][0].set_ylabel("ms per extracted symbol")
 
 for i in range(cols):
     axs[-1][i].set_xlabel("bits per text char")
@@ -108,5 +108,5 @@ fig.legend(
 
 fig.tight_layout(pad=3.0)
 
-plt.savefig("vysledky_sdsl_hybrid_count.png")
+plt.savefig("vysledky_sdsl_hybrid_extract.png")
 plt.clf()
