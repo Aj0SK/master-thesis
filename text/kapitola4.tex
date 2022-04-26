@@ -315,29 +315,25 @@ to save time.
 We further benchmarked our bit vector implementation as a part of Huffman shaped wavelet tree
 used inside of the FM-index. Implementation of FM-index in \texttt{SDSL}, as most of other
 implementations of FM-index, provides 3 basic methods:
-
 \begin{itemize}
 	\item $\countOp(P)$ returns the number of occurrences of $P$ in text $T$
 	\item $\locateOp(P)$ returns all positions of pattern $P$ in text $T$
 	\item $\extractOp(i, j)$ returns the subsequence $T[i..j]$
 \end{itemize}
-
 The reason that the $\extractOp$ method is useful and non-trivial is that FM-index
 does not store the original sequence $T$ -- at least not in an easily readable form.
-As in previous case, these methods are benchmarked on samples like English texts, \texttt{XML}
-data from \texttt{DBLP} as well as on source codes, DNA and protein sequences.
-Alongside our new encoding methods and their original counterparts, we once again added
-to the benchmark the 15 bit version of bit vector decoded by table. On top of that, we
-also added a classic uncompressed bit vector to put into the perspective space savings that
-are made by RRR. We present here just a selected subset of the results obtained. We either
-choose samples where our implementation beat the original implementation by a wide margin
-or others where our implementation was not running that good. All other graphs can be found
-in AppendixTODO.
+
+These benchmarks are provided by $\texttt{SDSL}$ library. They are based on data from
+the \texttt{Pizza\&Chili} dataset and use mainly methodology proposed by \cite{ferragina2009compressed}.
+The data we used are English texts from Gutenber project, source codes, DNA and protein
+sequences. In most of these benchmarks, we used as a baseline the FM-index version based
+on uncompressed bit vector. For informative purposes, we also include the version based
+on block size of 15 using the table decoding and sparse bit vector.
 
 To benchmark operation $\countOp$, the index over the text is built. Then, random patterns of
 various lengths are extracted from the text and subsequently used for benchmarking. Code
 that generates these patterns in \texttt{SDSL} is a slight modification of a version provided
-by \texttt{Pizza\&Chili}.
+by \texttt{Pizza\&Chili}. We present the results in Fig.~\ref{obr:benchmark_sdsl_count}.
 
 \begin{figure}
 	\centerline{
@@ -349,11 +345,13 @@ by \texttt{Pizza\&Chili}.
 \end{figure}
 
 For benchmarking of operation $\extractOp$, \texttt{SDSL} uses a methodology proposed by
-\cite{ferragina2009compressed} (Section 5.4). This basically consists of extracting numerous
+\cite{ferragina2009compressed} in Section~5.4. This consists of extracting numerous
 substrings of length 512 starting at random positions in text. There is additional parameter
 that is explored in this benchmark - sampling rate of suffix array and inverse suffix array.
 This is basically a parameter that can be used to balance the speed of FM-index and its memory
-usage. Options for this sampling ratio are the powers of 2 from 4 up to 256. 
+usage. Options for this sampling ratio are the powers of 2 from 4 up to 256. We show the
+results for sampling rate equal to 16 in Fig.~\ref{obr:benchmark_sdsl_extract}. Note that the
+trends that can be seen in these results are the same for every sampling rate.
 
 \begin{figure}
 	\centerline{
@@ -365,8 +363,8 @@ usage. Options for this sampling ratio are the powers of 2 from 4 up to 256.
 \end{figure}
 
 Benchmarking of operation $\locateOp$ again uses a methodology proposed by \cite{ferragina2009compressed} 
-(Section 5.3). This consists of at first locating random patterns of length 5 in the text such
-that 2 to 3 millions of occurences are found in the text.
+in Section 5.3. This consists of at first locating random patterns of length 5 in the text such
+that 2--3 millions of occurences are found in the text. We present our results in Fig.~\ref{obr:benchmark_sdsl_locate}.
 
 \begin{figure}
 	\centerline{
@@ -379,13 +377,14 @@ that 2 to 3 millions of occurences are found in the text.
 
 \paragraph{Correctness}
 
-We wanted to make sure that our implementation is not only as fast possible but also correct. We
-used mainly two types of tests for this purpose. The first are the tests of $\access$, $\rank$
-and $\select$ functionality in \texttt{SDSL} that run mainly on smaller bit vectors and also cover
-special cases that do not happen often in practice such as bit vector full of zeroes/ones. The
-second type of tests used was the benchmark running on wavelet tree representation of real data.
-Alongside the individual timings, this benchmark produces also as checksum the sum of all the
-results of the $\access$, $\rank$ and $\select$ operations.
+Besides making sure that our solution is as fast possible we also wanted to make sure it is
+correct. We mainly used two types of tests for this purpose. The first are the tests of $\access$,
+$\rank$ and $\select$ functionality in \texttt{SDSL} that run mainly on smaller bit vectors
+but also cover special cases such as bit vector full of zeroes/ones and certain special
+patterns that do not happen often in practice. The second type of tests used was the benchmark
+running on wavelet tree representation of real data. Alongside the individual timings, this
+benchmark produces, as a checksum, sum of all the results of the $\access$, $\rank$ and $\select$
+queries.
 
 \section{Hybrid encoding}
 
