@@ -113,7 +113,7 @@ In Chapter~\ref{kap:kap2}, we shall see how this method can be implemented effic
 	\begin{tabular}{l|l|l|l|l|l|l|l|l|l|l|}
 	\cline{2-11}
 	\textbf{Raw binary representation} & 1          & 1 & 0 & 1 & 1          & 1 & 1          & 0 & 1 & 0          \\ \cline{2-11} 
-	\textbf{Beginnings of an elements}          & \textbf{1} & 0 & 0 & 0 & \textbf{1} & 0 & \textbf{1} & 0 & 0 & \textbf{1} \\ \cline{2-11} 
+	\textbf{Beginnings of elements}          & \textbf{1} & 0 & 0 & 0 & \textbf{1} & 0 & \textbf{1} & 0 & 0 & \textbf{1} \\ \cline{2-11} 
 	\end{tabular}
 	}
 	\caption[TODO]{Raw binary representation of elements 1101, 11, 101 and 0 stored one after another.
@@ -327,11 +327,11 @@ only a single binary $\rank$ or $\select$. However, we use roughly $|\Sigma|$ ti
 than the single bit vector over this sequence.
 
 \textit{Wavelet tree} proposed by \cite{grossi2003high} uses a divide-and-conquer
-approach. It takes the sequence $S$ of length $n$ over some alphabet $\Sigma$ and
-recursively splits the alphabet into two subsets creating a hierarchical partitioning
-of an alphabet. In the root node of the tree, it splits the alphabet $\Sigma$ into
-two subsets $\Sigma_0$ and $\Sigma_1$ of roughly equal size. It then stores a bit
-vector $B$ of size $n$ in this node where
+approach. It takes the sequence $S$ of length $n$ over some alphabet $\Sigma$ of size
+$\sigma$ and recursively splits the alphabet into two subsets creating a hierarchical
+partitioning of an alphabet. In the root node of the tree, it splits the alphabet
+$\Sigma$ into two subsets $\Sigma_0$ and $\Sigma_1$ of roughly equal size. It then
+stores a bit vector $B$ of size $n$ in this node where
 \[
     B[i]= 
 \begin{cases}
@@ -344,7 +344,7 @@ Then it creates two strings $S_0$ and $S_1$ from $S$ by taking just symbols
 from $\Sigma_0$ and $\Sigma_1$, respectively. The left and right children of the root node
 are then built by recursively applying the same idea on subsequences $S_0$ and $S_1$ until
 we end up with a trivial unary alphabet at the leaves. It follows that the depth of the
-wavelet tree is roughly $\log |\Sigma|$.
+wavelet tree is roughly $\log \sigma$.
 \begin{figure}
 	\centerline{
 		\includegraphics[width=0.9\textwidth, height=0.3\textheight]{images/wavelet_tree}
@@ -371,24 +371,24 @@ otherwise, we can look at the wavelet tree as an assignment of a binary code to 
 alphabets character. Code of a character $c$ in some leaf node is equal to concatenation of
 bits that are contained in nodes on a path from root to the leaf node. The idea proposed
 by~\cite{makinen2005succinct} is to shape the wavelet tree in such a way that a code of every
-character is equal to Huffman code of this character.
+character is equal to Huffman code of this character. The advantage we get is that if queries
+for a characters are coming according to their frequencies, then we need to visit on average
+only $O(H_0)$ nodes rather than $O(\log \sigma)$ of them, where $H_0$ is zeroth-order empirical
+entropy $$H_0(S)=\sum_{c\in\Sigma} \frac{n_c}{n} \lg \frac{n}{n_c}$$. The maximum depth then
+may increase, however, \cite{grabowski2004first} showed that we can enforce depth
+$\BigO(log \sigma)$ with the depth being $H_0+2$ even if this is not convenient in practice.
+Thus, with some additional work, it is possible to speed up the average number of nodes accessed.
 
-% TODO: ze vyska je log n, aj v pripade Huffmana; average depth u Huffmana (ak by sme pristupovali k pismenam podla ich frekvencie, je H_0)
+The space used by the wavelet tree heavily depends on the space usage of individual bit vectors
+that are used to store the nodes of wavelet tree. If these are represented using a data structure
+that takes space proportional to the zero-order entropy of represented sequence, then the whole
+wavelet tree requires roughly $nH_0(S) + o(n\log\sigma)$ bits of space as was shown by
+\cite{grossi2003high}.
+
+To conclude this chapter, we explained the main idea of FM-index, the data structure used for the
+problem of text indexing. We showed the idea behind wavelet tree, one possible implementation of
+$\rank$ over sequence from general alphabet.
+
+% TODO: este FM-index space dobuchat sem
 % TODO: chcelo by to nejaky sumar, lebo uz z toho mam nafuknutu hlavu: Cize: Hladanie v FM-indexe potrebuje rank a rank v stringu sa robi cez wavelet a ten pouziva rank na bitvektoroch (pripadne, ze v kapitole 4 ukazeme, ako zlepsenie bitvektorov zlepsi vyhladavanie v FM-indexe 
 % TODO: chyba pojednanie o pamatovej zlozitosti: 1. wavelet stromzabera +/- tolko, co povodny text, 2. ak stlacime bitvektory na H_0, tak wavelet strom bude mat H_0(S) + cosi, 3. kolko zabera FM-index? za istych okolnosti H_k (+ citacie ku vsetkemu)
-
-\section{Space efficiency}
-
-There are many ways to measure the space efficiency of a data structure. From the
-practical point of view, we may be interested in the memory usage by the data
-structure on actual data that the structure could encounter in our use case. However,
-many succinct data structures are trying to achieve some upper bounds and express
-the used space in terms of the information contained in the data. There are many
-models how to measure the information contained in sequences of characters. One
-of the most commonly used models in the field of succinct data structures, yet still
-quite simple, is entropy or more specifically zeroth-order entropy:
-
-$$H(S)=\sum_{c\in\Sigma} \frac{n_c}{n} \lg \frac{n}{n_c}$$.
-
-In many scenarios, where succinct data structures are used, the stored sequence
-is compressible using the sole fact that some symbols have a bigger frequency than others.

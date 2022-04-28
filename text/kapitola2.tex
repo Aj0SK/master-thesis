@@ -295,7 +295,7 @@ chapter, bigger block size is better because of lower per bit overhead. Also, no
 sizes are used in practice. Very often, we are interested in block sizes of the form $2^k-1$.
 This is because the number of ones in block of size $2^k-1$ can be number between 0 and $2^k-1$
 making this in total $2^k$ possibilities. Storing this number in the fixed bucket of size
-$k$ bits makes use of all the available space. Because off this, commonly used bucket sizes in
+$k$ bits makes use of all the available space. This is why most commonly used bucket sizes in
 practice are 15, 31, 63 and 127. For block size of 15 the encoding and decoding table
 each occupies roughly 64kB of space. This is because every table consists of $2^{15}$ of entries
 each taking 2 bytes of storage. Unfortunately, for block size of 31 these two tables would consume
@@ -317,7 +317,7 @@ used when the frequency of zeroes or ones is more significantly shifted.
 Although we stated that RRR is used in case of shifted frequencies, when the number
 of ones is very small, i.e. less than 5\% of the sequence, sparse bit vector
 implementations may outperform solutions based on RRR as was observed by \cite{navarro2012fast}.
-Where RRR stands out to some of its alternatives is that it is also very competitive
+Where RRR stands out from some of its alternatives is that it is also very competitive
 in cases where frequencies of zeroes and ones are similar globally, but the bit
 sequence has a lot of places where locally zeroes or ones are over-represented.
-Many of sparse bit vector solutions are based on the work of \cite{okanohara2007practical}.
+Numerous sparse bit vector solutions are based on the work of \cite{okanohara2007practical}.

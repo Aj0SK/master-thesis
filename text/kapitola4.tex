@@ -9,15 +9,16 @@ In both of these sections, we first describe the important parts and decisions i
 implementation. Subsequently, we describe how we benchmarked our implementation and present
 the results we obtained.
 
-The source code to implementation along with all benchmarks can be found in electronic
-attachment to this work and also on \texttt{Github}. More about where to find individual
-parts of code and how to reproduce our results can be found in appendix A. All the results
-presented in this chapter were obtained on a machine with 8-core AMD~Ryzen~7~2700X with
-16~MB of cache, running at 3.7~GHz with 16~GB of RAM. The running operating system was
-Ubuntu~20.04.3~LTS. We used both \texttt{GCC} version 9.4.0 and \texttt{Clang} version
-10.0.0 compilers with the optimizations level most of the time set to \texttt{O3}.
-Although there are no special hardware requirements, to obtain the best possible results,
-our implementation requires a processor with support for \texttt{SSE2} instruction set.
+The \texttt{C++} source code of our implementation along with all benchmarks can be found
+in electronic attachment to this work and also on \texttt{Github}. More about where to
+find individual parts of code and how to reproduce our results can be found in appendix A.
+All the results presented in this chapter were obtained on a machine with 8-core
+AMD~Ryzen~7~2700X with 16~MB of cache, running at 3.7~GHz with 16~GB of RAM. The running
+operating system was Ubuntu~20.04.3~LTS. We used both \texttt{GCC} version 9.4.0 and
+\texttt{Clang} version 10.0.0 compilers with the optimizations level most of the time
+set to \texttt{O3}. Although there are no special hardware requirements, to obtain the
+best possible results, our implementation requires a processor with support for \texttt{SSE2}
+instruction set.
 
 \section{New decoding method}
 
@@ -288,7 +289,7 @@ solution for 127 bit block size, we used the 128 bit type \texttt{\_\_uint128\_t
 as a combination of two 64 bit numbers. We compared these results with the table decoding specialization
 in \texttt{SDSL} and with on-the-fly decoding for all the other block sizes. The data we run the decoding
 on were radomly generated. To generate them, we picked 1\,000 pairs of class and offset by first randomly
-picking class of the block and then the offset along this class. The results we obtained are shown in
+picking class of the block and then the offset along this class. The results we measured are shown in
 Fig.~\ref{obr:simple_benchmark}.
 
 \paragraph{Bit vector on real data}
