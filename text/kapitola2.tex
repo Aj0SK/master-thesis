@@ -54,7 +54,7 @@ one of the superblocks can then be very cache-friendly after the initial two cac
 thus very fast.
 
 % TODO: moreover, bit operations - popcount
-% TODO: in theory, for k ~ log n we already get linear space and O(1) time if we assume a strong-enough model (RAM with log n bit registers with popcount)
+% TODO: in theory, for k ~ log n we already get linear space and \BigO(1) time if we assume a strong-enough model (RAM with log n bit registers with popcount)
 
 \begin{figure}
 	\centerline{
@@ -124,7 +124,7 @@ to the start of the superblock, then another one for the precomputed value of ra
 beginning of the block and in the end also one for accessing the precomputed $\rank$ value
 of the block.
 
-% TODO: ... depends on model... can be O(k/w) if we consider RAM model with w-bit registers
+% TODO: ... depends on model... can be \BigO(k/w) if we consider RAM model with w-bit registers
 % that supports popcount
 
 \subsection{Select}

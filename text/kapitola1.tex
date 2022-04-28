@@ -51,7 +51,7 @@ Let us assume that only $n$ out of $N$ elements are present and also that $n\ll 
 
 First approach using the sparseness of an array is to store only the non-default elements as
 pairs $(\text{position}, \text{value})$, which takes $n\cdot (k+\ceil{\log n})$ bits of space.
-If we just store the pairs sorted by the position, accessing the $i$-th element takes $O(\log n)$ time.
+If we just store the pairs sorted by the position, accessing the $i$-th element takes $\BigO(\log n)$ time.
 
 We may use a hash table to obtain a constant time solution but this comes with additional
 memory overhead.
@@ -373,7 +373,7 @@ bits that are contained in nodes on a path from root to the leaf node. The idea 
 by~\cite{makinen2005succinct} is to shape the wavelet tree in such a way that a code of every
 character is equal to Huffman code of this character. The advantage we get is that if queries
 for a characters are coming according to their frequencies, then we need to visit on average
-only $O(H_0)$ nodes rather than $O(\log \sigma)$ of them, where $H_0$ is zeroth-order empirical
+only $\BigO(H_0)$ nodes rather than $\BigO(\log \sigma)$ of them, where $H_0$ is zeroth-order empirical
 entropy $$H_0(S)=\sum_{c\in\Sigma} \frac{n_c}{n} \lg \frac{n}{n_c}$$. The maximum depth then
 may increase, however, \cite{grabowski2004first} showed that we can enforce depth
 $\BigO(log \sigma)$ with the depth being $H_0+2$ even if this is not convenient in practice.
