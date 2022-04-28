@@ -16,6 +16,7 @@ def return_results(path):
             else:
                 test_name = initial_line_split[3]
                 test_block_size = int(lines[i + 8].split()[3])
+                # time in nanosecond per operation
                 test_access = float(lines[i + 13].split()[3])
                 test_rank = float(lines[i + 15].split()[3])
                 test_select = float(lines[i + 17].split()[3])

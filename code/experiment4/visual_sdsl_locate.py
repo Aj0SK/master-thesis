@@ -55,9 +55,9 @@ if rows*cols != len(datasets):
     print("Not enough of space in graph.")
     exit(1)
 
-fig, axs = plt.subplots(rows, cols, figsize=(10,6))
+fig, axs = plt.subplots(rows, cols, figsize=(8,6))
 pts = [set() for i in range(len(datasets))]
-fig.suptitle('FM-index locate')
+fig.suptitle('FM-index locate', fontsize=16)
 
 labels = set()
 
@@ -73,16 +73,21 @@ for r in range(len(res)):
         col = dataset_index%cols
         l = names[r] + "-" + map_name[structure]
         labels.add(l)
-        axs[row][col].scatter(x, y, label = l, marker = markers[r])
+        m = markers[r]
+        if structure == "FM_HUFF":
+            m = 'd'
+        elif structure == "CSA_SADA":
+            m = '*'
+        axs[row][col].scatter(x, y, label = l, marker = m, s = 35)
         axs[row][col].set_title(dataset_name)
         for yy in y:
             pts[dataset_index].add(yy)
 
 for i in range(rows):
-    axs[i][0].set_ylabel("ms per occurrence")
+    axs[i][0].set_ylabel("ms / occurrence", fontsize=10)
 
 for i in range(cols):
-    axs[-1][i].set_xlabel("bits per text symbol")
+    axs[-1][i].set_xlabel("bits / text symbol", fontsize=10)
 
 for i in range(rows):
     for j in range(cols):
@@ -100,7 +105,12 @@ fig.legend(
   loc="upper center",
   bbox_to_anchor=(0.5, 0),
   bbox_transform=plt.gcf().transFigure,
-  ncol=len(list(labels))
+  ncol=len(list(labels)),
+  handletextpad=0.01,
+  labelspacing=0.0,
+  borderpad=0.1,
+  columnspacing = 1.0,
+  prop={'size': 10}
 )
 
 fig.tight_layout(pad=1.0)

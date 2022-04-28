@@ -1,6 +1,8 @@
 #include <algorithm>
+#include <cmath>
 #include <fstream>
 #include <iostream>
+#include <sdsl/rrr_helper.hpp>
 #include <sdsl/rrr_vector.hpp>
 #include <string>
 #include <vector>
@@ -8,9 +10,60 @@
 using namespace std;
 using namespace sdsl;
 
-const int kBlockSize = 31;
-
 using namespace std;
+
+template <int block_size, int cutoff> void analyze(const bit_vector& bv)
+{
+  vector<int> freq(block_size + 1, 0);
+  for (int i = 0; i < bv.size(); i += block_size)
+  {
+    int count = 0;
+    for (int j = i; j < min((int)bv.size(), i + block_size); ++j)
+    {
+      if (bv[j])
+        ++count;
+    }
+    ++freq[count];
+  }
+
+  size_t sum = 0;
+  for (auto x : freq)
+  {
+    sum += x;
+  }
+
+  uint16_t cut_from = (cutoff + 1) / 2;
+  uint16_t cut_to = block_size - cut_from + 1;
+
+  double total_classic = 0, total_hybrid = 0;
+  for (int i = 0; i <= block_size; ++i)
+  {
+    double classic =
+        log2(block_size + 1) +
+        ceil(
+            log2(binomial_coefficients<block_size>::data.table[block_size][i]));
+
+    double hybrid = log2(cutoff + 1);
+    if (i >= cut_from && i <= cut_to)
+    {
+      hybrid += block_size;
+    }
+    else
+    {
+      hybrid += ceil(
+          log2(binomial_coefficients<block_size>::data.table[block_size][i]));
+    }
+
+    total_classic += freq[i] * classic;
+    total_hybrid += freq[i] * hybrid;
+  }
+
+  double size = static_cast<double>(bv.size());
+
+  std::cout << "<" << block_size << ", " << cutoff << ">"
+            << "\t\t" << total_classic / size << "/" << total_hybrid / size
+            << "\n";
+}
 
 int main(int argc, char* argv[])
 {
@@ -21,29 +74,11 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  vector<int> freq(kBlockSize + 1, 0);
-
-  for (int i = 0; i < bv.size(); i += kBlockSize)
-  {
-    int count = 0;
-    for (int j = i; j < min((int)bv.size(), i + kBlockSize); ++j)
-    {
-      if (bv[j])
-        ++count;
-    }
-    ++freq[count];
-  }
-
-  size_t sum = 0;
-  for (auto x : freq)
-    sum += x;
-
-  std::cout << "Frequencies for block size " << kBlockSize << "\n";
-  for (int i = 0; i < kBlockSize + 1; ++i)
-  {
-    std::cout << i << " : " << freq[i] << " "
-              << ((double)freq[i]) / ((double)sum) << "\n";
-  }
+  analyze<31, 7>(bv);
+  analyze<31, 15>(bv);
+  analyze<63, 7>(bv);
+  analyze<63, 15>(bv);
+  analyze<63, 31>(bv);
 
   return 0;
 }
