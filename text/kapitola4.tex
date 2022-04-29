@@ -360,7 +360,9 @@ in all searched patterns. We present the results in Fig.~\ref{obr:benchmark_sdsl
 	\centerline{
 		\includegraphics[width=\textwidth, height=0.4\textheight]{images/vysledky_sdsl_count}
 	}
-	\caption[TODO]{TODO: Zatial iba placeholder obrazok pre FM-index count.
+	\caption[TODO]{Counting occurences of patterns in various different texts. Displaying
+	the query time per pattern symbol for various block sizes and the size of index over the
+	text. Uncompresed bit vector and sparse array are included for reference. 
 	}
 	\label{obr:benchmark_sdsl_count}
 \end{figure}
@@ -378,7 +380,9 @@ Note that the trends that can be seen in these results are the same for every sa
 	\centerline{
 		\includegraphics[width=\textwidth, height=0.4\textheight]{images/vysledky_sdsl_extract}
 	}
-	\caption[TODO]{TODO: Zatial iba placeholder obrazok pre FM-index extract.
+	\caption[TODO]{Extracting parts of the represented text. Displaying
+	the query time per extracted symbol for various block sizes and the size of index over the
+	text. Uncompresed bit vector and sparse array are included for reference. 
 	}
 	\label{obr:benchmark_sdsl_extract}
 \end{figure}
@@ -391,7 +395,9 @@ that 2--3 millions of occurences are found in the text. We present our results i
 	\centerline{
 		\includegraphics[width=\textwidth, height=0.4\textheight]{images/vysledky_sdsl_locate}
 	}
-	\caption[TODO]{TODO: Zatial iba placeholder obrazok pre FM-index locate.
+	\caption[TODO]{Locating occurences of patterns in the represented text. Displaying
+	the query time per occurence for various block sizes and the size of index over the
+	text.
 	}
 	\label{obr:benchmark_sdsl_locate}
 \end{figure}
@@ -408,8 +414,6 @@ benchmark produces, as a checksum, sum of all the results of the $\access$, $\ra
 queries. These checksums can be compared between our and original implementation.
 
 \section{Hybrid encoding}
-
-% TODO: tu su len zakladne myslienky, ktore chcem ukazat, zatial to nie je hotove
 
 \subsection{Implementation}
 
@@ -495,47 +499,10 @@ int rank(int i)
 
 \paragraph{Hybrid version for balanced sequences}
 
-The major difference from the previous version of hybrid encoding are two helper
-functions that are used for mapping or as we call it compressing and decompressing
-the blocks class before any of its use.
-
-\lstset{language=C++,caption={Compressing blocks class},label=code:hybrid_valley_compress}
-\begin{lstlisting}
-int compress_class(int k) const {
-	if (!is_hybrid_impl) return k;
-	if (k < cut_from) {
-		return k;
-	}
-	else if (k <= cut_to) {
-		return cutoff;
-	}
-	else {
-		return k-(cut_to-cut_from+1);
-	}
-}
-\end{lstlisting}
-
-\lstset{language=C++,caption={Decompressing blocks class},label=code:hybrid_valley_decompress}
-\begin{lstlisting}
-int decompress_class(int k) const {
-	if (!is_hybrid_impl) return k;
-	if (k < cut_from) {
-		return k;
-	}
-	else if (k == cutoff) {
-		return cut_to;
-	}
-	else {
-		return k+(cut_to-cut_from+1);
-	}
-}
-\end{lstlisting}
-
-\subsection{Experimental results}
-
 Before implementing our second version of hybrid encoding, we have been interested in a potential
-space saving on some real-life data so we analyzed what is the possible space saving that can be
-obtained on a data from \texttt{WT-WEB-1GB} and \texttt{WT-DNA-1GB}.
+space saving on some real-life data so we analyzed what is the space saved when using hybrid encoding
+on a data \texttt{WT-WEB-1GB} and \texttt{WT-DNA-1GB}. The results in Fig.~\ref{obr:hybrid_space_saved}
+show, that there is a potential to save some space for certain cutoff values.
 
 \begin{figure}
 	\centerline{
@@ -582,6 +549,44 @@ obtained on a data from \texttt{WT-WEB-1GB} and \texttt{WT-DNA-1GB}.
 	\label{obr:hybrid_space_saved}
 \end{figure}
 
+The major difference from the previous version of hybrid encoding are two helper
+functions that are used for mapping or as we call it compressing and decompressing
+the blocks class before any of its use.
+
+\lstset{language=C++,caption={Compressing blocks class},label=code:hybrid_valley_compress}
+\begin{lstlisting}
+int compress_class(int k) {
+	if (!is_hybrid_impl) return k;
+	if (k < cut_from) {
+		return k;
+	}
+	else if (k <= cut_to) {
+		return cutoff;
+	}
+	else {
+		return k-(cut_to-cut_from+1);
+	}
+}
+\end{lstlisting}
+
+\lstset{language=C++,caption={Decompressing blocks class},label=code:hybrid_valley_decompress}
+\begin{lstlisting}
+int decompress_class(int k) {
+	if (!is_hybrid_impl) return k;
+	if (k < cut_from) {
+		return k;
+	}
+	else if (k == cutoff) {
+		return cut_to;
+	}
+	else {
+		return k+(cut_to-cut_from+1);
+	}
+}
+\end{lstlisting}
+
+\subsection{Experimental results}
+
 \begin{figure}
 	\centerline{
 		\includegraphics[width=\textwidth, height=0.4\textheight]{images/benchmark_sdsl_hybrid}
@@ -601,13 +606,13 @@ obtained on a data from \texttt{WT-WEB-1GB} and \texttt{WT-DNA-1GB}.
 	\label{obr:benchmark_sdsl_hybrid_count}
 \end{figure}
 
-\begin{figure}
-	\centerline{
-		\includegraphics[width=\textwidth, height=0.4\textheight]{images/vysledky_sdsl_hybrid_extract}
-	}
-	\caption[TODO]{TODO: Zatial iba placeholder obrazok.
-	}
-	\label{obr:benchmark_sdsl_hybrid_extract}
-\end{figure}
+%\begin{figure}
+%	\centerline{
+%		\includegraphics[width=\textwidth, height=0.4\textheight]{images/vysledky_sdsl_hybrid_extract}
+%	}
+%	\caption[TODO]{TODO
+%	}
+%	\label{obr:benchmark_sdsl_hybrid_extract}
+%\end{figure}
 
 % TODO: FM-indexove grafy

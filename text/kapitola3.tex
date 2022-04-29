@@ -419,3 +419,10 @@ values can be mapped into the range $[0, 3]$, thus only consuming two bits per c
     have as class value the biggest possible value we can store using 2 bits.}
 	\label{obr:hybrid_encoding_valley}
 \end{figure}
+
+Space used by this representation is equal to
+$$(n/b)\lg (c_k+1) + \sum_{i=0}^{\mathit{cut\_from}-1} C_i\ceil{\lg {b\choose i}}
++ \sum_{i=\mathit{cut\_from}}^{\mathit{cut\_to}}C_i b
++ \sum_{i=\mathit{cut\_to}+1}^{b} C_i\ceil{\lg {b\choose i}}.$$
+
+% TODO: conclusion nejaka?
