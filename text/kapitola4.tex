@@ -316,15 +316,17 @@ implementation in Fig.~\ref{obr:benchmark_sdsl_new_method}.
 \end{figure}
 
 There are several interesting things to observe in these results. We can see that our new implementation
-beats older implementations on almost all block sizes and all types of data. We can observe that our
-implementation achieves interesting results, beating the original implementation in every dataset and
-every method benchmarked. Note, that results are more clear on random data and DNA data. On web data,
-however, the difference is less noticable. We attribute this behaviour to the fact, that was observed by
-\cite{gog2014optimized}, creators of this dataset. They observed that the number of uniform blocks
-(full of either zeroes or ones) is much bigger in \texttt{WT-WEB} data than in \texttt{WT-DNA}. For
-block size 63, they observed ratio of uniform blocks in \texttt{WT-WEB-1GB} to be 84\% compared to
-28\% in \texttt{WT-DNA}. As the uniform blocks are decoded trivially in both implementations, this makes
-less opportunities for our implementation to save time.
+beats older implementations on almost all block sizes and all types of data. Note, that results are more
+clear on random data and DNA data. On web data, however, the difference is less noticable. We attribute
+this behaviour to the fact, that was observed by \cite{gog2014optimized}, creators of this dataset. They
+observed that the number of uniform blocks (full of either zeroes or ones) is much bigger in \texttt{WT-WEB}
+data than in \texttt{WT-DNA}. For block size 63, they observed ratio of uniform blocks in \texttt{WT-WEB-1GB}
+to be 84\% compared to 28\% in \texttt{WT-DNA}. As the uniform blocks are decoded trivially in both
+implementations, this makes less opportunities for our implementation to save time. Another visible pattern
+is that with increasing block size, the query time generally goes up as decoding takes more and more time.
+On the other hand, on query $\select$ in \texttt{WT-WEB} data we can observe, that at the beginning the query
+time decreases with increasing block size. This is because time savings of binary search in precomputed $\rank$
+values offset growing decoding time.
 
 \paragraph{Bit vector in FM-index}
 
@@ -356,7 +358,7 @@ in all searched patterns. We present the results in Fig.~\ref{obr:benchmark_sdsl
 
 \begin{figure}
 	\centerline{
-		\includegraphics[width=\textwidth, height=0.35\textheight]{images/vysledky_sdsl_count}
+		\includegraphics[width=\textwidth, height=0.4\textheight]{images/vysledky_sdsl_count}
 	}
 	\caption[TODO]{TODO: Zatial iba placeholder obrazok pre FM-index count.
 	}
@@ -374,7 +376,7 @@ Note that the trends that can be seen in these results are the same for every sa
 
 \begin{figure}
 	\centerline{
-		\includegraphics[width=\textwidth, height=0.35\textheight]{images/vysledky_sdsl_extract}
+		\includegraphics[width=\textwidth, height=0.4\textheight]{images/vysledky_sdsl_extract}
 	}
 	\caption[TODO]{TODO: Zatial iba placeholder obrazok pre FM-index extract.
 	}
@@ -387,7 +389,7 @@ that 2--3 millions of occurences are found in the text. We present our results i
 
 \begin{figure}
 	\centerline{
-		\includegraphics[width=\textwidth, height=0.35\textheight]{images/vysledky_sdsl_locate}
+		\includegraphics[width=\textwidth, height=0.4\textheight]{images/vysledky_sdsl_locate}
 	}
 	\caption[TODO]{TODO: Zatial iba placeholder obrazok pre FM-index locate.
 	}
@@ -416,22 +418,22 @@ subroutines. The first necessary change is addition of hybrid cutoff parameter
 to the \texttt{rrr\_vector} class and reimplementation of function \texttt{space\_for\_bt(c)}
 that is used in \texttt{SDSL} to get the number of bits that are needed to store offset
 of block with class $c$. The second change, more impactful on a runtime
-of \texttt{rrr\_vector}, relates to the way how we work with superblocks. When
-computing $\rank$ of a bit in particular block, we can still binary search for
-the superblock where the $i$-th one is located. To linearly search for a result
-inside of the superblock, we need only information from the array of classes $C$.
+of \texttt{rrr\_vector}, relates to the way how we work with superblocks.
+
+When computing $\rank$ of a bit in particular block, we can still binary search for
+the superblock where the $i$-th one is located. Then, to linearly search for a result
+inside of the superblock, we needed only information from the array of classes $C$.
 This is because this array stores the number of ones in the blocks and we can linearly
 search for the answer using successive entries of $C$. When we overrun the block, where
-the result is located, we go back and find finally answer to $\rank$ inside of a
-single block. To locate the beginning of the block, we take the offset of this superblock
-in $O$ and add the offset of this block inside of the superblock. The offset from the
-beginning of superblock can be counted along with the linear search for $\rank$ result.
-With cutoff in place, however, we are not able to linearly scan through the superblock
-only using information contained in $C$. This is because now, for some classes, $C$ does
-not store the number of ones in the block. Thus when we are linearly searching for the result
-of $\rank$ query along the block, we need to also from time to time count number of ones
-for some block in $O$. This creates some additional memory accesses that may slow down the
-hybrid implementation.
+the result is located, we go back and find finally answer to $\rank$ inside of a single
+block. To locate the beginning of this smaller block, we take the offset of the superblock
+in $O$ and add the offset of this block from the beginning of superblock that can be
+counted along with the linear search for $\rank$ result. With cutoff in place, however,
+we are not able to linearly scan through the superblock only using information contained
+in $C$. This is because now, for some classes, $C$ does not store the number of ones in
+the block. Thus when we are linearly searching for the result of $\rank$ query along the
+block, we need to also from time to time count number of ones for some block in $O$. This
+creates some additional memory accesses that may slow down the hybrid implementation.
 
 \lstset{language=C++,caption={Rank query, SDSL implementation (pseudo-code)},label=code:binary}
 \begin{lstlisting}
@@ -493,7 +495,7 @@ int rank(int i)
 
 \paragraph{Hybrid version for balanced sequences}
 
-The major change from the previous version of hybrid encoding are two helper
+The major difference from the previous version of hybrid encoding are two helper
 functions that are used for mapping or as we call it compressing and decompressing
 the blocks class before any of its use.
 
@@ -530,6 +532,55 @@ int decompress_class(int k) const {
 \end{lstlisting}
 
 \subsection{Experimental results}
+
+Before implementing our second version of hybrid encoding, we have been interested in a potential
+space saving on some real-life data so we analyzed what is the possible space saving that can be
+obtained on a data from \texttt{WT-WEB-1GB} and \texttt{WT-DNA-1GB}.
+
+\begin{figure}
+	\centerline{
+	\begin{tabular}{|l|l|r|}
+		\multicolumn{3}{c}{WT-DNA-1GB} \\
+		\hline
+		Block size 			& $c_k$					&  space used by hybrid \\
+		\hline
+		\multirow{2}{*}{31} & 7                  	&  90\%  \\
+							& 15  					&  97\%  \\
+		\hline
+		\multirow{3}{*}{63} & 7                 	&  93\%  \\
+							& 15                 	&  97\%  \\
+							& 31  					&  100\%  \\
+		\hline
+		\multirow{4}{*}{127}& 7                 	&  99\%  \\
+							& 15                 	&  99\%  \\
+							& 31  					&  101\%  \\
+							& 63  					&  102\%  \\
+		\hline
+	\end{tabular}
+	\hspace{3em}
+	\begin{tabular}{|l|l|r|}
+		\multicolumn{3}{c}{WT-WEB-1GB} \\
+		\hline
+		Block size 			& $c_k$					&  space used by hybrid \\
+		\hline
+		\multirow{2}{*}{31} & 7                  	&  73\%  \\
+							& 15  					&  85\%  \\
+		\hline
+		\multirow{3}{*}{63} & 7                 	&  78\%  \\
+							& 15                 	&  84\%  \\
+							& 31  					&  91\%  \\
+		\hline
+		\multirow{4}{*}{127}& 7                 	&  94\%  \\
+							& 15                 	&  94\%  \\
+							& 31  					&  94\%  \\
+							& 63  					&  95\%  \\
+		\hline
+	\end{tabular}
+	}
+	\caption[TODO]{TODO.
+	}
+	\label{obr:hybrid_space_saved}
+\end{figure}
 
 \begin{figure}
 	\centerline{

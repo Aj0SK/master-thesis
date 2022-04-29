@@ -57,18 +57,18 @@ thus very fast.
 % TODO: in theory, for k ~ log n we already get linear space and \BigO(1) time if we assume a strong-enough model (RAM with log n bit registers with popcount)
 
 \begin{figure}
-	\centerline{
 	\begin{tabular}{c|c|c|c|c|}
 	\cline{2-5}
 	\textbf{B} & {\tt 0 0 1 0 1 1 0 1} & {\tt 1 1 1 0 1 1 1 1} & {\tt 0 0 0 0 0 1 1 0} & {\tt 1 1 0 0 1} \\ \cline{2-5}
 	\end{tabular}
-    % TODO: oddelit tie tabulky medzerou, netusim ako to urobit jednoducho
-    % nefunguje newline, medskip, bigskip, vspace
+
+    \bigskip
+
     \begin{tabular}{c|c|c|c|c|}
         \cline{2-5}
         \textbf{precomputed ranks} & \tt 0 & \tt 4 & \tt 11 & \tt 13 \\ \cline{2-5}
         \end{tabular}
-    }
+
 	\caption[TODO]{Example of dividing bit sequence $B$ into superblocks of length 8 and precomputing
     $\rank_1$ for the beginning of every superblock. Note that last superblock may not contain full
     number of 8 bits.}
