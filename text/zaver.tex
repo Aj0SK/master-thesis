@@ -2,9 +2,18 @@
 \addcontentsline{toc}{chapter}{Conclusion} % rucne pridanie do obsahu
 \markboth{Conclusion}{Conclusion} % vyriesenie hlaviciek
 
-In this chapter, we conclude and discuss the results we have been able to
-obtain in this work. Following this, we propose future steps that could
-be made to obtain better results in the field of our study.
+The goal of this thesis was to explore representations of compressed
+bit vector, develop an efficient implementation and compare its
+performance with existing solutions. We have been able to come up with
+two new encoding schemes and test them in artificial but also practical
+conditions.
+
+One is based on the new ordering of the blocks along the same class. We
+showed how this new ordering enables us to decode efficiently by reusing
+the decoding solution for smaller sub-blocks. We showed that the decoding
+routine can be very competitive with the previously existing methods in
+artificial settings but also on real-life data. In the end, we demonstrated
+its usability as a part of wavelet tree in FM-index.
 
 %Na záver už len odporúčania k samotnej kapitole Záver v bakalárskej
 %práci podľa smernice \cite{smernica}:  \glqq{}V závere je potrebné v

@@ -414,16 +414,17 @@ queries. These checksums can be compared between our and original implementation
 
 \section{Hybrid encoding}
 
-We now turn our attention to the hybrid encoding. In the previous chapter, we proposed two
-ideas. Both of these were based on a idea not to encode the blocks that are rare and thus
-save space on bits used for blocks class. On the other hand, they differed in which blocks
-are not encoded but just trivially copied. The first solution was treating specially just
-block with high number of ones. The second, however, was more focused on balanced sequences
-and treated differently blocks that have more balanced number of zeroes and ones.
+We now present our implementation of the hybrid encoding. In the previous chapter, we
+proposed two variants of hybrid encoding. Both of these were based on a idea not to
+encode the blocks that are rare and thus save space on bits used for blocks class. On
+the other hand, they differed in which blocks are not encoded but just trivially copied.
+The first solution treated differently just block with high number of ones. The second,
+was focused on balanced sequences and treated differently blocks that have more balanced
+number of zeroes and ones.
 
 \subsection{Implementation}
 
-Implementing these both encodings required changes to more than only encoding and decoding
+Implementation of these encodings required changes to more than only encoding and decoding
 routines. The first necessary change is addition of hybrid cutoff parameter
 to the \texttt{rrr\_vector} class and reimplementation of function \texttt{space\_for\_bt(c)}
 that is used in \texttt{SDSL} to get the number of bits that are needed to store offset
@@ -454,8 +455,7 @@ a single class then uses $\ceil{\log_2(c_k+1)}$ bits of space.
 
 \lstset{language=C++,caption={Rank query, SDSL implementation (pseudo-code)},label=code:binary}
 \begin{lstlisting}
-int rank(int i)
-{
+int rank(int i) {
 	int block_idx = i/BLOCK_SIZE;
 	int superblock_index = block_idx/BLOCKS_PER_SUPERBLOCK;
 	int offset = P[superblock_idx]; // precomputed offset into O
@@ -480,8 +480,7 @@ int rank(int i)
 
 \lstset{language=C++,caption={Rank query, hybrid implementation (pseudo-code)},label=code:binary}
 \begin{lstlisting}
-int rank(int i)
-{
+int rank(int i) {
 	int block_idx = i/BLOCK_SIZE;
 	int superblock_index = block_idx/BLOCKS_PER_SUPERBLOCK;
 	int offset = P[superblock_idx];
@@ -512,8 +511,8 @@ int rank(int i)
 
 \paragraph{Hybrid version for balanced sequences}
 
-The major difference from the previous version of hybrid encoding are two helper
-functions that are used for mapping or as we call it compressing and decompressing
+The biggest notable difference from the previous version of hybrid encoding are two
+helper functions that are used for mapping or as we call it compressing and decompressing
 the blocks class before any of its use.
 
 \lstset{language=C++,caption={Compressing blocks class},label=code:hybrid_valley_compress}
