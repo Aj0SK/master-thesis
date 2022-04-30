@@ -5,12 +5,12 @@
 
 \section{Motivation}
 
-In many applications, the amount of data is so significant that our choice of
-the data structures we use is heavily influenced by their space usage. The field
+In many applications, the amount of data is so significant that the choice of
+the data structures is heavily influenced by their space usage. The field
 of \textit{succinct data structures} focuses on representing data using as little
-space as possible but at the same time tries not to hurt the time complexity and
-performance of methods that these structures support. In this field, many data structures
-for varied problems have been devised such as succinct dictionaries~\citep{raman2007succinct},
+space as possible while trying to minimize the time and performance penalty on methods
+that these structures support. Many succinct data structures for varied problems
+have been devised such as succinct dictionaries~\citep{raman2007succinct},
 succinct general graph representations~\citep{farzan2013succinct}, grid
 representations~\citep{chazelle1988functional} or text collections~\citep{ferragina2000opportunistic}.
 While many of the resulting structures come with solid theoretical bounds on the used space,
@@ -18,10 +18,10 @@ others look into real-world space usage and performance.
 
 % Mozno pridat (Fenwick tree by \cite{bille2017succinct}, trie by \cite{grossi2015fast}),
 
-Succinct data structures are very helpful in scenarios where we work with a massive amount of
-data. In these scenarios, using the ordinary data structures may force us to place
-the entire representation of data structure onto the slower type of memory storage, thus
-reducing the usability of our data structure and often completely ruining its runtime due to
+Succinct data structures are very helpful in scenarios where we work with a immense amount
+of data. In these scenarios, using the ordinary data structures may force us to place
+the entire representation of data structure onto the slower type of memory storage. This
+reduces the usability of our data structure and often completely ruins its runtime due to
 high amount of slow \textit{I/O operations}. Even if a succinct version of the data structure
 may help us to store the data in a faster type of memory (e.g. fast RAM instead of the slower disk),
 we pay some price for using the succinct data structure. It comes mostly in the form of more
@@ -32,35 +32,37 @@ data structures that represents a sequence of zeroes and ones while supporting t
 methods:
 \begin{itemize}
 \item $\access(i)$ - returns the $i$-th symbol of the sequence,
-\item $\rank_c(i)$ - returns the number of occurrences of symbol $c$up to the $i$-th index
+\item $\rank_c(i)$ - returns the number of occurrences of symbol $c$ up to the $i$-th index
 \item $\select_c(i)$ - returns the index of $i$-th occurrence of symbol $c$ in the sequence.
 \end{itemize}
 
 The reason behind our focus on bit vector and particularly its compressed version
-is that it is one of the main building blocks of many succinct data structures.
-In the next sections, we introduce some of its interesting and useful applications.
-Throughout our work, we work in a unit-cost RAM with word size $\Theta(\log n)$ bits.
+is the fact that it is one of the main building blocks of many succinct data structures.
+In the next sections, we introduce some interesting and useful applications of bit vector.
+Throughout our work, we use a unit-cost RAM model with word size $\Theta(\log n)$ bits.
 
 \section{Application 1: Sparse array}
 
-Let $A$ be an array of $N$ elements each taking $k$ bits of space. We shall be interested in
-accessing the $i$-th element of $A$. For simplicity, we assume that the elements of the array may
-not change after the construction. A straightforward representation of this array takes $N\cdot k$
-bits of space. However, imagine a scenario where a significant portion of the array is empty
-and just a handful of elements are present. Take for example a sparse vector of numbers,
-where most of the elements are 0. Then we could use a more space-efficient approach.
-Let us assume that only $n$ out of $N$ elements are present and also that $n\ll N$.
+Let $A$ be an array of $N$ elements, each taking $k$ bits of space. We shall be
+interested in accessing the $i$-th element of $A$. For simplicity, we assume that
+the elements of the array may not change after the construction. A straightforward
+representation of this array takes $N\cdot k$ bits of space. However, imagine a
+scenario where a significant portion of the array is empty and just a handful of
+elements are present. Take for example a sparse vector of numbers, where most of
+the elements are 0. Then we could use a more space-efficient approach. Let us
+assume that only $n$ out of $N$ elements are present and also that $n\ll N$.
 
-First approach using the sparseness of an array is to store only the non-default elements as
-pairs $(\text{position}, \text{value})$, which takes $n\cdot (k+\ceil{\log n})$ bits of space.
-If we just store the pairs sorted by the position, accessing the $i$-th element takes $\BigO(\log n)$ time.
+First approach considering the sparseness of an array is to store only the non-default
+elements as pairs $(\text{position}, \text{value})$, which takes $n\cdot (k+\ceil{\log_2 N})$
+bits of space. If we just store the pairs sorted by the position, accessing the $i$-th
+element takes $\BigO(\log n)$ time.
 
 We may use a hash table to obtain a constant time solution but this comes with additional
 memory overhead.
 
 An alternative approach using the bit vector is to store non-default elements in
-a packed array $P$ of length $n$ and size $nk$ bits. Alongside $P$ we store a bit vector $B$ of length
-$N$ where
+a packed array $P$ of length $n$ and size $n\cdot k$ bits. Alongside $P$ we store
+a bit vector $B$ of length $N$ where
 \[
    B[i]=
 \begin{cases}
@@ -70,19 +72,19 @@ $N$ where
 \]
 
 Using this representation of $A$, if we want to access the $i$-th element, we first check for
-the value of $B[i]$. If it is zero, we return the default value. If it is one, we need to find
-how many ones are preceding this particular one in $B$ to locate where our value is placed in
-array $P$. For this, we may use the $\rank_1$ method. Similarly, to obtain the position of $i$-th
-non-empty value in $A$, we use $\select_1$.
+the value of $B[i]$. If it is zero, we return the default value. Otherwise, we need to find
+how many ones are preceding this particular one in $B$ to locate where the requested value is
+placed in array $P$. For this, we may use the $\rank_1$ method. Similarly, to obtain the
+position of $i$-th non-empty value in $A$, we use $\select_1$.
 
-The total space used by this representation is $N+n\cdot k+R$ where $R$ is the space needed to
-support an efficient $\rank$ query. As we shall show in Section~\ref{section:rank}, $\rank$ can
-be implemented in constant time with sublinear space overhead, i.e., $R = o(N)$. If we are provided
-with bit vector implementation along with $\access$ and $\rank$ methods we are able to reduce the
-total space used from $k\cdot N$ to $N+n\cdot k+o(N)$ bits. Note that in practice, for a really small
-number of non-default values, the hashtable representation takes up less space, however, bit
-vector provides us with a solution that is usable for scenarios when $A$ is mediumly filled in,
-e.g. $n/N>0.10$.
+The total space used by this representation is $N+n\cdot k+R$ where $R$ is the space needed
+to support an efficient $\rank$ query. As we shall show in Section~\ref{section:rank}, $\rank$
+can be implemented in constant time with sublinear space overhead, i.e., $R = o(N)$. If we are
+provided with bit vector implementation along with $\access$ and $\rank$ methods we are able to
+reduce the total space used from $k\cdot N$ to $N+n\cdot k+o(N)$ bits. Note that in practice,
+for a really small number of non-default values, the hashtable representation takes up less
+space, however, bit vector provides us with a solution that is usable for scenarios when $A$
+is mediumly filled in, e.g. $n/N>0.10$.
 
 \section{Application 2: Storing elements of non-uniform length}
 
