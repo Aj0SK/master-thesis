@@ -11,14 +11,13 @@ the results we obtained.
 
 The \texttt{C++} source code of our implementation along with all benchmarks can be found
 in electronic attachment to this work and also on \texttt{Github}. More about where to
-find individual parts of code and how to reproduce our results can be found in appendix A.
-All the results presented in this chapter were obtained on a machine with 8-core
-AMD~Ryzen~7~2700X with 16~MB of cache, running at 3.7~GHz with 16~GB of RAM. The running
-operating system was Ubuntu~20.04.3~LTS. We used both \texttt{GCC} version 9.4.0 and
-\texttt{Clang} version 10.0.0 compilers with the optimizations level most of the time
-set to \texttt{O3}. Although there are no special hardware requirements, to obtain the
-best possible results, our implementation requires a processor with support for \texttt{SSE2}
-instruction set.
+find individual parts of code and how to reproduce our results can be found in Appendix A.
+We obtained results presented in this chapter on a machine with 8-core AMD~Ryzen~7~2700X
+with 16~MB of cache, running at 3.7~GHz with 16~GB of RAM. The running operating system
+was Ubuntu~20.04.3~LTS. We used both \texttt{GCC} version 9.4.0 and \texttt{Clang} version
+10.0.0 compilers with the optimizations level most of the time set to \texttt{O3}. Although
+there are no special hardware requirements, to obtain the best possible results, our
+implementation requires a processor with support for \texttt{SSE2} instruction set.
 
 \section{New decoding method}
 
@@ -404,8 +403,8 @@ that 2--3 millions of occurences are found in the text. We present our results i
 
 \paragraph{Correctness}
 
-On top of making sure that our solution is as fast possible we also wanted to make sure it is
-correct. We used mainly two types of tests for this purpose. The first are the tests of $\access$,
+On top of making sure that our solution is as fast as possible we also wanted to make sure it is
+correct. Mainly, we used two types of tests for this purpose. The first are the tests of $\access$,
 $\rank$ and $\select$ functionality in \texttt{SDSL} that run mainly on smaller bit sequences
 but cover special cases such as bit vector full of zeroes/ones and certain special patterns
 that are not encountered often in practice. The second type of tests used was the benchmark
@@ -414,6 +413,13 @@ benchmark produces, as a checksum, sum of all the results of the $\access$, $\ra
 queries. These checksums can be compared between our and original implementation.
 
 \section{Hybrid encoding}
+
+We now turn our attention to the idea of hybrid encoding. In the previous chapter, we proposed two
+ideas. Both these were based on a idea not to encode the blocks that are rare and thus save space
+on representing the individual classes. On the other hand, they differed in which blocks are not
+encoded but just trivially copied. The first solution was treating specially just block with high
+number of ones. The second, however, was more focused on balanced sequences and treated specially
+blocks that have more balanced number of zeroes and ones. 
 
 \subsection{Implementation}
 

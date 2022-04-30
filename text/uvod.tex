@@ -2,19 +2,24 @@
 \addcontentsline{toc}{chapter}{Introduction} % rucne pridanie do obsahu
 \markboth{Introduction}{Introduction} % vyriesenie hlaviciek
 
-In the first chapter, we look more closely at the goals of succinct data structures.
-We describe scenarios when they are very competitive but we also discuss their drawbacks.
-We also show useful applications of succinct data structures and demonstrate that the bit
-vector is an essential building block when implementing these structures.
+In the first chapter, we introduce the field of succinct data structures.
+We explain the goal of these data structures and describe scenarios when
+they are very competitive and useful but we also discuss their drawbacks.
+We introduce bit vector, one of the simplest succinct data structures,and
+demonstrate some of its useful applications. In the end, we demonstrate how
+bit vector can be used inside of the text indexing data structure FM-index.
 
-In the second chapter, we show various implementations of methods $\rank$ and $\select$.
-We discuss what are the theoretically optimal solutions but also what are their practical
-alternatives. We then proceed to describe one of the widely used implementations of the
-compressed bit vector.
+In the second chapter, we show possible implementations of methods $\rank$ and
+$\select$. We discuss what are the theoretically optimal solutions but also
+what are their practical alternatives. We then proceed to describe one of the
+widely used implementations of the compressed bit vector called RRR.
 
-In the third chapter, we propose our own modifications to the implementation of compressed bit
-vector proposed in the previous chapter. We discuss more theoretical aspects of these modifications.
+In the third chapter, we propose our own modifications to the implementation of
+compressed bit vector based on RRR. We discuss slightly more theoretical aspects
+of these modifications.
 
-In the fourth chapter, we propose implementation of methods previously devised and then experimentally
-test and evaluate them. We measure the performance of our solution on artificial but also real-world
-data. We demonstrate how our idea can be used to get a better ratio of speed and space used by FM-index.
+In the fourth chapter, we show our proposed implementation of methods previously
+devised and then experimentally test and evaluate them. We measure the performance
+of our solution on artificial but also real-world data. We demonstrate how our
+idea can be used to get a better ratio of query time and space used by the FM-index
+and thus deliver practically interesting results.
