@@ -420,17 +420,17 @@ We now present our implementation of the hybrid encoding. In the previous chapte
 proposed two variants of hybrid encoding. Both of these were based on an idea not to
 encode the blocks that are rare and thus save space on bits used for blocks classes. On
 the other hand, they differed in which blocks are not encoded but just trivially copied.
-The first solution treated differently just block with high number of ones. The second,
-was focused on balanced sequences and treated differently blocks that have more balanced
-number of zeroes and ones.
+The first solution treated differently just blocks with high number of ones. The second,
+was focused on balanced sequences and treated differently blocks that have balanced number
+of zeroes and ones.
 
 \subsection{Implementation}
 
 Implementation of these encodings required changes to more than only encoding and decoding
 routines. The first necessary change is addition of hybrid cutoff parameter
-to the \texttt{rrr\_vector} class and reimplementation of function \texttt{space\_for\_bt(c)}
-that is used in \texttt{SDSL} to get the number of bits that are needed to store offset
-of block with class $c$. The second change, more impactful on a runtime
+to the \texttt{rrr\_vector} class. The second is reimplementation of function
+\texttt{space\_for\_bt(c)} that is used in \texttt{SDSL} to get the number of bits that are
+needed to store offset of block with class $c$. The third change, most impactful on a runtime
 of \texttt{rrr\_vector}, relates to the way how we work with superblocks.
 
 When computing $\rank$ of a bit in particular block, we can still binary search for
@@ -447,15 +447,17 @@ in $C$. This is because now, for some classes, $C$ does not store the number of 
 the block. Thus when we are linearly searching for the result of $\rank$ query along the
 block, we need to also from time to time access $O$ to count number of ones for some block.
 This creates some additional memory accesses that may slow down the hybrid implementation.
+The simplified implementation of the method $\rank$ in \texttt{SDSL} is in listing \ref{code:rank_before}.
+The new version, adapted to the hybrid encoding is in listing \ref{code:rank_after}.
 
 In both versions of hybrid implementation, we introduced cutoff parameter $c_k$ to the
 class \texttt{rrr\_vector}. Its meaning is that exactly $c_k$ classes are represented
 as before and the rest of them is represented using a single value. In the first version,
 these are classes bigger or equal than $c_k$. In the second version, these are classes
-from range \texttt{cut\_from} up to and including \texttt{cut\_to}. Thus, integer to save
-a single class then uses $\ceil{\log_2(c_k+1)}$ bits of space.
+from range \texttt{cut\_from} up to and including \texttt{cut\_to}. Then, we need
+$\ceil{\log_2(c_k+1)}$ bits of space to represent a single class.
 
-\lstset{language=C++,caption={Rank query, SDSL implementation (pseudo-code)},label=code:binary}
+\lstset{language=C++,caption={Rank query, SDSL implementation (pseudo-code)},label=code:rank_before}
 \begin{lstlisting}
 int rank(int i) {
 	int block_idx = i/BLOCK_SIZE;
@@ -480,7 +482,7 @@ int rank(int i) {
 }
 \end{lstlisting}
 
-\lstset{language=C++,caption={Rank query, hybrid implementation (pseudo-code)},label=code:binary}
+\lstset{language=C++,caption={Rank query, hybrid implementation (pseudo-code)},label=code:rank_after}
 \begin{lstlisting}
 int rank(int i) {
 	int block_idx = i/BLOCK_SIZE;
@@ -550,6 +552,15 @@ int decompress_class(int k) {
 \end{lstlisting}
 
 \subsection{Experimental results}
+
+We tested the first version of hybrid encoding on randomly generated sequence of bits that contains 5\% of ones.
+This was to observe, how it behaves on sparse sequences with smaller percentage of ones. This is something, where
+implementations based on RRR do not perform very well and are often beaten by sparse bit vector implementation.
+
+Our second version of hybrid encoding was tested in the same two scenarios we used in the previous section. Namely
+on the raw data from the wavelet tree built on top of the DNA sequence and XML data and then inside of the FM-index.
+We used the exact same parameters as in the previous tests but now, we took as a baseline our implementation of RRR
+withouth hybrid encoding. 
 
 \begin{figure}
 	\centerline{
