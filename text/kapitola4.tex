@@ -2,21 +2,21 @@
 \label{kap:kap4}
 
 In this chapter, we describe the implementation of ideas proposed in the previous
-chapter and practical results we obtained when measuring experimentally their performance.
-This chapter is split into two main parts according to the main topics discussed
-in previous chapter namely our new general encoding and decoding routine and hybrid encoding.
-In both of these sections, we first describe the important parts and decisions in our
-implementation. Subsequently, we describe how we benchmarked our implementation and present
-the results we obtained.
+chapter and experimental results we obtained when measuring their performance.
+This chapter is split into two sections according to the main topics discussed
+in the previous chapter, namely our new general encoding and decoding routine and hybrid
+encoding. In both of these sections, we first describe the important parts and decisions
+in our implementation. Subsequently, we describe how we benchmarked our implementation and
+present the results we obtained.
 
 The \texttt{C++} source code of our implementation along with all benchmarks can be found
-in electronic attachment to this work and also on \texttt{Github}. More about where to
+in the electronic attachment to this work but also on \texttt{Github}. More about where to
 find individual parts of code and how to reproduce our results can be found in Appendix A.
-We obtained results presented in this chapter on a machine with 8-core AMD~Ryzen~7~2700X
+All the results presented in this chapter were obtained on a machine with 8-core AMD~Ryzen~7~2700X
 with 16~MB of cache, running at 3.7~GHz with 16~GB of RAM. The running operating system
-was Ubuntu~20.04.3~LTS. We used both \texttt{GCC} version 9.4.0 and \texttt{Clang} version
-10.0.0 compilers with the optimizations level most of the time set to \texttt{O3}. Although
-there are no special hardware requirements, to obtain the best possible results, our
+was Ubuntu~20.04.3~LTS. We used both \texttt{GCC} and \texttt{Clang} compiles with versions
+9.4.0 and 10.0.0, respectively. All available optimizations were turned on most of the time.
+Although there are no special hardware requirements, to obtain the best possible results, our
 implementation requires a processor with support for \texttt{SSE2} instruction set.
 
 \section{New decoding method}
@@ -30,20 +30,21 @@ is one of the most matured and versatile libraries implementing succinct data st
 written in \texttt{C++} and with almost 2\,000 commits from more than 30 contributors, \texttt{SDSL}
 is a heavily tested library, offering various implementations of succinct structures such as
 wavelet tree, FM-index, bit vector, suffix array and many more. It allows easy use of different
-building blocks to implement more complex structures, i.e. using different bit vector implementations
-inside of the wavelet tree. On top of this, thorough tests and benchmarks were implemented alongside
-the main functionality.
+building blocks to implement more complex data structures, i.e. using different bit vector
+implementations inside of the wavelet tree. On top of this, we also take advantage of thorough tests
+and benchmarks that were implemented alongside the main functionality.
 
 The RRR implementation of bit vector is provided by templated class \texttt{rrr\_vector}
-that enables us to use block sizes from 3 up to 256. To support longer block sizes,
-\texttt{SDSL} implements 128-bit and 256-bit integers. It generally uses the on-the-fly decoding,
-although template specialization for block size 15 that uses the table decoding method is provided.
+that enables use of block sizes from 3 up to 256. To support longer block sizes,
+\texttt{SDSL} implements 128-bit and 256-bit integers. The implementation generally uses the
+on-the-fly decoding, although template specialization using the table decoding method is provided
+for block size 15.
 
 To support $\access$, \texttt{rrr\_vector} supports single bit access operator \texttt{[]} as well
-as \texttt{get\_int} method. To facilitate $\access$ it uses the encoding scheme presented in
-Fig.~\ref{obr:RRRFinal} that consists of the array $C$ of fixed size elements that stores classes,
-array $O$ of variable length elements that stores offsets of blocks along their class and third array
-$P$ that stores pointers to the array $O$, more precisely to the beginning of every superblock.
+as \texttt{get\_int} method. To facilitate $\access$, \texttt{rrr\_vector} uses the implementation
+presented in Fig.~\ref{obr:RRRFinal} that consists of the array $C$ of fixed sized elements, storing
+classes, array $O$ of elements of variable length that stores offsets of blocks along their class and
+third array $P$ that stores pointers to the array $O$, more precisely to the beginning of every superblock.
 
 \texttt{SDSL} uses $\rank$ implementation, where result of $\rank$ is precomputed for the beginning
 of every superblock. To answer the query, binary search along the precomputed values is done first.
@@ -52,8 +53,8 @@ using the binary search and $\rank$ functionality, the first part of answering $
 search between precomputed values of $\rank$, then to do the $\select$ inside of the superblock. This
 demonstrates, how the size of superblock can be used to balance the ratio of space used and the speed
 of the $\access$, $\rank$ and $\select$ methods. Although size of superblock is one of the parameters
-of \texttt{rrr\_vector}, we did not make any changes to the preset number of blocks per superblock that is
-set in \texttt{SDSL} to 32.
+of \texttt{rrr\_vector}, we did not make any changes to the default number of blocks per superblock that
+is set in \texttt{SDSL} to 32.
 
 We decided to use the specialization for block size 15 as an underlying solution for the encoding and
 decoding of sub-blocks. We provided specialized implementations for block sizes 31, 63 and 127 that
@@ -62,17 +63,17 @@ are mostly used in practical scenarios. We based our implementation on the gener
 effects of our new decoding method. We have been able to implement our changes and at the same time alter
 only two methods that the \texttt{SDSL} uses for encoding and decoding namely \texttt{bin\_to\_nr(bin)} and
 \texttt{nr\_to\_bin(k, nr)}. As we mentioned, the encoding is less performance-critical in most of the
-applications as it is done only once when constructing bit vector. This is why we focuse more on the decoding
-part of the implementation.
+applications as it is done only once when constructing the bit vector. This is why we focuse more on the
+decoding part of the implementation.
 
 \paragraph{Division of problem into sub-problems}
 
 When implementing our decoding routine, we put most of our focus on the process of dividing problem into
 sub-problems of smaller size. This is a part, where we obtain pairs $(c_1, o_1)$ and $(c_2, o_2)$
-from the encoded pair $(c, o)$ and call another decoding subroutine on these two pairs.
-There are various reasons why we focus on this part of the algorithm. The first one is that for smaller
+from the encoded pair $(c, o)$ and call the decoding subroutine on these two pairs.
+There are various reasons why we focus on this part of the algorithm. The first reason is that for smaller
 blocks solving the sub-problems is done using the table approach which is very fast and can be hardly
-made faster as it consists only of one table lookup. The second one is that this part is blocking us
+made faster as it consists of only one table lookup. The second reason is that this part is blocking us
 from solving the sub-problems and even though sub-problems may be potentially solved somehow in parallel,
 e.g. by instruction-level parallelism, this part is harder to parallelize.
 
@@ -86,7 +87,7 @@ The most trivial part is third step as it only consists of a number of arithmeti
 second step, that is a computation of $\text{comb}_1$ and $\text{comb}_2$. We know that $\text{comb}_1$
 and $\text{comb}_2$ is equal to ${b\choose c_1}$ and ${b\choose c_2}$, respectively. These two numbers
 can be computed beforehand as there are only roughly $b^2$ combinations of possible pairs of $c$ and $c_1$.
-So roughly at the price of two cache misses, we can easily do the last two steps. To solve the first step,
+So roughly, at the price of two cache misses, we can easily do the last two steps. To solve the first step,
 we may precompute for every possible class $c$, numbers $C_0, C_1,\ldots ,C_{c}$ where $C_i$ is the number
 of blocks along the class $c$ with their class pair equal to $(i, c-i)$. Example can be observed in
 Fig.~\ref{table:class_pairs}.
@@ -199,17 +200,17 @@ uint32_t get_left_class(uint8_t k, uint32_t nr)  {
 \paragraph{Choosing the right sub-problem size}
 
 In previous chapter, we showed that our method can take encoding and decoding subroutines
-of sizes $b_1$ and $b_2$ and combine them together to obtain routine for encoding and
-decoding of size $b_1+b_2$. Thus it is up to us, how we obtain the decoding for block sizes
-bigger than 15. Minor inconvenience is, that the most used block sizes are of form $2^i-1$.
-Combining two block sizes of this form, however, leads only to block size of length $2^j-2$
-so to obtain the usable block length, we need to "extend" this solution by one bit.
+for blocks of sizes $b_1$ and $b_2$ and combine them together to obtain routine for encoding and
+decoding of block of size $b_1+b_2$. Thus it is up to us, how we obtain the decoding for block sizes
+bigger than 15. Minor inconvenience is, that the most interesting block sizes are of the form $2^i-1$.
+Combining two block sizes of this form, however, leads only to block size of length $2^{i+1}-2$
+so to again obtain the usable block length, we need to "extend" this solution by one bit.
 
 As we wanted to base our solutions on table decoding routine for block size 15, it is most
-reasonable to obtain the next interesting block size - 31, by at first splitting block into
-single-bit and 30-bit sub-problem and then obtaining 30-bit solution using two 15-bit
+reasonable to obtain the next interesting block size -- 31, by at first splitting block into
+single-bit and 30-bit sub-problem and then obtain 30-bit solution using two 15-bit
 subroutine calls. For 63, the next interesting block size, there are unfortunately more
-possible combinations that make sense. We may combine solution for single-bit and 62-bits
+possible combinations. We may combine solution for single bit and 62-bits
 and then obtain 62-bit block size using combination of solution for block size 31. On the
 other hand, it may be more beneficial, to do 63-bit block size by splitting it into 3 bits
 and 60 bits. Thus, before choosing what solution we want to fully include into \texttt{SDSL},
@@ -217,14 +218,14 @@ we explored and tried several promising combinations and microbenchmarked them.
 
 \subsection{Experimental results}
 
-We benchmarked our code using two types of benchmarks. The first type of benchmarks
-used a \texttt{Google Benchmark} library. This is one of the standard libraries used to
-microbenchmark code. A code snippet that is being benchmarked is run several times until
+For benchmarking of our code, we mainly used two types of benchmarks. The first type of benchmarks
+was based on a \texttt{Google Benchmark} library. This is one of the standard libraries used to
+microbenchmark code. A code snippet that is being evaluated is run several times until
 stable results are obtained. This makes the results reliable even if the measured time is
 very small and also limits the interference of other running processes on the result of
 benchmark. Although reliable, this types of benchmarks are more artificial in nature and
 do not give a best sense, how the solution may behave on real data. The second type of
-benchmarks used were the ones that are included in \texttt{SDSL}. These are built on top
+benchmarks used were the ones included in \texttt{SDSL}. These are built on top
 of a data from the \texttt{Pizza\&Chili} datasets \citep{ferragina2005pizza} and include
 many types of data such as DNA sequences, \texttt{C} and \texttt{Java} source codes from
 \texttt{Linux} and \texttt{GCC} projects as well as English texts from the Gutenberg project.
@@ -277,15 +278,15 @@ in combination with different methods used for dividing block to subproblems and
 approaches to obtain particular block size. The mainly tested block sizes were 15, 30, 31, 62, 63
 and 127. Sizes 15, 31, 63 and 127 are most useful in practice however they can be obtained using
 different combinations of block size 30 and 62, i.e. 31 can be combined as 1 bit and 30 bit solution,
-63 can be divided to 1 and 62 as well as to 3 and two sub-problems of length 30. Although, these
+63 can be divided to 1 and 62 as well as to 3 and two sub-problems of size 30. Although, these
 tests are not made on real life data, they were mainly used as an indication which implementations
 are interesting and should be the best candidates for further evaluation.
 
-We used 3 different techniques to divide a problem into sub-problems, these were the linear scan,
+We used 3 different techniques to divide a problem into sub-problems, these was a linear scan,
 binary search and linear scan enhanced by \texttt{SIMD} instructions. In order to implement the
-solution for 127 bit block size, we used the 128 bit type \texttt{\_\_uint128\_t} provided by both
+solution for 127-bit block size, we used the 128 bit type \texttt{\_\_uint128\_t} provided by both
 \texttt{GCC} and \texttt{Clang} compilers. This type is implemented on platform \texttt{x86\_64}
-as a combination of two 64 bit numbers. We compared these results with the table decoding specialization
+as a combination of two 64-bit numbers. We compared these results with the table decoding specialization
 in \texttt{SDSL} and with on-the-fly decoding for all the other block sizes. The data we run the decoding
 on were radomly generated. To generate them, we picked 1\,000 pairs of class and offset by first randomly
 picking class of the block and then the offset along this class. The results we measured are shown in
@@ -297,10 +298,10 @@ After bencharking and finding the potential for speeding up the bit vector imple
 our new method, we decided to implement and test it in environment that is closer to the real-life
 usage of bit vectors. We picked a benchmarking part of \texttt{SDSL} library that tests bit vector
 on a randomly generated sequence with fixed number of ones and on raw representation of a wavelet
-tree built on top of data from the DNA sequence, XML web data taken from \texttt{DBLP}, computer
-science bibliography. Among the explored dimensions is block size and size of the underlying data.
-\texttt{SDSL} generates $\access$, $\rank$ and $\select$ queries randomly. We were not able
-to find significant practical usability for other access patterns and thus stick with this one.
+tree built on top of data from the DNA sequence and XML web data taken from \texttt{DBLP}, computer
+science bibliography. This test focused on how the average query time of $\access$, $\rank$ and $\select$
+methods depends on the block size. These queries into the underlying bit vector were generated randomly.
+We were not able to find significant practical usability for other patterns and thus stick with this one.
 As a baseline, we choose the 15 bit specialized implementation already implemented in \texttt{SDSL}
 that uses the table decoding method. We present the measured results of our and the original
 implementation in Fig.~\ref{obr:benchmark_sdsl_new_method}.
@@ -315,24 +316,24 @@ implementation in Fig.~\ref{obr:benchmark_sdsl_new_method}.
 \end{figure}
 
 There are several interesting things to observe in these results. We can see that our new implementation
-beats older implementations on almost all block sizes and all types of data. Note, that results are more
+beats older implementation on almost all block sizes and all types of data. Note, that results are more
 clear on random data and DNA data. On web data, however, the difference is less noticable. We attribute
 this behaviour to the fact, that was observed by \cite{gog2014optimized}, creators of this dataset. They
 observed that the number of uniform blocks (full of either zeroes or ones) is much bigger in \texttt{WT-WEB}
-data than in \texttt{WT-DNA}. For block size 63, they observed ratio of uniform blocks in \texttt{WT-WEB-1GB}
+than in \texttt{WT-DNA}. For block size 63, they observed ratio of uniform blocks in \texttt{WT-WEB-1GB}
 to be 84\% compared to 28\% in \texttt{WT-DNA}. As the uniform blocks are decoded trivially in both
 implementations, this makes less opportunities for our implementation to save time. Another visible pattern
 is that with increasing block size, the query time generally goes up as decoding takes more and more time.
-On the other hand, on query $\select$ in \texttt{WT-WEB} data we can observe, that at the beginning the query
-time decreases with increasing block size. This is because time savings of binary search in precomputed $\rank$
-values offset growing decoding time.
+On the other hand, on $\select$ in \texttt{WT-WEB} data we can observe, that at the beginning the query
+time decreases with increasing block size. This is because time saved on faster binary search in precomputed
+$\rank$ values offsets growing decoding time.
 
 \paragraph{Bit vector in FM-index}
 
-Even if previous benchmark was done on real data, it was not done in application that is
+Even if the previous benchmark was done on real data, it was not done in application that is
 practically useful. Thus, we further benchmarked our bit vector implementation as a part
 of Huffman shaped wavelet tree used inside of the FM-index. Implementation of FM-index in
-\texttt{SDSL}, as most of other implementations of FM-index, provides mainly 3 methods:
+\texttt{SDSL}, as most of other implementations, provides mainly following 3 methods:
 \begin{itemize}
 	\item $\countOp(P)$ - returns the number of occurrences of $P$ in text $T$
 	\item $\locateOp(P)$ - returns all positions of pattern $P$ in text $T$
@@ -343,10 +344,10 @@ does not store the original sequence $T$ -- at least not in an easily readable f
 
 These benchmarks are provided by $\texttt{SDSL}$ library. They are based on data from
 the \texttt{Pizza\&Chili} dataset and use mainly methodology proposed by \cite{ferragina2009compressed}.
-The data we used are English texts from Gutenber project, source codes, DNA and protein
+The data we used are English texts from Gutenberg project, source codes, DNA and protein
 sequences. In most of these benchmarks, we used as a baseline the FM-index version based
-on uncompressed bit vector. For informative purposes, we also included the version based
-on block size 15, using the table decoding, and sparse bit vector.
+on block size 15. For informative purposes, we also included the version based on uncompressed
+bit vector and sparse bit vector based on Elias-Fano encoding.
 
 To benchmark operation $\countOp$, the index over the text is built. Then, random patterns of
 various lengths are extracted from the text and subsequently used for benchmarking. Code
@@ -364,7 +365,7 @@ in all searched patterns. We present the results in Fig.~\ref{obr:benchmark_sdsl
 	text. Uncompresed bit vector and sparse array are included for reference. 
 	}
 	\label{obr:benchmark_sdsl_count}
-\end{figure}
+\end{figure}Gutenberg
 
 For benchmarking of operation $\extractOp$, \texttt{SDSL} uses a methodology proposed by
 \cite{ferragina2009compressed} in Section~5.4. This consists of extracting numerous
@@ -408,9 +409,10 @@ correct. Mainly, we used two types of tests for this purpose. The first are the 
 $\rank$ and $\select$ functionality in \texttt{SDSL} that run mainly on smaller bit sequences
 but cover special cases such as bit vector full of zeroes/ones and certain special patterns
 that are not encountered often in practice. The second type of tests used was the benchmark
-running on wavelet tree representation of real data. Alongside the individual timings, this
-benchmark produces, as a checksum, sum of all the results of the $\access$, $\rank$ and $\select$
-queries. These checksums can be compared between our and original implementation.
+running on wavelet tree built over the \texttt{WT-DNA} and \texttt{WT-WEB} data. Alongside
+the individual timings, this benchmark produces, as a checksum, sum of all the results of the
+$\access$, $\rank$ and $\select$ queries. These checksums can be compared between our and original
+implementation to make sure that our implementation is giving the correct results.
 
 \section{Hybrid encoding}
 
