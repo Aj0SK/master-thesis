@@ -158,7 +158,7 @@ the original text $T$. For instance, FM-index over the DNA sequence can take jus
 taken by the original text $T$ as was observed by \cite{ferragina2001experimental}.
 
 In the rest of this section, let us now explain the construction of FM-index, how we search in the
-FM-index and how/why FM-index uses $\rank$ method on general strings.
+FM-index and how/why FM-index uses $\rank$.
 
 \paragraph{Burrows-Wheeler transformation}
 
@@ -243,7 +243,7 @@ $A<B$ and this means that rotated rows $Ac$ and $Bc$ are in the same order as or
 From this observation, we get that the relative ordering of the same character is preserved
 between $F$ and $L$.
 
-In the next part, we describe how we search for some arbitrary pattern $P$
+In the next part, we describe how we search for some arbitrary pattern $P=p_0p_1\ldots p_{m-1}$
 in FM-index. Let us denote suffix of $P$ starting at $i$-th element $P_{i\ldots}$. The
 result of the search for $P$ is a range of $M$s rows that have $P$ as their prefix. The search for these
 rows proceeds iteratively from the end of $P$ to its beginning. At first, we find rows that have suffix
@@ -261,38 +261,38 @@ for word {\tt mouse} or {\tt h} for {\tt house}. To search for the range of rows
 range is easy as it starts on position $\Count[\texttt{h}]$. Lines in this range are sorted according
 to the second character so there will be some lines continuing with symbol {\tt a} if the text contained
 for example word {\tt hashtag} or symbol {\tt e} if the word {\tt head} was in the text. Among them, lines
-starting with {\tt house} will be located, but we do not store anything except for $T_{BWT}$ and $\Count$.
+starting with {\tt house} are located, but we do not store anything except for $T_{BWT}$ and $\Count$.
 However, we already located the range where suffixes starting with {\tt ouse} are located in.
-We can look how many times {\tt h} is located before this range in $T_{BWT}$. Thanks to this
-number and the property \ref{chapter1:fmindexprop:prop2}, we know where in $F$ the subsequence
-containing the prefix {\tt house} begins.
+We can count how many times {\tt h} is located before this range in $T_{BWT}$ and denote it $r$. Thanks to
+the property \ref{chapter1:fmindexprop:prop2}, we know than in $F$ the subsequence containing the prefix
+{\tt house} begins on position $\Count[\texttt{h}]+r$.
 
 % TODO: mozno obrazok
 % TODO: fixnut indexovanie
 
-In general, we first find the subsequence of $M$s rows, where suffix $P_{n-1\ldots}$ is located.
-As this is just a one symbol, $P[n-1]$, the initial subsequence is just a run of symbol $P[n-1]$
+In general, we first find the subsequence of rows of $M$, where suffix $P_{n-1\ldots}$ is located.
+As this is just a one symbol, $p_{n-1}$, the initial subsequence is just a run of symbol $p_{n-1}$
 in $F$ given by
 \begin{align*}
-	b_{n-1}&=\Count[P[n-1]] \\
-	e_{n-1}&=\Count[P[n-1]+1].\\
+	b_{n-1}&=\Count[p_{n-1}] \\
+	e_{n-1}&=\Count[p_{n-1}+1].\\
 \end{align*}
 
-The next step is to find where the subsequence of $M$s rows, given by $b_{n-2}$ and $e_{n-2}$, is located,
-that has as a prefix $P_{n-2\ldots}$. As we already located rows beginning with $P_{n-1\ldots}$, we can reuse
-this information. In a range from $b_{n-1}$ to $e_{n-1}$ some rows end with character $P[n-2]$. These are rows
-that after being rotated, create subsequence we are looking for. Subsequence we are looking for is also
-subsequence of a run of character $P[n-2]$ in $F$, starting from $\Count[P[n-2]]$ spanning rows up to
-$\Count[P[n-2]+1]$. To find the offset of beginning and end of our subsequence along this run, we compute the
-number of occurences of character $P[n-2]$ in $L$ up to the $b_{n-1}$, the start of previous subsequence of
-rows and also the number of occurences of character $P[n-2]$ in $L$ up to the $e_{n-1}$ giving us its end.
+The next step is to find the location of subsequence of rows of $M$s, given by $b_{n-2}$ and $e_{n-2}$,
+which has $P_{n-2\ldots}$ as a prefix. As we already located rows beginning with $P_{n-1\ldots}$, we can reuse
+this information. In a range from $b_{n-1}$ to $e_{n-1}$ some rows end with character $p_{n-2}$. These are rows
+which after being rotated, create subsequence we are looking for. Subsequence we are looking for is also
+subsequence of a run of character $p_{n-2}$ in $F$, starting from $\Count[p_{n-2}]$ spanning rows up to
+$\Count[p_{n-2}+1]$. To find the offset of beginning and end of our subsequence along this run, we compute the
+number of occurences of character $p_{n-2}$ in $L$ up to the $b_{n-1}$, the start of previous subsequence of
+rows and also the number of occurences of character $p_{n-2}$ in $L$ up to the $e_{n-1}$ giving us its end.
 This works thanks to the property \ref{chapter1:fmindexprop:prop2}. Thus giving us the new subsequence
 \begin{align*}
-	b_{n-2}&=\Count[P[n-2]] + \rank_{P[n-2]}(b_{n-1}) \\
-	e_{n-2}&=\Count[P[n-2]] + \rank_{P[n-2]}(e_{n-1}).\\
+	b_{n-2}&=\Count[p_{n-2}] + \rank_{p_{n-2}}(b_{n-1}) \\
+	e_{n-2}&=\Count[p_{n-2}] + \rank_{p_{n-2}}(e_{n-1}).\\
 \end{align*}
 We continue and repeat the previous step until we compute $b_0$ and $e_0$ or until $b_i=e_i$ for some $i$
-(in which case the searched word is not present in the text). The possible pseudocode for counting the number
+(in this case the searched word is not present in the text). The possible pseudocode for counting the number
 of occcurences of $P$ in $T$ is in listing \ref{alg:fm_index_count}.
 
 \begin{algorithm}
@@ -310,10 +310,11 @@ $e \gets \Count[P[n-1]+1]$\;
 \KwRet{$e-b$}
 \end{algorithm}
 
-The most important fact from this application is that we are not only interested in $\rank$ over a bit vector
-and $\rank$/$\select$ functionality over general aphabet has particular use case in the FM-index. In the part
-of this section, we show how we can reduce this problem with general alphabet to bit sequence version and
-solve it using $\rank$ and $\select$ on bit vectors.
+We may observe that in FM-index, we require a $\rank$ functionality over sequence
+from general aphabet. This application should, however, demonstrate how bit vector can be used
+inside of the FM-index. Thus, in the next paragraph, we show that these two problems are related
+and we can use bit vector to provide a reasonable implementation of the $\rank$/$\select$ methods
+over the sequence from general alphabet.
 
 \paragraph{Wavelet tree}
 \label{section:WaweletTree}
