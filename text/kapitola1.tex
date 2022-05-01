@@ -257,7 +257,7 @@ Now, we demonstrate the search of a pattern on example. Let us assume we are sea
 as their prefix. Symbols in the last column of this range correspond to the symbols
 preceding {\tt ouse} in the text. We may observe different symbols in arbitrary order there such as {\tt m}
 for word {\tt mouse} or {\tt h} for {\tt house}. To search for the range of rows in $M$ that have
-{\tt house} as a prefix we look into the range of all prefixes beginning with {\tt h}. Locating this
+{\tt house} as a prefix we look into the range of all prefixes beginning with symbol {\tt h}. Locating this
 range is easy as it starts on position $\Count[\texttt{h}]$. Lines in this range are sorted according
 to the second character so there will be some lines continuing with symbol {\tt a} if the text contained
 for example word {\tt hashtag} or symbol {\tt e} if the word {\tt head} was in the text. Among them, lines
@@ -265,7 +265,7 @@ starting with {\tt house} will be located, but we do not store anything except f
 However, we already located the range where suffixes starting with {\tt ouse} are located in.
 We can look how many times {\tt h} is located before this range in $T_{BWT}$. Thanks to this
 number and the property \ref{chapter1:fmindexprop:prop2}, we know where in $F$ the subsequence
-containing the prefix {\tt house} begins. 
+containing the prefix {\tt house} begins.
 
 % TODO: mozno obrazok
 % TODO: fixnut indexovanie
