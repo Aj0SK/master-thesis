@@ -319,11 +319,11 @@ over the sequence from general alphabet.
 \paragraph{Wavelet tree}
 \label{section:WaweletTree}
 
-Assume for a moment that we have a bit vector implementation supporting methods $\access$,
-$\rank$ and $\select$. Our goal is to build a vector over a general alphabet $\Sigma$
-supporting the same three methods. The most straightforward approach to do this is to
-have one bit vector $B_c$ for every character $c$ from alphabet $\Sigma$, storing ones at
-positions where $c$ occurs in $S$
+Let us assume for a moment that we have a bit vector implementation supporting methods $\access$,
+$\rank$ and $\select$. We have a sequence $S$ over an arbitrary alphabet $\Sigma$. Our goal is to
+build vector over this sequence supporting the methods $\access$, $\rank$ and $\select$. The most
+straightforward approach is to have one bit vector $B_c$ for every character $c$ from the alphabet
+$\Sigma$, storing ones at positions where $c$ occurs in $S$
 \[
     B_c[j]= 
 \begin{cases}
@@ -332,16 +332,16 @@ positions where $c$ occurs in $S$
 \end{cases}
 \]
 
-This is indeed very fast because each $\rank$ and $\select$ operation can be answered using
+This is very fast because each $\rank$ and $\select$ operation can be answered using
 only a single binary $\rank$ or $\select$. However, we use roughly $|\Sigma|$ times more space
-than the single bit vector over this sequence.
+than the single bit vector over this sequence would consume.
 
 \textit{Wavelet tree} proposed by \cite{grossi2003high} uses a divide-and-conquer
-approach. It takes the sequence $S$ of length $n$ over some alphabet $\Sigma$ of size
-$\sigma$ and recursively splits the alphabet into two subsets creating a hierarchical
-partitioning of an alphabet. In the root node of the tree, it splits the alphabet
-$\Sigma$ into two subsets $\Sigma_0$ and $\Sigma_1$ of roughly equal size. It then
-stores a bit vector $B$ of size $n$ in this node where
+approach to solve this problem. It takes the alphabet $\Sigma$ of size $\sigma$ and
+recursively splits the alphabet into two subsets creating a hierarchical
+partitioning of an alphabet. In the root node of the tree, the alphabet $\Sigma$
+is split into two subsets $\Sigma_0$ and $\Sigma_1$ of roughly equal size. A bit
+vector $B$ of size $|S|$ is stored in this node such that
 \[
     B[i]= 
 \begin{cases}
@@ -350,11 +350,12 @@ stores a bit vector $B$ of size $n$ in this node where
 \end{cases}
 \]
 
-Then it creates two strings $S_0$ and $S_1$ from $S$ by taking just symbols
+Then two strings $S_0$ and $S_1$ are created from $S$ by taking just symbols
 from $\Sigma_0$ and $\Sigma_1$, respectively. The left and right children of the root node
 are then built by recursively applying the same idea on subsequences $S_0$ and $S_1$ until
-we end up with a trivial unary alphabet at the leaves. It follows that the depth of the
-wavelet tree is roughly $\log \sigma$.
+we end up with a trivial unary alphabet at the leaves. The example of this partitioning may
+be observed in Fig.~\ref{obr:WaveletTreeExample}. It follows that the depth of the wavelet
+tree is roughly $\log \sigma$.
 \begin{figure}
 	\centerline{
 		\includegraphics[width=0.9\textwidth, height=0.3\textheight]{images/wavelet_tree}
@@ -368,26 +369,36 @@ wavelet tree is roughly $\log \sigma$.
 	% based on https://simongog.github.io/assets/data/sdsl-slides/tutorial#23
 	% source at https://docs.google.com/drawings/d/1cJyda3bdTluajr3iXu1x1iL5HF0JPZqAHw6jwct9KLI/edit
 \end{figure}
-Both $\rank_c$ and $\select_c$ methods on the original sequence can be implemented
-using $\rank$/$\select$ methods applied on bit sequences that are along the path
-from the root to the leaf containing character $c$. It follows that the number of
-$\rank$ and $\select$ queries on individual bit vectors depends on the depth of
-a leaf containing queried character $c$. Note that this representation can take
-just $\log(|\Sigma|)$ times more space than the single bit vector over this sequence
-as we store on every level of wavelet tree a bit vector of size roughly $|S|$.
 
-If we assign to every node except the root a {\tt 0} if it is the left son and {\tt 1}
-otherwise, we can look at the wavelet tree as an assignment of a binary code to every
-alphabet character. Code of a character $c$ in some leaf node is equal to concatenation of
-bits that are contained in nodes on a path from root to the leaf node. The idea proposed
-by~\cite{makinen2005succinct} is to shape the wavelet tree in such a way that a code of every
-character is equal to Huffman code of this character. The advantage we get is that if queries
-for a characters are coming according to their frequencies, then we need to visit on average
-only $\BigO(H_0)$ nodes rather than $\BigO(\log \sigma)$ of them, where $H_0$ is zeroth-order empirical
-entropy $$H_0(S)=\sum_{c\in\Sigma} \frac{n_c}{n} \lg \frac{n}{n_c}.$$ The maximum depth then
-may increase, however, \cite{grabowski2004first} showed that we can enforce depth
-$\BigO(log \sigma)$ with the depth being $H_0+2$ even if this is not convenient in practice.
-Thus, with some additional work, it is possible to speed up the average number of nodes accessed.
+On top of this, both $\rank_c$ and $\select_c$ methods on the original sequence can
+be implemented using $\rank$/$\select$ methods applied on bit sequences that are along
+the path from the root to the leaf containing character $c$. Thus, the number of
+$\rank$ and $\select$ queries on individual bit vectors depends on the depth of
+a leaf containing queried character $c$. It is possible for this representation to use
+just $\BigO(\log \sigma)$ times more space than the single bit vector over this sequence as
+on every level of the wavelet tree, we store in total a bit vector of length roughly $|S|$.
+
+Even if this version of wavelet tree can be used inside of the FM-index, it is possible to
+make a solution that is faster in some scenarios. Both methods, $\rank_c$ and $\select_c$ now
+depend on the speed of the bit vector implementation, used in the nodes, but also on the depth
+of symbol $c$ in the tree. This depth is now for every single character roughly $\BigO(\log \sigma)$.
+
+To obtain a better solution, let us assign a single bit to every edge. For every edge, its bit
+is either {\tt 0} if it is edge leading from parent to the left son or {\tt 1} otherwise. We
+can think of the wavelet tree as an assignment of a binary code to every alphabet character. Code
+of a character $c$ in some leaf node is equal to concatenation of bits that are contained in edges
+on a path from root to the leaf node.
+
+The idea proposed by~\cite{makinen2005succinct} is to shape the wavelet tree in such a way that
+a code of every character is equal to Huffman code of this character. The advantage we get is that
+if queries for a characters are coming according to their frequencies, then we need to visit on average
+only $\BigO(H_0)$ nodes rather than $\BigO(\log \sigma)$, where $H_0$ is zeroth-order empirical
+entropy. It is defined as $$H_0(S)=\sum_{c\in\Sigma} \frac{\#_c(S)}{|S|} \lg \frac{|S|}{\#_c(S)},$$ 
+where $\#_c(S)$ denotes number of occurences of symbol $c$ in $S$. The maximum depth of the wavelet
+tree may increase and even if not convenient in practice, \cite{grabowski2004first} showed that we
+can enforce the maximum depth to be $\BigO(\log \sigma)$ with the average depth slightly increased to
+$H_0+2$. Thus, with some additional work, it is possible to decrease the average number of nodes accessed
+and thus decrease the average query time of $\rank$ and $\select$.
 
 The space used by the wavelet tree heavily depends on the space usage of individual bit vectors
 that are used to store the nodes of wavelet tree. If these are represented using a data structure
@@ -395,10 +406,10 @@ that takes space proportional to the zero-order entropy of represented sequence,
 wavelet tree requires roughly $nH_0(S) + o(n\log\sigma)$ bits of space as was shown by
 \cite{grossi2003high}.
 
-To conclude this chapter, we explained the main idea of FM-index, the data structure used for the
-problem of text indexing. We showed the idea behind wavelet tree, one possible implementation of
-$\rank$ over sequence from general alphabet.
+% TODO: FM-index vie zaberat H_k (+ citacia)
 
-% TODO: este FM-index space dobuchat sem
-% TODO: chcelo by to nejaky sumar, lebo uz z toho mam nafuknutu hlavu: Cize: Hladanie v FM-indexe potrebuje rank a rank v stringu sa robi cez wavelet a ten pouziva rank na bitvektoroch (pripadne, ze v kapitole 4 ukazeme, ako zlepsenie bitvektorov zlepsi vyhladavanie v FM-indexe 
-% TODO: chyba pojednanie o pamatovej zlozitosti: 1. wavelet stromzabera +/- tolko, co povodny text, 2. ak stlacime bitvektory na H_0, tak wavelet strom bude mat H_0(S) + cosi, 3. kolko zabera FM-index? za istych okolnosti H_k (+ citacie ku vsetkemu)
+In this chapter, we presented some useful applications of the bit vector. We looked more closely on
+FM-index, the data structure used for the problem of text indexing. There, we encountered the
+problem of answering $\rank$ and $\select$ over the general alphabet and described wavelet tree,
+one possible data structure that can be used to solve it, assuming we have an implementation of
+bit vector supporting $\access$, $\rank$ and $\select$ methods.
