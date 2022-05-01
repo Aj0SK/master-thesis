@@ -517,7 +517,10 @@ int rank(int i) {
 
 The biggest notable difference from the previous version of hybrid encoding are two
 helper functions that are used for mapping or as we call it compressing and decompressing
-the blocks class before any of its use.
+the blocks class before any of its use. We present these methods in listing \ref{code:hybrid_valley_compress},
+and \ref{code:hybrid_valley_decompress}. To choose for particular $c_k$, which $c_k$ classes we are
+going to represent in a standard way, we set values $\text{cut\_from}$ and $\text{cut\_to}$ to 
+$\floor{(c_k+1)/2}$ and $b-cut_from+1$, respectively.
 
 \lstset{language=C++,caption={Compressing blocks class},label=code:hybrid_valley_compress}
 \begin{lstlisting}
@@ -552,6 +555,8 @@ int decompress_class(int k) {
 \end{lstlisting}
 
 \subsection{Experimental results}
+
+% TODO: add one graph, explain results
 
 We tested the first version of hybrid encoding on randomly generated sequence of bits that contains 5\% of ones.
 This was to observe, how it behaves on sparse sequences with smaller percentage of ones. This is something, where
