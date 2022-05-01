@@ -263,7 +263,7 @@ when we interpret the left side of the equation as a number of ways we can choos
 from $n$ elements and $\ell$ elements from another $m$ elements. This is all contained on the
 right side of the equation that includes all these combinations. $D$ is storing $2^b$ entries
 and each entry is using $b$ bits of storage. The total space used is then
-$$nH_0(B) + \ceil{n/b} + \ceil{n/b} \cdot \ceil{\log(b+1)} + b2^b$$. To speed up the process
+$$nH_0(B) + \ceil{n/b} + \ceil{n/b} \cdot \ceil{\log(b+1)} + b2^b.$$ To speed up the process
 of accessing block, we can store the pointers into every $k$-th element of $O$. This divides
 the process of locating $O[i]$ into two parts. The first is to find the nearest pointer leading
 to element before $i$ and then move at most $k$ places. This additional structure of roughly

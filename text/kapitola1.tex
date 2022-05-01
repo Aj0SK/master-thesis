@@ -171,10 +171,9 @@ and was studied more by \cite{manzini2001analysis}. This is because BWT is often
 to compress than the original text. We shall show how the construction of BWT and then provide
 intuition why is easier to compress.
 
-Consider a sequence $T$ of symbols over some
-alphabet $\Sigma$. Take all the cyclical rotations $T_1, T_2, \ldots ,T_n$ of
-$T$ and imagine putting them sorted by their lexicographical order into the
-rows of table $M$ as seen in Fig.~\ref{obr:BWT}. We name the sequence created by the
+Consider a sequence $T$ of symbols over arbitrary alphabet $\Sigma$. Take all the cyclical
+rotations $T_1, T_2, \ldots ,T_n$ of $T$ and put them sorted by their lexicographical
+order into the rows of table $M$ as seen in Fig.~\ref{obr:BWT}. We name the sequence created by the
 concatenation of symbols in first and last column $F$ and $L$, respectively. Last column $L$
 is what we call the BWT of $T$. Note that the sequence $F$ can be obtained from $L$ just by
 sorting all the characters in $\mathit{T_{BWT}}$. $F$ consists of runs of symbols that are
@@ -227,7 +226,7 @@ is very common symbol preceding {\tt ome} in the text.
 \paragraph{Searching in an FM-index}
 
 As we already stated, FM-index is used for searching in the preprocessed text.
-Searching in FM-index is based on the two important properties of $M$:
+Searching in FM-index is based on the two important properties of matrix $M$:
 
 \begin{enumerate}
 	\item Rotations starting with $w$ form a consecutive subsequence of rows in $M$.
@@ -378,7 +377,7 @@ by~\cite{makinen2005succinct} is to shape the wavelet tree in such a way that a 
 character is equal to Huffman code of this character. The advantage we get is that if queries
 for a characters are coming according to their frequencies, then we need to visit on average
 only $\BigO(H_0)$ nodes rather than $\BigO(\log \sigma)$ of them, where $H_0$ is zeroth-order empirical
-entropy $$H_0(S)=\sum_{c\in\Sigma} \frac{n_c}{n} \lg \frac{n}{n_c}$$. The maximum depth then
+entropy $$H_0(S)=\sum_{c\in\Sigma} \frac{n_c}{n} \lg \frac{n}{n_c}.$$ The maximum depth then
 may increase, however, \cite{grabowski2004first} showed that we can enforce depth
 $\BigO(log \sigma)$ with the depth being $H_0+2$ even if this is not convenient in practice.
 Thus, with some additional work, it is possible to speed up the average number of nodes accessed.
