@@ -131,36 +131,34 @@ method can be implemented efficiently.
 % sources to help understand https://www.dcc.uchile.cl/TR/2005/TR_DCC-2005-004.pdf
 
 Let us now consider practically more interesting application within a more complex data structure.
-As we shall see, solution
-to this problem also uses bit vector and other building blocks commonly used in succinct
-data structures. This time, we have a text $T$ and we are interested in \textit{indexing} it.
-After preprocessing text, we would like to quickly answer questions such as “how many times is
-some pattern $P$ contained in $T$“ and also “where in $T$ are these occurrences located“.
+As we shall see, solution to this problem also uses bit vector and other building blocks commonly
+used in succinct data structures.
 
-This is particularly useful in bioinformatics, where we have a very long sequence of DNA and
-are interested in searching for some subsequences in it such as a \emph{read mapping}
-\citep{simpson2010efficient} problem.
+Let us consider a text $T$. After some initial preprocessing we would like to quickly answer
+questions such as “how many times is some pattern $P$ contained in $T$“ and also “where in $T$
+are these occurrences located“. This problem is generally called a \textit{text indexing} problem
+and is particularly useful in bioinformatics, where we have a very long sequence of DNA and
+we are interested in searching for some subsequences in it, i.e. \emph{read mapping}
+problem \citep{simpson2010efficient}.
 
-One of the solutions that is reasonably fast and may be used is constructing a \textit{suffix array}
-of $T$. Suffix array of $T$ is a data structure that stores information about the lexicographical
-order of suffixes of $T$. More precisely, on $i$-th position of suffix array $S$, it stores the
-starting position of suffix that comes $i$-th in lexicographical order. An example of suffix array is in
-Fig.~\ref{obr:suffixArray}. For simplicity, in this section, we assume that every text
-$T$ contains a special character {\tt \$} located only at its end that is lexicographically
-smaller than any other character contained in $T$. Searching for pattern $P$ in suffix array of $T$ uses fact that
-if $P$ is contained in $T$ it will be at the beginning of some suffixes that make up a
-consecutive subsequence of $S$.
+One of the solutions that can be used for smaller texts is based on a \textit{suffix array}
+of $T$. This is a data structure which stores information about the lexicographical
+order of suffixes of $T$. More precisely, on $i$-th position of suffix array $S$, the starting
+position of suffix that comes $i$-th in lexicographical order is stored. For simplicity, in this
+section, we assume that every text $T$ contains a special character {\tt \$} at its end and this
+character is also lexicographically smaller than any other character contained in $T$. Searching for
+pattern $P$ in suffix array of $T$ uses fact that if $P$ is contained in $T$ it will be at the
+beginning of some suffixes. It is easy to observe that these make up a consecutive subsequence of $S$.
 
 \textit{FM-index}, proposed by \cite{ferragina2000opportunistic} is a succinct data structure that
 is in some aspects similar to suffix array. FM-index can find the pattern in the preprocessed text
-in time complexity close to linear from $|P|$. Its space usage depends on the compressibility of the text but the
-resulting space used by FM-index is in many cases smaller than the space used for the original text $T$.
-For instance, FM-index over the DNA sequence can take just 30--40\% of the space taken by the original text
-$T$ as was observed by \cite{ferragina2001experimental}.
+in time complexity close to linear from $|P|$. Particular space usage depends on the compressibility
+of the text but the resulting space used by FM-index is in many cases smaller than the space used for
+the original text $T$. For instance, FM-index over the DNA sequence can take just 30--40\% of the space
+taken by the original text $T$ as was observed by \cite{ferragina2001experimental}.
 
-In the rest of this section, let us now explain how the FM-index is constructed, how we search in an
-FM-index and how/why FM-index uses rank computation on general strings, which are implemented via
-wavelet trees based on bit vectors.
+In the rest of this section, let us now explain the construction of FM-index, how we search in the
+FM-index and how/why FM-index uses $\rank$ method on general strings.
 
 \paragraph{Burrows-Wheeler transformation}
 
@@ -168,10 +166,10 @@ wavelet trees based on bit vectors.
 part of the FM-index. BWT of a text $T$ gives us a sequence $\mathit{T_{BWT}}$ of the same
 length. Furthermore, this operation is reversible in a sense that we are able to reconstruct
 the original text $T$ only using $\mathit{T_{BWT}}$. This transformation is used as a
-preprocessing step of some compression algorithms such as \textit{bzip2} introduced by
-\cite{seward1996bzip2} and was studied more by \cite{manzini2001analysis}. This is because
-BWT is oftentimes easier to compress. We shall show how it is constructed and then give 
-intuition why it has this property.
+preprocessing step of some compression algorithms such as \textit{bzip2}~\citep{seward1996bzip2}
+and was studied more by \cite{manzini2001analysis}. This is because BWT is oftentimes easier
+to compress than the original text. We shall show how the construction of BWT and then provide
+intuition why is easier to compress.
 
 Consider a sequence $T$ of symbols over some
 alphabet $\Sigma$. Take all the cyclical rotations $T_1, T_2, \ldots ,T_n$ of
@@ -210,11 +208,11 @@ Note that the run of symbol $c$ in $F$ starts at the index $\Count[c]$.
 		\tt nana\$ \\
 	\end{tabular}
 	}
-	\caption[TODO]{On the left we can see the matrix $M$ filled with cyclic rotations of sequence
-	$S = \mathtt{banana\$}$. On the right, we can see the sorted suffixes (content of suffix array). The
-	Burrows-Wheeler transformation of $S$ is string $L=\mathtt{annb\$aa}$ -- the last column of $M$.
+	\caption[TODO]{On the left, we may observe the matrix $M$ filled with cyclic rotations of sequence
+	$T = \mathtt{banana\$}$. On the right, we may observe the sorted suffixes of $T$(content of suffix array). The
+	Burrows-Wheeler transformation of $T$ is string $L=\mathtt{annb\$aa}$ -- the last column of $M$.
 	Note that in practice, we do not need to construct the whole table as more efficient algorithms exist.
-	It is also notable that matrix $M$ includes very similar information to suffix array.
+	It is also notable that matrix $M$ includes very similar information compared to suffix array.
 	}
 	\label{obr:BWT}
 \end{figure}
@@ -374,7 +372,7 @@ as we store on every level of wavelet tree a bit vector of size roughly $|S|$.
 
 If we assign to every node except the root a {\tt 0} if it is the left son and {\tt 1}
 otherwise, we can look at the wavelet tree as an assignment of a binary code to every
-alphabets character. Code of a character $c$ in some leaf node is equal to concatenation of
+alphabet character. Code of a character $c$ in some leaf node is equal to concatenation of
 bits that are contained in nodes on a path from root to the leaf node. The idea proposed
 by~\cite{makinen2005succinct} is to shape the wavelet tree in such a way that a code of every
 character is equal to Huffman code of this character. The advantage we get is that if queries
