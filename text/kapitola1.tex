@@ -223,7 +223,7 @@ consecutive subsequence of rows of $M$. Some of these rows will end in {\tt c} f
 some of them in {\tt m} for {\tt moment} but many of these lines will contain {\tt h} at the end as this
 is very common symbol preceding {\tt ome} in the text.
 
-\paragraph{Searching in an FM-index}
+\paragraph{Searching in FM-index}
 
 As we already stated, FM-index is used for searching in the preprocessed text.
 Searching in FM-index is based on the two important properties of matrix $M$:
@@ -235,27 +235,33 @@ Searching in FM-index is based on the two important properties of matrix $M$:
 	\label{chapter1:fmindexprop:prop2}
 \end{enumerate}
 
-The first property was also what enabled us to search for a pattern in a suffix array. The second
+The first property also enabled us to search for a pattern in a suffix array. The second
 property is less trivial to observe. Let us take two rows in $M$, namely $T_i$ and $T_j$
 such that $i<j$. Let $T_i$ be of the form $cA$ and $T_j$ of the form $cB$ where $c$ is a
 character from the text and $A$ and $B$ are sequences of characters. Since $i<j$, it follows that
 $A<B$ and this means that rotated rows $Ac$ and $Bc$ are in the same order as original rows.
-From this observation, we get that the relative ordering of the same character is maintained
-from $F$ to $L$.
+From this observation, we get that the relative ordering of the same character is preserved
+between $F$ and $L$.
 
-The search for rows where pattern $P$ is located proceeds from the end of $P$. This works by
-finding rows where suffixes $P[n-1\ldots], P[n-2\ldots]$ etc. are located. In every step, these
-rows will form a consecutive subsequence of rows of $M$ so we store only its beginning and end.
-This follows from the observation \ref{chapter1:fmindexprop:prop1}. Let us assume that we are
-looking for a word {\tt house} and we already found the range of rows in $M$ that have {\tt ouse}
-as their prefix. If we look to the last column in this range, these symbols correspond to the symbols
-preceding {\tt ouse} in the text. We can maybe observe there in arbitrary order symbols like {\tt m}
-for word {\tt mouse} or {\tt h} for {\tt house}. To search for the range of rows in $M$ that have as a prefix
-word ({\tt house}) we look into the range of all prefixes beginning with {\tt h}. Locating this
-range is easy thanks to the $\Count$ helper array. Lines in this range are sorted according to the
-second character so there will be some lines continuing with {\tt a} if the text contained for example
-word {\tt hashtag} or {\tt e} if the word {\tt head} was in the text. Somewhere the lines starting with 
-{\tt house} will be located, but we do not store anything except for $T_{BWT}$ and $\Count$.
+In the next part, we describe how we search for some arbitrary pattern $P$
+in FM-index. Let us denote suffix of $P$ starting at $i$-th element $P_{i\ldots}$. The
+result of the search for $P$ is a range of $M$s rows that have $P$ as their prefix. The search for these
+rows proceeds iteratively from the end of $P$ to its beginning. At first, we find rows that have suffix
+$P_{n-1\ldots}$ as their prefix and then gradually continue by finding rows that have as prefix suffixes
+$P_{n-2\ldots}, P_{n-3\ldots}$ and so on. In every step, these rows form a consecutive subsequence of rows
+of $M$ so we can represent this subsequence by its beginning and end. This follows from the observation
+\ref{chapter1:fmindexprop:prop1}.
+
+Now, we demonstrate the search of a pattern on example. Let us assume we are searching for a word
+{\tt house} and we already found the range of rows in $M$ that have {\tt ouse}
+as their prefix. Symbols in the last column of this range correspond to the symbols
+preceding {\tt ouse} in the text. We may observe different symbols in arbitrary order there such as {\tt m}
+for word {\tt mouse} or {\tt h} for {\tt house}. To search for the range of rows in $M$ that have
+{\tt house} as a prefix we look into the range of all prefixes beginning with {\tt h}. Locating this
+range is easy as it starts on position $\Count[\texttt{h}]$. Lines in this range are sorted according
+to the second character so there will be some lines continuing with symbol {\tt a} if the text contained
+for example word {\tt hashtag} or symbol {\tt e} if the word {\tt head} was in the text. Among them, lines
+starting with {\tt house} will be located, but we do not store anything except for $T_{BWT}$ and $\Count$.
 However, we already located the range where suffixes starting with {\tt ouse} are located in.
 We can look how many times {\tt h} is located before this range in $T_{BWT}$. Thanks to this
 number and the property \ref{chapter1:fmindexprop:prop2}, we know where in $F$ the subsequence
@@ -264,7 +270,7 @@ containing the prefix {\tt house} begins.
 % TODO: mozno obrazok
 % TODO: fixnut indexovanie
 
-In general, we first find the subsequence of $M$s rows, where suffix $P[n-1\ldots]$ is located.
+In general, we first find the subsequence of $M$s rows, where suffix $P_{n-1\ldots}$ is located.
 As this is just a one symbol, $P[n-1]$, the initial subsequence is just a run of symbol $P[n-1]$
 in $F$ given by
 \begin{align*}
@@ -272,8 +278,8 @@ in $F$ given by
 	e_{n-1}&=\Count[P[n-1]+1].\\
 \end{align*}
 
-The next step is to find where the subsequence of $M$s rows, given by $b_{n-2}$ and $e_{n-2}$ is located,
-that has as a prefix $P[n-2\ldots]$. As we already located rows beginning with $P[n-1\ldots]$, we can reuse
+The next step is to find where the subsequence of $M$s rows, given by $b_{n-2}$ and $e_{n-2}$, is located,
+that has as a prefix $P_{n-2\ldots}$. As we already located rows beginning with $P_{n-1\ldots}$, we can reuse
 this information. In a range from $b_{n-1}$ to $e_{n-1}$ some rows end with character $P[n-2]$. These are rows
 that after being rotated, create subsequence we are looking for. Subsequence we are looking for is also
 subsequence of a run of character $P[n-2]$ in $F$, starting from $\Count[P[n-2]]$ spanning rows up to
