@@ -14,6 +14,7 @@ def translate(str):
         str = str.replace(preklad[0], preklad[1])
     return str
 
+usedCutoffs = {}
 
 class BenchRes:
     def __init__(self, data):
@@ -31,6 +32,9 @@ class BenchRes:
         if len(struct_name_split) > 7:
             self.cutoff = int(struct_name_split[7])
             self.is_hybrid = True
+            prev = set(usedCutoffs.get(self.block_size, []))
+            prev.add(self.cutoff)
+            usedCutoffs[self.block_size] = list(prev)
         self.time = float(data["cpu_time"])
         self.space = float(data["Space"])
 
@@ -45,6 +49,8 @@ colors = ['r', 'g', 'b', 'darkorange']
 with open(file_path, "r") as f:
     data = json.load(f)
     results = [BenchRes(i) for i in data["benchmarks"]]
+
+print(usedCutoffs)
 
 fig, axs = plt.subplots(nrows=1, ncols=3, figsize=(15, 5))
 fig.suptitle(
@@ -67,6 +73,8 @@ for result_index in range(2):
                     oper, access_pattern, block_size, isHybrid[result_index])]
                 if x:
                     l = implNames[result_index] + "-" + str(block_size)
+                    if result_index == 0:
+                        l = l + "(" + str(usedCutoffs[block_size][0]) + ")"
                     labels.add(l)
                     axs[graph_index].scatter(x, y, label=l, marker=markers[result_index], s=75, c=colors[index3])
 
@@ -105,5 +113,5 @@ fig.legend(
 
 fig.tight_layout(pad=3.0)
 
-plt.savefig("vysledky_nase.png", bbox_inches='tight')
+plt.savefig("vysledky_hybrid_artif.png", bbox_inches='tight')
 plt.clf()

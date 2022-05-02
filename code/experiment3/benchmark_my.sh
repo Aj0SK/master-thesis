@@ -1,7 +1,7 @@
 #!/bin/bash
 REPOSRC=https://github.com/Aj0SK/sdsl-lite.git
 
-rm -f special.txt vysledky_nase.png sdsl_rrr_vector_test.out
+rm -f special.txt vysledky_hybrid_artif.png sdsl_rrr_vector_test.out
 git clone "$REPOSRC" 2> /dev/null || (cd "sdsl-lite" ; git pull ; cd ..)
 
 cd sdsl-lite
