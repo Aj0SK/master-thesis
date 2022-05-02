@@ -574,17 +574,22 @@ int decompress_class(int k) {
 
 \subsection{Experimental results}
 
+% TODO: finish this
+
 We tested the first version of hybrid encoding on randomly generated sequence of bits that contains 5\% of ones.
 This was to observe, how it behaves on sparse sequences with smaller percentage of ones. This is something, where
 implementations based on RRR do not perform very well and are often beaten by sparse bit vector implementation.
-We present the results in Fig.~\ref{obr:vysledky_hybrid_artif}. We may observe that
-
-% TODO: add what can be seen
+We present the results in Fig.~\ref{obr:vysledky_hybrid_artif}. We may observe that our implementation was already
+competitive with sparse array on $\access$ and $\rank$. Hybrid encoding only amplified these differences. However,
+on $\select$ where our implementation was dominated by sparse array, these differences were not completely overcome.
 
 Our second version of hybrid encoding was tested in the same two scenarios we used in the previous section. Namely
-on the raw data from the wavelet tree built on top of the DNA sequence and XML data and then inside of the FM-index.
+on the raw data from the wavelet tree built on top of the DNA sequence and XML data. The results can be observed in
+Fig.~\ref{obr:benchmark_sdsl_hybrid}.
+
+With these results, we also benchmarked several possible versions of hybrid bit vector inside of the FM-index.
 We used the exact same parameters as in the previous tests but now, we took as a baseline our implementation of RRR
-withouth hybrid encoding. 
+withouth hybrid encoding. The results may be observed in Fig~\ref{obr:benchmark_sdsl_hybrid_count}.
 
 \begin{figure}
 	\centerline{
@@ -603,8 +608,7 @@ withouth hybrid encoding.
 	\centerline{
 		\includegraphics[width=\textwidth, height=0.4\textheight]{images/benchmark_sdsl_hybrid}
 	}
-	\caption[TODO]{\texttt{SDSL} benchmark to measure the bit vector performance and its dependence
-	on the block size. Hybrid implementations are marked by cross.
+	\caption[TODO]{TODO: Zatial iba placeholder obrazok.
 	}
 	\label{obr:benchmark_sdsl_hybrid}
 \end{figure}
