@@ -33,7 +33,7 @@ $\rank_1$ in constant time -- a single table lookup. However, the space needed t
 support this solution is $\BigO(n\cdot\log n)$ bits where $n$ is the length of the
 bit sequence.
 
-These two solutions can be combined together to obtain an idea of a practically
+\cite{gonzalez2005practical} combined these two solutions together to obtain an idea of a practically
 interesting solution where we store the pre-computed $\rank_1$ values only for some
 of the bits. At first, we choose a constant $k$ and split bit vector into non-overlapping
 subsequences of $k$ bits. We name these subsequences \textit{superblocks}. We then
@@ -77,8 +77,8 @@ thus very fast.
 \paragraph{Constant time rank/sublinear extra space}
 
 Although the previous solution works well and is commonly used in practice, it is possible to
-answer $\rank$ query in constant time and only sublinear space overhead. This result was first
-obtained by \cite{okanohara2007practical}. We start as in the previous solution by splitting
+answer $\rank$ query in constant time and only sublinear space overhead. It uses the partitioning first
+used by \cite{okanohara2007practical}. We start as in the previous solution by splitting
 the bit sequence into superblocks. This time we let the superblocks be of size $\log^2 n$
 and again precompute $\rank$s for the beginning of every superblock. We further divide every
 superblock into blocks of size $(\log n)/2$. We precompute $\rank$s for all of these
@@ -141,14 +141,14 @@ $\rank$. This can be nicely combined with the solution from the previous section
 At first, we binary search for the solution in the samples of $\rank$ stored in superblocks. When we
 identify the correct superblock of length $k$ bits, we simply linearly scan for the solution. This
 solution is not asking for any additional memory on top of the space used for $\rank$. The answer
-can be given in time $\BigO(\log(n/k)+k)$. This is a solution often used in practice, even if we
-can see that the binary search may create more cache misses than the solution for $\rank$.
+can be given in time $\BigO(\log(n/k)+k)$. This solution even if not optimal works very well in
+practice as observed by \cite{gonzalez2005practical} on bit vectors of length up to $2^20\approx 10^6$.
 
 \paragraph{Constant time select}
 
 There is also a constant time solution for $\select$ using the sublinear memory overhead.
-This solution is similar to the solution for constant time $\rank$, based on a division to
-superblocks and blocks.
+The solution we are going to describe, proposed by \cite{clark1997compact}, is similar to
+the solution for constant time $\rank$, based on a division to superblocks and blocks.
 
 We begin by precomputing $select(i)$ for every $i$ that is a
 multiple of $t_1=\log n/\log\log n$. These precomputed values take $\BigO(n/\log\log n)$ bits of space.
@@ -175,6 +175,8 @@ in the previous part to conclude that this takes $\BigO(n/t_2^2\cdot t_2\cdot \l
 of bits. To take care of the blocks of size smaller than $t_2^2$ we can precompute a table of all
 the possible ways how the block may look and all the possible $\select$ queries over it with
 their $\select$ result. This is possible as $t_2^2 = o(n)$ and give us a constant time $\select$.
+
+% TODO: prepisat poslednu vetu
 
 When answering $select_1(i)$, we can easily find the location of right superblock. If this
 is a long superblock, we just look at the precomputed positions of ones in the superblock. The matter
@@ -209,8 +211,8 @@ bit in $B$ so it is more important to optimise for decoding speed.
 For smaller block sizes, such as $b\leq 15$, it is reasonable to
 generate two helper tables. One is named $E$, used for the encoding, where we can
 index using the block casted to a number and get the offset of this particular block.
-The class can be computed trivially by counting the number of ones. The other table
-named $D$ is two dimensional. At position $D[c][o]$ we store the block that
+The class can be computed by counting the number of ones. The other table
+$D$ is two dimensional. At position $D[c][o]$ we store the block that
 is associated with pair $(c, o)$. In other words, this is a block containing $c$ ones
 and at the same time being $o$-th in the sequence of all lexicographically sorted
 blocks containing $c$ ones. Both these tables $E$ and $D$ can be computed
