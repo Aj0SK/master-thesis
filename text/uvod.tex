@@ -1,25 +1,3 @@
 \chapter*{Introduction} % chapter* je necislovana kapitola
 \addcontentsline{toc}{chapter}{Introduction} % rucne pridanie do obsahu
 \markboth{Introduction}{Introduction} % vyriesenie hlaviciek
-
-In the first chapter, we introduce the field of succinct data structures.
-We explain the goal of these data structures and describe scenarios when
-they are very competitive and useful but we also discuss their drawbacks.
-We introduce bit vector, one of the simplest succinct data structures, and
-demonstrate some of its useful applications. In the end, we demonstrate how
-bit vector can be used inside of the text indexing data structure FM-index.
-
-In the second chapter, we show possible implementations of methods $\rank$ and
-$\select$. We discuss what are the theoretically optimal solutions but also
-what are their practical alternatives. We then proceed to describe one of the
-widely used implementations of a compressed bit vector called \textit{RRR}.
-
-In the third chapter, we propose our own modifications to the implementation of
-a compressed bit vector based on RRR. We discuss theoretical aspects of these
-modifications.
-
-In the fourth chapter, we show our proposed implementation of previously devised
-methods and experimentally test and evaluate them. We measure the performance
-of our solution on artificial as well as real-world data. Finally, we demonstrate
-how our idea can be used to get a better ratio of query time and space used by the
-FM-index and thus deliver practically useful results.

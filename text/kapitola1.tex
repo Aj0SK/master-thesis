@@ -416,3 +416,20 @@ FM-index, the data structure used for the problem of text indexing. There, we en
 problem of answering $\rank$ and $\select$ over the general alphabet and described wavelet tree,
 one possible data structure that can be used to solve it, assuming we have an implementation of
 bit vector supporting $\access$, $\rank$ and $\select$ methods.
+
+\section{Outline of the Thesis}
+
+In the second chapter, we show possible implementations of $\rank$ and
+$\select$ methods. We discuss what are the theoretically optimal solutions but also
+what are their practical drawbacks. We then proceed to describe one of the
+widely used implementations of a compressed bit vector called \textit{RRR}.
+
+In the third chapter, we propose our own modifications to the implementation of
+a compressed bit vector based on RRR and we discuss theoretical aspects of these
+modifications.
+
+In the fourth chapter, we show our proposed implementation of previously devised
+methods and experimentally test and evaluate them. We measure the performance
+of our solution on artificial as well as real-world data. Finally, we demonstrate
+how our idea can be used to get a better ratio of query time and space used by the
+FM-index and thus deliver practically useful results.
