@@ -1,7 +1,11 @@
 import json
 import re
 import matplotlib.pyplot as plt
+from math import log2
 
+def entropy(p):
+    q = (1.0-p)
+    return p*log2(1.0/p) + q*log2(1.0/q)
 
 def translate(str):
     preklady = [["Operation", "Operácia"], ["AccessPattern", "PrístupovýTyp"],
@@ -44,10 +48,12 @@ with open(file_path, "r") as f:
 
 fig, axs = plt.subplots(nrows=1, ncols=3, figsize=(15, 5))
 fig.suptitle(
-    f"Access, rank, select na postupnosti dĺžky 2^25 prvkov ({ONES_PERCENTAGE}% jednotiek)")
+    f"Access, rank, select on sequence of length 2^25 (density {ONES_PERCENTAGE}%) - entropy {entropy(ONES_PERCENTAGE/100):.2f}")
 
 isHybrid = [True, False]
-implNames = ["hybrid", "original"]
+implNames = ["hybrid", "orig"]
+
+labels = set()
 
 for result_index in range(2):
     for (index1, access_pattern) in enumerate(["AccessPattern::Random"]):
@@ -60,22 +66,43 @@ for result_index in range(2):
                 y = [res.time/NUM_OF_QUERIES for res in results if (res.oper, res.access_pat, res.block_size, res.is_hybrid) == (
                     oper, access_pattern, block_size, isHybrid[result_index])]
                 if x:
-                    axs[graph_index].scatter(x, y, label=str(result_index) + "-" + str(
-                        block_size), marker=markers[result_index], c=colors[index3])
+                    l = implNames[result_index] + "-" + str(block_size)
+                    labels.add(l)
+                    axs[graph_index].scatter(x, y, label=l, marker=markers[result_index], s=75, c=colors[index3])
 
-            axs[graph_index].set_title(translate(oper + " " + access_pattern))
-            axs[graph_index].set_xlabel("bitov na bit")
+            axs[graph_index].set_title(translate(oper.split(':')[2]))
+            axs[graph_index].set_xlabel("bits per bit")
 
             if result_index == 1:
                 x = [res.space for res in results if (
                     res.oper, res.access_pat, res.block_size) == (oper, access_pattern, 0)]
                 y = [res.time/NUM_OF_QUERIES for res in results if (
                     res.oper, res.access_pat, res.block_size) == (oper, access_pattern, 0)]
-                axs[graph_index].scatter(x, y, label=str(result_index) +
-                                        "-" + str(block_size), marker='*', c="0.0")
+                l = "sparse_vec"
+                labels.add(l)
+                axs[graph_index].scatter(x, y, label=l, marker='*', s=75, c="0.0")
 
-axs[-1].legend(loc='center left', bbox_to_anchor=(1, 0.5))
-axs[0].set_ylabel("čas (ns)")
+#axs[-1].legend(loc='center left', bbox_to_anchor=(1, 0.5))
+axs[0].set_ylabel("time per query (ns)")
+
+labels_handles = {
+  label: handle for ax in fig.axes for handle, label in zip(*ax.get_legend_handles_labels())
+}
+
+fig.legend(
+  labels_handles.values(),
+  labels_handles.keys(),
+  loc="upper center",
+  bbox_to_anchor=(0.5, 0),
+  bbox_transform=plt.gcf().transFigure,
+  ncol=len(list(labels)),
+  handletextpad=0.01,
+  labelspacing=0.0,
+  borderpad=0.1,
+  columnspacing = 1.0,
+  prop={'size': 13}
+)
+
 fig.tight_layout(pad=3.0)
 
 plt.savefig("vysledky_nase.png", bbox_inches='tight')

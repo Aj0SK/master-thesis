@@ -12,6 +12,24 @@ using namespace sdsl;
 
 using namespace std;
 
+static inline __uint128_t sdsl_to_gcc(sdsl::uint128_t x)
+{
+  return (static_cast<__uint128_t>(static_cast<uint64_t>(x >> 64)) << 64) +
+         static_cast<uint64_t>(x);
+}
+
+std::string toString(__uint128_t num)
+{
+  std::string str;
+  do
+  {
+    int digit = num % 10;
+    str = std::to_string(digit) + str;
+    num = (num - digit) / 10;
+  } while (num != 0);
+  return str;
+}
+
 template <int block_size, int cutoff> void analyze(const bit_vector& bv)
 {
   vector<int> freq(block_size + 1, 0);
@@ -38,10 +56,22 @@ template <int block_size, int cutoff> void analyze(const bit_vector& bv)
   double total_classic = 0, total_hybrid = 0;
   for (int i = 0; i <= block_size; ++i)
   {
-    double classic =
-        log2(block_size + 1) +
-        ceil(
-            log2(binomial_coefficients<block_size>::data.table[block_size][i]));
+    double x = 0.0;
+
+    if constexpr (block_size != 127)
+    {
+      x = ceil(
+          log2(binomial_coefficients<block_size>::data.table[block_size][i]));
+    }
+
+    if constexpr (block_size == 127)
+    {
+      __uint128_t num = sdsl_to_gcc(
+          binomial_coefficients<block_size>::data.table[block_size][i]);
+      x = ceil(log2(static_cast<double>(num)));
+    }
+
+    double classic = log2(block_size + 1) + x;
 
     double hybrid = log2(cutoff + 1);
     if (i >= cut_from && i <= cut_to)
@@ -50,8 +80,7 @@ template <int block_size, int cutoff> void analyze(const bit_vector& bv)
     }
     else
     {
-      hybrid += ceil(
-          log2(binomial_coefficients<block_size>::data.table[block_size][i]));
+      hybrid += x;
     }
 
     total_classic += freq[i] * classic;
@@ -62,7 +91,7 @@ template <int block_size, int cutoff> void analyze(const bit_vector& bv)
 
   std::cout << "<" << block_size << ", " << cutoff << ">"
             << "\t\t" << total_classic / size << "/" << total_hybrid / size
-            << "\n";
+            << "\t" << total_hybrid / total_classic << "\n";
 }
 
 int main(int argc, char* argv[])
@@ -79,6 +108,10 @@ int main(int argc, char* argv[])
   analyze<63, 7>(bv);
   analyze<63, 15>(bv);
   analyze<63, 31>(bv);
+  analyze<127, 7>(bv);
+  analyze<127, 15>(bv);
+  analyze<127, 31>(bv);
+  analyze<127, 63>(bv);
 
   return 0;
 }
