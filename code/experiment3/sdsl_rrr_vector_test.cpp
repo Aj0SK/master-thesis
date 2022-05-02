@@ -125,28 +125,32 @@ static void BM_RRR(benchmark::State& state)
   rrr_vec_type rrr_vector(bv);
   rrr_rank_type rrr_rank(&rrr_vector);
   rrr_select_type rrr_select(&rrr_vector);
+  // int checksum = 0;
 
   for (auto _ : state)
   {
+    // checksum = 0;
     for (size_t q : queries)
     {
+      bool x;
       if constexpr (op == Operation::Access)
       {
-        bool x = rrr_vector[q];
-        benchmark::DoNotOptimize(x);
+        x = rrr_vector[q];
       }
       if constexpr (op == Operation::Rank)
       {
-        bool x = rrr_rank(q);
-        benchmark::DoNotOptimize(x);
+        x = rrr_rank(q);
       }
       if constexpr (op == Operation::Select)
       {
-        bool x = rrr_select(q);
-        benchmark::DoNotOptimize(x);
+        x = rrr_select(q);
       }
+      benchmark::DoNotOptimize(x);
+      // checksum += x;
     }
   }
+
+  // std::cout << "Control checksum is " << checksum << "\n";
 
   double ratio = 8.0 * size_in_bytes(rrr_vector) / static_cast<double>(kN);
   state.counters["Space"] = ratio;

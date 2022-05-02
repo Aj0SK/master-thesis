@@ -80,7 +80,7 @@ for result_index in range(2):
                     axs[graph_index].scatter(x, y, label=l, marker=markers[result_index], s=75, c=colors[index3])
 
             axs[graph_index].set_title(translate(oper.split(':')[2]), fontsize=16)
-            axs[graph_index].set_xlabel("bits per bit")
+            axs[graph_index].set_xlabel("bits per bit", fontsize=12)
 
             if result_index == 1:
                 x = [res.space for res in results if (
@@ -92,7 +92,7 @@ for result_index in range(2):
                 axs[graph_index].scatter(x, y, label=l, marker='*', s=75, c="0.0")
 
 #axs[-1].legend(loc='center left', bbox_to_anchor=(1, 0.5))
-axs[0].set_ylabel("time per query (ns)")
+axs[0].set_ylabel("time per query (ns)", fontsize=12)
 
 labels_handles = {
   label: handle for ax in fig.axes for handle, label in zip(*ax.get_legend_handles_labels())
