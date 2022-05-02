@@ -417,12 +417,12 @@ implementation to make sure that our implementation is giving the correct result
 \section{Hybrid encoding}
 
 We now present our implementation of the hybrid encoding. In the previous chapter, we
-proposed two variants of hybrid encoding. Both of these were based on an idea not to
+proposed two variants of hybrid encoding. Both of these were based on an idea to not
 encode the blocks that are rare and thus save space on bits used for blocks classes. On
-the other hand, they differed in which blocks are not encoded but just trivially copied.
-The first solution treated differently just blocks with high number of ones. The second,
-was focused on balanced sequences and treated differently blocks that have balanced number
-of zeroes and ones.
+the other hand, they differed in which blocks are not encoded but just saved in ther original
+representation. The first solution treated differently just blocks with higher number of ones.
+The second, was focused on balanced sequences and treated differently blocks that have balanced
+number of zeroes and ones.
 
 \subsection{Implementation}
 
@@ -566,6 +566,15 @@ Our second version of hybrid encoding was tested in the same two scenarios we us
 on the raw data from the wavelet tree built on top of the DNA sequence and XML data and then inside of the FM-index.
 We used the exact same parameters as in the previous tests but now, we took as a baseline our implementation of RRR
 withouth hybrid encoding. 
+
+\begin{figure}
+	\centerline{
+		\includegraphics[width=\textwidth, height=0.27\textheight]{images/vysledky_hybrid_artif}
+	}
+	\caption[TODO]{TODO.
+	}
+	\label{obr:vysledky_hybrid_artif}
+\end{figure}
 
 \begin{figure}
 	\centerline{

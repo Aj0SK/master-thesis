@@ -425,4 +425,14 @@ $$(n/b)\lg (c_k+1) + \sum_{i=0}^{\mathit{cut\_from}-1} C_i\ceil{\lg {b\choose i}
 + \sum_{i=\mathit{cut\_from}}^{\mathit{cut\_to}}C_i b
 + \sum_{i=\mathit{cut\_to}+1}^{b} C_i\ceil{\lg {b\choose i}}.$$
 
-% TODO: conclusion nejaka?
+To summarize, we proposed two ideas how to enhance current implementations of RRR.
+First idea is related to the way how blocks are encoded and decoded. We devised a new ordering
+that can be nicely combined with divide-and-conquer approach and reuse table decoding subroutine
+for smaller sub-problems to which it divides the original problem.
+
+The second idea, targeted on sequences with some special properties, was to just store blocks that
+are rare in their original form. By using their original representation, we loose some space on these
+rare blocks but save space on every single class value, as we do not need to distinguish between blocks
+that have certain classes. We devised two versions of hybrid encoding, one more suitable for bit vectors
+that are very sparse and contain small percentage of ones (5--10\%), second, for bit sequences that have
+balanced number of zeroes and ones but contain many blocks with either small or big class.
