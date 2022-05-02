@@ -296,16 +296,29 @@ it obtained the queried bit. The results we measured are shown in Fig.~\ref{obr:
 \paragraph{Bit vector on real data}
 
 After bencharking and finding the potential for speeding up the bit vector implementation using
-our new method, we decided to implement and test it in environment that is closer to the real-life
-usage of bit vectors. We picked a benchmarking part of \texttt{SDSL} library that tests bit vector
-on a randomly generated sequence with fixed number of ones and on raw representation of a wavelet
-tree built on top of data from the DNA sequence and XML web data taken from \texttt{DBLP}, computer
-science bibliography. This test focused on how the average query time of $\access$, $\rank$ and $\select$
-methods depends on the block size. These queries into the underlying bit vector were generated randomly.
-We were not able to find significant practical usability for other patterns and thus stick with this one.
+our new method, we decided to implement and benchmark it on data that are closer to the real-life
+usage of bit vectors.
+
+We used a benchmarking part of \texttt{SDSL} targeted at a bit vector. This test measures how
+query time for $\access$, $\rank$ and $\select$ depends on the block size used on different types
+of data. The first type of sequence is randomly generated bit vector with density of ones equal to
+50\%. The origin of second type of sequences is closely described in \cite{gog2014optimized}.
+Test file \texttt{WT-DNA-1GB} has been created by:
+\begin{itemize}
+	\item Taking 1GB prefix of DNA file.
+	\item Creating BWT of this text.
+	\item Building Huffman shaped wavelet tree over it.
+	\item Concatenating all the vectors in the wavelet tree.
+\end{itemize}
+
+Other version of data such as \texttt{WT-DNA-16MB} or \texttt{WT-WEB-1GB} have been created similarly.
+Queries into the underlying bit vector were generated randomly. We were not able to find significant
+practical usability for other patterns and thus stick with this one.
+
 As a baseline, we choose the 15 bit specialized implementation already implemented in \texttt{SDSL}
 that uses the table decoding method. We present the measured results of our and the original
 implementation in Fig.~\ref{obr:benchmark_sdsl_new_method}.
+
 \begin{figure}
 	\centerline{
 		\includegraphics[width=\textwidth, height=0.7\textheight]{images/benchmark_sdsl_new_method}
@@ -316,29 +329,28 @@ implementation in Fig.~\ref{obr:benchmark_sdsl_new_method}.
 	\label{obr:benchmark_sdsl_new_method}
 \end{figure}
 
-There are several interesting things to observe in these results. We can see that our new implementation
-beats older implementation on almost all block sizes and all types of data. Note, that results are more
-clear on random data and DNA data. On web data, however, the difference is less noticable. We attribute
-this behaviour to the fact, that was observed by \cite{gog2014optimized}, creators of this dataset. They
-observed that the number of uniform blocks (full of either zeroes or ones) is much bigger in \texttt{WT-WEB}
-than in \texttt{WT-DNA}. For block size 63, they observed ratio of uniform blocks in \texttt{WT-WEB-1GB}
-to be 84\% compared to 28\% in \texttt{WT-DNA}. As the uniform blocks are decoded trivially in both
-implementations, this makes less opportunities for our implementation to save time. Another visible pattern
-is that with increasing block size, the query time generally goes up as decoding takes more and more time.
-On the other hand, on $\select$ in \texttt{WT-WEB} data we can observe, that at the beginning the query
-time decreases with increasing block size. This is because time saved on faster binary search in precomputed
-$\rank$ values offsets growing decoding time.
+There are several interesting things to observe in these results. We may observe that our new implementation
+beats older implementation on almost all block sizes and all types of data. Note, that the difference is more
+visible on random and DNA data. On web data, however, the difference is less noticable. We attribute
+this behaviour to the fact, that was observed by creators of this dataset. They observed that the number of
+uniform blocks (full of either zeroes or ones) is much bigger in \texttt{WT-WEB} than in \texttt{WT-DNA}.
+For block size 63, they observed ratio of uniform blocks in \texttt{WT-WEB-1GB} to be 84\% compared to 28\% in
+\texttt{WT-DNA}. As the uniform blocks are decoded trivially in both implementations, this makes less opportunities
+for our implementation to save time. Another visible pattern is that with increasing block size, the query time
+generally goes up as decoding takes more and more time. On the other hand, on $\select$ in \texttt{WT-WEB} data
+we can observe, that at the beginning the query time decreases with increasing block size. This is because time
+saved on faster binary search in precomputed $\rank$ values offsets growing decoding time.
 
 \paragraph{Bit vector in FM-index}
 
 Even if the previous benchmark was done on real data, it was not done in application that is
-practically useful. Thus, we further benchmarked our bit vector implementation as a part
-of Huffman shaped wavelet tree used inside of the FM-index. Implementation of FM-index in
-\texttt{SDSL}, as most of other implementations, provides mainly following 3 methods:
+practically useful. Thus, we further benchmarked our bit vector as a part of Huffman shaped
+wavelet tree used inside of the FM-index. Implementation of FM-index in \texttt{SDSL}, as most
+of other implementations, provides mainly methods:
 \begin{itemize}
-	\item $\countOp(P)$ - returns the number of occurrences of $P$ in text $T$
-	\item $\locateOp(P)$ - returns all positions of pattern $P$ in text $T$
-	\item $\extractOp(i, j)$ - returns the subsequence $T[i..j]$
+	\item $\countOp(P)$ - returns the number of occurrences of $P$ in text $T$,
+	\item $\locateOp(P)$ - returns all positions of pattern $P$ in text $T$,
+	\item $\extractOp(i, j)$ - returns the subsequence $T[i..j]$.
 \end{itemize}
 The reason that the $\extractOp$ method is useful and non-trivial is that FM-index
 does not store the original sequence $T$ -- at least not in an easily readable form.
@@ -348,7 +360,8 @@ the \texttt{Pizza\&Chili} dataset and use mainly methodology proposed by \cite{f
 The data we used are English texts from Gutenberg project, source codes, DNA and protein
 sequences. In most of these benchmarks, we used as a baseline the FM-index version based
 on block size 15. For informative purposes, we also included the version based on uncompressed
-bit vector and sparse bit vector based on Elias-Fano encoding.
+bit vector and sparse bit vector provided by \texttt{SDSL} that represents positions of ones
+using the Elias-Fano representation for non-decreasing sequences.
 
 To benchmark operation $\countOp$, the index over the text is built. Then, random patterns of
 various lengths are extracted from the text and subsequently used for benchmarking. Code
@@ -418,7 +431,7 @@ implementation to make sure that our implementation is giving the correct result
 \section{Hybrid encoding}
 
 We now present our implementation of the hybrid encoding. In the previous chapter, we
-proposed two variants of hybrid encoding. Both of these were based on an idea not to
+proposed two variants of hybrid encoding. Both of these were based on the idea not to
 encode the blocks that are rare. This in turn reduced the number of classes and we 
 have been able to save space on bits used for blocks classes. On the other hand, these
 two versions differed in decision, which blocks are not encoded but just saved in ther original
@@ -449,7 +462,7 @@ in $C$. This is because now, for some classes, $C$ does not store the number of 
 the block. Thus when we are linearly searching for the result of $\rank$ query along the
 block, we need to also from time to time access $O$ to count number of ones for some block.
 This creates some additional memory accesses that may slow down the hybrid implementation.
-The simplified implementation of the method $\rank$ in \texttt{SDSL} is in listing \ref{code:rank_before}.
+The simplified implementation of the $\rank$ in \texttt{SDSL} is in listing \ref{code:rank_before}.
 The new version, adapted to the hybrid encoding is in listing \ref{code:rank_after}.
 
 In both versions of hybrid implementation, we introduced cutoff parameter $c_k$ to the
@@ -521,8 +534,11 @@ The biggest notable difference from the previous version of hybrid encoding are 
 helper functions that are used for mapping or as we call it compressing and decompressing
 the blocks class before any of its use. We present these methods in listing \ref{code:hybrid_valley_compress},
 and \ref{code:hybrid_valley_decompress}. To choose for particular $c_k$, which $c_k$ classes we are
-going to represent in a standard way, we set values $\text{cut\_from}$ and $\text{cut\_to}$ to 
-$\floor{(c_k+1)/2}$ and $b-cut_from+1$, respectively.
+going to represent in a standard way, we set
+\begin{align*} % TODO: not looking good
+&\text{cut\_from} = \floor{(c_k+1)/2} \\
+&\text{cut\_to} = b-\text{cut\_from}+1.
+\end{align*}
 
 \lstset{language=C++,caption={Compressing blocks class},label=code:hybrid_valley_compress}
 \begin{lstlisting}
@@ -558,11 +574,10 @@ int decompress_class(int k) {
 
 \subsection{Experimental results}
 
-% TODO: add one graph, explain results
-
 We tested the first version of hybrid encoding on randomly generated sequence of bits that contains 5\% of ones.
 This was to observe, how it behaves on sparse sequences with smaller percentage of ones. This is something, where
 implementations based on RRR do not perform very well and are often beaten by sparse bit vector implementation.
+We present the results in Fig.~\ref{obr:vysledky_hybrid_artif}. We may observe that 
 
 Our second version of hybrid encoding was tested in the same two scenarios we used in the previous section. Namely
 on the raw data from the wavelet tree built on top of the DNA sequence and XML data and then inside of the FM-index.
@@ -573,7 +588,11 @@ withouth hybrid encoding.
 	\centerline{
 		\includegraphics[width=\textwidth, height=0.27\textheight]{images/vysledky_hybrid_artif}
 	}
-	\caption[TODO]{TODO.
+	\caption[TODO]{Timing of $\access$, $\rank$ and $\select$ methods over the randomly generated
+	sequence with 5\% of ones in it. Comparison of standard implementation and our hybrid encoding
+	marked with cross. For reference, we included sparse vector implementation. We may observe how
+	implementations get closer to the entropy lower bound with increasing block size. Name
+	$\texttt{hybrid-}x\texttt{(}y\texttt{)}$ denotes implementation of block size $x$ with cutoff $y$.
 	}
 	\label{obr:vysledky_hybrid_artif}
 \end{figure}
@@ -583,14 +602,14 @@ withouth hybrid encoding.
 		\includegraphics[width=\textwidth, height=0.4\textheight]{images/benchmark_sdsl_hybrid}
 	}
 	\caption[TODO]{\texttt{SDSL} benchmark to measure the bit vector performance and its dependence
-	on the block size. Our implementations are marked using cross.
+	on the block size. Hybrid implementations are marked by cross.
 	}
 	\label{obr:benchmark_sdsl_hybrid}
 \end{figure}
 
 \begin{figure}
 	\centerline{
-		\includegraphics[width=\textwidth, height=0.4\textheight]{images/vysledky_sdsl_hybrid_count}
+		\includegraphics[width=\textwidth, height=0.5\textheight]{images/vysledky_sdsl_hybrid_count}
 	}
 	\caption[TODO]{TODO: Zatial iba placeholder obrazok.
 	}
