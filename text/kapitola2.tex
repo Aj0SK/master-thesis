@@ -167,23 +167,21 @@ multiple of $t_2=(\log\log n)^2$. These precomputed values are small as they onl
 from the beginning of a short superblock. Every one of these values takes $\log\log n$ of space so the
 total amount of space used for the values is $\BigO(n/t_2\cdot \log\log n) = \BigO(n/\log\log n)$.
 
-
 This breaks short superblocks into blocks. Again, each of these blocks except for maybe the
 last one contains $t_2$ ones. For blocks of size bigger than $t_2^2$, we store the positions of all
 ones as there are not many of these blocks and they are sparse. We may use the same reasoning as
 in the previous part to conclude that this takes $\BigO(n/t_2^2\cdot t_2\cdot \log\log n) = \BigO(n/\log\log n)$
-of bits. To take care of the blocks of size smaller than $t_2^2$ we can precompute a table of all
+of bits. To take care of the blocks smaller than $t_2^2$ we can again precompute a table of all
 the possible ways how the block may look and all the possible $\select$ queries over it with
-their $\select$ result. This is possible as $t_2^2 = o(n)$ and give us a constant time $\select$.
-
-% TODO: prepisat poslednu vetu
+their result. This table is of size $$\BigO(2^{t_2^2}\cdot t_2^2 \cdot \log t_2) = o(n)$$
+and this representation enables us to answer $\select$ in constant time.
 
 When answering $select_1(i)$, we can easily find the location of right superblock. If this
-is a long superblock, we just look at the precomputed positions of ones in the superblock. The matter
-is more complicated if we fall into a short superblock. We then find the location of the correct block.
-If this is a long block, we can once again just look at the position of one we are interested
-in. If it is a short block, we have the precomputed table where we index with the block and the position of
-one in the block, we are interested in.
+is a long superblock, we just look at the precomputed positions of ones in the superblock.
+The matter is more complicated if we fall into a short superblock. In this case, we find
+the location of the correct block. If this is a long block, we can once again just look
+at the position of one we are interested in. If it is a short block, we have the precomputed
+table where we index with the block and the position of one in the block, we are interested in.
 
 \section{Compressed representation}
 \label{section:compressed_bv}
@@ -193,8 +191,8 @@ time with just sublinear space overhead. In this section, we show that it is pos
 the whole bit vector to a space that is close to the zeroth order entropy while still keeping the
 constant time $\rank$ and $\select$.
 
-We start with inroduction of RRR, data structure proposed by \cite{raman2007succinct}. It is based
-on the observation that $$H_0(B)\approx \log {n \choose \#_1(B)}.$$ The main idea of RRR is to
+We start with inroduction of RRR, data structure based on ideas of \cite{pagh2001low} and \cite{raman2007succinct}.
+It is based on the observation that $$H_0(B)\approx \log {n \choose \#_1(B)}.$$ The main idea of RRR is to
 split the bit sequence into blocks of size $b$ and then represent a block with $c$ ones using only
 $\ceil{\log {b \choose c}}$ bits as there are only ${b \choose c}$ combinations for positions of ones.
 The whole block can be then uniqly represented as a pair $(c, o)$ where $c$ is the number of ones in the
