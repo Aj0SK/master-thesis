@@ -32,8 +32,8 @@ data structures that represents a sequence of zeroes and ones while supporting t
 methods:
 \begin{itemize}
 \item $\access(i)$ - returns the $i$-th symbol of the sequence,
-\item $\rank_c(i)$ - returns the number of occurrences of symbol $c$ up to the $i$-th index
-\item $\select_c(i)$ - returns the index of $i$-th occurrence of symbol $c$ in the sequence
+\item $\rank_c(i)$ - returns the number of occurrences of symbol $c$ up to the $i$-th index,
+\item $\select_c(i)$ - returns the index of $i$-th occurrence of symbol $c$ in the sequence,
 \end{itemize}
 first studied by \cite{jacobson1988succinct}.
 
@@ -58,7 +58,7 @@ assume that only $n$ out of $N$ elements are present and also that $n\ll N$.
 First approach considering the sparseness of an array is to store only the non-default
 elements as pairs $(\text{position}, \text{value})$, which takes $n\cdot (k+\ceil{\log_2 N})$
 bits of space. If we just store the pairs sorted by the position, accessing the $i$-th
-element takes $\BigO(\log n)$ time.
+element takes time $\BigO(\log n)$.
 
 We may use a hash table to obtain a constant time solution but this comes with additional
 memory overhead.
@@ -251,9 +251,9 @@ in FM-index. Let us denote suffix of $P$ starting at $i$-th element $P_{i\ldots}
 result of the search for $P$ is a range of $M$s rows that have $P$ as their prefix. The search for these
 rows proceeds iteratively from the end of $P$ to its beginning. At first, we find rows that have suffix
 $P_{n-1\ldots}$ as their prefix and then gradually continue by finding rows that have as prefix suffixes
-$P_{n-2\ldots}, P_{n-3\ldots}$ and so on. In every step, these rows form a consecutive subsequence of rows
-of $M$ so we can represent this subsequence by its beginning and end. This follows from the observation
-\ref{chapter1:fmindexprop:prop1}.
+$P_{n-2\ldots}, P_{n-3\ldots}$ and so on up to $P_0=P$. In every step, these rows form a consecutive
+subsequence of rows of $M$ so we can represent this subsequence by its beginning and end. This follows
+from the observation \ref{chapter1:fmindexprop:prop1}.
 
 Now, we demonstrate the search of a pattern on example. Let us assume we are searching for a word
 {\tt house} and we already found the range of rows in $M$ that have {\tt ouse}
@@ -358,7 +358,7 @@ from $\Sigma_0$ and $\Sigma_1$, respectively. The left and right children of the
 are then built by recursively applying the same idea on subsequences $S_0$ and $S_1$ until
 we end up with a trivial unary alphabet at the leaves. The example of this partitioning may
 be observed in Fig.~\ref{obr:WaveletTreeExample}. It follows that the depth of the wavelet
-tree is roughly $\log \sigma$.
+tree is $\BigO(\log \sigma)$.
 \begin{figure}
 	\centerline{
 		\includegraphics[width=0.9\textwidth, height=0.3\textheight]{images/wavelet_tree}
@@ -418,6 +418,12 @@ one possible data structure that can be used to solve it, assuming we have an im
 bit vector supporting $\access$, $\rank$ and $\select$ methods.
 
 \section{Outline of the Thesis}
+
+The goal of this thesis is to describe current state of implementation of the bit vector
+supporting $\access$, $\rank$ and $\select$ methods and come up with improvements that
+make bit vector usable in more scenarios. This can be either by speeding up the current
+implementations, saving some additional space but also by combination of these two as
+obtaining some new ratios of query time and space used can also open doors to new applications.
 
 In the second chapter, we show possible implementations of $\rank$ and
 $\select$ methods. We discuss what are the theoretically optimal solutions but also
