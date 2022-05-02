@@ -50,17 +50,19 @@ for file, block_size, cutoff in res.keys():
 test_cases = list(test_cases)
 block_sizes = list(block_sizes)
 
+test_cases.sort()
+
 rows, cols = 2, 2
 
-fig, axs = plt.subplots(rows, cols, figsize=(11,6))
-fig.suptitle('FM-index count')
+fig, axs = plt.subplots(rows, cols, figsize=(11,8))
+fig.suptitle('FM-index count', fontsize=20)
 
 if rows*cols != len(test_cases):
     print("Not enough of space in graph.")
     exit(1)
 
 for i in range(len(test_cases)):
-    axs[i//cols][i%cols].set_title(test_cases[i])
+    axs[i//cols][i%cols].set_title(test_cases[i], fontsize=16)
 
 labels = set()
 
@@ -68,12 +70,12 @@ for file, block_size, cutoff in res.keys():
     time, memory = res[file, block_size, cutoff]
     file_index = test_cases.index(file)
     m = 'o'
-    marker_size = 20
+    marker_size = 30
     if cutoff != block_size:
         m = fr"${cutoff}$"
-        marker_size = 100
+        marker_size = 150
         if len(m) == 3:
-            marker_size = 45
+            marker_size = 60
     
     row = file_index//rows
     col = file_index%cols
@@ -85,10 +87,10 @@ for file, block_size, cutoff in res.keys():
     axs[row][col].scatter([memory], [time], c=color, marker=m, s=marker_size, label=l)
 
 for i in range(rows):
-    axs[i][0].set_ylabel("µs per pattern symbol")
+    axs[i][0].set_ylabel("µs per pattern symbol", fontsize=12)
 
 for i in range(cols):
-    axs[-1][i].set_xlabel("bits per text char")
+    axs[-1][i].set_xlabel("bits per text char", fontsize=12)
 
 fig.subplots_adjust(bottom=0.3, wspace=0.33)
 
@@ -100,7 +102,7 @@ fig.legend(
   labels_handles.values(),
   labels_handles.keys(),
   loc="upper center",
-  bbox_to_anchor=(0.5, 0.1),
+  bbox_to_anchor=(0.5, 0.05),
   bbox_transform=plt.gcf().transFigure,
   ncol=len(list(labels)),
   handletextpad=0.01
