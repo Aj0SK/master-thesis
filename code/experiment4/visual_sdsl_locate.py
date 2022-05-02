@@ -57,7 +57,7 @@ if rows*cols != len(datasets):
 
 fig, axs = plt.subplots(rows, cols, figsize=(8,6))
 pts = [set() for i in range(len(datasets))]
-fig.suptitle('FM-index locate', fontsize=16)
+fig.suptitle('FM-index locate', fontsize=20)
 
 labels = set()
 
@@ -79,15 +79,15 @@ for r in range(len(res)):
         elif structure == "CSA_SADA":
             m = '*'
         axs[row][col].scatter(x, y, label = l, marker = m, s = 35)
-        axs[row][col].set_title(dataset_name)
+        axs[row][col].set_title(dataset_name, fontsize=16)
         for yy in y:
             pts[dataset_index].add(yy)
 
 for i in range(rows):
-    axs[i][0].set_ylabel("ms / occurrence", fontsize=10)
+    axs[i][0].set_ylabel("ms / occurrence", fontsize=12)
 
 for i in range(cols):
-    axs[-1][i].set_xlabel("bits / text symbol", fontsize=10)
+    axs[-1][i].set_xlabel("bits / text symbol", fontsize=12)
 
 for i in range(rows):
     for j in range(cols):

@@ -200,7 +200,7 @@ static void SDSL_ON_THE_FLY(benchmark::State& state)
   {
     for (auto [k, index] : test)
     {
-      auto block = sdsl::rrr_helper<N>::decode_bit(k, index, N - 1);
+      auto block = sdsl::rrr_helper<N>::decode_bit(k, index, N / 2);
       benchmark::DoNotOptimize(block);
     }
   }

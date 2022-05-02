@@ -54,7 +54,8 @@ print(usedCutoffs)
 
 fig, axs = plt.subplots(nrows=1, ncols=3, figsize=(15, 5))
 fig.suptitle(
-    f"Access, rank, select on sequence of length 2^25 (density {ONES_PERCENTAGE}%) - entropy {entropy(ONES_PERCENTAGE/100):.2f}")
+    f"Access, rank, select on sequence of length 2^25 (density {ONES_PERCENTAGE}%) - entropy {entropy(ONES_PERCENTAGE/100):.2f}",
+    fontsize=20)
 
 isHybrid = [True, False]
 implNames = ["hybrid", "orig"]
@@ -78,7 +79,7 @@ for result_index in range(2):
                     labels.add(l)
                     axs[graph_index].scatter(x, y, label=l, marker=markers[result_index], s=75, c=colors[index3])
 
-            axs[graph_index].set_title(translate(oper.split(':')[2]))
+            axs[graph_index].set_title(translate(oper.split(':')[2]), fontsize=16)
             axs[graph_index].set_xlabel("bits per bit")
 
             if result_index == 1:
