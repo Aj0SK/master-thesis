@@ -242,23 +242,23 @@ necessary to explain the measured phenomenons later when exploring the results o
 		Block size &	Method									&	$\mu s$ per 1k queries \\
 		\hline
 		\multirow{2}{*}{15} & SDSL\_Table                         	&    2  \\
-							& SDSL\_ON\_THE\_FLY  					&   45  \\
+							& SDSL\_ON\_THE\_FLY  					&   18  \\
 		\hline
 		\multirow{4}{*}{30} & OUR\_LINEAR\_15\_15                 	&   9  \\
 							& OUR\_SIMD\_15\_15                   	&   8  \\
 							& OUR\_BINARY\_15\_15                 	&  15  \\
-							& SDSL\_ON\_THE\_FLY  					&  93  \\
+							& SDSL\_ON\_THE\_FLY  					&  38  \\
 		\hline
 		\multirow{2}{*}{31} & OUR\_LINEAR\_1\_30                  	&  11  \\
-							& SDSL\_ON\_THE\_FLY  					&  96  \\
+							& SDSL\_ON\_THE\_FLY  					&  37  \\
 		\hline
 		\multirow{3}{*}{62} & OUR\_LINEAR\_31\_31                 	&  36  \\
 							& OUR\_BINARY\_31\_31                 	&  42  \\
-							& SDSL\_ON\_THE\_FLY  					& 130  \\
+							& SDSL\_ON\_THE\_FLY  					&  50  \\
 		\hline
 		\multirow{3}{*}{63} & OUR\_LINEAR\_1\_62                  	&  33  \\
 							& OUR\_LINEAR\_3\_30\_30              	&  32  \\
-							& SDSL\_ON\_THE\_FLY  					& 148  \\
+							& SDSL\_ON\_THE\_FLY  					&  48  \\
 		\hline
 		\multirow{2}{*}{127} & OUR\_LINEAR\_1\_63\_63             	&  88  \\
 							 & OUR\_BINARY\_1\_63\_63             	&  91  \\
@@ -289,8 +289,9 @@ solution for 127-bit block size, we used the 128 bit type \texttt{\_\_uint128\_t
 as a combination of two 64-bit numbers. We compared these results with the table decoding specialization
 in \texttt{SDSL} and with on-the-fly decoding for all the other block sizes. The data we run the decoding
 on were radomly generated. To generate them, we picked 1\,000 pairs of class and offset by first randomly
-picking class of the block and then the offset along this class. The results we measured are shown in
-Fig.~\ref{obr:simple_benchmark}.
+picking class of the block and then the offset along this class. To make the process fair, we measured
+decoding time of the bit in the half of the block for on-the-fly decoding as this decoding can stop once
+it obtained the queried bit. The results we measured are shown in Fig.~\ref{obr:simple_benchmark}.
 
 \paragraph{Bit vector on real data}
 
@@ -365,7 +366,7 @@ in all searched patterns. We present the results in Fig.~\ref{obr:benchmark_sdsl
 	text. Uncompresed bit vector and sparse array are included for reference. 
 	}
 	\label{obr:benchmark_sdsl_count}
-\end{figure}Gutenberg
+\end{figure}
 
 For benchmarking of operation $\extractOp$, \texttt{SDSL} uses a methodology proposed by
 \cite{ferragina2009compressed} in Section~5.4. This consists of extracting numerous
@@ -417,9 +418,10 @@ implementation to make sure that our implementation is giving the correct result
 \section{Hybrid encoding}
 
 We now present our implementation of the hybrid encoding. In the previous chapter, we
-proposed two variants of hybrid encoding. Both of these were based on an idea to not
-encode the blocks that are rare and thus save space on bits used for blocks classes. On
-the other hand, they differed in which blocks are not encoded but just saved in ther original
+proposed two variants of hybrid encoding. Both of these were based on an idea not to
+encode the blocks that are rare. This in turn reduced the number of classes and we 
+have been able to save space on bits used for blocks classes. On the other hand, these
+two versions differed in decision, which blocks are not encoded but just saved in ther original
 representation. The first solution treated differently just blocks with higher number of ones.
 The second, was focused on balanced sequences and treated differently blocks that have balanced
 number of zeroes and ones.
