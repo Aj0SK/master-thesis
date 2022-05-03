@@ -130,6 +130,7 @@ sub-blocks $B_1$ and $B_2$ such that $B=B_1\cdot B_2$ then we call the $B_1$ the
 \textit{left sub-block} and consequently its class $\text{left\_k}$ while $B_2$ is called
 \textit{right sub-block}.
 
+% https://github.com/Aj0SK/master-thesis/blob/ed7e5a787738ae66d4d75e312106098c74a1cdaf/code/shared/rrr_convert.h#L167
 \lstset{language=C++,caption={Linear search for classes of sub-blocks},label=code:linear}
 \begin{lstlisting}
 uint32_t get_left_class(uint8_t k, uint32_t nr)  {
@@ -148,6 +149,7 @@ uint32_t get_left_class(uint8_t k, uint32_t nr)  {
 }
 \end{lstlisting}
 
+% https://github.com/Aj0SK/master-thesis/blob/ed7e5a787738ae66d4d75e312106098c74a1cdaf/code/shared/rrr_convert.h#L220
 \lstset{language=C++,caption={SIMD enhanced linear search for classes of sub-blocks},label=code:linearSimd}
 \begin{lstlisting}
 uint32_t get_left_class(uint8_t k, uint32_t nr)  {
@@ -188,13 +190,16 @@ uint32_t get_left_class(uint8_t k, uint32_t nr)  {
 }
 \end{lstlisting}
 
+% https://github.com/Aj0SK/master-thesis/blob/ed7e5a787738ae66d4d75e312106098c74a1cdaf/code/shared/rrr_convert.h#L196
 \lstset{language=C++,caption={Binary search for classes of sub-blocks},label=code:binary}
 \begin{lstlisting}
 uint32_t get_left_class(uint8_t k, uint32_t nr)  {
 	int left_k_from = std::max(k - 15, 0);
 	int left_k_to = std::min(k, 15);
+	// std::upper_bound(a, b, val) returns pointer to first greater than val in <a;b) 
 	auto it = std::upper_bound(P[k].begin() + left_k_from,
                                      P[k].begin() + left_k_to, nr);
+	// returns index of it in array P[k]
     int left_k = std::distance(P[k].begin(), it);
     if (P[k][left_k] > nr)
       --left_k;
@@ -242,10 +247,10 @@ to explain the measured phenomenons later when exploring the results of our benc
 \paragraph{Microbenchmarks of block decoding}
 
 These benchmarks were used in the early stage of the development to measure a potential gain from
-our new method of encoding and decoding. We mainly focused on measuring different block sizes
+our new method of encoding and decoding. We mainly focused on measuring different block lengths
 in combination with different methods used for dividing block to subproblems and with different
-approaches to obtain particular block size. The mainly tested block sizes were 15, 30, 31, 62, 63
-and 127. Sizes 15, 31, 63 and 127 are most useful in practice however they can be obtained using
+approaches to obtain particular block size. The tested block lengths were 15, 30, 31, 62, 63
+and 127. Sizes 15, 31, 63 and 127 are most useful in practice, however, they can be obtained using
 different combinations of block size 30 and 62, i.e. 31 can be combined as 1 bit and 30 bit solution,
 63 can be divided to 1 and 62 as well as to 3 and two sub-problems of size 30. Although, these
 tests are not made on real life data, they were mainly used as an indication which implementations
@@ -293,7 +298,7 @@ it obtained the queried bit. The results we measured are shown in Fig.~\ref{obr:
 	\end{tabular}
 	}
 	\caption[TODO]{Results of microbenchmarking various types of decoding implementations.
-	The numbers in method name denote to what block sizes the problem was broken. The name
+	The numbers in method name denote to what block lengths the problem was broken. The name
 	reflects what method was used to broke the problem into subproblems.
 	}
 	\label{obr:simple_benchmark}
@@ -305,21 +310,22 @@ After bencharking and finding the potential for speeding up the bit vector imple
 our new method, we decided to implement and benchmark it on data that are closer to the real-life
 usage of bit vectors.
 
-We used a benchmarking part of \texttt{SDSL} targeted at a bit vector. This test measures how
-query time for $\access$, $\rank$ and $\select$ depends on the block size used on different types
-of data. The first type of sequence is randomly generated bit vector with density of ones equal to
-50\%. The origin of second type of sequences is closely described in \cite{gog2014optimized}.
-Test file \texttt{WT-DNA-1GB} has been created by:
+We used a benchmarking part of \texttt{SDSL} targeted at a class \texttt{rrr\_vector}. This test
+measures how query time for $\access$, $\rank$ and $\select$ depends on the block size used on
+different types of data. The first type of sequence is randomly generated bit sequence with
+density of ones equal to 50\%. The origin of second type of data is closely described in
+\cite{gog2014optimized}. It consists of numerous bit vectors, stored in files such as
+\texttt{WT-DNA-16MB} or \texttt{WT-WEB-1GB}. The structured name describes how the bit vector
+was created. For instance, \texttt{WT-DNA-1GB} has been created by:
 \begin{itemize}
 	\item Taking 1GB prefix of DNA file.
 	\item Creating BWT of this text.
 	\item Building Huffman shaped wavelet tree over it.
 	\item Concatenating all the vectors in the wavelet tree.
 \end{itemize}
-
-Other version of data such as \texttt{WT-DNA-16MB} or \texttt{WT-WEB-1GB} have been created similarly.
-Queries into the underlying bit vector were generated randomly. We were not able to find significant
-practical usability for other patterns and thus stick with this one.
+Other version of test data have been created accordingly. Queries into the underlying bit vector
+were generated randomly. We were not able to find significant practical usability for other patterns
+and thus stick with this one.
 
 As a baseline, we choose the 15 bit specialized implementation already implemented in \texttt{SDSL}
 that uses the table decoding method. We present the measured results of our and the original
@@ -342,32 +348,35 @@ this behaviour to the fact, that was observed by creators of this dataset. They 
 uniform blocks (full of either zeroes or ones) is much bigger in \texttt{WT-WEB} than in \texttt{WT-DNA}.
 For block size 63, they observed ratio of uniform blocks in \texttt{WT-WEB-1GB} to be 84\% compared to 28\% in
 \texttt{WT-DNA}. As the uniform blocks are decoded trivially in both implementations, this makes less opportunities
-for our implementation to save time. Another visible pattern is that with increasing block size, the query time
-generally goes up as decoding takes more and more time. On the other hand, on $\select$ in \texttt{WT-WEB} data
-we can observe, that at the beginning the query time decreases with increasing block size. This is because time
-saved on faster binary search in precomputed $\rank$ values offsets growing decoding time.
+for our implementation to save time.
+
+Another visible pattern is that with increasing block length, the query time generally goes up as decoding takes
+more and more time. On the other hand, on $\select$ in \texttt{WT-WEB} data we can observe, that at the beginning
+the query time decreases with increasing block length. This is because time saved on faster binary search in
+precomputed $\rank$ values offsets growing decoding time.
 
 \paragraph{Bit vector in FM-index}
 
-Even if the previous benchmark was done on real data, it was not done in application that is
-practically useful. Thus, we further benchmarked our bit vector as a part of Huffman shaped
+Even if the previous benchmark was done on realistic data, we tested our implementation on
+practicallt useful application. We benchmarked our bit vector as a part of Huffman shaped
 wavelet tree used inside of the FM-index. Implementation of FM-index in \texttt{SDSL}, as most
-of other implementations, provides mainly methods:
+of other implementations, provides mainly 3 methods:
 \begin{itemize}
 	\item $\countOp(P)$ - returns the number of occurrences of $P$ in text $T$,
 	\item $\locateOp(P)$ - returns all positions of pattern $P$ in text $T$,
-	\item $\extractOp(i, j)$ - returns the subsequence $T[i..j]$.
+	\item $\extractOp(i, j)$ - returns the subsequence of $T$ starting on $i$-th and ending on $j$-th index.
 \end{itemize}
 The reason that the $\extractOp$ method is useful and non-trivial is that FM-index
 does not store the original sequence $T$ -- at least not in an easily readable form.
 
-These benchmarks are provided by $\texttt{SDSL}$ library. They are based on data from
-the \texttt{Pizza\&Chili} dataset and use mainly methodology proposed by \cite{ferragina2009compressed}.
-The data we used are English texts from Gutenberg project, source codes, DNA and protein
-sequences. In most of these benchmarks, we used as a baseline the FM-index version based
-on block size 15. For informative purposes, we also included the version based on uncompressed
-bit vector and sparse bit vector provided by \texttt{SDSL} that represents positions of ones
-using the Elias-Fano representation for non-decreasing sequences.
+We again used benchmarks provided by $\texttt{SDSL}$ library and tested how the performance
+of methods $\countOp, \locateOp$ and $\extractOp$ changes when our bit vector is used. These
+benchmarks are based on the data from the \texttt{Pizza\&Chili} dataset and use mainly methodology
+proposed by \cite{ferragina2009compressed}. The data we used are English texts from Gutenberg
+project, source codes and then DNA and protein sequences. In these benchmarks, we used as a
+baseline the FM-index version based on block length 15. For informative purposes, we also included
+the version based on uncompressed bit vector and sparse bit vector provided by \texttt{SDSL} that
+represents positions of ones using the Elias-Fano representation for non-decreasing sequences.
 
 To benchmark operation $\countOp$, the index over the text is built. Then, random patterns of
 various lengths are extracted from the text and subsequently used for benchmarking. Code
@@ -394,7 +403,7 @@ that is explored in this benchmark is sampling rate of suffix array and inverse 
 This is basically a parameter that can be used to balance between the speed of FM-index and
 its memory usage. Options for this sampling ratio are by default the powers of 2 from 4 up to
 256. We show the results for sampling rate equal to 16 in Fig.~\ref{obr:benchmark_sdsl_extract}.
-Note that the trends that can be seen in these results are the same for every sampling rate.
+Note that the trends that can be seen in these results can be observed for every sampling rate.
 
 \begin{figure}
 	\centerline{
