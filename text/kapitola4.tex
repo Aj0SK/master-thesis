@@ -468,7 +468,7 @@ the superblock where the $i$-th one is located. Then, to linearly search for a r
 inside of the superblock, we previously needed only information from the array of classes $C$.
 This is because $C$ stores the number of ones in the blocks and we can linearly
 search for the answer using its successive entries. We skip over the blocks inside of the
-superblocks until we find the block, where the result is located. This block needs to be decoded
+superblock until we find the block where the result is located. This block needs to be decoded
 and only then we find answer to $\rank$ inside of a single block. To locate the beginning of this
 smaller block, we take the memory offset of the superblock in $O$ and add the memory offset of this
 block from the beginning of superblock. This can be counted along with the linear search for $\rank$
