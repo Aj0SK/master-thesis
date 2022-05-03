@@ -222,22 +222,45 @@ into \texttt{SDSL}, we explored and tried several promising combinations and mic
 
 \subsection{Experimental results}
 
-For benchmarking of our code, we mainly used two types of benchmarks. The first type of benchmarks
-was based on a \texttt{Google Benchmark} library. This is one of the standard libraries used to
+For benchmarking of our code, we mainly used two types of benchmarks. The first of benchmarks
+used a \texttt{Google Benchmark} library. This is one of the standard libraries used to
 microbenchmark code. A code snippet that is being evaluated is run several times until
 stable results are obtained. This makes the results reliable even if the measured time is
 very small and also limits the interference of other running processes on the result of
-benchmark. Although reliable, this types of benchmarks are more artificial in nature and
-do not give a best sense, how the solution may behave on real data. The second type of
-benchmarks used were the ones included in \texttt{SDSL}. These are built on top
-of a data from the \texttt{Pizza\&Chili} datasets \citep{ferragina2005pizza} and include
-many types of data such as DNA sequences, \texttt{C} and \texttt{Java} source codes from
-\texttt{Linux} and \texttt{GCC} projects as well as English texts from the Gutenberg project.
-More information about this data such as some statistics about the compressibility and much
-more can be found in section 4.2 of \cite{ferragina2009compressed}. We only provide information
-necessary to explain the measured phenomenons later when exploring the results of our benchmarks. 
+benchmark. Although reliable, this type of benchmarks is more artificial in nature and
+does not give the best possible sense how the solution may behave on real data.
+
+The second type of benchmarks we used are the ones included in \texttt{SDSL}. These are
+testing bit vector inside of the more advanced data structures and use data from the
+\texttt{Pizza\&Chili} datasets \citep{ferragina2005pizza}. These include many types of data
+such as DNA sequences, \texttt{C} and \texttt{Java} source codes from \texttt{Linux} and
+\texttt{GCC} projects as well as English texts from the Gutenberg project. More information
+about this data such as some statistics about the compressibility and more can be found in
+Section 4.2 of work by \cite{ferragina2009compressed}. We only provide information necessary
+to explain the measured phenomenons later when exploring the results of our benchmarks. 
 
 \paragraph{Microbenchmarks of block decoding}
+
+These benchmarks were used in the early stage of the development to measure a potential gain from
+our new method of encoding and decoding. We mainly focused on measuring different block sizes
+in combination with different methods used for dividing block to subproblems and with different
+approaches to obtain particular block size. The mainly tested block sizes were 15, 30, 31, 62, 63
+and 127. Sizes 15, 31, 63 and 127 are most useful in practice however they can be obtained using
+different combinations of block size 30 and 62, i.e. 31 can be combined as 1 bit and 30 bit solution,
+63 can be divided to 1 and 62 as well as to 3 and two sub-problems of size 30. Although, these
+tests are not made on real life data, they were mainly used as an indication which implementations
+are interesting and should be the best candidates for further evaluation.
+
+We used 3 different techniques to divide a problem into sub-problems, these was a linear scan,
+binary search and linear scan enhanced by \texttt{SIMD} instructions. In order to implement the
+solution for 127-bit block size, we used the 128 bit type \texttt{\_\_uint128\_t} provided by both
+\texttt{GCC} and \texttt{Clang} compilers. This type is implemented on platform \texttt{x86\_64}
+as a combination of two 64-bit numbers. We compared these results with the table decoding specialization
+in \texttt{SDSL} and with on-the-fly decoding for all the other block sizes. The data we run the decoding
+on were radomly generated. To generate them, we picked 1\,000 pairs of class and offset by first randomly
+picking class of the block and then the offset along this class. To make the process fair, we measured
+decoding time of the bit in the half of the block for on-the-fly decoding as this decoding can stop once
+it obtained the queried bit. The results we measured are shown in Fig.~\ref{obr:simple_benchmark}.
 
 \begin{figure}
 	\centerline{
@@ -275,27 +298,6 @@ necessary to explain the measured phenomenons later when exploring the results o
 	}
 	\label{obr:simple_benchmark}
 \end{figure}
-
-These benchmarks were used in the early stage of the development to measure a potential gain from
-our new method of encoding and decoding. We mainly focused on measuring different block sizes
-in combination with different methods used for dividing block to subproblems and with different
-approaches to obtain particular block size. The mainly tested block sizes were 15, 30, 31, 62, 63
-and 127. Sizes 15, 31, 63 and 127 are most useful in practice however they can be obtained using
-different combinations of block size 30 and 62, i.e. 31 can be combined as 1 bit and 30 bit solution,
-63 can be divided to 1 and 62 as well as to 3 and two sub-problems of size 30. Although, these
-tests are not made on real life data, they were mainly used as an indication which implementations
-are interesting and should be the best candidates for further evaluation.
-
-We used 3 different techniques to divide a problem into sub-problems, these was a linear scan,
-binary search and linear scan enhanced by \texttt{SIMD} instructions. In order to implement the
-solution for 127-bit block size, we used the 128 bit type \texttt{\_\_uint128\_t} provided by both
-\texttt{GCC} and \texttt{Clang} compilers. This type is implemented on platform \texttt{x86\_64}
-as a combination of two 64-bit numbers. We compared these results with the table decoding specialization
-in \texttt{SDSL} and with on-the-fly decoding for all the other block sizes. The data we run the decoding
-on were radomly generated. To generate them, we picked 1\,000 pairs of class and offset by first randomly
-picking class of the block and then the offset along this class. To make the process fair, we measured
-decoding time of the bit in the half of the block for on-the-fly decoding as this decoding can stop once
-it obtained the queried bit. The results we measured are shown in Fig.~\ref{obr:simple_benchmark}.
 
 \paragraph{Bit vector on real data}
 
