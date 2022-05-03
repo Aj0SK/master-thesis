@@ -1,15 +1,15 @@
 \chapter{Implementation and results}
 \label{kap:kap4}
 
-In this chapter, we describe the implementation of ideas proposed in the previous
-chapter and experimental results we obtained when measuring their performance.
+In this chapter, we describe the implementation of ideas we proposed in the previous
+chapter and experimental results obtained when measuring their performance.
 This chapter is split into two sections according to the main topics discussed
 in the previous chapter, namely our new general encoding and decoding routine and hybrid
-encoding. In both of these sections, we first describe the important parts and decisions
-in our implementation. Subsequently, we describe how we benchmarked our implementation and
-present the results we obtained.
+encoding. In both of these sections, we first describe the important parts of our
+implementation and then describe how we benchmarked our implementation and present the
+results we measured.
 
-The \texttt{C++} source code of our implementation along with all benchmarks can be found
+The source code of our implementation written in \texttt{C++} along with all benchmarks can be found
 in the electronic attachment to this work but also on \texttt{Github}. More about where to
 find individual parts of code and how to reproduce our results can be found in Appendix A.
 All the results presented in this chapter were obtained on a machine with 8-core AMD~Ryzen~7~2700X
@@ -29,22 +29,22 @@ We decided to make our solution a part of the \texttt{SDSL} library~\citep{gog20
 is one of the most matured and versatile libraries implementing succinct data structures. It is
 written in \texttt{C++} and with almost 2\,000 commits from more than 30 contributors, \texttt{SDSL}
 is a heavily tested library, offering various implementations of succinct structures such as
-wavelet tree, FM-index, bit vector, suffix array and many more. It allows easy use of different
-building blocks to implement more complex data structures, i.e. using different bit vector
-implementations inside of the wavelet tree. On top of this, we also take advantage of thorough tests
+bit vector, integer vector, wavelet tree, FM-index, suffix array and many more. It allows easy use
+of different building blocks to implement more complex data structures, i.e. using different bit vector
+implementations inside of the wavelet tree. On top of this, we also took advantage of thorough tests
 and benchmarks that were implemented alongside the main functionality.
 
 The RRR implementation of bit vector is provided by templated class \texttt{rrr\_vector}
-that enables use of block sizes from 3 up to 256. To support longer block sizes,
+that enables use of block length from 3 up to 256. To support longer blocks,
 \texttt{SDSL} implements 128-bit and 256-bit integers. The implementation generally uses the
 on-the-fly decoding, although template specialization using the table decoding method is provided
-for block size 15.
+for block length 15.
 
 To support $\access$, \texttt{rrr\_vector} supports single bit access operator \texttt{[]} as well
 as \texttt{get\_int} method. To facilitate $\access$, \texttt{rrr\_vector} uses the implementation
 presented in Fig.~\ref{obr:RRRFinal} that consists of the array $C$ of fixed sized elements, storing
 classes, array $O$ of elements of variable length that stores offsets of blocks along their class and
-third array $P$ that stores pointers to the array $O$, more precisely to the beginning of every superblock.
+third array $P$, that stores pointers to the array $O$, more precisely to the beginning of every superblock.
 
 \texttt{SDSL} uses $\rank$ implementation, where result of $\rank$ is precomputed for the beginning
 of every superblock. To answer the query, binary search along the precomputed values is done first.
@@ -57,25 +57,27 @@ of \texttt{rrr\_vector}, we did not make any changes to the default number of bl
 is set in \texttt{SDSL} to 32.
 
 We decided to use the specialization for block size 15 as an underlying solution for the encoding and
-decoding of sub-blocks. We provided specialized implementations for block sizes 31, 63 and 127 that
-are mostly used in practical scenarios. We based our implementation on the general implementation of
+decoding of sub-blocks. We provided specialized implementations for block lengths 31, 63 and 127 that
+are most used in practical scenarios. We based our implementation on the general implementation of
 \texttt{rrr\_vector} and tried to keep the number of changes as small as possible to easily observe the
-effects of our new decoding method. We have been able to implement our changes and at the same time alter
-only two methods that the \texttt{SDSL} uses for encoding and decoding namely \texttt{bin\_to\_nr(bin)} and
-\texttt{nr\_to\_bin(k, nr)}. As we mentioned, the encoding is less performance-critical in most of the
-applications as it is done only once when constructing the bit vector. This is why we focuse more on the
-decoding part of the implementation.
+effects of our new decoding method. Thanks to the modularity of \texttt{SDSL}, we have been able to
+implement our changes and at the same time alter only two methods that the \texttt{SDSL} uses for
+encoding and decoding namely \texttt{bin\_to\_nr(bin)} and \texttt{nr\_to\_bin(k, nr)}. As we mentioned,
+the encoding is less performance-critical in most of the applications as it is done only once when
+constructing the bit vector. This is why we focuse more on the decoding part of the implementation.
 
-\paragraph{Division of problem into sub-problems}
+\paragraph{Division of decoding problem into sub-problems}
 
-When implementing our decoding routine, we put most of our focus on the process of dividing problem into
-sub-problems of smaller size. This is a part, where we obtain pairs $(c_1, o_1)$ and $(c_2, o_2)$
-from the encoded pair $(c, o)$ and call the decoding subroutine on these two pairs.
-There are various reasons why we focus on this part of the algorithm. The first reason is that for smaller
-blocks solving the sub-problems is done using the table approach which is very fast and can be hardly
-made faster as it consists of only one table lookup. The second reason is that this part is blocking us
-from solving the sub-problems and even though sub-problems may be potentially solved somehow in parallel,
-e.g. by instruction-level parallelism, this part is harder to parallelize.
+The decoding routine basically consists of three steps. First is to divide problem into subproblems,
+second is to use subroutines on subproblems and third is to combine the results obtained to the final
+results. When implementing our decoding routine, we put most of our focus on the process of dividing
+problem into sub-problems of smaller size. This is a part, where we obtain pairs $(c_1, o_1)$ and $(c_2, o_2)$
+from the encoded pair $(c, o)$. There are various reasons why we focus on this part of the algorithm.
+The first reason is that for smaller blocks solving the sub-problems is done using the helper table
+which is quite fast and can be hardly made faster as it consists of only one table lookup. The second
+reason is that the dividing of the problem is blocking us from solving the sub-problems and even though
+sub-problems may be potentially solved somehow in parallel, e.g. by instruction-level parallelism, this
+part is harder to parallelize.
 
 Let us now break down the process of dividing the original problem into sub-problems into following 3 steps:
 \begin{enumerate}
@@ -87,10 +89,11 @@ The most trivial part is third step as it only consists of a number of arithmeti
 second step, that is a computation of $\text{comb}_1$ and $\text{comb}_2$. We know that $\text{comb}_1$
 and $\text{comb}_2$ is equal to ${b\choose c_1}$ and ${b\choose c_2}$, respectively. These two numbers
 can be computed beforehand as there are only roughly $b^2$ combinations of possible pairs of $c$ and $c_1$.
-So roughly, at the price of two cache misses, we can easily do the last two steps. To solve the first step,
-we may precompute for every possible class $c$, numbers $C_0, C_1,\ldots ,C_{c}$ where $C_i$ is the number
-of blocks along the class $c$ with their class pair equal to $(i, c-i)$. Example can be observed in
-Fig.~\ref{table:class_pairs}.
+Roughly speaking, at the price of two cache misses, we can easily do the last two steps.
+
+One possible approach to do the first step is to precompute for every possible class $c$, numbers
+$C_0, C_1,\ldots ,C_{c}$ where $C_i$ is the number of blocks of class $c$ with their class pair equal to
+$(i, c-i)$. Example of these values can be observed in Fig.~\ref{table:class_pairs}.
 
 \begin{figure}
 	\centerline{
@@ -111,19 +114,21 @@ Fig.~\ref{table:class_pairs}.
 We would like to map the offset of the block to the number $C_i$ and thus identify $i$,
 the number of ones in the first and thus also second sub-block. One possible way how to
 do this is to precompute the prefix sums over these numbers such that $$P_i = \sum_{j=0}^{i} C_i.$$
-As these prefix sums form an increasing sequence, we can binary search for class that contains our offset.
+As these prefix sums form an increasing sequence, we can binary search for "group" that
+contains our offset.
 
 Although binary search has good time complexity, the number of buckets where our offset
-may land is usually small. As we found out, linear search outperforms binary search most
-of the time. Another idea that we tested was to speed up the linear search using the
-\texttt{SIMD} instructions. These can be used to do 4 comparisons at a time using special
-128-bit register. In practice, we found that sequential search using the \texttt{SIMD}
-instructions leads to the best results for smaller block sizes. Possible implementations
-that we tested, follow in listings \ref{code:linear}, \ref{code:linearSimd} and \ref{code:binary}.
-The naming convention adheres to \texttt{SDSL} naming of $k$ for class, $nr$ for offset.
-To simplify naming, if block $B$ was encoded using division to sub-blocks $B_1$ and
-$B_2$ such that $B=B_1\cdot B_2$ then we call the $B_1$ the \textit{left sub-block} and
-consequently its class $\text{left\_k}$ while $B_2$ is called \textit{right sub-block}.
+may land is usually small. As we found out and later demonstrate, linear search outperforms
+binary search most of the time. Another idea that we tested was to speed up the linear
+search using the \texttt{SIMD} instructions. These can be used to do 4 comparisons at a
+time using special 128-bit register. In practice, we found that sequential search using
+the \texttt{SIMD} instructions leads to the best results for smaller block sizes. Possible
+implementations that we tested, follow in listings \ref{code:linear}, \ref{code:linearSimd}
+and \ref{code:binary}. The naming convention adheres to \texttt{SDSL} naming of $k$ for
+class, $nr$ for offset. To simplify naming, if block $B$ was encoded using division to
+sub-blocks $B_1$ and $B_2$ such that $B=B_1\cdot B_2$ then we call the $B_1$ the
+\textit{left sub-block} and consequently its class $\text{left\_k}$ while $B_2$ is called
+\textit{right sub-block}.
 
 \lstset{language=C++,caption={Linear search for classes of sub-blocks},label=code:linear}
 \begin{lstlisting}
@@ -200,21 +205,20 @@ uint32_t get_left_class(uint8_t k, uint32_t nr)  {
 \paragraph{Choosing the right sub-problem size}
 
 In previous chapter, we showed that our method can take encoding and decoding subroutines
-for blocks of sizes $b_1$ and $b_2$ and combine them together to obtain routine for encoding and
-decoding of block of size $b_1+b_2$. Thus it is up to us, how we obtain the decoding for block sizes
-bigger than 15. Minor inconvenience is, that the most interesting block sizes are of the form $2^i-1$.
-Combining two block sizes of this form, however, leads only to block size of length $2^{i+1}-2$
-so to again obtain the usable block length, we need to "extend" this solution by one bit.
+for block lengths $b_1$ and $b_2$ and combine them together to obtain routine for encoding and
+decoding of block length $b_1+b_2$. Thus it is up to us, how we obtain the decoding for block
+lengths bigger than 15. Minor inconvenience is, that the most interesting block lengths are of
+the form $2^i-1$. Combining two block lengths of this form, however, leads only to block length
+of form $2^{i+1}-2$ so to again obtain the usable block length, we need to "extend" this solution
+by one bit.
 
-As we wanted to base our solutions on table decoding routine for block size 15, it is most
-reasonable to obtain the next interesting block size -- 31, by at first splitting block into
-single-bit and 30-bit sub-problem and then obtain 30-bit solution using two 15-bit
-subroutine calls. For 63, the next interesting block size, there are unfortunately more
-possible combinations. We may combine solution for single bit and 62-bits
-and then obtain 62-bit block size using combination of solution for block size 31. On the
-other hand, it may be more beneficial, to do 63-bit block size by splitting it into 3 bits
-and 60 bits. Thus, before choosing what solution we want to fully include into \texttt{SDSL},
-we explored and tried several promising combinations and microbenchmarked them.
+We based our solutions on table decoding routine for block length 15. This made it easy to combine
+two 15-bit blocks to obtain 30 bit block. To obtain the next interesting block length 31, we then
+extended this 30 bit solution by one bit. To obtain block length 63, there are, however, more possible
+combinations that look reasonable. We may took 62 bit solution that is built from two 31 bit blocks
+and then again extend it. On the other hand, it may be more beneficial, to do 63-bit block size by
+splitting it into 3 bits and 60 bits. Thus, before choosing what solution we want to fully include
+into \texttt{SDSL}, we explored and tried several promising combinations and microbenchmarked them.
 
 \subsection{Experimental results}
 
