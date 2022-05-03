@@ -1,7 +1,8 @@
 \chapter{Introduction to succinct data structures}
 \label{kap:kap1}
 
-% TODOs: skontrolovat indexovanie, polo-otvorene intervaly, pridat viac prikladov pre succinct DS 
+% TODO: hlavne todo's tejto kapitoly
+% TODO: priestor pre FM-index, skontrolovat +-1 v FM-index Count, pridat viac prikladov pre succinct DS
 
 \section{Motivation}
 
@@ -28,21 +29,22 @@ we pay some price for using the succinct data structure. It comes mostly in the 
 complex implementation.
 
 In this work, we are mainly concerned with \textit{bit vector}. One of the simplest
-data structures that represents a sequence of zeroes and ones while supporting the
+data structures that represents a sequence of zeroes and ones $S$ while supporting the
 methods:
 \begin{itemize}
-\item $\access(i)$ - returns the $i$-th symbol of the sequence,
-\item $\rank_c(i)$ - returns the number of occurrences of symbol $c$ up to the $i$-th index,
-\item $\select_c(i)$ - returns the index of $i$-th occurrence of symbol $c$ in the sequence,
+\item $\access(i)$ - returns the $i$-th symbol of $S$,
+\item $\rank_c(j)$ - returns the number of occurrences of symbol $c$ before $j$-th index,
+\item $\select_c(k)$ - returns the index of $k$-th occurrence of symbol $c$ in the sequence.
 \end{itemize}
-first studied by \cite{jacobson1988succinct}.
+Values of these methods are defined only for integers $i, j, k$ such that $0\leq i<|S|$, $0\leq j\leq |S|$
+and $1\leq k\leq \#_c(S)$ where $\#_c(S)$ denotes the number of occurences of $c$ in $S$. The first
+notable study of $\rank$ and $\select$ over sequences have been done by \cite{jacobson1988succinct}.
 
 The reason behind our focus on bit vector and particularly its compressed version
 is the fact that it is one of the main building blocks of many succinct data structures.
 In the next sections, we introduce some interesting and useful applications of bit vector.
 Throughout our work, we use a unit-cost RAM model with word size of $\Theta(\log n)$ bits.
-In this model, arithmetic and logic operations on and between memory words require just
-$\BigO(1)$ time.
+In this model, arithmetic and logic operations on and between memory words take constant time.
 
 \section{Application 1: Sparse array}
 
@@ -81,8 +83,8 @@ elements in array $P$. This is, where we find useful the $\rank_1$ method. Simil
 the position of $i$-th non-empty value in $A$, we use $\select_1$ method.
 
 The total space used by this representation is $N+n\cdot k+R$ where $R$ is the space required
-to support an efficient $\rank$ query. As we shall show in Section~\ref{section:rank}, $\rank$
-can be implemented in constant time with sublinear space overhead, i.e. $R = o(N)$. If we are
+to support an efficient $\rank_1$ query over $B$. As we shall show in Section~\ref{section:rank},
+$\rank$ can be implemented in constant time with sublinear space overhead, i.e. $R = o(N)$. If we are
 provided with bit vector implementation along with $\access$ and $\rank$ methods we are able to
 reduce the total space used from $k\cdot N$ to $N+n\cdot k+o(N)$ bits. Note that in practice,
 for a really small number of non-default values, the hashtable representation takes up less
@@ -92,25 +94,25 @@ when $A$ is mediumly filled in, e.g. $n/N>0.10$.
 \section{Application 2: Storing elements of non-uniform length}
 
 Let us consider another problem of representing an array of elements of variable length.
-Elements with variable length can often arise in succinct data structures when trying to
-optimise the amount of space used. An example of this is a \textit{Huffman code} \citep{huffman1952method}
-which constructs the optimal code for symbols based on the symbol frequencies. More frequent
-symbols are assigned shorter code while less frequent symbols get longer code.
-Even though we can store these elements one after another in memory, with the variable-length
-elements, we do not have an easy and fast way to tell where is the $i$-th element located.
+Elements with variable length can often arise in succinct data structures. An example of
+this is a \textit{Huffman code} \citep{huffman1952method} which constructs the optimal
+code for symbols based on the symbol frequencies. More frequent symbols are assigned
+shorter code while less frequent symbols get longer code. Even though we can store these
+elements one after another in memory, with the variable-length elements, we do not have
+an easy and fast way to tell where is the $i$-th element located.
 
 Let us assume that we want to represent $n$ elements of variable length. The first solution
 is to allocate the array of length $n\cdot k_{MAX}$ bits where $k_{MAX}$ is the number of
-bits used for the element with the longest bit representation. Presented approach enables
-constant time access but wastes a lot of space.
+bits used for the element with the longest bit representation. This approach enables constant
+time access but wastes a lot of space.
 
 A second possible solution is to allocate a bit array $R$ where the elements are stored
 one after another in their raw bit representation. To locate the $i$-th element we store
 alongside $R$ a helper array $P$. Number on $i$-th position in $P$ is the index where the
-$i$-th element begins in $R$. Helper array $P$ consumes at least $\Theta(n\log n)$ bits
+$i$-th element begins in $R$. Helper array $P$ consumes rougly $\Theta(n\log |R|)$ bits
 as each entry contains an index into the array $R$.
 
-The helper array $P$ can be replaced by a bit vector of length $N$, storing
+The helper array $P$ can be replaced by a bit vector of length $|R|$, storing
 ones at positions where some element in $R$ begins (see an example in
 Fig.~\ref{obr:VariableSizedElements}). Identifying the beginning of the $i$-th element now
 boils down to efficiently locating the $i$-th one in the helper bit vector, which can be
@@ -148,7 +150,7 @@ One of the solutions that can be used for smaller texts is based on a \textit{su
 of $T$. This is a data structure which stores information about the lexicographical
 order of suffixes of $T$. More precisely, on $i$-th position of suffix array $S$, the starting
 position of suffix that comes $i$-th in lexicographical order is stored. For simplicity, in this
-section, we assume that every text $T$ contains a special character {\tt \$} at its end and this
+section, we assume that every text $T$ contains a special character {\tt \$} at the end and this
 character is also lexicographically smaller than any other character contained in $T$. Searching for
 pattern $P$ in suffix array of $T$ uses fact that if $P$ is contained in $T$ it will be at the
 beginning of some suffixes. It is easy to observe that these make up a consecutive subsequence of $S$.
@@ -171,15 +173,15 @@ length. Furthermore, this operation is reversible in a sense that we are able to
 the original text $T$ only using $\mathit{T_{BWT}}$. This transformation is used as a
 preprocessing step of some compression algorithms such as \textit{bzip2}~\citep{seward1996bzip2}
 and was studied more by \cite{manzini2001analysis}. This is because BWT is oftentimes easier
-to compress than the original text. We shall show how the construction of BWT and then provide
+to compress than the original text. We shall show the construction of BWT and then provide
 intuition why is easier to compress.
 
 Consider a sequence $T$ of symbols over arbitrary alphabet $\Sigma$. Take all the cyclical
 rotations $T_1, T_2, \ldots ,T_n$ of $T$ and put them sorted by their lexicographical
 order into the rows of table $M$ as seen in Fig.~\ref{obr:BWT}. We name the sequence created by the
 concatenation of symbols in first and last column $F$ and $L$, respectively. Last column $L$
-is what we call the BWT of $T$. Note that the sequence $F$ can be obtained from $L$ just by
-sorting all the characters in $\mathit{T_{BWT}}$. $F$ consists of runs of symbols that are
+is what we also call the BWT of $T$. Note that the sequence $F$ can be obtained from $\mathit{T_{BWT}}$
+just by sorting all the characters in $\mathit{T_{BWT}}$. $F$ consists of runs of symbols that are
 sorted according to the lexicographical ordering of alphabet symbols. We shall use the helper
 sequence $\Count$ where $\Count[c]$ is number of occurrences of symbols smaller than $c$.
 Note that the run of symbol $c$ in $F$ starts at the index $\Count[c]$.
@@ -232,7 +234,7 @@ As we already stated, FM-index is used for searching in the preprocessed text.
 Searching in FM-index is based on the two important properties of matrix $M$:
 
 \begin{enumerate}
-	\item Rotations starting with $w$ form a consecutive subsequence of rows in $M$.
+	\item Rotations starting with prefix $w$ form a consecutive subsequence of rows in $M$.
 	\label{chapter1:fmindexprop:prop1}
 	\item The $i$-th occurence of character $c$ in $F$ corresponds to the $i$-th occurence of $c$ in~$L$.
 	\label{chapter1:fmindexprop:prop2}
@@ -243,10 +245,10 @@ property is less trivial to observe. Let us take two rows in $M$, namely $T_i$ a
 such that $i<j$. Let $T_i$ be of the form $cA$ and $T_j$ of the form $cB$ where $c$ is a
 character from the text and $A$ and $B$ are sequences of characters. Since $i<j$, it follows that
 $A<B$ and this means that rotated rows $Ac$ and $Bc$ are in the same order as original rows.
-From this observation, we get that the relative ordering of the same character is preserved
+From this observation, it follows that the relative ordering of the same character is preserved
 between $F$ and $L$.
 
-In the next part, we describe how we search for some arbitrary pattern $P=p_0p_1\ldots p_{m-1}$
+In the next part, we describe how we search for some arbitrary pattern $P=p_0p_1\ldots p_{n-1}$
 in FM-index. Let us denote suffix of $P$ starting at $i$-th element $P_{i\ldots}$. The
 result of the search for $P$ is a range of $M$s rows that have $P$ as their prefix. The search for these
 rows proceeds iteratively from the end of $P$ to its beginning. At first, we find rows that have suffix
@@ -267,7 +269,7 @@ for example word {\tt hashtag} or symbol {\tt e} if the word {\tt head} was in t
 starting with {\tt house} are located, but we do not store anything except for $T_{BWT}$ and $\Count$.
 However, we already located the range where suffixes starting with {\tt ouse} are located in.
 We can count how many times {\tt h} is located before this range in $T_{BWT}$ and denote it $r$. Thanks to
-the property \ref{chapter1:fmindexprop:prop2}, we know than in $F$ the subsequence containing the prefix
+the property \ref{chapter1:fmindexprop:prop2}, we know that in $F$ the subsequence containing the prefix
 {\tt house} begins on position $\Count[\texttt{h}]+r$.
 
 % TODO: mozno obrazok
@@ -281,7 +283,7 @@ in $F$ given by
 	e_{n-1}&=\Count[p_{n-1}+1].\\
 \end{align*}
 
-The next step is to find the location of subsequence of rows of $M$s, given by $b_{n-2}$ and $e_{n-2}$,
+The next step is to find the location of subsequence of rows of $M$, given by $b_{n-2}$ and $e_{n-2}$,
 which has $P_{n-2\ldots}$ as a prefix. As we already located rows beginning with $P_{n-1\ldots}$, we can reuse
 this information. In a range from $b_{n-1}$ to $e_{n-1}$ some rows end with character $p_{n-2}$. These are rows
 which after being rotated, create subsequence we are looking for. Subsequence we are looking for is also
@@ -313,11 +315,10 @@ $e \gets \Count[P[n-1]+1]$\;
 \KwRet{$e-b$}
 \end{algorithm}
 
-We may observe that in FM-index, we require a $\rank$ functionality over sequence
-from general aphabet. This application should, however, demonstrate how bit vector can be used
-inside of the FM-index. Thus, in the next paragraph, we show that these two problems are related
-and we can use bit vector to provide a reasonable implementation of the $\rank$/$\select$ methods
-over the sequence from general alphabet.
+We may observe that in FM-index, we use $\rank$ over sequence from general aphabet. This application
+should, however, demonstrate how bit vector can be used inside of the FM-index. Thus, in the next
+paragraph, we show that these two problems are related and we can use bit vector to provide a
+reasonable implementation of the $\rank$/$\select$ methods over the sequence from general alphabet.
 
 \paragraph{Wavelet tree}
 \label{section:WaweletTree}
@@ -386,28 +387,27 @@ make a solution that is faster in some scenarios. Both methods, $\rank_c$ and $\
 depend on the speed of the bit vector implementation, used in the nodes, but also on the depth
 of symbol $c$ in the tree. This depth is now for every single character roughly $\BigO(\log \sigma)$.
 
-To obtain a better solution, let us assign a single bit to every edge. For every edge, its bit
-is either {\tt 0} if it is edge leading from parent to the left son or {\tt 1} otherwise. We
-can think of the wavelet tree as an assignment of a binary code to every alphabet character. Code
-of a character $c$ in some leaf node is equal to concatenation of bits that are contained in edges
-on a path from root to the leaf node.
+To obtain a better solution, let us give another perspective on the wavelet tree and assign
+single bit to every edge. For every edge, its bit is either {\tt 0} if this edge leads from
+the parent to the left son or {\tt 1} otherwise. We can think of the wavelet tree as an assignment
+of a binary code to every alphabet character. Code of a character $c$ in some leaf node is equal
+to concatenation of bits that are contained in edges on a path from root to the leaf node.
 
 The idea proposed by~\cite{makinen2005succinct} is to shape the wavelet tree in such a way that
 a code of every character is equal to Huffman code of this character. The advantage we get is that
 if queries for a characters are coming according to their frequencies, then we need to visit on average
 only $\BigO(H_0)$ nodes rather than $\BigO(\log \sigma)$, where $H_0$ is zeroth-order empirical
 entropy. It is defined as $$H_0(S)=\sum_{c\in\Sigma} \frac{\#_c(S)}{|S|} \lg \frac{|S|}{\#_c(S)},$$ 
-where $\#_c(S)$ denotes number of occurences of symbol $c$ in $S$. The maximum depth of the wavelet
-tree may increase and even if not convenient in practice, \cite{grabowski2004first} showed that we
-can enforce the maximum depth to be $\BigO(\log \sigma)$ with the average depth slightly increased to
-$H_0+2$. Thus, with some additional work, it is possible to decrease the average number of nodes accessed
-and thus decrease the average query time of $\rank$ and $\select$.
+where $\#_c(S)$ denotes number of occurences of symbol $c$ in $S$. Even if the maximum depth of the wavelet
+tree may increase, \cite{grabowski2004first} showed that we can enforce the maximum depth to be $\BigO(\log \sigma)$
+with the average depth limited by $H_0+2$. This is, however, not advisable in practice. The most
+important fact is that with Huffman shaped wavelet tree, it is possible to decrease the average number
+of nodes accessed and thus decrease the average query time of $\rank$ and $\select$.
 
 The space used by the wavelet tree heavily depends on the space usage of individual bit vectors
 that are used to store the nodes of wavelet tree. If these are represented using a data structure
-that takes space proportional to the zero-order entropy of represented sequence, then the whole
-wavelet tree requires roughly $nH_0(S) + o(n\log\sigma)$ bits of space as was shown by
-\cite{grossi2003high}.
+that takes space close to the zero-order entropy of represented sequence, then the whole
+wavelet tree requires $nH_0(S) + o(n\log\sigma)$ bits of space as was shown by \cite{grossi2003high}.
 
 % TODO: FM-index vie zaberat H_k (+ citacia)
 
