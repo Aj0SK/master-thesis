@@ -1,11 +1,11 @@
 \chapter{Our contributions}
 \label{kap:kap3}
 
-In this chapter, we propose various ideas that we hope may lead to a better practical
-implementation of RRR. We first propose a new general block encoding and decoding method.
-Then, we show how we can exploit the assumptions about the input bit sequence to build
-an implementation that is better tailored for it in terms of the space used and time to
-answer the query.
+In this chapter, we propose various ideas that could lead to a better practical
+implementation of RRR. We first propose a new general block encoding and decoding routine.
+Then, we show how we can exploit the assumptions about the input to come up with
+implementation that is better tailored for the underlying bit sequence in terms of
+the query time and space used for representation.
 
 \section{Block encoding}
 
@@ -13,10 +13,10 @@ As we discussed in section~\ref{section:compressed_bv}, there are to
 the best of our knowledge two widely used methods to encode and decode the
 blocks in RRR. Disadvantage of the table decoding method is its inability
 to reasonably support longer blocks in practice because of the
-huge helper table sizes for bigger block lengths. On the other hand, the on-the-fly
-decoding method may be used to support a bigger block size with the downside
+huge helper table sizes for longer blocks. On the other hand, the on-the-fly
+decoding method may be used to support a longer blocks with the downside
 being longer encoding and decoding times. In this section, we propose a new
-method for encoding and decoding the blocks. The main objective of the new
+method for block encoding and decoding. The main objective of the new
 method is to enable use of longer blocks while not hurting the runtime so significantly.
 
 The main idea of our proposed solution is to use a divide-and-conquer approach to
@@ -24,7 +24,7 @@ break the problem of finding the order of the block $B$ along the class $c$ to
 finding the order of several smaller sub-blocks of $B$. The potential advantage of this
 solution is that it may enable us to use the table method to solve the smaller
 subproblems. To facilitate our solution, we altered the respective order of the blocks
-along the same class and we no longer use the lexicographical ordering. Note that we
+along the class and we do not use the lexicographical ordering anymore. Note that we
 continue to use the number of ones to identify class of the block. In our solution, every
 block $B$ will be thought of as a concatenation of two smaller \textit{sub-blocks}, $B_1$
 and $B_2$. Primarily, the blocks are ordered according to the value of their \textit{class pair}
@@ -111,34 +111,39 @@ Summing up, we get that there are 10 blocks preceding {\tt 100 010} so it follow
 that its offset $o$ is equal to 10 (when indexing from 0). Together with its class,
 we encode this block as a pair of numbers $(2, 10)$.
 
-Let us generalize this process and consider encoding block $B$ of length $b$
-with sub-blocks of size $b_1$ and $b_2$. We first count the number of ones to
-obtain class $c=\#_1(B)$. Then we compute the offset by counting the number of
-preceding blocks. These can be divided into 3 categories:
+Let us generalize the process of encoding block $B$ of length $b$
+with sub-blocks of size $b_1$ and $b_2$. We also need two orderings $X$ and $Y$
+that can be used to order sub-blocks $b_1$ and $b_2$, respectively.
+The first step is to count the number of ones to obtain class $c=\#_1(B)$.
+Then we compute the offset by counting the number of blocks $B'$ preceding $B$.
+These can be divided into 3 categories:
 \begin{enumerate}
-    \item Blocks with the first sub-block having smaller class than $B_1$.
+    \item $B'$ such that $\#_1(B'_1) < \#_1(B_1)$
     \label{chapter3:encoding:1}
-    \item Blocks with the first sub-block being of the same class as $B_1$
-    but with smaller first sub-block. \label{chapter3:encoding:2}
-    \item Blocks with the same first sub-block but smaller second sub-block.
+    \item $B'$ such that $\#_1(B'_1) = \#_1(B_1), B'_1\prec_X B_1$
+    \label{chapter3:encoding:2}
+    \item $B'$ such that $B'_1 = B_1, B'_2\prec_Y B_2$
     \label{chapter3:encoding:3}
 \end{enumerate}
+One can observe that these categories closely resemble the definition of our ordering
+in the previous paragraph.
 
-The number of blocks in group~\ref{chapter3:encoding:1} is equal to
-$$\sum_{i=0}^{c_1-1} {b_1\choose i} {b_2\choose c-i}$$. For fixed $i$, ${b_1\choose i}$ denotes the
-number of sub-blocks with $i$ ones and ${b_2\choose c-i}$ denotes the number of sub-blocks with the rest
-$c-i$ ones.
+The number of blocks in the first category~\ref{chapter3:encoding:1} is equal to
+$$\sum_{i=0}^{c_1-1} {b_1\choose i} {b_2\choose c-i}$$. For fixed $i$, ${b_1\choose i}$
+denotes the number of sub-blocks with $i$ ones and ${b_2\choose c-i}$ denotes the number
+of sub-blocks with the rest $c-i$ ones.
 
-The number of blocks in group~\ref{chapter3:encoding:2} is equal to $$o_1\times {b_2\choose c_2}.$$
-These are all the blocks with first sub-block smaller than $B_1$ and any second sub-block with
-$c_2$ ones.
+The number of blocks in the second category~\ref{chapter3:encoding:2} is equal to
+$$o_1\times {b_2\choose c_2}.$$ These are all the blocks with first sub-block smaller
+than $B_1$ and any second sub-block with $c_2$ ones.
 
-The number of blocks in group~\ref{chapter3:encoding:3} is equal to $o_2$. This is number of blocks that
-have $B_1$ as the first sub-block and smaller second sub-block $B_2$.
+The number of blocks in the third category~\ref{chapter3:encoding:3} is equal to $o_2$.
+This is number of blocks that have $B_1$ as the first sub-block and smaller second
+sub-block $B_2$.
 
-As we mentioned, the offset of block $B$ is given by the sum of sizes of these 3 groups. However,
-to obtain these, we need to get $c_1, c_2, o_1$ and $o_2$. These numbers can be obtained by recursively
-encoding the sub-blocks $B_1$ and $B_2$.
+As we mentioned, the offset of block $B$ is given by the sum of sizes of these 3 groups.
+However, to obtain these, we need to get $c_1, c_2, o_1$ and $o_2$. These numbers can be
+obtained by recursively encoding the sub-blocks $B_1$ and $B_2$.
 
 \paragraph{Decoding}
 
@@ -173,16 +178,19 @@ the first sub-block {\tt 100}. Obtaining the second sub-block can be done by dec
 $(1, 7\mod 3)$.
 
 Let us propose a general decoding scheme for block $B$ of length $b$ combined from the
-sub-blocks of sizes $b_1$ and $b_2$. We start with the encoded pair $(c, o)$. It is easy
+sub-blocks of sizes $b_1$ and $b_2$. We start decoding with the encoded pair $(c, o)$. It is easy
 to observe that $$c_1 + c_2 = c.$$ All the possible blocks along the class $c$ are primarily
 sorted by class pair $(c_1, c_2)$. Let us denote $C_i$ the number of blocks with class
 pair $(c_i, c_{c-i})$. If we know the exact values of the numbers $C_0, C_1, \ldots , C_c$,
-we can search using the offset $o$ in which of these groups our block is located. Let us
-assume that our block has the class pair equal to $c_1$ and $c_2$. When we obtain these two,
+we can search using the offset $o$ in which of these groups our block is located.
+
+Let us assume that our block has the class pair equal to $(c_1, c_2)$. When we obtain these two,
 we proceed to the second step. There are $C_{c_1}$ blocks that have the same class pair
 as our block $B$. Among them, we would like to find $o'$-th where the new offset $o'$
-is given by subtracting the number of blocks with the smaller class pairs, from the offset
-$o$. There are ${b_1 \choose c_1}$ and ${b_2 \choose c_2}$ ways how the first and second
+is given by subtracting the number of blocks with the smaller class pairs from the offset
+$o$ so $$o' = o - \sum_{i=0}^{c_1-1} C_{c_1}.$$
+
+There are ${b_1 \choose c_1}$ and ${b_2 \choose c_2}$ ways how the first and second
 sub-block may look respectively. As all the combinations of first and second sub-block are
 possible, we want to identify $o'$-th block along the ${b_1 \choose c_1}\cdot {b_2 \choose c_2}$
 blocks. Blocks are sorted primarily by the first sub-block and then by the second sub-block.
@@ -357,7 +365,7 @@ $p, b$ and $c_k$ in Fig.~\ref{obr:hybridEncodingTheoretical}.
     }
 	\label{obr:hybridEncodingTheoretical}
 \end{figure}
-We may observe, that for some choices of cutoff, we may expect to save rougly 10--17\%
+We may observe, that for some choices of cutoff, we may expect to save roughly 10--17\%
 of space compared to the original method. On top of this, hybrid encoding approach has a potential
 to be of the same or even better performance as it is easier to decode the blocks
 saved in the raw form. However, we should note that hybrid encoding is based on our expectations
