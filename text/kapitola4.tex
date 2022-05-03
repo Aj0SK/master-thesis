@@ -113,7 +113,14 @@ $(i, c-i)$. Example of these values can be observed in Fig.~\ref{table:class_pai
 
 We would like to map the offset of the block to the number $C_i$ and thus identify $i$,
 the number of ones in the first and thus also second sub-block. One possible way how to
-do this is to precompute the prefix sums over these numbers such that $$P_i = \sum_{j=0}^{i} C_i.$$
+do this is to precompute the prefix sums over these numbers such that
+\[
+   P_i=
+\begin{cases}
+   0,& \text{if $i=0$}\\
+   \sum_{j=0}^{i} C_i,& \text{otherwise.}
+\end{cases}
+\]
 As these prefix sums form an increasing sequence, we can binary search for "group" that
 contains our offset.
 
