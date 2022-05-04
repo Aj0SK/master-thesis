@@ -94,40 +94,31 @@ can be computed beforehand as there are only roughly $b^2$ combinations of possi
 Roughly speaking, at the price of two cache misses, we can easily do the last two steps.
 
 One possible approach to do the first step is to precompute for every possible class $c$, numbers
-$C_0, C_1,\ldots ,C_{c}$ where $C_i$ is the number of blocks of class $c$ with their class pair equal to
-$(i, c-i)$. Example of these values can be observed in Fig.~\ref{table:class_pairs}.
+$Z_{max(c-b_2, 0)},\ldots , Z_{max(c-b_1, 0)}$ where $Z_i$ is the offset of first block with class
+pair $(i, c-i)$. Example of these values can be observed in Fig.~\ref{table:class_pairs}.
 
 \begin{figure}
 	\centerline{
         \begin{tabular}{c c c c}
-            $C_k$	&	$(c_1, c_2)$  &   Block count & Offsets of blocks\\
+            $Z_k$	&	class pair  & value & offsets mapped  \\
         \hline
-			$C_0$	&	$(0, 2)$	&   \tt 3 	&	0--2\\
-			$C_1$	&	$(1, 1)$	&	\tt 9 	&	3--11\\
-			$C_2$	&	$(2, 0)$	&	\tt 3	&	12--14\\
+			$Z_0$	&	$(0, 2)$	&   \tt 0 	&	0--2\\
+			$Z_1$	&	$(1, 1)$	&	\tt 3 	&	3--11\\
+			$Z_2$	&	$(2, 0)$	&	\tt 12	&	12--14\\
         \end{tabular}
 	}
 	\caption[TODO]{
-        The table shows all the class pairs with the number of blocks for $b=6, c=2$.
+        The table shows all the class pairs with their corresponding value $Z$ for $b=6, c=2$.
     }
 	\label{table:class_pairs}
 \end{figure}
 
-We would like to map the offset of the block to the number $C_i$ and thus identify $i$,
-the number of ones in the first and thus also second sub-block. One possible way how to
-do this is to precompute the prefix sums over these numbers such that
-\[
-   P_i=
-\begin{cases}
-   0,& \text{if $i=0$}\\
-   \sum_{j=0}^{i} C_i,& \text{otherwise.}
-\end{cases}
-\]
-As these prefix sums form an increasing sequence, we can binary search for "group" that
-contains our offset.
+We would like to map the offset of the block to the number $Z_i$ and thus identify $(c_i, c_)$,
+As $Z$-numbers form an increasing sequence, we can binary search for ``group`` that contains our
+offset.
 
 Although binary search has good time complexity, the number of buckets where our offset
-may land is usually small. As we found out and later demonstrate, linear search outperforms
+may land is bounded by $b+1$. As we found out and later demonstrate, linear search outperforms
 binary search most of the time. Another idea that we tested was to speed up the linear
 search using the \texttt{SIMD} instructions. These can be used to do 4 comparisons at a
 time using special 128-bit register. In practice, we found that sequential search using
@@ -223,7 +214,7 @@ for block lengths $b_1$ and $b_2$ and combine them together to obtain routine fo
 decoding of block length $b_1+b_2$. Thus it is up to us, how we obtain the decoding for block
 lengths bigger than 15. Minor inconvenience is, that the most interesting block lengths are of
 the form $2^i-1$. Combining two block lengths of this form, however, leads only to block length
-of form $2^{i+1}-2$ so to again obtain the usable block length, we need to "extend" this solution
+of form $2^{i+1}-2$ so to again obtain the usable block length, we need to ``extend`` this solution
 by one bit.
 
 We based our solutions on table decoding routine for block length 15. This made it easy to combine

@@ -182,19 +182,13 @@ Let us propose a general decoding scheme for block $B$ of length $b$ combined fr
 sub-blocks of sizes $b_1$ and $b_2$. All we have at the beginning of decoding is the
 encoded pair $(c, o)$. Assume that our block has an unknown class pair $(c_1, c_2)$,
 such that $c_1+c_2=c$. Our first step is to find $c_1$ and $c_2$. All the possible
-blocks along the class $c$ are primarily sorted by class pair $(c_1, c_2)$ and thus
-blocks can be categorized by their class pair into one of the groups $G_0, G_1,\ldots G_c$
-with block having class pair $(i, c-i)$ being categorized into $G_i$. The important property
-is that for any numbers $i, j$ such that $0\leq i<j\leq c$, blocks from group $G_i$ have all
-smaller offsets than blocks from group $G_j$. It is possible to precompute how many blocks
-are contained in some particular group $G_i$ thus it is also possible to precompute for every
-group $G_i$ a number $Z_i$. This is the smallest offset of some block in group $G_i$.
-Searching for class pair of block $B$ is then easy. We have its offset $o$ and for its class
-$c$ we look at the precomputed numbers $Z_0, Z_1,\ldots Z_c$ and find the right bucket.
-For $o$ it is the last $Z_i$ such that $Z_i\leq o$.
+blocks along the class $c$ are primarily sorted by class pair $(c_1, c_2)$ so blocks
+with the same class pair form a consecutive sequence. For every class $c$, we precompute
+numbers $Z_{max(c-b_2, 0)},\ldots , Z_{max(c-b_1, 0)}$ where $Z_i$ is the smallest offset
+of block having class pair $(i, c-i)$.
 
 Assume that our block has the class pair equal to $(c_1, c_2)$. The second step is to
-is to find $o_1$ and $o_2$. There are $|G_{c_1}|$ blocks that have the same class pair
+is to find $o_1$ and $o_2$. There are more blocks that have the same class pair
 as block $B$. Among them, we would like to find $o'$-th where the new offset $o'$
 is given by subtracting the number of blocks with the smaller class pairs from the offset
 $o$ so $$o' = o - Z{c_1}.$$
