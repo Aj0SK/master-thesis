@@ -175,11 +175,13 @@ precomputed values are small as they only represent positions from the beginning
 Each of these values takes $\BigO(\log\log n)$ of space so the total amount of space used by these
 values is $\BigO(n/t_2\cdot \log\log n) = \BigO(n/\log\log n)$.
 
-This procedure breaks short superblocks into blocks. Again, each of these blocks except for maybe the
+This procedure breaks short superblocks into blocks. Again, each of these blocks, possibly except for the
 last one contains $t_2$ ones. For blocks longer than $t_2^2$, we store the positions of all
-ones as there are not many of these blocks and they are sparse. We may use the same reasoning as
-in the previous part to conclude that this takes $\BigO(n/t_2^2\cdot t_2\cdot \log\log n) = \BigO(n/\log\log n)$
-of bits. To deal with the blocks smaller than $t_2^2$ we can again precompute a table of all
+ones as there are not many of these blocks. We may use the same reasoning as in the previous
+part to conclude that this takes $\BigO(n/t_2^2\cdot t_2\cdot \log\log n) = \BigO(n/\log\log n)$
+of bits.
+
+To deal with the blocks smaller than $t_2^2$ we can again precompute a table of all
 the possible ways how the block may look and all the possible $\select$ queries over it with
 their result. Number of possible blocks of length $t_2^2$ is equal to $\BigO(2^{t_2^2})$,
 number of possible queries over the block is at most its length $t_2^2$ and to store the results
@@ -206,16 +208,16 @@ We start with the introduction of RRR, data structure based on ideas of \cite{pa
 $b$ and then represent a block with $c$ ones using only $\ceil{\log {b \choose c}}$ bits as
 there are ${b \choose c}$ combinations for positions of ones. The whole block can be then uniquely
 represented as a pair $(c, o)$ where $c$ is the number of ones in the block, called \emph{class} and
-$o$ is an offset of this block in a sequence of all the ${b \choose c}$ blocks in this particular class.
+$o$ is an \emph{offset} of this block in a sequence of all the ${b \choose c}$ blocks in this particular class.
 Even if the ordering of the blocks with the same class can be arbitrary, only lexicographical ordering
 is heavily used in practice.
 
 Now, for this structure to work, we need to find a way how to convert between the bit representation of
 a block and its compressed form $(c, o)$. The process of obtaining $c$ and $o$ from the raw representation
 of block is called \textit{encoding}. The opposite process is called \textit{decoding}. Although
-we would like both processes to be fast, we do the encoding just once, at the initial construction
-of the bit vector while decoding is done every time we are accessing a particular bit in $B$ so in practice
-it is more important to optimise for decoding speed.
+we would like both processes to be fast, we do the encoding only once, at the initial construction
+of the bit vector while decoding is done every time we are accessing a particular bit in $B$. Thus,
+in practice, it is more important to optimise the speed of decoding.
 
 \paragraph{Block encoding/decoding}
 
@@ -225,12 +227,34 @@ stores the bit representation of the block that is associated with pair $(c, o)$
 Both these tables $E$ and $D$ can be precomputed by generating all the possible blocks in lexicographical
 order. After this precomputation, the encoding and decoding of a block takes constant time.
 
-For longer block lengths, it is impractical or even impossible to store huge helper tables. On the other
+For longer blocks, it is impractical or even impossible to store huge helper tables. On the other
 hand, bigger block sizes yield better compression rates because of smaller per block overhead. The need for
 helper tables was overcome by \cite{navarro2012fast} who developed method of \textit{on the fly-decoding}.
 This method relies on a bit by bit encoding and decoding of the block, taking $\BigO(b)$ time. While decoding,
 we can compute on every position using simple combinatorics, how many blocks precede a given prefix and decide,
-whether next bit should be 0 or 1.
+whether next bit should be 0 or 1. Pseudocode of this idea computing binary representation of block is in
+listing~\ref{alg:on_the_fly}.
+
+\begin{algorithm}
+\caption{Pseudocode for on-the-fly decoding}\label{alg:on_the_fly}
+    \KwData{$c, o$}
+    $block \gets 0$\;
+    \For{$i=0$ \KwTo $b-1$} {
+        $p \gets {b-i-1\choose c}$\;
+        \If{$o<p$} {
+            $block \gets 2\cdot block$\;
+        } \Else {
+            $block \gets 2\cdot block+1$\;
+            $c \gets c-1$\;
+            $o \gets o-p$\;
+        }
+    }
+    \KwRet{$block$}
+\end{algorithm}
+
+
+we have precomputed how many blocks there
+are of this type -- ${b\choose c}$.
 
 \paragraph{Arrangement of encoded blocks}
 

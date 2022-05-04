@@ -150,62 +150,63 @@ obtained by recursively encoding the sub-blocks $B_1$ and $B_2$.
 Decoding is a process of obtaining bit representation of block $B$ from its encoded
 representation $(c, o)$. However, when our new encoding scheme is used, main part
 of the decoding process is to obtain encoded representations $(c_1, o_1)$ and
-$(c_2, o_2)$ of sub-blocks $B_1$ and $B_2$. These two can be then fed into
+$(c_2, o_2)$ of sub-blocks $B_1$ and $B_2$. These two can then be fed into
 the decoding subroutines to obtain sub-blocks $B_1$ and $B_2$. Concatenating these
 two representations then gives us the decoded block $B$.
 
 We shall again present this process on an example and decode the block from the previous
 encoding example {\tt 100 010} encoded as $(2, 10)$. To obtain the number of ones in
-the first sub-block only from the offset of the block, we can look into the table and
-see that there are 3 blocks with zero ones in the first sub-block. As the offset of our
-block is ten, we need to look for this block between blocks with more than 0 ones in the
-first sub-block. There are 9 blocks with one 1 in the first sub-block. As $3+9$ is bigger
-than 10, we discovered that the number of ones in the first block is 1 and it follows that
-the number of ones in the second sub-block is also 1 as we know the total number of ones in
-the block is 2. There are, however, 9 blocks with this exact same property, the smallest one
-being {\tt 001 001} and the largest one {\tt 100 100} as can be seen in
-Fig.~\ref{obr:lexicographicalVsUs} (offsets 3--11). We had successfully narrowed our search
-into these 9 blocks and can now focus on identifying what is the offset of the first and second
-sub-block. There are ${3 \choose 1} = 3$ possibilities (namely {\tt 001}, {\tt 010}, {\tt 100})
+the first sub-block only from the offset of the block, we can look into the table in
+Fig.~\ref{obr:lexicographicalVsUs} and see that there are 3 blocks with zero ones in
+the first sub-block. As the offset of our block is ten, we need to look for this block
+between blocks with more than 0 ones in the first sub-block. There are 9 blocks with one
+1 in the first sub-block. As $3+9$ is bigger than 10, we discovered that the number of
+ones in the first block is 1 and it follows that the number of ones in the second sub-block
+is also 1 as we know the total number of ones in the block is 2. There are, however, 9 blocks
+with this exact same property, the smallest one being {\tt 001 001} and the largest one
+{\tt 100 100} as can be seen in Fig.~\ref{obr:lexicographicalVsUs} (offsets 3--11). We have
+successfully narrowed our search into these 9 blocks and now we can focus on identifying the
+offset of the first and second sub-block.
+
+There are ${3 \choose 1} = 3$ possibilities (namely {\tt 001}, {\tt 010}, {\tt 100})
 how the first and also the second sub-block may look. Blocks are sorted according to the first
-and then second sub-block. The cycle through the sub-blocks will be of length 3 (number of
+and then the second sub-block. The cycle through the sub-blocks will be of length 3 (number of
 possible second sub-blocks) and will repeat 3 times (number of possible first sub-blocks). To
 find the offset of first and second sub-block, we need to find out on which first and second
 sub-block the cycle is on 7th position. As the blocks are of fixed size 3, this can be
 computed using simple division and modulus. After computing the offsets, we may reuse the
 solution based on the lexicographical ordering to decode pair $(1, \floor{7/3})$ that gives us
-the first sub-block {\tt 100}. Obtaining the second sub-block can be done by decoding pair
-$(1, 7\mod 3)$.
+the first sub-block {\tt 100} and pair $(1, 7\bmod 3)$, which gives us the second sub-block.
 
 Let us propose a general decoding scheme for block $B$ of length $b$ combined from the
-sub-blocks of sizes $b_1$ and $b_2$. We start decoding with the encoded pair $(c, o)$. It is easy
-to observe that $$c_1 + c_2 = c.$$ All the possible blocks along the class $c$ are primarily
-sorted by class pair $(c_1, c_2)$. Let us denote $C_i$ the number of blocks with class
-pair $(c_i, c_{c-i})$. If we know the exact values of the numbers $C_0, C_1, \ldots , C_c$,
-we can search using the offset $o$ in which of these groups our block is located.
+sub-blocks of sizes $b_1$ and $b_2$. All we have at the beginning of decoding is the
+encoded pair $(c, o)$. Assume that our block has an unknown class pair $(c_1, c_2)$,
+such that $c_1+c_2=c$. Our first step is to find $c_1$ and $c_2$. All the possible
+blocks along the class $c$ are primarily sorted by class pair $(c_1, c_2)$. Let us
+denote $C_i$ the number of blocks with class pair $(i, c-i)$. We can precompute the
+values of the numbers $C_0, C_1, \ldots , C_c$, for every possible $c$.
 
-Let us assume that our block has the class pair equal to $(c_1, c_2)$. When we obtain these two,
-we proceed to the second step. There are $C_{c_1}$ blocks that have the same class pair
+% TODO: nejak tu dokoncit zaciatky
+
+Assume that our block has the class pair equal to $(c_1, c_2)$. The second step is to
+is to find $o_1$ and $o_2$. There are $C_{c_1}$ blocks that have the same class pair
 as our block $B$. Among them, we would like to find $o'$-th where the new offset $o'$
 is given by subtracting the number of blocks with the smaller class pairs from the offset
-$o$ so $$o' = o - \sum_{i=0}^{c_1-1} C_{i}.$$
+$o$ so $$o' = o - Z{i}.$$
 
 There are ${b_1 \choose c_1}$ and ${b_2 \choose c_2}$ ways how the first and second
-sub-block may look respectively. As all the combinations of first and second sub-block are
-possible, we want to identify $o'$-th block along the ${b_1 \choose c_1}\cdot {b_2 \choose c_2}$
+sub-block may look, respectively. As all the combinations of first and second sub-block are
+possible, we want to identify $o'$-th block among the ${b_1 \choose c_1}\cdot {b_2 \choose c_2}$
 blocks. Blocks are sorted primarily by the first sub-block and then by the second sub-block.
 This means, that the ordered sequence of the blocks within the class pair $(c_1, c_2)$ will be
 just all the possible ${b_2 \choose c_2}$ second sub-blocks repeating cyclically, every time
 with the different, yet increasing first sub-block. Furthermore, this cycle of
 ${b_2 \choose c_2}$ sub-blocks will repeat ${b_1 \choose c_1}$ times (once for each possible
-first sub-block). Using $o'$ we can easily find the order of the first and second sub-block.
+first sub-block). Using $o'$ we can easily find the order of the first and the second sub-block.
 We just need to know how many cycles of length ${b_2 \choose c_2}$ fit into $o'$ and what is
 the offset of the second sub-block at which the last cycle is positioned when reaching 
 offset $o'$. This is straightforward to compute as:
-\begin{align*}
-    o_1 &= \floor{o'/{b_2 \choose c_2}} \\
-    o_2 &= o'\mod ({b_2 \choose c_2})\\ % TODO: not working without ()
-\end{align*}
+$$o_1 = \floor{o' \middle/{b_2 \choose c_2}}\qquad o_2 = o'\bmod {b_2 \choose c_2}$$
 Now we have obtained $(c_1, o_1)$ and $(c_2, o_2)$ so we can reuse the decoding subroutine for the
 block size $b_1$ and $b_2$.
 
@@ -215,19 +216,20 @@ times block size $b$ can be obtained using the different combinations of $b_1$ a
 
 \section{Hybrid encoding}
 
+% TODO: premenovat C_i na nieco ine
 % TODO: pridat viac kontextu, preco sa zaoberame percentami jednotiek
 % TODO: ukazat ze vacsie b je lepsie
 
-It is easy to observe, that the main part of space-saving aspect of RRR is hidden in
-a way how blocks are represented. If we have a block of length $b$, then storing it in
-a raw bit representation takes always exactly $b$ bits of space. The number of bits used by
-compressed form, however, depends heavily on the blocks class. If the block is of class
-$c$, then compressed representation uses $\ceil{\log_2 (b+1)}$ bits to store its
-class and $\ceil{\log_2{b\choose c}}$ bits to store the offset along the class.
-In Fig.~\ref{obr:rrrSpaceSavings}, we can see how the space saved per block depends on
-the blocks class. At the same time, we see that RRR saves most of the memory on very
-sparse and very dense blocks. We would like to exploit situations when the frequency of
-these blocks is very high.
+Now, we would like to focus more on the space-saving aspect of RRR and use some assumptions
+about the input bit sequence to change how blocks are represented and by doing it, save
+some additional space. Storing block of length $b$, in a raw bit representation always
+takes exactly $b$ bits of space. The number of bits used by compressed form, however,
+depends heavily on the blocks class. If the block is of class $c$, then compressed
+representation uses $\ceil{\log_2 (b+1)}$ bits to store its class and $\ceil{\log_2{b\choose c}}$
+bits to store the offset along the class. In Fig.~\ref{obr:rrrSpaceSavings}, we can see
+how the space saved per block depends on the block’s class. At the same time, we see
+that RRR saves most of the memory on very sparse and very dense blocks. We would like
+to exploit situations when the frequency of these blocks is very high.
 
 \paragraph{Sequences with fixed densities}
 
@@ -302,19 +304,19 @@ $$\ceil{\log_2(c_k+1)} < \ceil{\log_2(b+1)}.$$ Let us now compare these two repr
 and the theoretical space savings that can be obtained.
 
 Let $n$ be a length of the
-sequence, $b$ the block size and $C_i$ number of blocks with class $i$. To simplify the
-calculations in this section, we assume that $b+1$ as well as $c_k$ is a power of 2 and
-$n$ is divisible by $b$, also we shall denote logarithm with base 2 $\lg x$. Using this
-notation, first representation is consuming
-$$(n/b)\lg (b+1) + \sum_{i=0}^{b} C_i\ceil{\lg {b\choose i}}$$ bits of space with the
-first and second term being the number of bits that is used by the classes and offsets
-respectively. The second representation with the cutoff $c_k$ shall consume
+sequence, $b$ the block size and $C_i$ the number of blocks with class $i$. To simplify the
+calculations in this section, we assume that $b+1$ as well as $c_k+1$ is a power of 2 and
+$n$ is divisible by $b$
+
+The first representation takes $$(n/b)\lg (b+1) + \sum_{i=0}^{b} C_i\ceil{\lg {b\choose i}}$$
+bits of space with the first and second term being the number of bits that is used by the
+classes and offsets respectively. The hybrid representation with cutoff $c_k$ takes
 $$(n/b)\lg (c_k+1) + \sum_{i=0}^{c_k-1}C_i\ceil{\lg {b\choose i}} + \sum_{i=c_k}^{b}C_i b$$
 bits of space. We would like to find out what is the expected space that we save using the
 hybrid encoding. We start by simplifying the expected value of the difference of these
 representations:
 \begin{align}
-E[\text{space}] &= E\left[(n/b)(\lg(b+1)-\lg(c_k+1)) + \sum_{i=c_k}^{i\leq b}C_i\cdot \left(\ceil{\lg{b\choose i}} - b\right)\right] \nonumber\\
+E[\Delta\text{space}] &= E\left[(n/b)(\lg(b+1)-\lg(c_k+1)) + \sum_{i=c_k}^{i\leq b}C_i\cdot \left(\ceil{\lg{b\choose i}} - b\right)\right] \nonumber\\
 &=(n/b)(\lg(b+1)-\lg(c_k+1)) + \sum_{i=c_k}^{i\leq b}E\left[C_i\cdot \left(\ceil{\lg{b\choose i}} - b\right)\right] \nonumber\\
 &=(n/b)(\lg(b+1)-\lg(c_k+1)) + \sum_{i=c_k}^{i\leq b}E\left[C_i\right]\cdot \left(\ceil{\lg{b\choose i}} - b\right) \nonumber\\
 E[C_i] &= (n/b)\cdot {b\choose i}\cdot p^i\cdot (1-p)^{b-i} \label{eq:hybrid_encoding_expected_c_i}
@@ -373,8 +375,8 @@ that the number of these blocks is low, so the possible speedup may not be very 
 
 \paragraph{Balanced sequences}
 
-Although, the previous version of hybrid encoding may work well for sequences with low density
-of ones. We would like to use this idea as a viable solution for sequences that contain
+The previous version of hybrid encoding may work well for sequences with low density of ones.
+However, we would also like to use this idea as a viable solution for sequences that contain
 similar frequency of zeroes and ones but still exhibit behaviour that some block classes are
 underrepresented. This may, for example, occur when sequence has a property, that it is
 globally balanced, but is very unbalanced in some local parts. Then it may be the case, that
