@@ -1,33 +1,38 @@
-\chapter*{Appendix A: electronic attachment}
+\chapter*{Appendix A: Electronic Attachment}
 \addcontentsline{toc}{chapter}{Appendix A}
 \label{kap:kapAppendixA}
 
 All the relevant source code is available in the electronic attachment to this work.
-The code is divided into two parts. Benchmarking part is contained in the folder named
-master-thesis and the fork of \texttt{SDSL} library that can be found in sdsl-lite folder.
-Both of these can be also accessed on \url{https://github.com/Aj0SK/master-thesis} and
+The code is divided into two parts. Benchmarking part is contained in the \verb!master-thesis!
+folder and the fork of \texttt{SDSL} library can be found in \verb!sdsl-lite! folder.
+Both of these can be also accessed at \url{https://github.com/Aj0SK/master-thesis} and
 \url{https://github.com/Aj0SK/sdsl-lite}.
 
 The first repository contains 4 experiments in directory \texttt{master-thesis/code}:
 \begin{itemize}
-    \item \texttt{experiment1} - microbenchmarking of various RRR implementations
-    \item \texttt{experiment2} - \texttt{SDSL} and our benchmark of our new method
-    \item \texttt{experiment3} - our benchmark for hybrid implementation
-    \item \texttt{experiment4} - \texttt{SDSL} benchmark of our new method using FM-index
+    \item \texttt{experiment1} -- microbenchmarking of various RRR implementations
+    \item \texttt{experiment2} -- \texttt{SDSL} and our benchmark of our new method
+    \item \texttt{experiment3} -- our benchmark for hybrid implementation
+    \item \texttt{experiment4} -- \texttt{SDSL} benchmark of our new method using FM-index
 \end{itemize}
 In all these folders, there are scripts to run the benchmarks. We used these also to obtain
 all the results in this work. 
 
-The second repository is a fork of \texttt{SDSL} library. The individual features are implemented
+The second repository is a fork of the \texttt{SDSL} library. The individual features are implemented
 on separate branches:
 \begin{itemize}
-    \item \texttt{master} - non-modified version of master branch
-    \item \texttt{benchmark\_original} - master branch containing minor changes
-        to limit the number of benchmarked blocks, make the tests deterministic
-    \item \texttt{rrr\_vector\_31\_spec} - branch with minimum changes, implementing 31 bit specialization
-    \item \texttt{rrr\_vector\_63\_127\_spec} - branch with 63 and 127 bit specialization (branched from \texttt{rrr\_vector\_31\_spec})
-    \item \texttt{rrr\_vector\_hybrid} - hybrid implementation for block size 31, 63, 127
-    \item \texttt{rrr\_vector\_hybrid\_twoside} - special hybrid implementation for sequences with balanced zeroes and ones
-    \item \texttt{rrr\_benchmark\_our} - branch with 31, 63 and 127 bit specialization and benchmarking changes
-    \item \texttt{rrr\_benchmark\_hybrid} - branch with hybrid 31, 63 and 127 bit specialization and benchmarking changes
+    \item \texttt{master} -- unmodified version of the master branch
+    \item \texttt{benchmark\_original} -- master branch containing minor changes
+        to limit the number of benchmarked blocks and make the tests pseudorandom but reproducible
+    \item \texttt{rrr\_vector\_31\_spec} -- branch with minimum changes, implementing 31 bit specialization
+    \item \texttt{rrr\_vector\_63\_127\_spec} -- branch with 63 and 127 bit specializations (branched from \texttt{rrr\_vector\_31\_spec})
+    \item \texttt{rrr\_vector\_hybrid} -- hybrid implementation for block sizes 31, 63, 127
+    \item \texttt{rrr\_vector\_hybrid\_twoside} -- special hybrid implementation for sequences with balanced zeroes and ones
+    \item \texttt{rrr\_benchmark\_our} -- branch with 31, 63 and 127 bit specializations and benchmarks
+    \item \texttt{rrr\_benchmark\_hybrid} -- branch with hybrid 31, 63 and 127 bit specializations and benchmarks
 \end{itemize}
+
+% Requirements:
+% Clang or g++ compiler?
+% Google Benchmarks
+% cpu governor? matplotlib?

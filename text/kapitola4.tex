@@ -209,39 +209,39 @@ uint32_t get_left_class(uint8_t k, uint32_t nr)  {
 
 \paragraph{Choosing the right sub-problem size}
 
-In previous chapter, we showed that our method can take encoding and decoding subroutines
-for block lengths $b_1$ and $b_2$ and combine them together to obtain routine for encoding and
-decoding of block length $b_1+b_2$. Thus it is up to us, how we obtain the decoding for block
+In the previous chapter, we showed that our method can take encoding and decoding subroutines
+for block lengths $b_1$ and $b_2$ and combine them together to obtain routines for encoding and
+decoding of block length $b_1+b_2$. It is up to us, how we obtain the decoding for block
 lengths bigger than 15. Minor inconvenience is, that the most interesting block lengths are of
-the form $2^i-1$. Combining two block lengths of this form, however, leads only to block length
-of form $2^{i+1}-2$ so to again obtain the usable block length, we need to ``extend`` this solution
+the form $2^i-1$. Combining two block lengths of this form, however, leads only to a block length
+of the form $2^{i+1}-2$ so to obtain a usable block length again, we need to ``extend'' this solution
 by one bit.
 
-We based our solutions on table decoding routine for block length 15. This made it easy to combine
-two 15-bit blocks to obtain 30 bit block. To obtain the next interesting block length 31, we then
-extended this 30 bit solution by one bit. To obtain block length 63, there are, however, more possible
-combinations that look reasonable. We may take 62 bit solution that is built from two 31 bit blocks
+We based our solutions on table lookup for block length 15 and combined two 15-bit blocks to obtain
+30 bit block decoding. To obtain the next interesting block length 31, we then extended this 30 bit
+solution by one bit. To obtain block length 63, there are, however, multiple possible combinations
+that look reasonable. We may take 62 bit solution that is built from two 31 bit blocks
 and then again extend it. On the other hand, it may be more beneficial, to do 63-bit block size by
 splitting it into 3 bits and 60 bits. Thus, before choosing what solution we want to fully include
 into \texttt{SDSL}, we explored and tried several promising combinations and microbenchmarked them.
 
 \subsection{Experimental results}
 
-For benchmarking of our code, we mainly used two types of benchmarks. The first of benchmarks
-used a \texttt{Google Benchmark} library. This is one of the standard libraries used to
-microbenchmark code. A code snippet that is being evaluated is run several times until
+To measure the performance of our implementation, we mainly used two types of benchmarks. The first
+type used a \texttt{Google Benchmark} library. This is one of the standard libraries used for
+microbenchmarking of code. A code snippet that is being evaluated is run many times until
 stable results are obtained. This makes the results reliable even if the measured time is
-very small and also limits the interference of other running processes on the result of
-benchmark. The limitation of microbenchmarks is that they are more artificial in nature and
-do not give the best possible sense how the solution may behave on real data.
+very small and also limits interference of other running processes on the results. The
+limitation of microbenchmarks is that they are more artificial in nature and
+do not give the best possible sense of how the solution may behave on real data.
 
 The second type of benchmarks we used are the ones included in \texttt{SDSL}. These are
 testing bit vector inside of the more advanced data structures and use data from the
 \texttt{Pizza\&Chili} datasets \citep{ferragina2005pizza}. These include many types of data
 such as DNA sequences, \texttt{C} and \texttt{Java} source codes from \texttt{Linux} and
 \texttt{GCC} projects as well as English texts from the Gutenberg project. More information
-about this data such as statistics about the compressibility can be found in Section 4.2 of
-work by \cite{ferragina2009compressed}. We only provide information necessary to explain the
+about this data such as statistics about the compressibility can be found in the work of
+\cite{ferragina2009compressed}, Section 4.2. We only provide information necessary to explain the
 measured phenomena later when exploring the results of our benchmarks.
 
 \paragraph{Microbenchmarks of block decoding}
@@ -261,11 +261,13 @@ binary search and linear scan enhanced by \texttt{SIMD} instructions. In order t
 solution for 127-bit block size, we used the 128 bit type \texttt{\_\_uint128\_t} provided by both
 \texttt{GCC} and \texttt{Clang} compilers. This type is implemented on platform \texttt{x86\_64}
 as a combination of two 64-bit numbers. We compared these results with the table decoding specialization
-in \texttt{SDSL} and with on-the-fly decoding for all the other block sizes. The data we run the decoding
-on were randomly generated. To generate them, we picked 1\,000 pairs of class and offset by first randomly
+in \texttt{SDSL} and with on-the-fly decoding for all the other block sizes. We ran the deconding algorithm
+on randomly generated data. To generate them, we picked 1\,000 pairs of class and offset by first randomly
 picking class of the block and then the offset along this class. To make the process fair, we measured
 decoding time of the bit in the half of the block for on-the-fly decoding as this decoding can stop once
 it obtained the queried bit. The results we measured are shown in Tab.~\ref{obr:simple_benchmark}.
+
+%TODO: a co tam vidime v tej tabulke?? zhodnot
 
 \begin{figure}
 	\centerline{
@@ -323,9 +325,8 @@ was created. For instance, \texttt{WT-DNA-1GB} has been created by:
 	\item Building Huffman shaped wavelet tree over it.
 	\item Concatenating all the bit vectors in the wavelet tree.
 \end{itemize}
-Other version of test data have been created accordingly. Queries into the underlying bit vector
-were generated randomly. We were not able to find significant practical usability for other patterns
-and thus stick with this one.
+Other versions of test data have been created similarly. Queries into the underlying bit vector
+were generated randomly.
 
 As a baseline, we choose the 15 bit specialized implementation already implemented in \texttt{SDSL}
 that uses the table decoding method. We present the measured results of our and the original
@@ -341,30 +342,30 @@ implementation in Fig.~\ref{obr:benchmark_sdsl_new_method}.
 	\label{obr:benchmark_sdsl_new_method}
 \end{figure}
 
-There are several interesting things to observe in these results. We may observe that our new implementation
-beats older implementation on almost all block sizes and all types of data. Note, that the difference is more
-visible on random and DNA data. On web data, however, the difference is less noticable. We attribute
-this behaviour to the fact, that was observed by creators of this dataset. They observed that the number of
+There are several interesting things to observe in these results: Our new implementation
+beats older implementation on almost all block sizes and all types of data. Note that the difference is more
+visible on random and DNA data. On web data, however, the difference is less noticeable. We attribute
+this behaviour to the fact, that was observed by creators of this dataset -- the number of
 uniform blocks (full of either zeroes or ones) is much bigger in \texttt{WT-WEB} than in \texttt{WT-DNA}.
-For block size 63, they observed ratio of uniform blocks in \texttt{WT-WEB-1GB} to be 84\% compared to 28\% in
+For block size 63, they observed that \texttt{WT-WEB-1GB} contains 84\% of uniform blocks compared to 28\% in
 \texttt{WT-DNA}. As the uniform blocks are decoded trivially in both implementations, this makes less opportunities
 for our implementation to save time.
 
 Another visible pattern is that with increasing block length, the query time generally goes up as decoding takes
-more and more time. On the other hand, on $\select$ in \texttt{WT-WEB} data we can observe, that at the beginning
+more and more time. On the other hand, on $\select$ in \texttt{WT-WEB} data, we can see that at the beginning
 the query time decreases with increasing block length. This is because time saved on faster binary search in
 precomputed $\rank$ values offsets the growing decoding time.
 
 \paragraph{Bit vector in FM-index}
 
-Even if the previous benchmark was done on realistic data, we tested our implementation on
-practicallt useful application. We benchmarked our bit vector as a part of Huffman shaped
+Even if the previous benchmark was done on realistic data, we wanted to test our implementation in
+a practically useful application. We benchmarked our bit vector as a part of Huffman shaped
 wavelet tree used inside of the FM-index. Implementation of FM-index in \texttt{SDSL}, as most
 of other implementations, provides mainly 3 methods:
 \begin{itemize}
-	\item $\countOp(P)$ - returns the number of occurrences of $P$ in text $T$,
-	\item $\locateOp(P)$ - returns all positions of pattern $P$ in text $T$,
-	\item $\extractOp(i, j)$ - returns the subsequence of $T$ starting on $i$-th and ending on $j$-th index.
+	\item $\countOp(P)$ -- returns the number of occurrences of $P$ in text $T$,
+	\item $\locateOp(P)$ -- returns all positions of pattern $P$ in text $T$,
+	\item $\extractOp(i, j)$ -- returns the subsequence of $T$ starting on $i$-th and ending on $j$-th index.
 \end{itemize}
 The reason that the $\extractOp$ method is useful and non-trivial is that FM-index
 does not store the original sequence $T$ -- at least not in an easily readable form.
@@ -374,9 +375,9 @@ of methods $\countOp, \locateOp$ and $\extractOp$ changes when our bit vector is
 benchmarks are based on the data from the \texttt{Pizza\&Chili} dataset and use mainly methodology
 proposed by \cite{ferragina2009compressed}. The data we used are English texts from Gutenberg
 project, source codes and then DNA and protein sequences. In these benchmarks, we used as a
-baseline the FM-index version based on block length 15. For informative purposes, we also included
-the version based on uncompressed bit vector and sparse bit vector provided by \texttt{SDSL} that
-represents positions of ones using the Elias-Fano representation for non-decreasing sequences.
+baseline the FM-index version based on block length 15. To provide more context, we also included
+versions based on uncompressed bit vector and sparse bit vector which represents positions of
+ones using the Elias-Fano representation for non-decreasing sequences (provided by \texttt{SDSL}).
 
 To benchmark operation $\countOp$, the index over the text is built. Then, random patterns of
 various lengths are extracted from the text and subsequently used for benchmarking. Code
