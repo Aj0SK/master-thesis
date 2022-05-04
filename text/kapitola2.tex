@@ -6,13 +6,16 @@ implementations. Bit vector is a data structure storing binary sequence and supp
 methods $\access$, $\rank$ and $\select$. As we have shown in section~\ref{section:WaweletTree},
 wavelet tree can be used to build a vector from sequence over the general alphabet
 using the bit vector implementation. This is the reason why it is important to dedicate
-time to creating fast and efficient bit vector implementation. We start with its
-succinct representation, in which we simply store bits one after another and use sublinear
-space to support $\rank$ and $\select$. Then we look at the compressed representation using
-the method introduced by \cite{raman2007succinct}. In the end, we briefly explain what other
-alternatives exist for compressed bit vector implementation.
+time to creating fast and efficient bit vector implementation. We start with succinct
+representation of bit vector and present ideas to support $\rank$ and $\select$ in sublinear
+space. Then we look at the compressed representation of bit vector obtained using the method
+introduced by \cite{raman2007succinct}. In the end, we briefly mention the alternative implementations
+of compressed bit vector implementation.
 
 \section{Bit vector implementation}
+
+In this section, we introduce practical but also optimal constant time implementations of
+$\rank$ and $\select$ methods using the sublinear space overhead.
 
 \subsection{Rank}
 \label{section:rank}
@@ -81,9 +84,9 @@ answer $\rank$ query in constant time with only sublinear space overhead. The co
 solution is based on partitioning first proposed in this context by \cite{okanohara2007practical}.
 As in the previous solution, we start by splitting the bit sequence into superblocks. This time
 we set the length of superblock to $\BigO(\log^2 n)$ and again precompute $\rank$s for the beginning of
-every superblock. Then, every is further divided into blocks of length $\ceil{(\log n)/2}$. Similarly to
-superblocks, for all of these smaller blocks we precompute $\rank$. However, to save space, we
-only precompute these $\rank$s from the beginning of the corresponding superblock.
+every superblock. Then, every superblock is further divided into blocks of length $\ceil{(\log n)/2}$.
+Similarly to superblocks, for all of these smaller blocks we precompute $\rank$. However, to save space,
+we only precompute these $\rank$s from the beginning of the corresponding superblock.
 
 Now, when queried for $\rank$ of some position $i$, we combine:
 \begin{enumerate}
@@ -92,7 +95,7 @@ Now, when queried for $\rank$ of some position $i$, we combine:
     \item $\rank$ inside of its block
 \end{enumerate}
 
-The third step can be done in constant time on unit-cost RAM model with word size of $\Theta(\log n)$
+The third step can be done also in constant time on unit-cost RAM model with word size of $\Theta(\log n)$
 that we use in most of our work. We, however, use and analyze here the solution that uses the precomputed table.
 This table stores for every possible block and $\rank$ query its result. 
 
@@ -185,7 +188,7 @@ To deal with the blocks smaller than $t_2^2$ we can again precompute a table of 
 the possible ways how the block may look and all the possible $\select$ queries over it with
 their result. Number of possible blocks of length $t_2^2$ is equal to $\BigO(2^{t_2^2})$,
 number of possible queries over the block is at most its length $t_2^2$ and to store the results
-we need roughly $O(\log t_2)$ bits. The table size is thus
+we need roughly $\BigO(\log t_2)$ bits. The table size is thus
 $$\BigO(2^{t_2^2}\cdot t_2^2 \cdot \log t_2) = o(n).$$
 
 When answering $select_1(i)$, we can easily find the location of right superblock. If this
@@ -203,8 +206,18 @@ time with just sublinear space overhead. In this section, we show that it is pos
 the whole bit vector close to the zeroth order entropy while still keeping the constant time $\rank$
 and $\select$.
 
-We start with the introduction of RRR, data structure based on ideas of \cite{pagh2001low} and
-\cite{raman2007succinct}. The main idea of RRR is to split the bit sequence into blocks of size
+Up to now, we have been working with straightforward representation of bit vector in which we store
+all the bits one after another. This is in general the best thing we can hope for but there are scenarios
+where there is a room for improvement. The example is if zeroth order entropy $H_0$ of bit sequence
+is small. This occurs in sequences that have very skewed frequency of zeroes or ones. If sequence of
+length $n$ has $m$ ones in it, we can store it as before using $n$ bits but there is only ${n \choose m}$
+such sequences and it may be more beneficial for big $m$ to store the sequence number which one of these
+we are working with. It is possible to prove for sequence $S$ of length $n$ with $m$ ones that
+$$\ceil{\log_2 {n \choose m}} = nH_0(S)+\BigO(\log n).$$ This means that using this representation may be
+beneficial in scenarios when $nH_0(S)\ll n$.
+
+This is an idea that RRR is based on. RRR is a data structure based partly on the work of \cite{pagh2001low}
+and proposed by \cite{raman2007succinct}. The main idea of RRR is to split the bit sequence into blocks of size
 $b$ and then represent a block with $c$ ones using only $\ceil{\log {b \choose c}}$ bits as
 there are ${b \choose c}$ combinations for positions of ones. The whole block can be then uniquely
 represented as a pair $(c, o)$ where $c$ is the number of ones in the block, called \emph{class} and
@@ -228,8 +241,8 @@ Both these tables $E$ and $D$ can be precomputed by generating all the possible 
 order. After this precomputation, the encoding and decoding of a block takes constant time.
 
 For longer blocks, it is impractical or even impossible to store huge helper tables. On the other
-hand, bigger block sizes yield better compression rates because of smaller per block overhead. The need for
-helper tables was overcome by \cite{navarro2012fast} who developed method of \textit{on the fly-decoding}.
+hand, bigger block sizes yield better compression rates because of smaller per block overhead. \cite{navarro2012fast}
+developed method we shall call \textit{on the fly-decoding}, that does not require these big helper tables. 
 This method relies on a bit by bit encoding and decoding of the block, taking $\BigO(b)$ time. While decoding,
 we can compute on every position using simple combinatorics, how many blocks precede a given prefix and decide,
 whether next bit should be 0 or 1. Pseudocode of this idea computing binary representation of block is in
@@ -252,9 +265,9 @@ listing~\ref{alg:on_the_fly}.
     \KwRet{$block$}
 \end{algorithm}
 
-
-we have precomputed how many blocks there
-are of this type -- ${b\choose c}$.
+On the fly decoding does not require helper tables $E$ and $D$ but to achieve the best possible time complexity
+it requires the precomputation of combination numbers it uses. These, however, use together less than $\BigO(b^3)$
+of bits
 
 \paragraph{Arrangement of encoded blocks}
 
@@ -301,11 +314,15 @@ when we interpret the left side of the equation as a number of ways we can choos
 from $n$ elements and $\ell$ elements from another $m$ elements. This is all contained on the
 right side of the equation that includes all these combinations. $D$ is storing $2^b$ entries
 and each entry is using $b$ bits of storage. The total space used is then
-$$nH_0(B) + \ceil{n/b} + \ceil{n/b} \cdot \ceil{\log(b+1)} + b2^b.$$ To speed up the process
-of accessing block, we can store the pointers into every $k$-th element of $O$. The example of
-this solution can be observed in Fig.~\ref{obr:RRRFinal}. This divides the process of locating
-$O[i]$ into two parts. The first is to find the nearest pointer leading to element before $i$
-and then move at most $k$ places. This additional structure of roughly $n/(bk)$ integers uses
+$$nH_0(B) + \ceil{n/b} + \ceil{n/b} \cdot \ceil{\log(b+1)} + b2^b.$$
+
+\paragraph{Block accessing speed up}
+
+To speed up the process of accessing block, we can store the pointers into every $k$-th element
+of $O$. This again creates some bigger superblocks as can be observed in Fig.~\ref{obr:RRRFinal}.
+This representation speeds up the process of locating offset $O[i]$. Now, we at first find the
+nearest pointer leading to superblock where $i$ is located and then we just skip through superblock
+at most $k$ times to locate $O[i]$. This additional structure of $\floor{n/(bk)}$ integers uses
 $\BigO(\log(n)\cdot \frac{n}{bk})$ bits of space.
 
 \begin{figure}
