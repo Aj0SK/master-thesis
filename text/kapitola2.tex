@@ -7,10 +7,10 @@ methods $\access$, $\rank$ and $\select$. As we have shown in section~\ref{secti
 wavelet tree can be used to build a vector from sequence over the general alphabet
 using the bit vector implementation. This is the reason why it is important to dedicate
 time to creating fast and efficient bit vector implementation. We start with its
-succinct representation, in which we simply store bits one after another. Then we
-look at the compressed representation using the method introduced by \cite{raman2007succinct}.
-In the end, we briefly explain what other alternatives exist for compressed bit vector
-implementation.
+succinct representation, in which we simply store bits one after another and use sublinear
+space to support $\rank$ and $\select$. Then we look at the compressed representation using
+the method introduced by \cite{raman2007succinct}. In the end, we briefly explain what other
+alternatives exist for compressed bit vector implementation.
 
 \section{Bit vector implementation}
 
