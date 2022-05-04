@@ -140,7 +140,7 @@ of the block.
 \label{section:select}
 
 In case of a $\select$ over bit vector, we are again interested in two methods $\select_0$
-and $select_1$. Although there is not a simple way how to convert the result of one to
+and $select_1$. Even if there is not a simple way how to convert the result of one to
 another just like with $rank$, we shall be interested mainly in $select_1$ version as the
 other one can be implemented using the same ideas. The important property of the $\select$
 method is that it works much like an inverse to $\rank$. This is given by the fact that
@@ -253,10 +253,13 @@ listing~\ref{alg:on_the_fly}.
     \KwData{$c, o$}
     $block \gets 0$\;
     \For{$i=0$ \KwTo $b-1$} {
+        \tcp{$p$ is number of blocks with same prefix and zero on $i$-th position}
         $p \gets {b-i-1\choose c}$\;
         \If{$o<p$} {
+            \tcp{add zero at the end of the block}
             $block \gets 2\cdot block$\;
         } \Else {
+            \tcp{add one at the end of the block}
             $block \gets 2\cdot block+1$\;
             $c \gets c-1$\;
             $o \gets o-p$\;
@@ -265,7 +268,7 @@ listing~\ref{alg:on_the_fly}.
     \KwRet{$block$}
 \end{algorithm}
 
-On the fly decoding does not require helper tables $E$ and $D$ but to achieve the best possible time complexity
+On the fly decoding does not use helper tables $E$ and $D$ but to achieve the best possible time complexity
 it requires the precomputation of combination numbers it uses. These, however, use together less than $\BigO(b^3)$
 of bits
 
@@ -308,15 +311,15 @@ $\ceil{\log(b+1)}$. For array $O$ we argue that its size is bounded by
     &\leq \log{n\choose \#_1(B)} + \ceil{n/b} &\leq nH_0(B) + \ceil{n/b}
 \end{align*}
 
-where $\#_1(B)$ denotes the total number of ones in $B$. We obtained (TODOsomeref) using the
-observation that ${n\choose k} {m\choose \ell} \leq {n+m\choose k+\ell}$. This can be seen
+where $\#_1(B)$ denotes the total number of ones in $B$. The second inequality was obtained using
+the observation that ${n\choose k} {m\choose \ell} \leq {n+m\choose k+\ell}$. This can be seen
 when we interpret the left side of the equation as a number of ways we can choose $k$ elements
 from $n$ elements and $\ell$ elements from another $m$ elements. This is all contained on the
 right side of the equation that includes all these combinations. $D$ is storing $2^b$ entries
 and each entry is using $b$ bits of storage. The total space used is then
 $$nH_0(B) + \ceil{n/b} + \ceil{n/b} \cdot \ceil{\log(b+1)} + b2^b.$$
 
-\paragraph{Block accessing speed up}
+\paragraph{Block access speed up}
 
 To speed up the process of accessing block, we can store the pointers into every $k$-th element
 of $O$. This again creates some bigger superblocks as can be observed in Fig.~\ref{obr:RRRFinal}.
