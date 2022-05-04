@@ -315,7 +315,7 @@ version was measured to be faster than on-the-fly decoding for 31 bit block.
 
 \paragraph{Bit vector on real data}
 
-After bencharking and finding the potential for speeding up the bit vector implementation using
+After benchmarking and finding the potential for speeding up the bit vector implementation using
 our new method, we decided to implement and benchmark it on data that are closer to the real-life
 usage of bit vectors.
 
@@ -362,6 +362,13 @@ Another visible pattern is that with increasing block length, the query time gen
 more and more time. On the other hand, on $\select$ in \texttt{WT-WEB} data, we can see that at the beginning
 the query time decreases with increasing block length. This is because time saved on faster binary search in
 precomputed $\rank$ values offsets the growing decoding time.
+
+Overall, we saved almost 50\% of time on $\access$, $\rank$ and $\select$ over randomly generated data,
+and close to 50\% of time on \texttt{WT-DNA} data when compared to the baseline. Our results are positive
+also on \texttt{WT-WEB}, particularly for block length 127. This block length is particularly faster in our
+case. The reason could be the inefficiencies in \texttt{SDSL}s implementation of 128-bit integer but also
+in fact, that after dividing the problem into subproblems, we continue to work with 64-bit integers which
+are much faster on current machines.
 
 \paragraph{Bit vector in FM-index}
 
