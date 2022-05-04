@@ -400,13 +400,19 @@ by \texttt{Pizza\&Chili}. We measure the trade-off between space used for index 
 normalized by the number of symbols contained in all searched patterns. We present the results
 in Fig.~\ref{obr:benchmark_sdsl_count}.
 
+We may observe that the speed gain we have measured in the previous benchmarks also translated
+to speedup of FM-index operation $\countOp$. On the English dataset, block lengths 127 and 63 have
+been able to obtain the speed of the block lengths 63 and 31 provided by \texttt{SDSL}. The biggest
+speed up can be observed for 127 bit block, on English data the time saved is close to 20\%, on
+DNA it is roughly 30\% speedup.
+
 \begin{figure}
 	\centerline{
 		\includegraphics[width=\textwidth, height=0.4\textheight]{images/vysledky_sdsl_count}
 	}
 	\caption[TODO]{Counting occurrences of patterns in various different texts. Displaying
 	the query time per pattern symbol for various block sizes and the size of index over the
-	text. Uncompresed bit vector and sparse array are included for reference. 
+	text. Uncompressed bit vector (sdsl-bv) and sparse array (sdsl-sparse) are included for reference. 
 	}
 	\label{obr:benchmark_sdsl_count}
 \end{figure}
@@ -417,8 +423,9 @@ substrings of length 512 starting at random positions in text. The additional pa
 that is explored in this benchmark is sampling rate of suffix array and inverse suffix array.
 This is basically a parameter that can be used to balance between the speed of FM-index and
 its memory usage. Options for this sampling ratio are by default the powers of 2 from 4 up to
-256. We show the results for sampling rate equal to 16 in Fig.~\ref{obr:benchmark_sdsl_extract}.
-Note that the trends that can be seen in these results can be observed for every sampling rate.
+256. We only show the results for a sampling rate 16 in Fig.~\ref{obr:benchmark_sdsl_extract},
+however, note that the trends that can be seen in these results can be observed for every sampling
+rate.
 
 \begin{figure}
 	\centerline{
@@ -426,7 +433,7 @@ Note that the trends that can be seen in these results can be observed for every
 	}
 	\caption[TODO]{Extracting parts of the represented text. Displaying
 	the query time per extracted symbol for various block sizes and the size of index over the
-	text. Uncompresed bit vector and sparse array are included for reference. 
+	text. Uncompressed bit vector and sparse array are included for reference. 
 	}
 	\label{obr:benchmark_sdsl_extract}
 \end{figure}
