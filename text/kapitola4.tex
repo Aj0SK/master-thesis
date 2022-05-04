@@ -267,7 +267,14 @@ picking class of the block and then the offset along this class. To make the pro
 decoding time of the bit in the half of the block for on-the-fly decoding as this decoding can stop once
 it obtained the queried bit. The results we measured are shown in Tab.~\ref{obr:simple_benchmark}.
 
-%TODO: a co tam vidime v tej tabulke?? zhodnot
+We can observe there that our implementation is faster than on-the-fly decoding provided by \texttt{SDSL}
+on every block length that was tested. Linear version of decoding division outperforms binary search on
+every block length tested but the binary search is slowly catching up with increasing block length.
+For 30 bit block, the SIMD version dominates both linear and binary approach, this version is, however,
+harder to use for longer blocks as it ask for support of special instruction set. Version splitting
+63 bit block into 3 bits and two 30 bit blocks seems to be performing slightly better than the other
+variant combining 1 bit with solution for block length 62. Very important observation is that our 63 bit
+version was measured to be faster than on-the-fly decoding for 31 bit block.
 
 \begin{figure}
 	\centerline{
@@ -382,15 +389,15 @@ ones using the Elias-Fano representation for non-decreasing sequences (provided 
 To benchmark operation $\countOp$, the index over the text is built. Then, random patterns of
 various lengths are extracted from the text and subsequently used for benchmarking. Code
 that generates these patterns in \texttt{SDSL} is a slight modification of a version provided
-by \texttt{Pizza\&Chili}. We measure, as in other places where this benchmark was used, the
-ratio between space used for index and the speed normalized by the number of symbols contained
-in all searched patterns. We present the results in Fig.~\ref{obr:benchmark_sdsl_count}.
+by \texttt{Pizza\&Chili}. We measure the trade-off between space used for index and the speed
+normalized by the number of symbols contained in all searched patterns. We present the results
+in Fig.~\ref{obr:benchmark_sdsl_count}.
 
 \begin{figure}
 	\centerline{
 		\includegraphics[width=\textwidth, height=0.4\textheight]{images/vysledky_sdsl_count}
 	}
-	\caption[TODO]{Counting occurences of patterns in various different texts. Displaying
+	\caption[TODO]{Counting occurrences of patterns in various different texts. Displaying
 	the query time per pattern symbol for various block sizes and the size of index over the
 	text. Uncompresed bit vector and sparse array are included for reference. 
 	}
@@ -418,15 +425,16 @@ Note that the trends that can be seen in these results can be observed for every
 \end{figure}
 
 Benchmarking of operation $\locateOp$ again uses a methodology proposed by \cite{ferragina2009compressed} 
-in Section~5.3. This consists of at first locating random patterns of length 5 in the text such
-that 2--3 millions of occurences are found in the text. We present our results in Fig.~\ref{obr:benchmark_sdsl_locate}.
+in Section~5.3. This consists of locating random patterns of length 5 in the text such
+that in total 2--3 millions of occurrences are found in the text. We present the results
+obtained in Fig.~\ref{obr:benchmark_sdsl_locate}.
 
 \begin{figure}
 	\centerline{
 		\includegraphics[width=\textwidth, height=0.4\textheight]{images/vysledky_sdsl_locate}
 	}
-	\caption[TODO]{Locating occurences of patterns in the represented text. Displaying
-	the query time per occurence for various block sizes and the size of index over the
+	\caption[TODO]{Locating occurrences of patterns in the represented text. Displaying
+	the query time per occurrence for various block sizes and the size of index over the
 	text.
 	}
 	\label{obr:benchmark_sdsl_locate}
