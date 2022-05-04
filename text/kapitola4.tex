@@ -15,9 +15,9 @@ for further information on how to reproduce our results). All the results presen
 chapter were obtained on a machine with 8-core AMD~Ryzen~7~2700X with 16~MB of cache, running
 at 3.7~GHz with 16~GB of RAM. The running operating system was Ubuntu~20.04.3~LTS. We used both
 \texttt{GCC} and \texttt{Clang} compilers with versions 9.4.0 and 10.0.0, respectively. All
-available optimizations were turned on most of the time. Although there are no special hardware
-requirements, to obtain the best possible results, our implementation requires a processor with
-support for \texttt{SSE2} instruction set.
+available optimizations were turned on most of the time. There are no special hardware requirements,
+but to obtain the best possible results, our implementation requires a processor with support for
+\texttt{SSE2} instruction set.
 
 \paragraph{SDSL library}
 
@@ -39,8 +39,8 @@ and benchmarks that were implemented alongside the main functionality.
 The RRR implementation of bit vector in \texttt{SDSL} is provided by templated class \verb'rrr_vector'
 that enables use of block length from 3 up to 256. To support longer blocks,
 \texttt{SDSL} implements 128-bit and 256-bit integers. The implementation generally uses the
-on-the-fly decoding, although template specialization using the table decoding method is provided
-for block length 15.
+on-the-fly decoding. The table decoding method is provided for block length 15 by template specialization
+of \verb'rrr_vector'.
 
 To support $\access$, \verb'rrr_vector' supports single bit access operator \verb'[]' as well
 as \verb'get_int' method. To facilitate $\access$, \verb'rrr_vector' uses the implementation
@@ -54,7 +54,7 @@ we do linear search for the final result inside of the superblock. As a $\select
 using the binary search and $\rank$ functionality, the first part of answering $\select$ is to binary
 search between precomputed values of $\rank$, then to do the $\select$ inside of the superblock. This
 demonstrates, how the size of superblock can be used to balance the ratio of space used and the speed
-of the $\access$, $\rank$ and $\select$ methods. Although size of superblock is one of the parameters
+of the $\access$, $\rank$ and $\select$ methods. Even if the size of superblock is one of the parameters
 of \verb'rrr_vector', we did not make any changes to the default number of blocks per superblock that
 is set in \texttt{SDSL} to 32.
 
@@ -117,21 +117,21 @@ We would like to map the offset of the block to the number $Z_i$ and thus identi
 As $Z$-numbers form an increasing sequence, we can binary search for ``group`` that contains our
 offset.
 
-Although binary search has good time complexity, the number of buckets where our offset
-may land is bounded by $b+1$. As we found out and later demonstrate, linear search outperforms
-binary search most of the time. Another idea that we tested was to speed up the linear
-search using the \texttt{SIMD} instructions. These can be used to do 4 comparisons at a
-time using special 128-bit register. In practice, we found that sequential search using
-the \texttt{SIMD} instructions leads to the best results for smaller block sizes. Possible
-implementations that we tested, follow in listings \ref{code:linear}, \ref{code:linearSimd}
-and \ref{code:binary}. The naming convention adheres to \texttt{SDSL} naming of $k$ for
-class, $nr$ for offset. To simplify naming, if block $B$ was encoded using division to
-sub-blocks $B_1$ and $B_2$ such that $B=B_1\cdot B_2$ then we call the $B_1$ the
-\textit{left sub-block} and consequently its class $\text{left\_k}$ while $B_2$ is called
-\textit{right sub-block}.
+Despite having good time complexity, binary search may not be practically fastest solution
+as the number of buckets where our offset may land is bounded by $b+1$ and thus quite small.
+As we found out and later demonstrate, linear search outperforms binary search most of the
+time. Another idea that we tested was to speed up the linear search using the \texttt{SIMD}
+instructions. These can be used to do 4 comparisons at a time using special 128-bit register.
+In practice, we found that sequential search using the \texttt{SIMD} instructions leads to the
+best results for smaller block sizes. Examples for block size 30 of possible implementations
+that we tested, follow in listings \ref{code:linear}, \ref{code:linearSimd}, \ref{code:binary}.
+The naming convention adheres to \texttt{SDSL} naming of $k$ for class, $nr$ for offset. To
+simplify naming, if block $B$ was encoded using division to sub-blocks $B_1$ and $B_2$ such
+that $B=B_1\cdot B_2$ then we call the $B_1$ the \textit{left sub-block} and consequently its
+class $\text{left\_k}$ while $B_2$ is called \textit{right sub-block}.
 
 % https://github.com/Aj0SK/master-thesis/blob/ed7e5a787738ae66d4d75e312106098c74a1cdaf/code/shared/rrr_convert.h#L167
-\lstset{language=C++,caption={Linear search for classes of sub-blocks},label=code:linear}
+\lstset{language=C++,caption={Linear search for classes of sub-blocks (b=30)},label=code:linear}
 \begin{lstlisting}
 uint32_t get_left_class(uint8_t k, uint32_t nr)  {
 	int left_k_from = std::max(k - 15, 0);
@@ -150,7 +150,7 @@ uint32_t get_left_class(uint8_t k, uint32_t nr)  {
 \end{lstlisting}
 
 % https://github.com/Aj0SK/master-thesis/blob/ed7e5a787738ae66d4d75e312106098c74a1cdaf/code/shared/rrr_convert.h#L220
-\lstset{language=C++,caption={SIMD enhanced linear search for classes of sub-blocks},label=code:linearSimd}
+\lstset{language=C++,caption={SIMD enhanced linear search for classes of sub-blocks (b=30)},label=code:linearSimd}
 \begin{lstlisting}
 uint32_t get_left_class(uint8_t k, uint32_t nr)  {
 	int left_k_from = std::max(k - 15, 0);
@@ -191,7 +191,7 @@ uint32_t get_left_class(uint8_t k, uint32_t nr)  {
 \end{lstlisting}
 
 % https://github.com/Aj0SK/master-thesis/blob/ed7e5a787738ae66d4d75e312106098c74a1cdaf/code/shared/rrr_convert.h#L196
-\lstset{language=C++,caption={Binary search for classes of sub-blocks},label=code:binary}
+\lstset{language=C++,caption={Binary search for classes of sub-blocks (b=30)},label=code:binary}
 \begin{lstlisting}
 uint32_t get_left_class(uint8_t k, uint32_t nr)  {
 	int left_k_from = std::max(k - 15, 0);
@@ -220,7 +220,7 @@ by one bit.
 We based our solutions on table decoding routine for block length 15. This made it easy to combine
 two 15-bit blocks to obtain 30 bit block. To obtain the next interesting block length 31, we then
 extended this 30 bit solution by one bit. To obtain block length 63, there are, however, more possible
-combinations that look reasonable. We may took 62 bit solution that is built from two 31 bit blocks
+combinations that look reasonable. We may take 62 bit solution that is built from two 31 bit blocks
 and then again extend it. On the other hand, it may be more beneficial, to do 63-bit block size by
 splitting it into 3 bits and 60 bits. Thus, before choosing what solution we want to fully include
 into \texttt{SDSL}, we explored and tried several promising combinations and microbenchmarked them.
@@ -232,17 +232,17 @@ used a \texttt{Google Benchmark} library. This is one of the standard libraries 
 microbenchmark code. A code snippet that is being evaluated is run several times until
 stable results are obtained. This makes the results reliable even if the measured time is
 very small and also limits the interference of other running processes on the result of
-benchmark. Although reliable, this type of benchmarks is more artificial in nature and
-does not give the best possible sense how the solution may behave on real data.
+benchmark. The limitation of microbenchmarks is that they are more artificial in nature and
+do not give the best possible sense how the solution may behave on real data.
 
 The second type of benchmarks we used are the ones included in \texttt{SDSL}. These are
 testing bit vector inside of the more advanced data structures and use data from the
 \texttt{Pizza\&Chili} datasets \citep{ferragina2005pizza}. These include many types of data
 such as DNA sequences, \texttt{C} and \texttt{Java} source codes from \texttt{Linux} and
 \texttt{GCC} projects as well as English texts from the Gutenberg project. More information
-about this data such as some statistics about the compressibility and more can be found in
-Section 4.2 of work by \cite{ferragina2009compressed}. We only provide information necessary
-to explain the measured phenomenons later when exploring the results of our benchmarks. 
+about this data such as statistics about the compressibility can be found in Section 4.2 of
+work by \cite{ferragina2009compressed}. We only provide information necessary to explain the
+measured phenomena later when exploring the results of our benchmarks.
 
 \paragraph{Microbenchmarks of block decoding}
 
@@ -251,27 +251,27 @@ our new method of encoding and decoding. We mainly focused on measuring differen
 in combination with different methods used for dividing block to subproblems and with different
 approaches to obtain particular block size. The tested block lengths were 15, 30, 31, 62, 63
 and 127. Sizes 15, 31, 63 and 127 are most useful in practice, however, they can be obtained using
-different combinations of block size 30 and 62, i.e. 31 can be combined as 1 bit and 30 bit solution,
-63 can be divided to 1 and 62 as well as to 3 and two sub-problems of size 30. Although, these
-tests are not made on real life data, they were mainly used as an indication which implementations
-are interesting and should be the best candidates for further evaluation.
+different combinations of block size 30 and 62, e.g. 31 can be combined as 1 bit and 30 bit solution,
+63 can be divided to 1 and 62 as well as to 3 and two sub-problems of size 30. Even if these
+tests were not made on practically useful data, they were mainly used as an indication which
+implementations are interesting and should be the best candidates for further evaluation.
 
-We used 3 different techniques to divide a problem into sub-problems, these was a linear scan,
+We used 3 different techniques to divide a problem into sub-problems, these were a linear scan,
 binary search and linear scan enhanced by \texttt{SIMD} instructions. In order to implement the
 solution for 127-bit block size, we used the 128 bit type \texttt{\_\_uint128\_t} provided by both
 \texttt{GCC} and \texttt{Clang} compilers. This type is implemented on platform \texttt{x86\_64}
 as a combination of two 64-bit numbers. We compared these results with the table decoding specialization
 in \texttt{SDSL} and with on-the-fly decoding for all the other block sizes. The data we run the decoding
-on were radomly generated. To generate them, we picked 1\,000 pairs of class and offset by first randomly
+on were randomly generated. To generate them, we picked 1\,000 pairs of class and offset by first randomly
 picking class of the block and then the offset along this class. To make the process fair, we measured
 decoding time of the bit in the half of the block for on-the-fly decoding as this decoding can stop once
-it obtained the queried bit. The results we measured are shown in Fig.~\ref{obr:simple_benchmark}.
+it obtained the queried bit. The results we measured are shown in Tab.~\ref{obr:simple_benchmark}.
 
 \begin{figure}
 	\centerline{
-	\begin{tabular}{|l|l|r|}
+	\begin{tabular}{|c|l|c|}
 		\hline
-		Block size &	Method									&	$\mu s$ per 1k queries \\
+		Block size &	Method									&	ns per query \\
 		\hline
 		\multirow{2}{*}{15} & SDSL\_Table                         	&    2  \\
 							& SDSL\_ON\_THE\_FLY  					&   18  \\
@@ -299,7 +299,7 @@ it obtained the queried bit. The results we measured are shown in Fig.~\ref{obr:
 	}
 	\caption[TODO]{Results of microbenchmarking various types of decoding implementations.
 	The numbers in method name denote to what block lengths the problem was broken. The name
-	reflects what method was used to broke the problem into subproblems.
+	reflects what method was used to break the problem into subproblems.
 	}
 	\label{obr:simple_benchmark}
 \end{figure}
