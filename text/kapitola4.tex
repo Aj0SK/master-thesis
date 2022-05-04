@@ -9,62 +9,64 @@ encoding. In both of these sections, we first describe the important parts of ou
 implementation and then describe how we benchmarked our implementation and present the
 results we measured.
 
-The source code of our implementation written in \texttt{C++} along with all benchmarks can be found
-in the electronic attachment to this work but also on \texttt{Github}. More about where to
-find individual parts of code and how to reproduce our results can be found in Appendix A.
-All the results presented in this chapter were obtained on a machine with 8-core AMD~Ryzen~7~2700X
-with 16~MB of cache, running at 3.7~GHz with 16~GB of RAM. The running operating system
-was Ubuntu~20.04.3~LTS. We used both \texttt{GCC} and \texttt{Clang} compiles with versions
-9.4.0 and 10.0.0, respectively. All available optimizations were turned on most of the time.
-Although there are no special hardware requirements, to obtain the best possible results, our
-implementation requires a processor with support for \texttt{SSE2} instruction set.
+The source code of our implementation written in \texttt{C++} along with all benchmarks can
+be found in the electronic attachment to this work but also on \texttt{Github} (see Appendix~A
+for further information on how to reproduce our results). All the results presented in this
+chapter were obtained on a machine with 8-core AMD~Ryzen~7~2700X with 16~MB of cache, running
+at 3.7~GHz with 16~GB of RAM. The running operating system was Ubuntu~20.04.3~LTS. We used both
+\texttt{GCC} and \texttt{Clang} compilers with versions 9.4.0 and 10.0.0, respectively. All
+available optimizations were turned on most of the time. Although there are no special hardware
+requirements, to obtain the best possible results, our implementation requires a processor with
+support for \texttt{SSE2} instruction set.
+
+\paragraph{SDSL library}
+
+We decided to make our solution a part of the \texttt{SDSL} library~\citep{gog2014theory}. This
+is one of the most mature and versatile libraries implementing succinct data structures. It is
+written in \texttt{C++} and with almost 2\,000 commits from more than 30 contributors, \texttt{SDSL}
+is a heavily tested library, offering various implementations of succinct structures such as
+bit vector, integer vector, wavelet tree, FM-index, suffix array and many more. It allows easy use
+of different building blocks to implement more complex data structures, e.g., using different bit vector
+implementations inside of a wavelet tree. On top of this, we also took advantage of thorough tests
+and benchmarks that were implemented alongside the main functionality.
 
 \section{New decoding method}
 
 \subsection{Implementation}
 
-\paragraph{SDSL library}
+\paragraph{RRR in SDSL}
 
-We decided to make our solution a part of the \texttt{SDSL} library~\citep{gog2014theory}. This
-is one of the most matured and versatile libraries implementing succinct data structures. It is
-written in \texttt{C++} and with almost 2\,000 commits from more than 30 contributors, \texttt{SDSL}
-is a heavily tested library, offering various implementations of succinct structures such as
-bit vector, integer vector, wavelet tree, FM-index, suffix array and many more. It allows easy use
-of different building blocks to implement more complex data structures, i.e. using different bit vector
-implementations inside of the wavelet tree. On top of this, we also took advantage of thorough tests
-and benchmarks that were implemented alongside the main functionality.
-
-The RRR implementation of bit vector is provided by templated class \texttt{rrr\_vector}
+The RRR implementation of bit vector in \texttt{SDSL} is provided by templated class \verb'rrr_vector'
 that enables use of block length from 3 up to 256. To support longer blocks,
 \texttt{SDSL} implements 128-bit and 256-bit integers. The implementation generally uses the
 on-the-fly decoding, although template specialization using the table decoding method is provided
 for block length 15.
 
-To support $\access$, \texttt{rrr\_vector} supports single bit access operator \texttt{[]} as well
-as \texttt{get\_int} method. To facilitate $\access$, \texttt{rrr\_vector} uses the implementation
+To support $\access$, \verb'rrr_vector' supports single bit access operator \verb'[]' as well
+as \verb'get_int' method. To facilitate $\access$, \verb'rrr_vector' uses the implementation
 presented in Fig.~\ref{obr:RRRFinal} that consists of the array $C$ of fixed sized elements, storing
 classes, array $O$ of elements of variable length that stores offsets of blocks along their class and
 third array $P$, that stores pointers to the array $O$, more precisely to the beginning of every superblock.
 
 \texttt{SDSL} uses $\rank$ implementation, where result of $\rank$ is precomputed for the beginning
-of every superblock. To answer the query, binary search along the precomputed values is done first.
-Then linear search for the final result is made inside of the superblock. As a $\select$ can be answered
+of every superblock. To answer the query, we first access the precomputed value for the superblock. Then
+we do linear search for the final result inside of the superblock. As a $\select$ can be answered
 using the binary search and $\rank$ functionality, the first part of answering $\select$ is to binary
 search between precomputed values of $\rank$, then to do the $\select$ inside of the superblock. This
 demonstrates, how the size of superblock can be used to balance the ratio of space used and the speed
 of the $\access$, $\rank$ and $\select$ methods. Although size of superblock is one of the parameters
-of \texttt{rrr\_vector}, we did not make any changes to the default number of blocks per superblock that
+of \verb'rrr_vector', we did not make any changes to the default number of blocks per superblock that
 is set in \texttt{SDSL} to 32.
 
 We decided to use the specialization for block size 15 as an underlying solution for the encoding and
 decoding of sub-blocks. We provided specialized implementations for block lengths 31, 63 and 127 that
 are most used in practical scenarios. We based our implementation on the general implementation of
-\texttt{rrr\_vector} and tried to keep the number of changes as small as possible to easily observe the
+\verb'rrr_vector' and tried to keep the number of changes as small as possible to easily observe the
 effects of our new decoding method. Thanks to the modularity of \texttt{SDSL}, we have been able to
 implement our changes and at the same time alter only two methods that the \texttt{SDSL} uses for
-encoding and decoding namely \texttt{bin\_to\_nr(bin)} and \texttt{nr\_to\_bin(k, nr)}. As we mentioned,
+encoding and decoding namely \verb'bin_to_nr(bin)' and \verb'nr_to_bin(k, nr)'. As we mentioned,
 the encoding is less performance-critical in most of the applications as it is done only once when
-constructing the bit vector. This is why we focuse more on the decoding part of the implementation.
+constructing the bit vector. This is why we focus more on the decoding part of the implementation.
 
 \paragraph{Division of decoding problem into sub-problems}
 
@@ -83,7 +85,7 @@ Let us now break down the process of dividing the original problem into sub-prob
 \begin{enumerate}
 	\item Finding the class pair $(c_1, c_2)$.
 	\item Counting the number of possibilities for first and second sub-block $\text{comb}_1, \text{comb}_2$.
-	\item Compute offsets of sub-blocks $o_1$ and $o_2$.
+	\item Computing offsets of sub-blocks $o_1$ and $o_2$.
 \end{enumerate}
 The most trivial part is third step as it only consists of a number of arithmetic operations. Then,
 second step, that is a computation of $\text{comb}_1$ and $\text{comb}_2$. We know that $\text{comb}_1$
@@ -100,9 +102,9 @@ $(i, c-i)$. Example of these values can be observed in Fig.~\ref{table:class_pai
         \begin{tabular}{c c c c}
             $C_k$	&	$(c_1, c_2)$  &   Block count & Offsets of blocks\\
         \hline
-			$C_0$	&	$(0, 2)$	&   \tt 3 	&	0-2\\
-			$C_1$	&	$(1, 1)$	&	\tt 9 	&	3-11\\
-			$C_2$	&	$(2, 0)$	&	\tt 3	&	12-14\\
+			$C_0$	&	$(0, 2)$	&   \tt 3 	&	0--2\\
+			$C_1$	&	$(1, 1)$	&	\tt 9 	&	3--11\\
+			$C_2$	&	$(2, 0)$	&	\tt 3	&	12--14\\
         \end{tabular}
 	}
 	\caption[TODO]{
@@ -360,7 +362,7 @@ for our implementation to save time.
 Another visible pattern is that with increasing block length, the query time generally goes up as decoding takes
 more and more time. On the other hand, on $\select$ in \texttt{WT-WEB} data we can observe, that at the beginning
 the query time decreases with increasing block length. This is because time saved on faster binary search in
-precomputed $\rank$ values offsets growing decoding time.
+precomputed $\rank$ values offsets the growing decoding time.
 
 \paragraph{Bit vector in FM-index}
 

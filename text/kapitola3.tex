@@ -172,7 +172,7 @@ There are ${3 \choose 1} = 3$ possibilities (namely {\tt 001}, {\tt 010}, {\tt 1
 how the first and also the second sub-block may look. Blocks are sorted according to the first
 and then the second sub-block. The cycle through the sub-blocks will be of length 3 (number of
 possible second sub-blocks) and will repeat 3 times (number of possible first sub-blocks). To
-find the offset of first and second sub-block, we need to find out on which first and second
+find the offset of the first and the second sub-block, we need to find out on which first and second
 sub-block the cycle is on 7th position. As the blocks are of fixed size 3, this can be
 computed using simple division and modulus. After computing the offsets, we may reuse the
 solution based on the lexicographical ordering to decode pair $(1, \floor{7/3})$ that gives us
@@ -182,17 +182,22 @@ Let us propose a general decoding scheme for block $B$ of length $b$ combined fr
 sub-blocks of sizes $b_1$ and $b_2$. All we have at the beginning of decoding is the
 encoded pair $(c, o)$. Assume that our block has an unknown class pair $(c_1, c_2)$,
 such that $c_1+c_2=c$. Our first step is to find $c_1$ and $c_2$. All the possible
-blocks along the class $c$ are primarily sorted by class pair $(c_1, c_2)$. Let us
-denote $C_i$ the number of blocks with class pair $(i, c-i)$. We can precompute the
-values of the numbers $C_0, C_1, \ldots , C_c$, for every possible $c$.
-
-% TODO: nejak tu dokoncit zaciatky
+blocks along the class $c$ are primarily sorted by class pair $(c_1, c_2)$ and thus
+blocks can be categorized by their class pair into one of the groups $G_0, G_1,\ldots G_c$
+with block having class pair $(i, c-i)$ being categorized into $G_i$. The important property
+is that for any numbers $i, j$ such that $0\leq i<j\leq c$, blocks from group $G_i$ have all
+smaller offsets than blocks from group $G_j$. It is possible to precompute how many blocks
+are contained in some particular group $G_i$ thus it is also possible to precompute for every
+group $G_i$ a number $Z_i$. This is the smallest offset of some block in group $G_i$.
+Searching for class pair of block $B$ is then easy. We have its offset $o$ and for its class
+$c$ we look at the precomputed numbers $Z_0, Z_1,\ldots Z_c$ and find the right bucket.
+For $o$ it is the last $Z_i$ such that $Z_i\leq o$.
 
 Assume that our block has the class pair equal to $(c_1, c_2)$. The second step is to
-is to find $o_1$ and $o_2$. There are $C_{c_1}$ blocks that have the same class pair
-as our block $B$. Among them, we would like to find $o'$-th where the new offset $o'$
+is to find $o_1$ and $o_2$. There are $|G_{c_1}|$ blocks that have the same class pair
+as block $B$. Among them, we would like to find $o'$-th where the new offset $o'$
 is given by subtracting the number of blocks with the smaller class pairs from the offset
-$o$ so $$o' = o - Z{i}.$$
+$o$ so $$o' = o - Z{c_1}.$$
 
 There are ${b_1 \choose c_1}$ and ${b_2 \choose c_2}$ ways how the first and second
 sub-block may look, respectively. As all the combinations of first and second sub-block are
@@ -210,9 +215,10 @@ $$o_1 = \floor{o' \middle/{b_2 \choose c_2}}\qquad o_2 = o'\bmod {b_2 \choose c_
 Now we have obtained $(c_1, o_1)$ and $(c_2, o_2)$ so we can reuse the decoding subroutine for the
 block size $b_1$ and $b_2$.
 
-Note that our newly devised method enables us to combine two different encoding/decoding methods
-for block size $b_1$ and $b_2$ yielding the method usable for block size $b_1+b_2$. Thus, many
-times block size $b$ can be obtained using the different combinations of $b_1$ and $b_2$.
+In this section, we proposed new block ordering and showed that it can be encoded and decoded
+efficiently. Our method for block length $b_1$ and $b_2$ yields to a block length $b_1+b_2$.
+This gives us an opportunity to obtain block length $b$ using different combinations of $b_1$
+and $b_2$ and even combine different orderings.
 
 \section{Hybrid encoding}
 
@@ -220,10 +226,10 @@ times block size $b$ can be obtained using the different combinations of $b_1$ a
 % TODO: pridat viac kontextu, preco sa zaoberame percentami jednotiek
 % TODO: ukazat ze vacsie b je lepsie
 
-Now, we would like to focus more on the space-saving aspect of RRR and use some assumptions
-about the input bit sequence to change how blocks are represented and by doing it, save
-some additional space. Storing block of length $b$, in a raw bit representation always
-takes exactly $b$ bits of space. The number of bits used by compressed form, however,
+In this section, we would like to focus more on the space-saving aspect of RRR and use some
+assumptions about the input bit sequence to change how blocks are represented and by doing
+it, save some additional space. Storing block of length $b$, in a raw bit representation
+always takes exactly $b$ bits of space. The number of bits used by compressed form, however,
 depends heavily on the blocks class. If the block is of class $c$, then compressed
 representation uses $\ceil{\log_2 (b+1)}$ bits to store its class and $\ceil{\log_2{b\choose c}}$
 bits to store the offset along the class. In Fig.~\ref{obr:rrrSpaceSavings}, we can see
