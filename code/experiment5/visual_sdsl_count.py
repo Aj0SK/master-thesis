@@ -110,7 +110,7 @@ fig.legend(
 )
 
 fig.tight_layout(pad=1.0)
-fig.set_size_inches(13, 10)
+fig.set_size_inches(13, 9)
 
 plt.savefig("vysledky_sdsl_hybrid_count.png")
 plt.clf()
