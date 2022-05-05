@@ -31,7 +31,7 @@ def return_results(path):
 map_name = {"FM_HUFF" : "bv", "FM_HUFF_RRR15": "rrr_15",
             "FM_HUFF_RRR31": "rrr_31",
             "FM_HUFF_RRR63": "rrr_63",
-            "FM_HUFF_RRR127": "rrr_127", "CSA_SADA": "sparse"}
+            "FM_HUFF_RRR127": "rrr_127"}
 
 reimplemented = ["FM_HUFF_RRR31", "FM_HUFF_RRR63", "FM_HUFF_RRR127"]
 
@@ -63,6 +63,8 @@ labels = set()
 
 for r in range(len(res)):
     for dataset_name, structure in res[r].keys():
+        if structure not in map_name.keys():
+            continue
         time, memory = res[r][dataset_name, structure]
         if structure not in reimplemented and names[r] == "our":
             continue
@@ -75,8 +77,6 @@ for r in range(len(res)):
         labels.add(l)
         m = markers[r]
         if structure == "FM_HUFF":
-            m = 'd'
-        elif structure == "CSA_SADA":
             m = '*'
         axs[row][col].scatter(x, y, label = l, marker = m, s = 35)
         axs[row][col].set_title(dataset_name, fontsize=16)
@@ -110,7 +110,7 @@ fig.legend(
   labelspacing=0.0,
   borderpad=0.1,
   columnspacing = 1.0,
-  prop={'size': 10}
+  prop={'size': 13}
 )
 
 fig.tight_layout(pad=1.0)
