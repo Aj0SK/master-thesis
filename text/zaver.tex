@@ -2,18 +2,35 @@
 \addcontentsline{toc}{chapter}{Conclusion} % rucne pridanie do obsahu
 \markboth{Conclusion}{Conclusion} % vyriesenie hlaviciek
 
-The goal of this thesis was to explore representations of compressed
-bit vector, develop an efficient implementation and compare its
-performance with existing solutions. We have been able to come up with
-two new encoding schemes and test them in artificial but also practical
-settings.
+The goal of this thesis was to study existing implementations of compressed
+bit vector, explore their shortcomings and develop new implementation of bit
+vector that mitigates some of these issues. We picked up one particular
+representation of bit vector and come up with two ideas that try to enhance
+it. We implemented both of these ideas and tested them as a part of \texttt{SDSL}
+library that is regarded as one the most popular libraries implementing succinct
+data structures.
 
-One is based on the new ordering of the blocks along the same class. We
-showed how this new ordering enables us to decode efficiently by reusing
-the decoding solution for smaller sub-blocks. We showed that the decoding
-routine can be very competitive with the previously existing methods in
-artificial settings but also on real-life data. In the end, we demonstrated
-its usability as a part of wavelet tree in FM-index.
+The new decoding scheme that we introduced was very successful in artificial
+but also practical testing. The most important result presented in this work
+is the relative speedup of FM-index when \texttt{SDSL} bit vector is replaced
+by our implementation. We measured about 20--30\% speedup of $\countOp$,
+$\extractOp$ and $\locateOp$ methods thanks to our changes. This was observed
+on various data types such as DNA sequences, source codes or protein sequences.
+
+We developed two versions of hybrid encoding. The first is better suited for
+sparse sequences with low frequency of ones and was meant to rival sparse bit
+vector implementations on sequences with roughly 5\% of ones. This version indeed
+worked quite well and when compared to our ordinary version of bit vector it was
+able to deliver the same speed with roughly 5\% lower space usage.
+The second version of hybrid encoding was found not to be practically competitive
+in its current version due to additional memory accesses that are needed to answer
+$\rank$ and $\select$ queries. 
+
+With our new decoding scheme, future work could lead to discovering what tradeoffs
+between space usage and speed can be achieved with longer blocks, e.g. 255 bit block.
+Working with longer blocks is way slower because computers natively support 64-bit
+integers. Our new method, however, enables us to quickly decompose problem into smaller
+subproblems that could fit into a 64-bit integer.
 
 %Na záver už len odporúčania k samotnej kapitole Záver v bakalárskej
 %práci podľa smernice \cite{smernica}:  \glqq{}V závere je potrebné v

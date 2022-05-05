@@ -637,14 +637,13 @@ were not completely overcome by hybrid implementation. We can, however, conclude
 created new viable alternatives, most importantly for $\select$ method.
 
 We tested our second version of hybrid encoding on the previously used datasets \texttt{WT-DNA} and \texttt{WT-WEB}.
-The graph comparing results for classic bit vectors and hybrid bit vectors can be sobserved in Fig.~\ref{obr:vysledky_sdsl_hybrid}.
-The results of our hybrid implementation are not very promising on these data. Except for the access, they do not
-look very promising. The reason why the results are better for $\access$ is that hybrid implementation creates
-unneccessary memory accesses when anwering $\rank$ and $\select$. 
+The graph comparing results for classic bit vectors and hybrid bit vectors can be observed in Fig.~\ref{obr:vysledky_sdsl_hybrid}.
+The results of our hybrid implementation are not very promising on these data, except for the $\access$. The reason
+why the results are better for $\access$ is that hybrid implementation creates additional memory accesses when answering
+$\rank$ and $\select$ as we described in the previous subsection. 
 
-With these results, we also benchmarked several possible versions of hybrid bit vector inside of the FM-index.
-We used the exact same parameters as in the previous tests but now, we took as a baseline our implementation of RRR
-without hybrid encoding. The results may be observed in Fig~\ref{obr:benchmark_sdsl_hybrid_count}.
+To test if our hybrid implementation could be used in the practice, we benchmarked FM-index implementation of method $\countOp$,
+with hybrid bit vector used inside of the Huffman shaped wavelet tree. The results are shown in Fig~\ref{obr:benchmark_sdsl_hybrid_count}.
 
 \begin{figure}
 	\centerline{
@@ -669,6 +668,7 @@ without hybrid encoding. The results may be observed in Fig~\ref{obr:benchmark_s
 	the average query time for the respective operation. Original implementation is denoted by dots. These
 	are our implementations except for the 15 bit version based on the table lookup provided by \texttt{SDSL}.
 	Every cross symbols hybrid implementation with particular cutoff. The same block size is denoted by the single color.
+	Name $\texttt{hybrid-}x\texttt{(}y\texttt{)}$ denotes implementation of block size $x$ with cutoff $y$.
 	}
 	\label{obr:vysledky_sdsl_hybrid}
 \end{figure}
@@ -677,8 +677,7 @@ without hybrid encoding. The results may be observed in Fig~\ref{obr:benchmark_s
 	\centerline{
 		\includegraphics[width=\textwidth, height=0.5\textheight]{images/vysledky_sdsl_hybrid_count}
 	}
-	\caption[TODO]{Counting occurrences of patterns in various different texts. Displaying
-	the query time per pattern symbol compared to size index. 
+	\caption[TODO]{Results of benchmark of $\countOp$ operation on FM-index.
 	}
 	\label{obr:benchmark_sdsl_hybrid_count}
 \end{figure}

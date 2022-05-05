@@ -407,23 +407,32 @@ concatenation of bits that are contained in edges along the path from root to th
 containing symbol $c$.
 
 The idea proposed by~\cite{makinen2005succinct} is to shape the wavelet tree in such a way that
-a code of every symbol is equal to Huffman code of this symbol. The advantage we get is that
-if queries for a symbols are proportional to their frequencies, then we need to visit on average
-only $\BigO(H_0)$ nodes rather than $\BigO(\log \sigma)$, where $H_0$ is zeroth-order empirical
-entropy. It is defined as $$H_0(S)=\sum_{c\in\Sigma} \frac{\#_c(S)}{|S|} \lg \frac{|S|}{\#_c(S)}$$,
-where $\#_c(S)$ denotes number of occurences of symbol $c$ in $S$. Even if the maximum depth of this
-Huffman shaped wavelet tree may be bigger compared to the original, \cite{grabowski2004first} showed
-that we can enforce the maximum depth to be $\BigO(\log \sigma)$ with the average depth limited by
-$H_0+2$. This is, however, as they claimed, not very practical. The most important fact is that
-with Huffman shaped wavelet tree, it is possible to decrease the average number of nodes accessed and
-thus decrease the average query time of $\rank$ and $\select$.
+a code of every symbol is equal to its Huffman code. The advantage we get is that if queries for
+a symbols are proportional to their frequencies, then we need to visit on average
+only $\BigO(H_0)$ nodes rather than $\BigO(\log \sigma)$, where $H_0$ is empirical zero-order
+entropy, defined as $$H_0(S)=\sum_{c\in\Sigma} \frac{n_c}{n} \log \frac{n}{n_c}$$,
+where $n_c$ denotes number of occurences of symbol $c$ in sequence $S$ of length $n$. The value
+of zero-order entropy is a lower bound for the number of bits that $S$ can be compressed to by
+compressor that considers only frequencies of symbols. Even if the maximum depth of Huffman
+shaped wavelet tree may be bigger compared to the original, \cite{grabowski2004first} showed
+that we can enforce the maximum depth to be $\BigO(\log \sigma)$ with the average depth limited
+by $H_0+2$. This is, however, as they claimed, not very practical. The most important fact is
+that with Huffman shaped wavelet tree, it is possible to decrease the average number of nodes
+accessed and thus decrease the average query time of $\rank$ and $\select$.
 
 The space used by the wavelet tree heavily depends on the space usage of individual bit vectors
 that are used to store the nodes of wavelet tree. If these are represented using a data structure
 that takes space close to the zero-order entropy of the sequence $S$, then the whole wavelet tree
 requires $nH_0(S) + o(n\log\sigma)$ bits of space as was shown by \cite{grossi2003high}.
 
-% TODO: FM-index vie zaberat H_k (+ citacia)
+With the use of Huffman shaped wavelet tree, it is possible to bring down the space used by FM-index to
+$nH_k(T)+o(n\log \sigma)$ for the text $T$ of length $n$ over alphabet of size $\sigma$ where $H_k$ is
+$k$-th order empirical entropy. This quantity is defined as
+$$H_k(S) = \frac{1}{n} \sum_{w\in \Sigma^k} |w_S| H_0(w_S)$$ where $w_S$ is the string consisting of
+concatenation of symbols following $w$ in $S$. This measure gives us the lower bound for number of bits
+that $S$ can be compressed to by compressor that considers context of length $k$ when encoding each
+symbol of $S$. The example of the data structure obtaining bound $nH_k(T)+o(n\log \sigma)$ is AF-index
+(alphabet friendly FM-index) proposed by \cite{ferragina2004alphabet}.
 
 In this chapter, we presented some useful applications of the bit vector. We looked more closely on
 FM-index, the data structure used for the problem of text indexing. There, we encountered the
