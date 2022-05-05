@@ -1,8 +1,8 @@
 \chapter{Implementation and results}
 \label{kap:kap4}
 
-In this chapter, we describe the implementation of ideas we proposed in the previous
-chapter and experimental results obtained when measuring their performance.
+In this chapter, we propose the implementation of ideas we developed in the previous
+chapter and show experimental results obtained when measuring their performance.
 This chapter is split into two sections according to the main topics discussed
 in the previous chapter, namely our new general encoding and decoding routine and hybrid
 encoding. In both of these sections, we first describe the important parts of our
@@ -70,10 +70,10 @@ constructing the bit vector. This is why we focus more on the decoding part of t
 
 \paragraph{Division of decoding problem into sub-problems}
 
-The decoding routine basically consists of three steps. First is to divide problem into subproblems,
-second is to use subroutines on subproblems and third is to combine the results obtained to the final
+The decoding routine can be divided into three steps. The first is to divide problem into subproblems,
+second is to use subroutines to decode subproblems and third is to combine the results obtained to the final
 results. When implementing our decoding routine, we put most of our focus on the process of dividing
-problem into sub-problems of smaller size. This is a part, where we obtain pairs $(c_1, o_1)$ and $(c_2, o_2)$
+a problem into sub-problems of smaller size. This is a part, where we obtain pairs $(c_1, o_1)$ and $(c_2, o_2)$
 from the encoded pair $(c, o)$. There are various reasons why we focus on this part of the algorithm.
 The first reason is that for smaller blocks solving the sub-problems is done using the helper table
 which is quite fast and can be hardly made faster as it consists of only one table lookup. The second
@@ -84,18 +84,19 @@ part is harder to parallelize.
 Let us now break down the process of dividing the original problem into sub-problems into following 3 steps:
 \begin{enumerate}
 	\item Finding the class pair $(c_1, c_2)$.
-	\item Counting the number of possibilities for first and second sub-block $\text{comb}_1, \text{comb}_2$.
+	\item Counting the number of possibilities for first and second sub-block $\text{pos}_1, \text{pos}_2$.
 	\item Computing offsets of sub-blocks $o_1$ and $o_2$.
 \end{enumerate}
-The most trivial part is third step as it only consists of a number of arithmetic operations. Then,
-second step, that is a computation of $\text{comb}_1$ and $\text{comb}_2$. We know that $\text{comb}_1$
-and $\text{comb}_2$ is equal to ${b\choose c_1}$ and ${b\choose c_2}$, respectively. These two numbers
+The most trivial part is the third step as it only consists of a number of arithmetic operations. Then,
+second step, that is a computation of $\text{pos}_1$ and $\text{pos}_2$. We know that $\text{pos}_1$
+and $\text{pos}_2$ is equal to ${b\choose c_1}$ and ${b\choose c_2}$, respectively. These two numbers
 can be computed beforehand as there are only roughly $b^2$ combinations of possible pairs of $c$ and $c_1$.
-Roughly speaking, at the price of two cache misses, we can easily do the last two steps.
+Roughly speaking, we can do the last two steps at the price of two cache misses.
 
 One possible approach to do the first step is to precompute for every possible class $c$, numbers
 $Z_{max(c-b_2, 0)},\ldots , Z_{max(c-b_1, 0)}$ where $Z_i$ is the offset of first block with class
-pair $(i, c-i)$. Example of these values can be observed in Fig.~\ref{table:class_pairs}.
+pair $(i, c-i)$. Example of these values can be observed in Fig.~\ref{table:class_pairs} but also
+in the previous chapter(Fig.~/ref{obr:classPairsZVals}).
 
 \begin{figure}
 	\centerline{
@@ -114,20 +115,20 @@ pair $(i, c-i)$. Example of these values can be observed in Fig.~\ref{table:clas
 \end{figure}
 
 We would like to map the offset of the block to the number $Z_i$ and thus identify $(c_i, c_)$,
-As $Z$-numbers form an increasing sequence, we can binary search for ``group`` that contains our
+As $Z$-numbers form an increasing sequence, we can binary search for ``group'' that contains our
 offset.
 
-Despite having good time complexity, binary search may not be practically fastest solution
+Despite having good time complexity, binary search may not be the fastest solution in practice
 as the number of buckets where our offset may land is bounded by $b+1$ and thus quite small.
 As we found out and later demonstrate, linear search outperforms binary search most of the
 time. Another idea that we tested was to speed up the linear search using the \texttt{SIMD}
-instructions. These can be used to do 4 comparisons at a time using special 128-bit register.
+instructions. These can be used to do 4 comparisons at a time using a special 128-bit register.
 In practice, we found that sequential search using the \texttt{SIMD} instructions leads to the
-best results for smaller block sizes. Examples for block size 30 of possible implementations
+best results for smaller block lengths. Examples for block length 30 of possible implementations
 that we tested, follow in listings \ref{code:linear}, \ref{code:linearSimd}, \ref{code:binary}.
-The naming convention adheres to \texttt{SDSL} naming of $k$ for class, $nr$ for offset. To
+The naming convention adheres to \texttt{SDSL} naming of $k$ for class, $nr$ for the offset. To
 simplify naming, if block $B$ was encoded using division to sub-blocks $B_1$ and $B_2$ such
-that $B=B_1\cdot B_2$ then we call the $B_1$ the \textit{left sub-block} and consequently its
+that $B=B_1\cdot B_2$ then we call the $B_1$ \textit{left sub-block} and consequently its
 class $\text{left\_k}$ while $B_2$ is called \textit{right sub-block}.
 
 % https://github.com/Aj0SK/master-thesis/blob/ed7e5a787738ae66d4d75e312106098c74a1cdaf/code/shared/rrr_convert.h#L167
@@ -196,7 +197,7 @@ uint32_t get_left_class(uint8_t k, uint32_t nr)  {
 uint32_t get_left_class(uint8_t k, uint32_t nr)  {
 	int left_k_from = std::max(k - 15, 0);
 	int left_k_to = std::min(k, 15);
-	// std::upper_bound(a, b, val) returns pointer to first greater than val in <a;b) 
+	// std::upper_bound(a, b, val) returns pointer to first elem. greater than val in <a;b) 
 	auto it = std::upper_bound(P[k].begin() + left_k_from,
                                      P[k].begin() + left_k_to, nr);
 	// returns index of it in array P[k]
@@ -212,37 +213,40 @@ uint32_t get_left_class(uint8_t k, uint32_t nr)  {
 In the previous chapter, we showed that our method can take encoding and decoding subroutines
 for block lengths $b_1$ and $b_2$ and combine them together to obtain routines for encoding and
 decoding of block length $b_1+b_2$. It is up to us, how we obtain the decoding for block
-lengths bigger than 15. Minor inconvenience is, that the most interesting block lengths are of
+lengths bigger than 15. A minor inconvenience is, that the most interesting block lengths are of
 the form $2^i-1$. Combining two block lengths of this form, however, leads only to a block length
 of the form $2^{i+1}-2$ so to obtain a usable block length again, we need to ``extend'' this solution
 by one bit.
 
 We based our solutions on table lookup for block length 15 and combined two 15-bit blocks to obtain
-30 bit block decoding. To obtain the next interesting block length 31, we then extended this 30 bit
+30-bit block decoding. To obtain the next interesting block length 31, we then extended this 30-bit
 solution by one bit. To obtain block length 63, there are, however, multiple possible combinations
-that look reasonable. We may take 62 bit solution that is built from two 31 bit blocks
+that look reasonable. We may take 62-bit solution that is built from two 31-bit blocks
 and then again extend it. On the other hand, it may be more beneficial, to do 63-bit block size by
 splitting it into 3 bits and 60 bits. Thus, before choosing what solution we want to fully include
 into \texttt{SDSL}, we explored and tried several promising combinations and microbenchmarked them.
 
 \subsection{Experimental results}
 
-To measure the performance of our implementation, we mainly used two types of benchmarks. The first
-type used a \texttt{Google Benchmark} library. This is one of the standard libraries used for
-microbenchmarking of code. A code snippet that is being evaluated is run many times until
-stable results are obtained. This makes the results reliable even if the measured time is
-very small and also limits interference of other running processes on the results. The
+In this subsection, we show how we measured the performance and practical usability of our solution
+and also show the results of our experiments.
+
+To measure the performance of our implementation, we mainly relied on two types of benchmarks.
+The first type used a \texttt{Google Benchmark} library. This is one of the standard libraries
+used for microbenchmarking of code. A code snippet that is being evaluated is run many times
+until stable results are obtained. This makes the results reliable even if the measured time
+is very small and also limits interference of other running processes on the results. The
 limitation of microbenchmarks is that they are more artificial in nature and
 do not give the best possible sense of how the solution may behave on real data.
 
 The second type of benchmarks we used are the ones included in \texttt{SDSL}. These are
-testing bit vector inside of the more advanced data structures and use data from the
-\texttt{Pizza\&Chili} datasets \citep{ferragina2005pizza}. These include many types of data
-such as DNA sequences, \texttt{C} and \texttt{Java} source codes from \texttt{Linux} and
-\texttt{GCC} projects as well as English texts from the Gutenberg project. More information
-about this data such as statistics about the compressibility can be found in the work of
-\cite{ferragina2009compressed}, Section 4.2. We only provide information necessary to explain the
-measured phenomena later when exploring the results of our benchmarks.
+testing bit vector on real data and also as a part of the more advanced data structure.
+They use data from the \texttt{Pizza\&Chili} datasets \citep{ferragina2005pizza}. These
+include many types of data such as DNA sequences, \texttt{C} and \texttt{Java} source codes
+from \texttt{Linux} and \texttt{GCC} projects as well as English texts from the Gutenberg
+project. More information about this data such as statistics about the compressibility can
+be found in the work of \cite{ferragina2009compressed}, Section 4.2. We only provide information
+necessary to explain the measured phenomena later when exploring the results of our benchmarks.
 
 \paragraph{Microbenchmarks of block decoding}
 
@@ -251,12 +255,12 @@ our new method of encoding and decoding. We mainly focused on measuring differen
 in combination with different methods used for dividing block to subproblems and with different
 approaches to obtain particular block size. The tested block lengths were 15, 30, 31, 62, 63
 and 127. Sizes 15, 31, 63 and 127 are most useful in practice, however, they can be obtained using
-different combinations of block size 30 and 62, e.g. 31 can be combined as 1 bit and 30 bit solution,
+different combinations of block size 30 and 62, e.g. 31 can be combined as 1 bit and 30-bit solution,
 63 can be divided to 1 and 62 as well as to 3 and two sub-problems of size 30. Even if these
 tests were not made on practically useful data, they were mainly used as an indication which
 implementations are interesting and should be the best candidates for further evaluation.
 
-We used 3 different techniques to divide a problem into sub-problems, these were a linear scan,
+We tested 3 different techniques to divide a problem into sub-problems. These were a linear scan,
 binary search and linear scan enhanced by \texttt{SIMD} instructions. In order to implement the
 solution for 127-bit block size, we used the 128 bit type \texttt{\_\_uint128\_t} provided by both
 \texttt{GCC} and \texttt{Clang} compilers. This type is implemented on platform \texttt{x86\_64}
@@ -270,10 +274,10 @@ it obtained the queried bit. The results we measured are shown in Tab.~\ref{obr:
 We can observe there that our implementation is faster than on-the-fly decoding provided by \texttt{SDSL}
 on every block length that was tested. Linear version of decoding division outperforms binary search on
 every block length tested but the binary search is slowly catching up with increasing block length.
-For 30 bit block, the SIMD version dominates both linear and binary approach, this version is, however,
-harder to use for longer blocks as it ask for support of special instruction set. Version splitting
-63 bit block into 3 bits and two 30 bit blocks seems to be performing slightly better than the other
-variant combining 1 bit with solution for block length 62. Very important observation is that our 63 bit
+For 30-bit block, the \texttt{SIMD} version dominates both linear and binary approach, this version is,
+however, harder to use for longer blocks as it ask for support of special instruction set. Version splitting
+63-bit block into 3 bits and two 30-bit blocks seems to be performing slightly better than the other
+variant combining 1 bit with solution for block length 62. Very important observation is that our 63-bit
 version was measured to be faster than on-the-fly decoding for 31 bit block.
 
 \begin{figure}
@@ -408,7 +412,7 @@ DNA it is roughly 30\% speedup.
 On graphs where we can observe the tradeoff between space and time it is important not only to
 focus on fastest and most succinct implementations but also on those that are \textit{Pareto optimal}.
 This means that certain implementation may not be the fastest or space optimal but changing it for one
-that is faster means increasing space usage and vice versa. These pareto optimal values can be
+that is faster means increasing space usage and vice versa. These Pareto optimal values can be
 
 \begin{figure}
 	\centerline{
@@ -425,7 +429,7 @@ For benchmarking of $\extractOp$, \texttt{SDSL} uses a methodology proposed by
 \cite{ferragina2009compressed} in Section~5.4. This consists of extracting numerous
 substrings of length 512 starting at random positions in text. The additional parameter
 that is explored in this benchmark is sampling rate of suffix array and inverse suffix array.
-This is a parameter that can be used to trade off between the speed of FM-index and
+This is a parameter that can be used to trade-off between the speed of FM-index and
 its memory usage. Options for this sampling ratio are by default the powers of 2 from 4 up to
 256. We only show the results for a sampling rate 16 in Fig.~\ref{obr:benchmark_sdsl_extract},
 however, note that the trends that can be seen in these results can be observed for every sampling
@@ -629,7 +633,7 @@ The goal of first benchmark was to observe, how the first version of hybrid enco
 sequences with fixed percentage of ones. The reason behind this test is that bit vector implementations based on RRR
 do not perform very well on this type of sequences and are often dominated by sparse bit vector implementation.
 
-Thus, we generated random sequence of bits containing 5\% of ones. and compared our original RRR implementation with hybrid
+Thus, we generated a random sequence of bits containing 5\% of ones. and compared our original RRR implementation with hybrid
 implementation and also sparse bit vector provided by \texttt{SDSL}. We present the results in Fig.~\ref{obr:vysledky_hybrid_artif}.
 We may observe that our implementation was already competitive with sparse array for $\access$ and $\rank$. Hybrid encoding
 only amplified these differences. However, on $\select$ where our implementation was dominated by sparse array, these differences
