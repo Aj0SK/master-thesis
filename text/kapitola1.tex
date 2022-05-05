@@ -149,8 +149,8 @@ As we shall see, data structure used to solve this problem also uses bit vector 
 building blocks commonly used in succinct data structures.
 
 Let us consider a text $T$. After some initial preprocessing we would like to quickly answer
-questions such as “how many times is some pattern $P$ contained in $T$“ and also “where in $T$
-are the occurrences of $P$ located“. This problem is generally called a \textit{text indexing}
+questions such as ``how many times is some pattern $P$ contained in $T$'' and also ``where in $T$
+are the occurrences of $P$ located''. This problem is generally called a \textit{text indexing}
 problem and is particularly useful in bioinformatics, where we often have a very long sequence of DNA
 and we are interested in searching for some subsequences in it, e.g. problem of \emph{read mapping}
 \citep{simpson2010efficient}.
@@ -285,8 +285,8 @@ we know that in $F$ the subsequence containing the prefix {\tt house} begins on 
 
 % TODO: pridat obrazok, skontrolovat indexovanie
 
-In general, to count number of occurrences of pattern $P$, we first find the subsequence of rows of $M$, where
-suffix $P_{n-1\ldots}$ is located. As this is just a one symbol, $p_{n-1}$, the initial subsequence is a run
+In general, to count the number of occurrences of pattern $P$, we first find the subsequence of rows of $M$
+beginning with $P_{n-1\ldots}$. As this is just one symbol, $p_{n-1}$, the initial subsequence is a run
 of symbol $p_{n-1}$ in $F$ given by
 \begin{align*}
 	b_{n-1}&=\Count[p_{n-1}] \\
@@ -299,8 +299,8 @@ this information. In a range from $b_{n-1}$ to $e_{n-1}$ some rows end with char
 are rows which after being rotated, create subsequence we are looking for. Subsequence we are looking
 for is also subsequence of a run of character $p_{n-2}$ in $F$, starting from $\Count[p_{n-2}]$ spanning
 rows up to $\Count[p_{n-2}+1]$. To find the beginning and end of our subsequence inside of this run, we
-compute the number of occurrences of character $p_{n-2}$ in $L$ up to the $b_{n-1}$, the start of previous
-subsequence of rows and also the number of occurrences of character $p_{n-2}$ in $L$ up to the $e_{n-1}$
+compute the number of occurrences of character $p_{n-2}$ in $L$ up to $b_{n-1}$, the start of previous
+subsequence of rows and also the number of occurrences of character $p_{n-2}$ in $L$ up to $e_{n-1}$
 giving us its end. This works thanks to the property \ref{chapter1:fmindexprop:prop2}. Thus giving us the
 new subsequence
 \begin{align*}
@@ -309,11 +309,11 @@ new subsequence
 \end{align*}
 We continue and repeat the previous step until we compute $b_0$ and $e_0$ or until $b_i=e_i$ for some $i$
 (in this case, the searched word is not present in the text). The possible pseudocode for counting the number
-of occcurrences of $P$ in $T$ is in listing \ref{alg:fm_index_count}.
+of occurrences of $P$ in $T$ is in listing \ref{alg:fm_index_count}.
 
 \begin{algorithm}
-\caption{FM-index count method pseudocode}\label{alg:fm_index_count}
-\KwData{$P = \Sigma^n$}
+\caption{Count number of occurrences of pattern $P$ in an FM-index}\label{alg:fm_index_count}
+\KwData{$P\in \Sigma^n$}
 $b \gets \Count[P[n-1]]$\;
 $e \gets \Count[P[n-1]+1]$\;
 \For{$i=n-2$ \KwTo $0$} {
@@ -409,8 +409,8 @@ containing symbol $c$.
 The idea proposed by~\cite{makinen2005succinct} is to shape the wavelet tree in such a way that
 a code of every symbol is equal to its Huffman code. The advantage we get is that if queries for
 symbols are proportional to their frequencies, then we need to visit on average
-only $\BigO(H_0)$ nodes rather than $\BigO(\log \sigma)$, where $H_0$ is empirical zero-order
-entropy, defined as $$H_0(S)=\sum_{c\in\Sigma} \frac{n_c}{n} \log \frac{n}{n_c}$$,
+only $\BigO(H_0)$ nodes rather than $\BigO(\log \sigma)$, where $H_0$ is the empirical zero-order
+entropy, defined as $$H_0(S)=\sum_{c\in\Sigma} \frac{n_c}{n} \log \frac{n}{n_c},$$
 where $n_c$ denotes number of occurrences of symbol $c$ in sequence $S$ of length $n$. The value
 of zero-order entropy is a lower bound for the number of bits that $S$ can be compressed to by
 compressor that considers only frequencies of symbols. Even if the maximum depth of Huffman

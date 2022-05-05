@@ -293,7 +293,7 @@ $i$-th block where $i=\floor{x/b}$. Its compressed representation is $(C[i], O[i
 
 Obtaining $C[i]$ is trivial as it is at the fixed memory offset from the beginning of array $C$. Getting the
 value of $O[i]$ is harder as it is not at a known memory offset but it can be still expressed as
-$$\sum_{j=1}^{i-1} \ceil{\log_2{b\choose C[i]}}$$. This can not be, however, computed in constant time without
+$$\sum_{j=1}^{i-1} \ceil{\log_2{b\choose C[i]}}.$$ This can not be, however, computed in constant time without
 any precomputed information and we need to basically one by one skip over elements that come before $O[i]$.
 To access the $i$-th block, we need in the worst case to look at all the elements of $C$ and this
 takes $\BigO(n/b)$ time. For now, we stay with this solution and analyze its space usage.
