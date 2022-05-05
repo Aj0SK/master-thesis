@@ -71,10 +71,10 @@ for file, block_size, cutoff in res.keys():
     file_index = test_cases.index(file)
     m = 'o'
     marker_size = 75
-    l = str(block_size)
+    l = "orig-" + str(block_size)
     if cutoff != block_size:
         m = "x"
-        l = str(block_size) + "(" + str(cutoff) + ")"
+        l = "hybrid-" + str(block_size) + "(" + str(cutoff) + ")"
     labels.add(l)
     color = block_size_color[block_size]
     

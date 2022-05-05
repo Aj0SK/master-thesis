@@ -54,8 +54,8 @@ test_cases.sort()
 
 rows, cols = 2, 2
 
-fig, axs = plt.subplots(rows, cols, figsize=(11,8))
-fig.suptitle('FM-index count', fontsize=20)
+fig, axs = plt.subplots(rows, cols)
+fig.suptitle('FM-index count for hybrid implementation', fontsize=20)
 
 if rows*cols != len(test_cases):
     print("Not enough of space in graph.")
@@ -66,23 +66,25 @@ for i in range(len(test_cases)):
 
 labels = set()
 
+allowedCutoffs = {15: [15], 31: [15, 31], 63: [15, 63], 127: [31, 127]}
+
 for file, block_size, cutoff in res.keys():
     time, memory = res[file, block_size, cutoff]
+    if cutoff not in allowedCutoffs[block_size]:
+        continue
+
     file_index = test_cases.index(file)
     m = 'o'
-    marker_size = 30
+    marker_size = 75
+    l = "orig-" + str(block_size)
     if cutoff != block_size:
-        m = fr"${cutoff}$"
-        marker_size = 150
-        if len(m) == 3:
-            marker_size = 60
-    
+        m = "x"
+        l = "hybrid-" + str(block_size) + "(" + str(cutoff) + ")"
+
     row = file_index//rows
     col = file_index%cols
     color = block_size_color[block_size]
-    l = '_nolegend_'
-    if cutoff == block_size:
-        l = str(block_size)
+
     labels.add(l)
     axs[row][col].scatter([memory], [time], c=color, marker=m, s=marker_size, label=l)
 
@@ -91,8 +93,6 @@ for i in range(rows):
 
 for i in range(cols):
     axs[-1][i].set_xlabel("bits per text char", fontsize=12)
-
-fig.subplots_adjust(bottom=0.3, wspace=0.33)
 
 labels_handles = {
   label: handle for ax in fig.axes for handle, label in zip(*ax.get_legend_handles_labels())
@@ -105,10 +105,12 @@ fig.legend(
   bbox_to_anchor=(0.5, 0.05),
   bbox_transform=plt.gcf().transFigure,
   ncol=len(list(labels)),
-  handletextpad=0.01
+  handletextpad=0.01,
+  prop={'size': 13}
 )
 
-fig.tight_layout(pad=3.0)
+fig.tight_layout(pad=1.0)
+fig.set_size_inches(13, 10)
 
 plt.savefig("vysledky_sdsl_hybrid_count.png")
 plt.clf()
