@@ -625,22 +625,26 @@ int decompress_class(int k) {
 
 \subsection{Experimental results}
 
-% TODO: finish this
+The goal of first benchmark was to observe, how the first version of hybrid encoding behaves on randomly generated
+sequences with fixed percentage of ones. The reason behind this test is that bit vector implementations based on RRR
+do not perform very well on this type of sequences and are often dominated by sparse bit vector implementation.
 
-We tested the first version of hybrid encoding on randomly generated sequence of bits that contains 5\% of ones.
-This was to observe, how it behaves on sparse sequences with smaller percentage of ones. This is something, where
-implementations based on RRR do not perform very well and are often beaten by sparse bit vector implementation.
-We present the results in Fig.~\ref{obr:vysledky_hybrid_artif}. We may observe that our implementation was already
-competitive with sparse array on $\access$ and $\rank$. Hybrid encoding only amplified these differences. However,
-on $\select$ where our implementation was dominated by sparse array, these differences were not completely overcome.
+Thus, we generated random sequence of bits containing 5\% of ones. and compared our original RRR implementation with hybrid
+implementation and also sparse bit vector provided by \texttt{SDSL}. We present the results in Fig.~\ref{obr:vysledky_hybrid_artif}.
+We may observe that our implementation was already competitive with sparse array for $\access$ and $\rank$. Hybrid encoding
+only amplified these differences. However, on $\select$ where our implementation was dominated by sparse array, these differences
+were not completely overcome by hybrid implementation. We can, however, conclude that hybrid version of 63 and 127 bit block
+created new viable alternatives, most importantly for $\select$ method.
 
-Our second version of hybrid encoding was tested in the same two scenarios we used in the previous section. Namely
-on the raw data from the wavelet tree built on top of the DNA sequence and XML data. The results can be observed in
-Fig.~\ref{obr:benchmark_sdsl_hybrid}.
+We tested our second version of hybrid encoding on the previously used datasets \texttt{WT-DNA} and \texttt{WT-WEB}.
+The graph comparing results for classic bit vectors and hybrid bit vectors can be sobserved in Fig.~\ref{obr:vysledky_sdsl_hybrid}.
+The results of our hybrid implementation are not very promising on these data. Except for the access, they do not
+look very promising. The reason why the results are better for $\access$ is that hybrid implementation creates
+unneccessary memory accesses when anwering $\rank$ and $\select$. 
 
 With these results, we also benchmarked several possible versions of hybrid bit vector inside of the FM-index.
 We used the exact same parameters as in the previous tests but now, we took as a baseline our implementation of RRR
-withouth hybrid encoding. The results may be observed in Fig~\ref{obr:benchmark_sdsl_hybrid_count}.
+without hybrid encoding. The results may be observed in Fig~\ref{obr:benchmark_sdsl_hybrid_count}.
 
 \begin{figure}
 	\centerline{
@@ -649,7 +653,7 @@ withouth hybrid encoding. The results may be observed in Fig~\ref{obr:benchmark_
 	\caption[TODO]{Timing of $\access$, $\rank$ and $\select$ methods over the randomly generated
 	sequence with 5\% of ones in it. Comparison of standard implementation and our hybrid encoding
 	marked with cross. For reference, we included sparse vector implementation. We may observe how
-	implementations get closer to the entropy lower bound with increasing block size. Name
+	implementations get closer to the entropy lower bound (0.29) with increasing block size. Name
 	$\texttt{hybrid-}x\texttt{(}y\texttt{)}$ denotes implementation of block size $x$ with cutoff $y$.
 	}
 	\label{obr:vysledky_hybrid_artif}
@@ -657,18 +661,24 @@ withouth hybrid encoding. The results may be observed in Fig~\ref{obr:benchmark_
 
 \begin{figure}
 	\centerline{
-		\includegraphics[width=\textwidth, height=0.4\textheight]{images/benchmark_sdsl_hybrid}
+		\includegraphics[width=\textwidth, height=0.35\textheight]{images/vysledky_sdsl_hybrid}
 	}
-	\caption[TODO]{TODO: Zatial iba placeholder obrazok.
+	\caption[TODO]{This graph is showing the results of benchmark of $\access$, $\rank$ and $\select$
+	queries over bit vectors from wavelet tree over DNA sequence data \texttt{WT-DNA} and XML bibliographic
+	data \texttt{WT-WEB}. On $x$-axis is the space usage of the particular representation and on $y$-axis
+	the average query time for the respective operation. Original implementation is denoted by dots. These
+	are our implementations except for the 15 bit version based on the table lookup provided by \texttt{SDSL}.
+	Every cross symbols hybrid implementation with particular cutoff. The same block size is denoted by the single color.
 	}
-	\label{obr:benchmark_sdsl_hybrid}
+	\label{obr:vysledky_sdsl_hybrid}
 \end{figure}
 
 \begin{figure}
 	\centerline{
 		\includegraphics[width=\textwidth, height=0.5\textheight]{images/vysledky_sdsl_hybrid_count}
 	}
-	\caption[TODO]{TODO: Zatial iba placeholder obrazok.
+	\caption[TODO]{Counting occurrences of patterns in various different texts. Displaying
+	the query time per pattern symbol compared to size index. 
 	}
 	\label{obr:benchmark_sdsl_hybrid_count}
 \end{figure}
@@ -681,8 +691,6 @@ withouth hybrid encoding. The results may be observed in Fig~\ref{obr:benchmark_
 %	}
 %	\label{obr:benchmark_sdsl_hybrid_extract}
 %\end{figure}
-
-% TODO: FM-indexove grafy
 
 %Before implementing our second version of hybrid encoding, we have been interested in a potential
 %space saving on some real-life data so we analyzed what is the space saved when using hybrid encoding
