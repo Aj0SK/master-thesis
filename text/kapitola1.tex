@@ -313,10 +313,11 @@ of occurrences of $P$ in $T$ is in listing \ref{alg:fm_index_count}.
 
 \begin{algorithm}
 \caption{Count number of occurrences of pattern $P$ in an FM-index}\label{alg:fm_index_count}
+\SetKw{KwDownto}{downto}
 \KwData{$P\in \Sigma^n$}
 $b \gets \Count[P[n-1]]$\;
 $e \gets \Count[P[n-1]+1]$\;
-\For{$i=n-2$ \KwTo $0$} {
+\For{$i=n-2$ \KwDownto $0$} {
 	\If{$e-b = 0$}{
 		break\;
 	}
