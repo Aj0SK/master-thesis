@@ -66,10 +66,10 @@ sparse vector of numbers, where most of the elements are 0. Then we could use a 
 space-efficient approach. Let us assume that only $n$ out of $N$ elements are present
 and also that $n\ll N$.
 
-First approach considering the sparseness of an array is to store only the non-default
+The first approach considering the sparseness of an array is to store only the non-default
 elements as pairs $(\text{position}, \text{value})$, which takes $n\cdot (k+\lg N)$
-bits of space. If we just store these pairs sorted by the position, accessing the $i$-th
-element takes time $\BigO(\log n)$.
+bits of space where $\lg x = \ceil{\log_2 x}$. If we just store these pairs sorted by
+the position, accessing the $i$-th element takes time $\BigO(\log n)$.
 
 We may use a hash table to obtain a constant time solution but this comes with additional
 memory overhead.

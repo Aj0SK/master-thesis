@@ -249,7 +249,7 @@ assumptions about the input bit sequence to change how blocks are represented an
 it, save some additional space. Storing block of length $b$, in a raw bit representation
 always takes exactly $b$ bits of space. The number of bits used by compressed form, however,
 depends heavily on the blocks class. If the block is of class $c$, then compressed
-representation uses $\ceil{\log_2 (b+1)}$ bits to store its class and $\ceil{\log_2{b\choose c}}$
+representation uses $\lg (b+1)$ bits to store its class and $\lg {b\choose c}$
 bits to store the offset along the class. In Fig.~\ref{obr:rrrSpaceSavings}, we can see
 how the space saved per block depends on the block’s class. At the same time, we see
 that RRR saves most of the memory on very sparse and very dense blocks. We would like
@@ -310,7 +310,7 @@ block that is densely packed with ones), we can save a small amount of space
 by decreasing the number of bits used to store the classes. The main idea
 of hybrid encoding is that every block with a class bigger than some threshold
 has its class set to this threshold and this means that the block
-is stored using full $b$ bits instead of $\ceil{\log_2{b\choose c}}$ bits.
+is stored using full $b$ bits instead of $\lg {b\choose c}$ bits.
 Let $c_k$ be a cutoff value. Blocks with class bigger than $c_k$ will not be
 encoded but just copied with the class set to $c_k$ no matter what is the
 number of ones in them.
@@ -324,25 +324,25 @@ number of ones in them.
 Possible value for blocks class is a number from 0 up to $b$. When the cuttoff $c_k$ is
 used, the class of block is a number from 0 up to $c_k$. To possibly save some space on
 the bit representation of the blocks class, we need to choose $c_k$ such that
-$$\ceil{\log_2(c_k+1)} < \ceil{\log_2(b+1)}.$$ Let us now compare these two representations
+$$\lg (c_k+1) < \lg (b+1).$$ Let us now compare these two representations
 and the theoretical space savings that can be obtained.
 
 Let $n$ be a length of the
 sequence, $b$ the block size and $C_i$ the number of blocks with class $i$. To simplify the
 calculations in this section, we assume that $b+1$ as well as $c_k+1$ is a power of 2 and
-$n$ is divisible by $b$
+$n$ is divisible by $b$.
 
-The first representation takes $$(n/b)\lg (b+1) + \sum_{i=0}^{b} C_i\ceil{\lg {b\choose i}}$$
+The first representation takes $$(n/b)\lg (b+1) + \sum_{i=0}^{b} C_i\lg {b\choose i}$$
 bits of space with the first and second term being the number of bits that is used by the
 classes and offsets respectively. The hybrid representation with cutoff $c_k$ takes
-$$(n/b)\lg (c_k+1) + \sum_{i=0}^{c_k-1}C_i\ceil{\lg {b\choose i}} + \sum_{i=c_k}^{b}C_i b$$
+$$(n/b)\lg (c_k+1) + \sum_{i=0}^{c_k-1}C_i\lg {b\choose i} + \sum_{i=c_k}^{b}C_i b$$
 bits of space. We would like to find out what is the expected space that we save using the
 hybrid encoding. We start by simplifying the expected value of the difference of these
 representations:
 \begin{align}
-E[\Delta\text{space}] &= E\left[(n/b)(\lg(b+1)-\lg(c_k+1)) + \sum_{i=c_k}^{i\leq b}C_i\cdot \left(\ceil{\lg{b\choose i}} - b\right)\right] \nonumber\\
-&=(n/b)(\lg(b+1)-\lg(c_k+1)) + \sum_{i=c_k}^{i\leq b}E\left[C_i\cdot \left(\ceil{\lg{b\choose i}} - b\right)\right] \nonumber\\
-&=(n/b)(\lg(b+1)-\lg(c_k+1)) + \sum_{i=c_k}^{i\leq b}E\left[C_i\right]\cdot \left(\ceil{\lg{b\choose i}} - b\right) \nonumber\\
+E[\Delta\text{space}] &= E\left[(n/b)(\lg(b+1)-\lg(c_k+1)) + \sum_{i=c_k}^{i\leq b}C_i\cdot \left(\lg{b\choose i} - b\right)\right] \nonumber\\
+&=(n/b)(\lg(b+1)-\lg(c_k+1)) + \sum_{i=c_k}^{i\leq b}E\left[C_i\cdot \left(\lg{b\choose i} - b\right)\right] \nonumber\\
+&=(n/b)(\lg(b+1)-\lg(c_k+1)) + \sum_{i=c_k}^{i\leq b}E\left[C_i\right]\cdot \left(\lg{b\choose i} - b\right) \nonumber\\
 E[C_i] &= (n/b)\cdot {b\choose i}\cdot p^i\cdot (1-p)^{b-i} \label{eq:hybrid_encoding_expected_c_i}
 \end{align}
 Here we mainly used the linearity of the expected value. To compute the expected value of
@@ -401,14 +401,14 @@ that the number of these blocks is low, so the possible speedup may not be very 
 
 The previous version of hybrid encoding may work well for sequences with low density of ones.
 However, we would also like to use this idea as a viable solution for sequences that contain
-similar frequency of zeroes and ones but still exhibit behaviour that some block classes are
+similar frequencies of zeroes and ones but still exhibit behaviour that some block classes are
 underrepresented. This may, for example, occur when sequence has a property, that it is
 globally balanced, but is very unbalanced in some local parts. Then it may be the case, that
 blocks with low count of zeroes and ones are more frequent than blocks with balanced counts
 of zeroes and ones.
 
 Let us say, that we want to only store $r$ classes instead of all $b+1$ of them. To make
-some space saving possible, it must hold that $$\ceil{\log_2(r)} < \ceil{\log_2(b+1)}.$$
+some space saving possible, it must hold that $$\lg r < \lg (b+1).$$
 We create a range of classes given by closed interval $[\mathit{cut\_from}, \mathit{cut\_to}]$.
 If the blocks class is outside of this range, it is encoded in a standard way. On the other
 hand, all the values inside of this interval are mapped to one particular class number and the
@@ -449,9 +449,9 @@ values can be mapped into the range $[0, 3]$, thus only consuming two bits per c
 \end{figure}
 
 Space used by this representation is equal to
-$$(n/b)\lg (c_k+1) + \sum_{i=0}^{\mathit{cut\_from}-1} C_i\ceil{\lg {b\choose i}}
+$$(n/b)\lg (c_k+1) + \sum_{i=0}^{\mathit{cut\_from}-1} C_i\lg {b\choose i}
 + \sum_{i=\mathit{cut\_from}}^{\mathit{cut\_to}}C_i b
-+ \sum_{i=\mathit{cut\_to}+1}^{b} C_i\ceil{\lg {b\choose i}}.$$
++ \sum_{i=\mathit{cut\_to}+1}^{b} C_i\lg {b\choose i}.$$
 
 To summarize, we proposed two ideas how to enhance current implementations of RRR.
 First idea is related to the way how blocks are encoded and decoded. We devised a new ordering
