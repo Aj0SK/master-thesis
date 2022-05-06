@@ -310,7 +310,7 @@ version was measured to be even faster than on-the-fly decoding for 31-bit block
 	}
 	\caption[TODO]{Results of microbenchmarking various types of decoding implementations.
 	The numbers in method name denote to what block lengths the problem was broken. The name
-	reflects what method was used to break the problem into subproblems.
+	also reflects what method was used to break the problem into subproblems.
 	}
 	\label{obr:simple_benchmark}
 \end{figure}
@@ -345,8 +345,9 @@ implementation in Fig.~\ref{obr:benchmark_sdsl_new_method}.
 	\centerline{
 		\includegraphics[width=\textwidth, height=0.7\textheight]{images/benchmark_sdsl_new_method}
 	}
-	\caption[TODO]{\texttt{SDSL} benchmark to measure the bit vector performance and its dependence
-	on the block length. Our implementations are marked using cross.
+	\caption[TODO]{\texttt{SDSL} benchmark measuring the query time of $\access$, $\rank$ and $\select$
+	and its dependence on the block length across various data types. Our implementations are marked
+	by cross.
 	}
 	\label{obr:benchmark_sdsl_new_method}
 \end{figure}
@@ -378,7 +379,7 @@ we continue to work with 64-bit integers which are much faster on current machin
 Even if the previous benchmark was done on realistic data, we wanted to test our implementation in
 a practically useful application. We benchmarked our bit vector as a part of Huffman shaped
 wavelet tree used inside of the FM-index. Implementation of FM-index in \texttt{SDSL}, as most
-of other implementations, provides mainly 3 methods:
+of the other implementations, provides mainly 3 methods:
 \begin{itemize}
 	\item $\countOp(P)$ -- returns the number of occurrences of $P$ in text $T$,
 	\item $\locateOp(P)$ -- returns all positions of pattern $P$ in text $T$,
@@ -389,62 +390,61 @@ does not store the original sequence $T$ -- at least not in an easily readable f
 
 We again used benchmarks provided by $\texttt{SDSL}$ library and tested how the performance
 of methods $\countOp, \locateOp$ and $\extractOp$ changes when our bit vector is used. These
-benchmarks are based on the data from the \texttt{Pizza\&Chili} dataset and use mainly methodology
-proposed by \cite{ferragina2009compressed}. The data we used are English texts from Gutenberg
-project, source codes and then DNA and protein sequences. In these benchmarks, we used as a
-baseline the FM-index version based on block length 15. To provide more context, we also included
-version based on uncompressed bit vector.
+benchmarks are run on the data from the \texttt{Pizza\&Chili} dataset and use mainly methodology
+proposed by \cite{ferragina2009compressed}. The data we show here are the English texts from
+Gutenberg project, source codes and then DNA and protein sequences. In these benchmarks, we used
+as a baseline the FM-index version based on block length 15. To provide more context, we also included
+version based on the uncompressed bit vector.
 
-To benchmark operation $\countOp$, the index over the text is built. Then, random patterns of
+To measure performance of $\countOp$, the index over the text is built. Then, random patterns of
 various lengths are extracted from the text and subsequently used for benchmarking. Code
 that generates these patterns in \texttt{SDSL} is a slight modification of a version provided
-by \texttt{Pizza\&Chili}. We measure the trade-off between space used for index and the speed
-normalized by the number of symbols contained in all searched patterns. We present the results
-in Fig.~\ref{obr:benchmark_sdsl_count}.
+by \texttt{Pizza\&Chili} project. We measure the trade-off between space used for the index and the
+speed normalized by the total number of symbols contained in all searched patterns. We present the
+results in Fig.~\ref{obr:benchmark_sdsl_count}.
 
 We may observe that the speed gain we have measured in the previous benchmarks also translated
 to speedup of FM-index operation $\countOp$. On the English dataset, block lengths 127 and 63 have
 been able to obtain the speed of the block lengths 63 and 31 provided by \texttt{SDSL}. The biggest
-speed up can be observed for 127-bit block, on English data the time saved is close to 20\%, on
+speed up can be observed for 127-bit block -- on English data the time saved is close to 20\%, on
 DNA it is roughly 30\% speedup.
 
 On graphs where we can observe the tradeoff between space and time it is important not only to
 focus on fastest and most succinct implementations but also on those that are \textit{Pareto optimal}.
-This means that certain implementation may not be the fastest or space optimal but changing it for one
-that is faster means increasing space usage and vice versa. These Pareto optimal values can be
+This means that certain implementation may not be the fastest or space optimal but to obtain faster
+implementation leads to increase in space usage and vice versa.
 
 \begin{figure}
 	\centerline{
 		\includegraphics[width=\textwidth, height=0.4\textheight]{images/vysledky_sdsl_count}
 	}
 	\caption[TODO]{Counting occurrences of patterns in various different texts. Displaying
-	the query time per pattern symbol for various block sizes and the size of index over the
-	text. Uncompressed bit vector (sdsl-bv) is included for reference. 
+	the query time per pattern symbol on $y$-axis and the size of the index over the
+	text on $x$-axis. Uncompressed bit vector (sdsl-bv) is included for reference. 
 	}
 	\label{obr:benchmark_sdsl_count}
 \end{figure}
 
 For benchmarking of $\extractOp$, \texttt{SDSL} uses a methodology proposed by
-\cite{ferragina2009compressed} in Section~5.4. This consists of extracting numerous
-substrings of length 512 starting at random positions in text. The additional parameter
-that is explored in this benchmark is sampling rate of suffix array and inverse suffix array.
-This is a parameter that can be used to trade-off between the speed of FM-index and
+\cite{ferragina2009compressed} in Section~5.4. The queries used for benchmarking consist of
+numerous substrings of length 512 starting at random positions in text. The additional dimension
+of FM-index that is tested in this benchmark is sampling rate of suffix array and inverse suffix
+array. This is a parameter that can be used to trade-off between the speed of FM-index and
 its memory usage. Options for this sampling ratio are by default the powers of 2 from 4 up to
 256. We only show the results for a sampling rate 16 in Fig.~\ref{obr:benchmark_sdsl_extract},
-however, note that the trends that can be seen in these results can be observed for every sampling
-rate.
+however, note that the trends that can be observed in these results are also visible for every
+sampling rate.
 
-We can observe similar speedup as for $\countOp$. The visible difference is slightly
-bigger speedup on Source codes data for block length 31. On the DNA data, the speedup is
-hitting again 30\%.
+We may observe similar speedup as for $\countOp$ method. The visible difference is slightly
+bigger speedup on Sources for block length 31. On the DNA data, the speedup is hitting again 30\%.
 
 \begin{figure}
 	\centerline{
 		\includegraphics[width=\textwidth, height=0.4\textheight]{images/vysledky_sdsl_extract}
 	}
 	\caption[TODO]{Extracting parts of the represented text. Displaying
-	the query time per extracted symbol for various block sizes and the size of index over the
-	text. Uncompressed bit vector (sdsl-bv) is included for reference. 
+	the query time per extracted symbol on $y$-axis and the size of index over the text on $x$-axis.
+	Uncompressed bit vector (sdsl-bv) is included for reference. 
 	}
 	\label{obr:benchmark_sdsl_extract}
 \end{figure}
@@ -454,7 +454,7 @@ in Section~5.3. This consists of locating random patterns of length 5 in the tex
 that in total 2--3 millions of occurrences are found in the text. We present the results
 obtained in Fig.~\ref{obr:benchmark_sdsl_locate}.
 
-The results are very strong for DNA, Proteins and Sources datasets but even on English, where
+The results are very strong for DNA, Protein and Sources datasets but even on English, where
 our method performed the worst we can observe 10--20\% speed up on every block length.
 
 \begin{figure}
