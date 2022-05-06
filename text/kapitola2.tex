@@ -79,7 +79,7 @@ through superblock is very cache-friendly and thus very fast.
 
 \paragraph{Constant time rank with sublinear space overhead}
 
-Although the previous solution works well and is commonly used in practice, it is possible to
+The previous solution works well and is commonly used in practice. However, it is possible to
 answer $\rank$ query in constant time with only sublinear space overhead. The constant time
 solution is based on partitioning first proposed in this context by \cite{okanohara2007practical}.
 As in the previous solution, we start by splitting the bit sequence into superblocks. This time
@@ -127,7 +127,7 @@ The additional space used by this solution can be broken down into three parts:
 The total space used for this solution of $\rank$ is therefore sum of \ref{eq:rank_space_1}, \ref{eq:rank_space_2} and
 \ref{eq:rank_space_3}, which is sublinear from $n$.
 
-Although optimal in theory, this solution is not often used in practice as it produces
+Even if optimal in theory, this solution is not often used in practice as it produces
 3 cache misses and quite complex implementation. One for accessing the precomputed rank up
 to the start of the superblock, then another one for the precomputed value of rank to the
 beginning of the block and in the end also one for accessing the precomputed $\rank$ value
@@ -227,10 +227,10 @@ is heavily used in practice.
 
 Now, for this structure to work, we need to find a way how to convert between the bit representation of
 a block and its compressed form $(c, o)$. The process of obtaining $c$ and $o$ from the raw representation
-of block is called \textit{encoding}. The opposite process is called \textit{decoding}. Although
-we would like both processes to be fast, we do the encoding only once, at the initial construction
-of the bit vector while decoding is done every time we are accessing a particular bit in $B$. Thus,
-in practice, it is more important to optimise the speed of decoding.
+of block is called \textit{encoding}. The opposite process is called \textit{decoding}. We would like both
+processes to be fast, however, in most of the applications where bit vector is used, we do the encoding only
+once at the initial construction of the bit vector. Decoding, on the other hand, is done every time we are
+accessing a particular bit in $B$. Thus, in practice, it is more important to optimise the speed of decoding.
 
 \paragraph{Block encoding/decoding}
 
@@ -372,7 +372,7 @@ RRR is used on sequences with low entropy, where the frequency of zeroes/ones
 is shifted to one or the other side such as 20-40\% of all bits are the same.
 There is also a second class of the bit vector implementations, heavily
 used when the frequency of zeroes or ones is more significantly shifted.
-Although we stated that RRR is used in case of shifted frequencies, when the number
+We stated that RRR is used in case of shifted frequencies, but when the number
 of ones is very small, e.g. less than 5\% of the sequence, sparse bit vector
 implementations may outperform solutions based on RRR as was observed by \cite{navarro2012fast}.
 Where RRR stands out from some of its alternatives is that it is also very competitive
