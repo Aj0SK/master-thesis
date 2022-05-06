@@ -265,18 +265,18 @@ solution for 127-bit block size, we used the 128 bit type \texttt{\_\_uint128\_t
 as a combination of two 64-bit integers. We compared these results with the table decoding specialization
 in \texttt{SDSL} and with on-the-fly decoding. We ran the deconding algorithm on randomly generated data.
 We generated 1\,000 pairs of class and offset by first randomly picking class of the block and then the
-offset along this class. To make the comparison fair, we measured decoding time of the bit in the half of
-the block for on-the-fly decoding as this decoding can stop once it obtained the queried bit. The results
-we measured are shown in Tab.~\ref{obr:simple_benchmark}.
+offset along this class. To make the fair comparison, we measured decoding time of the bit in the half of
+the block for the on-the-fly decoding as this decoding method can stop once it obtained the queried bit.
+The results we measured are shown in Tab.~\ref{obr:simple_benchmark}.
 
 We can observe there that our implementation is faster than on-the-fly decoding provided by \texttt{SDSL}
 on every block length that was tested. Linear version of decoding division outperforms binary search on
 every block length tested but the binary search is slowly catching up with increasing block length.
-For 30-bit block, the \texttt{SIMD} version dominates both linear and binary approach, this version is,
-however, harder to use for longer blocks as it ask for support of special instruction set. Version splitting
-63-bit block into 3 bits and two 30-bit blocks seems to be performing slightly better than the other
-variant combining 1 bit with solution for block length 62. Very important observation is that our 63-bit
-version was measured to be faster than on-the-fly decoding for 31-bit block.
+For 30-bit block, the \texttt{SIMD} version dominates both linear and binary approach. This version is,
+however, harder to use for longer blocks as it ask for support of special instruction set. Version
+obtaining 63-bit block using one 3-bit and two 30-bit blocks seems to be performing slightly better than
+the other variant that extends block length 62 by one bit. Important observation is that our 63-bit
+version was measured to be even faster than on-the-fly decoding for 31-bit block.
 
 \begin{figure}
 	\centerline{
@@ -317,19 +317,19 @@ version was measured to be faster than on-the-fly decoding for 31-bit block.
 
 \paragraph{Bit vector on real data}
 
-After benchmarking and finding the potential for speeding up the bit vector implementation using
-our new method, we decided to implement and benchmark it on data that are closer to the real-life
+After benchmarking and finding the potential for speeding up the bit vector using our new method,
+we decided to implement and benchmark our implementation on data that are closer to the real-life
 usage of bit vectors.
 
-We used a benchmarking part of \texttt{SDSL} targeted at a class \texttt{rrr\_vector}. This test
-measures how query time for $\access$, $\rank$ and $\select$ depends on the block size used on
-different types of data. The first type of sequence is randomly generated bit sequence with
+We used a benchmarking part of \texttt{SDSL} targeted on \verb'rrr_vector' class. This test
+measures on different types of data how query time for $\access$, $\rank$ and $\select$ depends
+on the block length used. The first type of sequence is randomly generated bit sequence with
 density of ones equal to 50\%. The origin of second type of data is closely described in
 \cite{gog2014optimized}. It consists of numerous bit vectors, stored in files such as
 \texttt{WT-DNA-16MB} or \texttt{WT-WEB-1GB}. The structured name describes how the bit vector
 was created. For instance, \texttt{WT-DNA-1GB} has been created by:
 \begin{itemize}
-	\item Taking 1GB prefix of DNA file.
+	\item Taking 1GB prefix of file containing DNA sequence.
 	\item Creating BWT of this text.
 	\item Building Huffman shaped wavelet tree over it.
 	\item Concatenating all the bit vectors in the wavelet tree.
@@ -346,31 +346,32 @@ implementation in Fig.~\ref{obr:benchmark_sdsl_new_method}.
 		\includegraphics[width=\textwidth, height=0.7\textheight]{images/benchmark_sdsl_new_method}
 	}
 	\caption[TODO]{\texttt{SDSL} benchmark to measure the bit vector performance and its dependence
-	on the block size. Our implementations are marked using cross.
+	on the block length. Our implementations are marked using cross.
 	}
 	\label{obr:benchmark_sdsl_new_method}
 \end{figure}
 
 There are several interesting things to observe in these results: Our new implementation
-beats older implementation on almost all block sizes and all types of data. Note that the difference is more
+beats older implementation on almost all block lengths and all types of data. Note that the difference is more
 visible on random and DNA data. On web data, however, the difference is less noticeable. We attribute
 this behaviour to the fact, that was observed by creators of this dataset -- the number of
 uniform blocks (full of either zeroes or ones) is much bigger in \texttt{WT-WEB} than in \texttt{WT-DNA}.
-For block size 63, they observed that \texttt{WT-WEB-1GB} contains 84\% of uniform blocks compared to 28\% in
+For block length 63, they observed that \texttt{WT-WEB-1GB} contains 84\% of uniform blocks compared to 28\% in
 \texttt{WT-DNA}. As the uniform blocks are decoded trivially in both implementations, this makes less opportunities
 for our implementation to save time.
 
 Another visible pattern is that with increasing block length, the query time generally goes up as decoding takes
 more and more time. On the other hand, on $\select$ in \texttt{WT-WEB} data, we can see that at the beginning
-the query time decreases with increasing block length. This is because time saved on faster binary search in
-precomputed $\rank$ values offsets the growing decoding time.
+the query time decreases with increasing block length. Similar behaviour on this data was observed by
+\cite{gog2014optimized} and attributed to the faster binary search in precomputed $\rank$ values offsetting the
+growing decoding time.
 
 Overall, we saved almost 50\% of time on $\access$, $\rank$ and $\select$ over randomly generated data,
-and close to 50\% of time on \texttt{WT-DNA} data when compared to the baseline. Our results are positive
-also on \texttt{WT-WEB}, particularly for block length 127. This block length is particularly faster in our
-case. The reason could be the inefficiencies in \texttt{SDSL}s implementation of 128-bit integer but also
-in fact, that after dividing the problem into subproblems, we continue to work with 64-bit integers which
-are much faster on current machines.
+and close to 50\% of time on \texttt{WT-DNA} data when compared to the baseline implementation. Our results
+are positive also on \texttt{WT-WEB}, particularly for block length 127. This block length is particularly
+faster in our implementation and we argue this could be also due to the inefficiencies in \texttt{SDSL}s
+implementation of 128-bit integer but also due to the fact, that after dividing the problem into subproblems,
+we continue to work with 64-bit integers which are much faster on current machines.
 
 \paragraph{Bit vector in FM-index}
 
@@ -494,10 +495,10 @@ the same number of zeroes and ones.
 
 Implementation of these encodings required changes to more than only encoding and decoding
 routines. The first necessary change is addition of hybrid cutoff parameter
-to the \texttt{rrr\_vector} class. The second is reimplementation of function
+to the \verb'rrr_vector' class. The second is reimplementation of function
 \texttt{space\_for\_bt(c)} that is used in \texttt{SDSL} to get the number of bits that are
 needed to store offset of block with class $c$. The third change, most impactful on a runtime
-of \texttt{rrr\_vector}, relates to the way how we work with superblocks.
+of \verb'rrr_vector', relates to the way how we work with superblocks.
 
 When computing $\rank$ of a bit in particular block, we can still binary search for
 the superblock where the $i$-th one is located. Then, to linearly search for a result
@@ -519,7 +520,7 @@ down the hybrid implementation. The new version, adapted to the hybrid encoding 
 Listing~\ref{code:rank_after}.
 
 In both versions of hybrid implementation, we introduced cutoff parameter $c_k$ to the
-class \texttt{rrr\_vector}. Its meaning is that exactly $c_k$ classes are represented
+class \verb'rrr_vector'. Its meaning is that exactly $c_k$ classes are represented
 as before and the rest of them is represented using a single value. In the first version,
 these are classes bigger or equal than $c_k$. In the second version, these are classes
 from range \texttt{cut\_from} up to and including \texttt{cut\_to}. Then, we need
