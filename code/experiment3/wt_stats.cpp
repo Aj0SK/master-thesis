@@ -30,7 +30,8 @@ std::string toString(__uint128_t num)
   return str;
 }
 
-template <int block_size, int cutoff> void analyze(const bit_vector& bv)
+template <int block_size, int cutoff, bool print_stats = false>
+void analyze(const bit_vector& bv)
 {
   vector<int> freq(block_size + 1, 0);
   for (int i = 0; i < bv.size(); i += block_size)
@@ -48,6 +49,16 @@ template <int block_size, int cutoff> void analyze(const bit_vector& bv)
   for (auto x : freq)
   {
     sum += x;
+  }
+
+  if constexpr (print_stats)
+  {
+    std::cout << "Printing block stats for block_size " << block_size
+              << " and cutoff " << cutoff << "\n";
+    for (int i = 0; i < freq.size(); ++i)
+    {
+      std::cout << i << ": " << ((double)freq[i]) / ((double)sum) << "\n";
+    }
   }
 
   uint16_t cut_from = (cutoff + 1) / 2;
@@ -103,7 +114,7 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  analyze<31, 7>(bv);
+  analyze<31, 7, true>(bv);
   analyze<31, 15>(bv);
   analyze<63, 7>(bv);
   analyze<63, 15>(bv);

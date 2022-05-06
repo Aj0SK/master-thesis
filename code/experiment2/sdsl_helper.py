@@ -50,7 +50,7 @@ block_sizes = list(block_sizes)
 
 fig, axs = plt.subplots(len(test_cases), 3)
 slovak_title = 'Čas pre 10^7 operácií prístup, rank, select'
-english_title = 'Access, rank and select query time as a function of block size '
+english_title = 'Access, rank and select query time as a function of block length'
 fig.suptitle(english_title)
 
 for i in range(len(test_cases)):
@@ -93,5 +93,5 @@ axs[-1][2].set_xlabel("block_size")
 
 fig.set_size_inches(8, 10)
 plt.tight_layout()
-plt.savefig("vysledky_sdsl.png")
+plt.savefig("benchmark_sdsl_new_method.png")
 plt.clf()
