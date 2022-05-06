@@ -483,13 +483,13 @@ implementation to make sure that our implementation is giving the correct result
 \section{Hybrid encoding}
 
 Let us now present our implementation of the hybrid encoding. In the previous chapter, we
-proposed two variants of hybrid encoding. Both of these were based on the idea not to
-encode blocks that are rare. This in turn reduced the number of classes and we 
-have been able to save space on bits used for blocks classes. On the other hand, these
-two versions differed in decision, which blocks are not encoded but just saved in ther original
-representation. The first solution treated differently just blocks with higher number of ones.
-The second, was focused on balanced sequences and treated differently blocks that have roughly
-the same number of zeroes and ones.
+proposed two variants of hybrid encoding -- one-sided and two-sided version. Both of these
+were based on the idea not to encode blocks that are rare. This in turn reduced the number
+of classes and we  have been able to save space on bits used for blocks classes. On the other
+hand, these two versions differed in decision, which blocks are not encoded but just saved in
+ther original representation. The first solution treated differently just blocks with higher
+number of ones. The second, was focused on balanced sequences and treated differently blocks
+that have roughly the same number of zeroes and ones.
 
 \subsection{Implementation}
 
