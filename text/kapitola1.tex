@@ -283,7 +283,41 @@ range where suffixes starting with {\tt ouse} are located. We can count how many
 before this range in $T_{BWT}$ and denote it $r$. Thanks to the property \ref{chapter1:fmindexprop:prop2},
 we know that in $F$ the subsequence containing the prefix {\tt house} begins on position $\Count[\texttt{h}]+r$.
 
-% TODO: pridat obrazok, skontrolovat indexovanie
+% https://docs.google.com/spreadsheets/d/1C7O2qsEEnjYkf2N1gX6HbS8sZu3UNl86VIxL3X9msVo/edit#gid=0
+% TODO: pridat \tt ked sa to trosku zastabilizuje
+\begin{figure}
+	\centerline{
+	\begin{tabular}{c|c|l|l|l|l|l|l|l|l|l|}
+																	  \cline{5-9}\cline{2-3}\cline{11-11}
+				    & Row n.     & F &  &   &   &   &   &   &  & L \\ \cline{5-9}\cline{2-3}\cline{11-11}
+				    & 0          &   &  &   &   &   &   &   &  &   \\ \cline{5-9}\cline{2-3}\cline{11-11}
+				    &            &   &  &   &   &   &   &   &  &   \\ \cline{5-9}\cline{2-3}\cline{11-11}
+	$\Count{[}h{]}$ & 100        & h &  & a & s & h &   &   &  &   \\ \cline{5-9}\cline{2-3}\cline{11-11}
+				    & 101        & h &  & e & a & d &   &   &  &   \\ \cline{5-9}\cline{2-3}\cline{11-11}
+	                & 102        & h &  & i & n & d &   & b &  & e \\ \cline{5-9}\cline{2-3}\cline{11-11}
+	$b_0$		    & 103        & h &  & o & u & s & e &   &  &   \\ \cline{5-9}\cline{2-3}\cline{11-11}
+	                & 104        & h &  & o & u & s & e &   &  &   \\ \cline{5-9}\cline{2-3}\cline{11-11}
+	$e_0$			& 105        & h &  & i & g & h &   &   &  &   \\ \cline{5-9}\cline{2-3}\cline{11-11}
+	                & 106        &   &  &   &   &   &   &   &  &   \\ \cline{5-9}\cline{2-3}\cline{11-11}
+	$b_1$           & 200        & o &  & u & s & e &   &   &  & m \\ \cline{5-9}\cline{2-3}\cline{11-11}
+				    & 201        & o &  & u & s & e &   &   &  & h \\ \cline{5-9}\cline{2-3}\cline{11-11}
+				    & 202        & o &  & u & s & e &   &   &  & m \\ \cline{5-9}\cline{2-3}\cline{11-11}
+				    & 203        & o &  & u & s & e &   & s &  & p \\ \cline{5-9}\cline{2-3}\cline{11-11}
+				    & 204        & o &  & u & s & e &   &   &  & h \\ \cline{5-9}\cline{2-3}\cline{11-11}
+	$e_1$           & 205        &   &  &   &   &   &   &   &  &   \\ \cline{5-9}\cline{2-3}\cline{11-11}
+	\end{tabular}
+	}
+	\caption[TODO]{Assume that we are counting occurences of \texttt{home} and we already found the
+	range of rows where suffix \texttt{ouse} is located given by $b_1$ and $e_1$. Now to find range
+	of rows where \texttt{house} is located we first look where the run of symbol \texttt{h} begins
+	in $F$ -- $\Count[h]$. However, not all of the rows starting with \texttt{h} continue with
+	\texttt{ouse}. To find this subinterval, we use the information from previous iteration. We count
+	the number of occurences of \texttt{h} before position $b_1$ and use this as offset into run of
+	symbol \texttt{h}. In this particular case, $b_0 = \Count[h] + rank_h(b_1) = 100 + 3 = 103$ and
+	$e_0 = \Count[h] + rank_h(e_1) = 100 + 5 = 105$.
+	}
+	\label{tab:fm_index_example}
+\end{figure}
 
 In general, to count the number of occurrences of pattern $P$, we first find the subsequence of rows of $M$
 beginning with $P_{n-1\ldots}$. As this is just one symbol, $p_{n-1}$, the initial subsequence is a run
