@@ -493,8 +493,8 @@ that have roughly the same number of zeroes and ones.
 
 \subsection{Implementation}
 
-Implementation of these encodings required changes to more than only encoding and decoding
-routines. The first necessary change is addition of hybrid cutoff parameter
+Implementation of the hybrid encoding required changes to more than only encoding and decoding
+routines. The first necessary change is addition of hybrid cutoff parameter $c_k$
 to the \verb'rrr_vector' class. The second is reimplementation of function
 \texttt{space\_for\_bt(c)} that is used in \texttt{SDSL} to get the number of bits that are
 needed to store offset of block with class $c$. The third change, most impactful on a runtime
@@ -511,22 +511,22 @@ smaller block, we take the memory offset of the superblock in $O$ and add the me
 block from the beginning of superblock. This can be counted along with the linear search for $\rank$
 result. The simplified implementation of the $\rank$ in \texttt{SDSL} is in Listing~\ref{code:rank_before}.
 
-With cutoff in place, however, we are not able to linearly scan through the superblock only
+With hybrid implementation, however, we are not able to linearly scan through the superblock only
 using information contained in $C$. This is because now, for some classes, $C$ does not
 store the number of ones in the block. Thus when we are linearly searching for the result
-of $\rank$ query along the block, we need to also from time to time access $O$ to count
-number of ones for some block. This creates some additional memory accesses that may slow
-down the hybrid implementation. The new version, adapted to the hybrid encoding is in
+of $\rank$ query along the superblock, we need to also from time to time access $O$ to count
+number of ones for some block. This creates additional memory accesses that may slow down the
+hybrid implementation. The new version of implementation, adapted to the hybrid encoding is in
 Listing~\ref{code:rank_after}.
 
 In both versions of hybrid implementation, we introduced cutoff parameter $c_k$ to the
 class \verb'rrr_vector'. Its meaning is that exactly $c_k$ classes are represented
 as before and the rest of them is represented using a single value. In the first version,
 these are classes bigger or equal than $c_k$. In the second version, these are classes
-from range \texttt{cut\_from} up to and including \texttt{cut\_to}. Then, we need
-$\lg (c_k+1)$ bits of space to represent a single class.
+from range \texttt{cut\_from} up to and including \texttt{cut\_to}. For certain $c_k$,
+we need then $\lg (c_k+1)$ bits of space to represent a single class.
 
-\lstset{language=C++,caption={Rank query, SDSL implementation (pseudo-code)},label=code:rank_before}
+\lstset{language=C++,caption={Rank query, SDSL implementation},label=code:rank_before}
 \begin{lstlisting}
 int rank(int i) {
 	int block_idx = i/BLOCK_SIZE;
@@ -534,9 +534,9 @@ int rank(int i) {
 	int offset = P[superblock_idx]; // precomputed offset into O
 	int rank  = R[superblock_idx]; // precomputed rank for superblock
 	for (int j = superblock_idx*BLOCKS_PER_SUPERBLOCK; j < block_idx; ++j) {
-		uint16_t r = C[j];
-		rank  += r;
-		offset += rrr_helper::space_for_class(r);
+		uint16_t c = C[j];
+		rank  += c;
+		offset += rrr_helper::space_for_class(c);
 	}
 	uint16_t off = i % BLOCK_SIZE;
 	if (!off) {
@@ -551,7 +551,7 @@ int rank(int i) {
 }
 \end{lstlisting}
 
-\lstset{language=C++,caption={Rank query, hybrid implementation (pseudo-code)},label=code:rank_after}
+\lstset{language=C++,caption={Rank query, hybrid implementation (one-sided)},label=code:rank_after}
 \begin{lstlisting}
 int rank(int i) {
 	int block_idx = i/BLOCK_SIZE;
@@ -559,13 +559,13 @@ int rank(int i) {
 	int offset = P[superblock_idx];
 	int rank  = R[superblock_idx]; // precomputed rank for superblock
 	for (int j = superblock_idx*BLOCKS_PER_SUPERBLOCK; j < block_idx; ++j) {
-		uint16_t r = C[j];
-		if (r >= c_k) {
+		uint16_t c = C[j];
+		if (c >= c_k) {
 			uint32_t o = rrr_helper::get_blocks_offset(O, offset, BLOCK_SIZE);
 			rank += __popcount(btnr);
 		}
 		else {
-			rank  += r;
+			rank  += c;
 		}
 		offset += rrr_helper::space_for_class(r);
 	}
@@ -582,17 +582,14 @@ int rank(int i) {
 }
 \end{lstlisting}
 
-\paragraph{Hybrid version for balanced sequences}
+\paragraph{Two sided version}
 
-The biggest notable difference from the previous version of hybrid encoding are two
+The biggest notable difference from the previous version of hybrid encoding are the two
 helper functions that are used for mapping or as we call it compressing and decompressing
 the blocks class before any of its use. We present these methods in listing \ref{code:hybrid_valley_compress},
 and \ref{code:hybrid_valley_decompress}. To choose for particular $c_k$, which $c_k$ classes we are
 going to represent in a standard way, we set
-\begin{align*} % TODO: not looking good
-&\text{cut\_from} = \floor{(c_k+1)/2} \\
-&\text{cut\_to} = b-\text{cut\_from}+1.
-\end{align*}
+$$\text{cut\_from} = \floor{(c_k+1)/2}\qquad \text{cut\_to} = b-\text{cut\_from}+1.$$
 
 \lstset{language=C++,caption={Compressing blocks class},label=code:hybrid_valley_compress}
 \begin{lstlisting}
