@@ -67,7 +67,7 @@ space-efficient approach. Let us assume that only $n$ out of $N$ elements are pr
 and also that $n\ll N$.
 
 First approach considering the sparseness of an array is to store only the non-default
-elements as pairs $(\text{position}, \text{value})$, which takes $n\cdot (k+\ceil{\log_2 N})$
+elements as pairs $(\text{position}, \text{value})$, which takes $n\cdot (k+\lg N)$
 bits of space. If we just store these pairs sorted by the position, accessing the $i$-th
 element takes time $\BigO(\log n)$.
 

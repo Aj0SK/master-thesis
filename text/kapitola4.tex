@@ -525,7 +525,7 @@ class \texttt{rrr\_vector}. Its meaning is that exactly $c_k$ classes are repres
 as before and the rest of them is represented using a single value. In the first version,
 these are classes bigger or equal than $c_k$. In the second version, these are classes
 from range \texttt{cut\_from} up to and including \texttt{cut\_to}. Then, we need
-$\ceil{\log_2(c_k+1)}$ bits of space to represent a single class.
+$\lg (c_k+1)$ bits of space to represent a single class.
 
 \lstset{language=C++,caption={Rank query, SDSL implementation (pseudo-code)},label=code:rank_before}
 \begin{lstlisting}

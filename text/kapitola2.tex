@@ -213,7 +213,7 @@ is small. This occurs in sequences that have very skewed frequency of zeroes or 
 length $n$ has $m$ ones in it, we can store it as before using $n$ bits but there is only ${n \choose m}$
 such sequences and it may be more beneficial for big $m$ to store the sequence number which one of these
 we are working with. It is possible to prove for sequence $S$ of length $n$ with $m$ ones that
-$$\ceil{\log_2 {n \choose m}} = nH_0(S)+\BigO(\log n).$$ This means that using this representation may be
+$$\lg {n \choose m} = nH_0(S)+\BigO(\log n).$$ This means that using this representation may be
 beneficial in scenarios when $nH_0(S)\ll n$.
 
 This is an idea that RRR is based on. RRR is a data structure based partly on the work of \cite{pagh2001low}
@@ -280,8 +280,8 @@ but also allow easy access to individual blocks of $B$.
 
 The main part of this representation comprises of two arrays $C$ and $O$ storing the classes and offsets of
 the blocks, respectively. The array $C$ is an array of elements that are of fixed length. Every element takes
-$\ceil{\log_2(b+1)}$ bits of space. The array $O$, on the other hand, is an array of elements of variable
-size where the $i$-th element is $\ceil{\log_2{b\choose C[i]}}$ bits long. Note that accessing $i$-th element
+$\lg b+1$ bits of space. The array $O$, on the other hand, is an array of elements of variable
+size where the $i$-th element is $\lg {b\choose C[i]}$ bits long. Note that accessing $i$-th element
 in array $C$ is easier than doing the same in array $O$.
 
 \paragraph{Accessing bits in RRR}
@@ -293,7 +293,7 @@ $i$-th block where $i=\floor{x/b}$. Its compressed representation is $(C[i], O[i
 
 Obtaining $C[i]$ is trivial as it is at the fixed memory offset from the beginning of array $C$. Getting the
 value of $O[i]$ is harder as it is not at a known memory offset but it can be still expressed as
-$$\sum_{j=1}^{i-1} \ceil{\log_2{b\choose C[i]}}.$$ This can not be, however, computed in constant time without
+$$\sum_{j=1}^{i-1} \lg {b\choose C[i]}.$$ This can not be, however, computed in constant time without
 any precomputed information and we need to basically one by one skip over elements that come before $O[i]$.
 To access the $i$-th block, we need in the worst case to look at all the elements of $C$ and this
 takes $\BigO(n/b)$ time. For now, we stay with this solution and analyze its space usage.
@@ -335,7 +335,7 @@ $\BigO(\log(n)\cdot \frac{n}{bk})$ bits of space.
 	\caption[TODO]{RRR implementation. $B$ shows the original bit sequence cut to
     blocks. $C$ stores the class which is in this case number of ones in the block.
     $O$ uses variable number of bits per entry, in general, $i$-th entry uses
-    $\ceil{\log_2{b\choose C[i]}}$ bits and stores the lexicographical order
+    $\lg {b\choose C[i]}$ bits and stores the lexicographical order
     of this block in the class $C[i]$. For $k=2$ we can see a helper array $P$
     storing bit offsets into every $k$-th element namely $0, 2, 4\ldots$
 	}
