@@ -302,13 +302,13 @@ takes $\BigO(n/b)$ time. For now, we stay with this solution and analyze its spa
 
 Our current representation needs to store the arrays $C, O$ and helper table $D$. Let us now
 analyze the space used by these structures. $C$ is an array of $\ceil{n/b}$ elements of fixed size
-$\ceil{\log(b+1)}$. For array $O$ we argue that its size is bounded by
+$\lg (b+1)$. For array $O$ we argue that its size is bounded by
 
 \begin{align*}
-    \sum_{i=1}^{n/b} \ceil{{\log b\choose c_i}}
-    &\leq \sum_{i=1}^{\ceil{n/b}} \log {b\choose c_i} + \ceil{n/b} \\
-    &= \log\prod_{i=1}^{\ceil{n/b}} {b\choose c_i} + \ceil{n/b} \\
-    &\leq \log{n\choose \#_1(B)} + \ceil{n/b} &\leq nH_0(B) + \ceil{n/b}
+    \sum_{i=1}^{n/b} \lg {b\choose c_i}
+    &\leq \sum_{i=1}^{\ceil{n/b}} \log_2 {b\choose c_i} + \ceil{n/b} \\
+    &= \log_2\prod_{i=1}^{\ceil{n/b}} {b\choose c_i} + \ceil{n/b} \\
+    &\leq \log_2{n\choose \#_1(B)} + \ceil{n/b} &\leq nH_0(B) + \ceil{n/b}
 \end{align*}
 
 where $\#_1(B)$ denotes the total number of ones in $B$. The second inequality was obtained using
@@ -317,7 +317,7 @@ when we interpret the left side of the equation as a number of ways we can choos
 from $n$ elements and $\ell$ elements from another $m$ elements. This is all contained on the
 right side of the equation that includes all these combinations. $D$ is storing $2^b$ entries
 and each entry is using $b$ bits of storage. The total space used is then
-$$nH_0(B) + \ceil{n/b} + \ceil{n/b} \cdot \ceil{\log(b+1)} + b2^b.$$
+$$nH_0(B) + \ceil{n/b} + \ceil{n/b} \cdot \lg(b+1) + b2^b.$$
 
 \paragraph{Block access speed up}
 
