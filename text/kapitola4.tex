@@ -93,10 +93,12 @@ and $\text{pos}_2$ is equal to ${b\choose c_1}$ and ${b\choose c_2}$, respective
 can be computed beforehand as there are only roughly $b^2$ combinations of possible pairs of $c$ and $c_1$.
 Roughly speaking, we can do the last two steps at the price of two cache misses.
 
-One possible approach to do the first step is to precompute for every possible class $c$, numbers
+The approach we use is to first precompute for every possible class $c$, numbers
 $Z_{max(c-b_2, 0)},\ldots , Z_{max(c-b_1, 0)}$ where $Z_i$ is the offset of first block with class
-pair $(i, c-i)$. Example of these values can be observed in Fig.~\ref{table:class_pairs} but also
-in the previous chapter(Fig.~/ref{obr:classPairsZVals}).
+pair $(i, c-i)$. We map the offset of the block to the number $Z_i$ and thus identify $(c_i, c_j)$.
+As $Z$-numbers form an increasing sequence, we can binary search for ``group'' that contains our
+offset. Example of these values can be observed in Fig.~\ref{table:class_pairs} but also
+in the previous chapter(Fig.~\ref{obr:classPairsZVals}).
 
 \begin{figure}
 	\centerline{
@@ -113,10 +115,6 @@ in the previous chapter(Fig.~/ref{obr:classPairsZVals}).
     }
 	\label{table:class_pairs}
 \end{figure}
-
-We would like to map the offset of the block to the number $Z_i$ and thus identify $(c_i, c_)$,
-As $Z$-numbers form an increasing sequence, we can binary search for ``group'' that contains our
-offset.
 
 Despite having good time complexity, binary search may not be the fastest solution in practice
 as the number of buckets where our offset may land is bounded by $b+1$ and thus quite small.
@@ -139,7 +137,7 @@ uint32_t get_left_class(uint8_t k, uint32_t nr)  {
 	int left_k_to = std::min(k, 15);
 	int left_k = left_k_from;
 	for (; left_k < left_k_to; ++left_k)  {
-		uint32_t curr_index = P[k][left_k+1];
+		uint32_t curr_index = Z[k][left_k+1];
 		if (curr_index >= nr)  {
 			if (curr_index == nr)
 				++left_k;
@@ -158,13 +156,13 @@ uint32_t get_left_class(uint8_t k, uint32_t nr)  {
 	int left_k_to = std::min(k, 15);
 	__m128i keys = _mm_set1_epi32(nr);
 	__m128i vec1 =
-		_mm_loadu_si128(reinterpret_cast<__m128i*>(&P[k][0]));
+		_mm_loadu_si128(reinterpret_cast<__m128i*>(&Z[k][0]));
 	__m128i vec2 =
-		_mm_loadu_si128(reinterpret_cast<__m128i*>(&P[k][4]));
+		_mm_loadu_si128(reinterpret_cast<__m128i*>(&Z[k][4]));
 	__m128i vec3 =
-		_mm_loadu_si128(reinterpret_cast<__m128i*>(&P[k][8]));
+		_mm_loadu_si128(reinterpret_cast<__m128i*>(&Z[k][8]));
 	__m128i vec4 =
-		_mm_loadu_si128(reinterpret_cast<__m128i*>(&P[k][12]));
+		_mm_loadu_si128(reinterpret_cast<__m128i*>(&Z[k][12]));
 
 	__m128i cmp1 = _mm_cmpgt_epi32(vec1, keys);
 	__m128i cmp2 = _mm_cmpgt_epi32(vec2, keys);
@@ -184,7 +182,7 @@ uint32_t get_left_class(uint8_t k, uint32_t nr)  {
 	{
 		left_k = (1 + __builtin_ctz(mask)) / 2;
 
-		if (P[k][left_k] > nr)
+		if (Z[k][left_k] > nr)
 			--left_k;
 	}
 	return left_k;
@@ -198,11 +196,11 @@ uint32_t get_left_class(uint8_t k, uint32_t nr)  {
 	int left_k_from = std::max(k - 15, 0);
 	int left_k_to = std::min(k, 15);
 	// std::upper_bound(a, b, val) returns pointer to first elem. greater than val in <a;b) 
-	auto it = std::upper_bound(P[k].begin() + left_k_from,
-                                     P[k].begin() + left_k_to, nr);
-	// returns index of it in array P[k]
-    int left_k = std::distance(P[k].begin(), it);
-    if (P[k][left_k] > nr)
+	auto it = std::upper_bound(Z[k].begin() + left_k_from,
+                                     Z[k].begin() + left_k_to, nr);
+	// returns index of it in array Z[k]
+    int left_k = std::distance(Z[k].begin(), it);
+    if (Z[k][left_k] > nr)
       --left_k;
 	return left_k;
 }
@@ -223,7 +221,7 @@ We based our solutions on table lookup for block length 15 and combined two 15-b
 solution by one bit. To obtain block length 63, there are, however, multiple possible combinations
 that look reasonable. We may take 62-bit solution that is built from two 31-bit blocks
 and then again extend it. On the other hand, it may be more beneficial, to do 63-bit block size by
-splitting it into 3 bits and 60 bits. Thus, before choosing what solution we want to fully include
+splitting it into 3 and 60 bit block. Thus, before choosing what solution we want to fully include
 into \texttt{SDSL}, we explored and tried several promising combinations and microbenchmarked them.
 
 \subsection{Experimental results}
@@ -231,7 +229,7 @@ into \texttt{SDSL}, we explored and tried several promising combinations and mic
 In this subsection, we show how we measured the performance and practical usability of our solution
 and also show the results of our experiments.
 
-To measure the performance of our implementation, we mainly relied on two types of benchmarks.
+To measure the performance of our implementation, we mainly relied on two sorts of benchmarks.
 The first type used a \texttt{Google Benchmark} library. This is one of the standard libraries
 used for microbenchmarking of code. A code snippet that is being evaluated is run many times
 until stable results are obtained. This makes the results reliable even if the measured time
@@ -264,12 +262,12 @@ We tested 3 different techniques to divide a problem into sub-problems. These we
 binary search and linear scan enhanced by \texttt{SIMD} instructions. In order to implement the
 solution for 127-bit block size, we used the 128 bit type \texttt{\_\_uint128\_t} provided by both
 \texttt{GCC} and \texttt{Clang} compilers. This type is implemented on platform \texttt{x86\_64}
-as a combination of two 64-bit numbers. We compared these results with the table decoding specialization
-in \texttt{SDSL} and with on-the-fly decoding for all the other block sizes. We ran the deconding algorithm
-on randomly generated data. To generate them, we picked 1\,000 pairs of class and offset by first randomly
-picking class of the block and then the offset along this class. To make the process fair, we measured
-decoding time of the bit in the half of the block for on-the-fly decoding as this decoding can stop once
-it obtained the queried bit. The results we measured are shown in Tab.~\ref{obr:simple_benchmark}.
+as a combination of two 64-bit integers. We compared these results with the table decoding specialization
+in \texttt{SDSL} and with on-the-fly decoding. We ran the deconding algorithm on randomly generated data.
+We generated 1\,000 pairs of class and offset by first randomly picking class of the block and then the
+offset along this class. To make the comparison fair, we measured decoding time of the bit in the half of
+the block for on-the-fly decoding as this decoding can stop once it obtained the queried bit. The results
+we measured are shown in Tab.~\ref{obr:simple_benchmark}.
 
 We can observe there that our implementation is faster than on-the-fly decoding provided by \texttt{SDSL}
 on every block length that was tested. Linear version of decoding division outperforms binary search on
@@ -278,7 +276,7 @@ For 30-bit block, the \texttt{SIMD} version dominates both linear and binary app
 however, harder to use for longer blocks as it ask for support of special instruction set. Version splitting
 63-bit block into 3 bits and two 30-bit blocks seems to be performing slightly better than the other
 variant combining 1 bit with solution for block length 62. Very important observation is that our 63-bit
-version was measured to be faster than on-the-fly decoding for 31 bit block.
+version was measured to be faster than on-the-fly decoding for 31-bit block.
 
 \begin{figure}
 	\centerline{
@@ -406,7 +404,7 @@ in Fig.~\ref{obr:benchmark_sdsl_count}.
 We may observe that the speed gain we have measured in the previous benchmarks also translated
 to speedup of FM-index operation $\countOp$. On the English dataset, block lengths 127 and 63 have
 been able to obtain the speed of the block lengths 63 and 31 provided by \texttt{SDSL}. The biggest
-speed up can be observed for 127 bit block, on English data the time saved is close to 20\%, on
+speed up can be observed for 127-bit block, on English data the time saved is close to 20\%, on
 DNA it is roughly 30\% speedup.
 
 On graphs where we can observe the tradeoff between space and time it is important not only to
@@ -637,7 +635,7 @@ Thus, we generated a random sequence of bits containing 5\% of ones. and compare
 implementation and also sparse bit vector provided by \texttt{SDSL}. We present the results in Fig.~\ref{obr:vysledky_hybrid_artif}.
 We may observe that our implementation was already competitive with sparse array for $\access$ and $\rank$. Hybrid encoding
 only amplified these differences. However, on $\select$ where our implementation was dominated by sparse array, these differences
-were not completely overcome by hybrid implementation. We can, however, conclude that hybrid version of 63 and 127 bit block
+were not completely overcome by hybrid implementation. We can, however, conclude that hybrid version of 63 and 127-bit block
 created new viable alternatives, most importantly for $\select$ method.
 
 We tested our second version of hybrid encoding on the previously used datasets \texttt{WT-DNA} and \texttt{WT-WEB}.

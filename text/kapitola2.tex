@@ -95,7 +95,7 @@ Now, when queried for $\rank$ of some position $i$, we combine:
     \item $\rank$ inside of its block
 \end{enumerate}
 
-The third step can be done also in constant time on unit-cost RAM model with word size of $\Theta(\log n)$
+The third step can be done also in constant time on unit-cost RAM model with word size $\Theta(\log n)$
 that we use in most of our work. We, however, use and analyze here the solution that uses the precomputed table.
 This table stores for every possible block and $\rank$ query its result. 
 
@@ -280,7 +280,7 @@ but also allow easy access to individual blocks of $B$.
 
 The main part of this representation comprises of two arrays $C$ and $O$ storing the classes and offsets of
 the blocks, respectively. The array $C$ is an array of elements that are of fixed length. Every element takes
-$\lg b+1$ bits of space. The array $O$, on the other hand, is an array of elements of variable
+$\lg (b+1)$ bits of space. The array $O$, on the other hand, is an array of elements of variable
 size where the $i$-th element is $\lg {b\choose C[i]}$ bits long. Note that accessing $i$-th element
 in array $C$ is easier than doing the same in array $O$.
 
