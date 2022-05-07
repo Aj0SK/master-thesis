@@ -635,12 +635,12 @@ with our original RRR implementation and also sparse bit vector provided by \tex
 present the results in Fig.~\ref{obr:vysledky_hybrid_artif}. We may observe that our implementation
 was already competitive with sparse array for $\access$ and $\rank$. Hybrid encoding only amplified
 these differences. However, on $\select$ where our implementation was dominated by sparse array,
-these differences were not completely overcome by hybrid implementation. We can, however, conclude
-that hybrid version of 63 and 127-bit block created new viable alternatives, most importantly for
-$\select$ method and 127-bit block where it move the representation very close to optimal 0.29
-bits per one bit in original sequence.
+these differences were not completely overcome by hybrid implementation. We can conclude
+that hybrid version of 63 and 127-bit block created new usable alternatives, most importantly for
+$\select$ method and 127-bit block where our hybrid encoding moved the representation very close
+to optimal 0.29 bits per one bit in original sequence.
 
-We tested our second version of hybrid encoding on the previously used datasets \texttt{WT-DNA}
+We tested the two-sided version of hybrid encoding on the previously used datasets \texttt{WT-DNA}
 and \texttt{WT-WEB}. The graph comparing results for classic bit vectors and hybrid bit vectors
 can be observed in Fig.~\ref{obr:vysledky_sdsl_hybrid}. The results of our hybrid implementation
 are not very promising on these data, except for the $\access$. The reason why the results are

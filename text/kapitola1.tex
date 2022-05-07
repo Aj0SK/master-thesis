@@ -36,7 +36,7 @@ store the data. We call the data representation
 	\item \textit{compact} -- if it uses $\BigO(I)$ bits of space.
 \end{itemize}
 
-In this work, we are mainly concerned with \textit{bit vector}. One of the simplest
+In this work, we are mainly concerned with \textit{bit vector}, one of the simplest
 data structures that represents a sequence $S$ of zeroes and ones while supporting the
 methods:
 \begin{itemize}
@@ -50,7 +50,9 @@ notable study of $\rank$ and $\select$ over sequences was done by \cite{jacobson
 
 The reason behind our focus on bit vector and particularly its compressed version
 is the fact that it is one of the main building blocks of many succinct data structures.
-In the next sections, we introduce some interesting and useful applications of bit vector.
+
+In the following sections, we introduce some interesting and useful applications of bit vectors.
+
 Throughout our work, we use a unit-cost RAM model with word size of $\Theta(\log n)$ bits.
 In this model, arithmetic and logic operations on and between memory words take constant time.
 
@@ -66,16 +68,15 @@ sparse vector of numbers, where most of the elements are 0. Then we could use a 
 space-efficient approach. Let us assume that only $n$ out of $N$ elements are present
 and also that $n\ll N$.
 
-The first approach considering the sparseness of an array is to store only the non-default
-elements as pairs $(\text{position}, \text{value})$, which takes $n\cdot (k+\lg N)$
-bits of space where $\lg x = \ceil{\log_2 x}$. If we just store these pairs sorted by
-the position, accessing the $i$-th element takes time $\BigO(\log n)$.
+One approach considering the sparseness of an array is to store only the non-default
+elements as $(\text{position}, \text{value})$ pairs, which takes $n\cdot (k+\lg N)$
+bits of space, where by $\lg x$ we denote $\ceil{\log_2 x}$. If we just store these
+pairs sorted by the position, accessing the $i$-th element takes time $\BigO(\log n)$.
+We may also use a hash table to obtain a constant time solution but this comes with
+additional memory overhead.
 
-We may use a hash table to obtain a constant time solution but this comes with additional
-memory overhead.
-
-An alternative approach using the bit vector is to store non-default elements in
-a packed array $P$ of length $n$ taking $n\cdot k$ bits of space. Alongside $P$ we
+An alternative approach, using the bit vector, is to store non-default elements in
+a packed array $P$ of length $n$ taking $n\cdot k$ bits of space. Alongside $P$, we
 store a bit vector $B$ of length $N$ where
 \[
    B[i]=
@@ -88,17 +89,17 @@ store a bit vector $B$ of length $N$ where
 Using this representation of $A$, if we want to access the $i$-th element, we first check for
 the value of $B[i]$. If it is zero, we return the default value. Otherwise, we need to find
 how many ones are preceding this particular one in $B$ to identify the location of the requested
-element in array $P$. This is, where we find useful the $\rank_1$ method. Similarly, to obtain
-the position of $i$-th non-empty value in $A$, we can use $\select_1$ method.
+element in array $P$. This is where we find the $\rank_1$ method useful. Similarly, to obtain
+the position of $i$-th non-empty value in $A$, we can use the $\select_1$ method.
 
 The total space used by this representation is $N+n\cdot k+R$ where $R$ is the space required
 to support an efficient $\rank_1$ query over $B$. As we shall show in Section~\ref{section:rank},
-$\rank$ can be implemented in constant time with sublinear space overhead, i.e. $R = o(N)$. If we are
-provided with bit vector implementation along with $\access$ and $\rank$ methods we are able to
-reduce the total space used from $k\cdot N$ to $N+n\cdot k+o(N)$ bits. Note that in practice,
-for a really small number of non-default values, the hashtable representation takes up less
-space. On the other hand, bit vector provides us with a solution that is usable for scenarios
-when $A$ is mediumly filled in, e.g. $n/N>0.10$.
+$\rank$ can be implemented succinctly in constant time, i.e., with sublinear space overhead
+$R = o(N)$. So if we are provided with bit vector implementation along with $\access$ and $\rank$
+methods, we are able to reduce the total space used from $k\cdot N$ to $N+n\cdot k+o(N)$ bits.
+Note that in practice, for a really small number of non-default values, the hashtable representation
+takes up less space. On the other hand, bit vector provides us with a solution that is usable for
+scenarios when $A$ is mediumly filled in, e.g., $n/N>0.1$.
 
 \section{Application 2: Storing elements of non-uniform length}
 
