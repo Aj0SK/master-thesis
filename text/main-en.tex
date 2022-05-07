@@ -180,24 +180,22 @@ poskytli dáta a podobne.
 %   Abstrakt - Slovensky
 % -------------------
 \newpage 
-\section*{Abstrakt}
+\section*{Abstrakt}  
 
 Úsporné dátové štruktúry sú užitočné v prípadoch, keď pracujeme s veľkým
-objemom dát a klasické dátové štruktúry nás limitujú
-svojími pamäťovými nárokmi. Bitové pole s~operáciami $\access$,
-$\rank$ a $\select$ je stavebným kameňom mnohých prakticky užitočných
-úsporných dátových štruktúr. V našej práci sa venujeme implementácii
-bitového poľa pomocou metódy \textit{RRR}, ktorá delí postupnosť bitov na
-bloky, ktoré sú ďalej jednotlivo komprimované. V tejto práci sme
-predstavili nový spôsob kompresie a dekompresie blokov pre všeobecné
-bitové polia ale aj novú hybridnú metódu, ktorá výmenou za nekódovanie niektorých
-blokov šetrí priestor na reprezentácii ostatných. Obidve
-myšlienky sme naimplementovali a experimentálne otestovali v umelých
-aj reálnych podmienkach. Naša dekódovacia stratégia sa ukázala veľmi
-kompetitívnou a v testoch jasne porazila predchádzajúce implementácie
-v rýchlosti dekódovania. Jednostranná verzia hybridnej implementácie
-sa ukázala zaujímavou pre riedke bitové postupnosti avšak jej obojstranná
-verzia pre vyvážené postupnosti nepriniesla zaujímavé praktické výsledky.
+objemom dát a klasické dátové štruktúry nás limitujú svojími pamäťovými
+nárokmi. Bitové pole s operáciami $\access$, $\rank$ a $\select$ je stavebným
+kameňom mnohých prakticky užitočných úsporných dátových štruktúr. V našej práci
+sa venujeme implementácii bitového poľa pomocou metódy \textit{RRR}, ktorá delí
+postupnosť bitov na bloky, ktoré sú ďalej jednotlivo komprimované. V tejto práci
+sme predstavili nový algoritmus na kompresiu a dekompresiu blokov ale aj novú
+hybridnú metódu, ktorá výmenou za nekódovanie niektorých blokov šetrí priestor
+na reprezentácii ostatných. Obidve myšlienky sme naimplementovali a experimentálne
+otestovali v umelých aj reálnych podmienkach. Naša dekódovacia stratégia sa ukázala
+veľmi kompetitívnou a v testoch jasne porazila predchádzajúce implementácie v
+rýchlosti dekódovania dlhších blokov. Prvý variant hybridnej implementácie sa ukázal
+zaujímavým pre riedke bitové postupnosti avšak druhý variant nepriniesol zaujímavé
+praktické výsledky.
 
 \paragraph*{Kľúčové slová:} bitové pole, úsporné dátové štruktúry
 % --- Koniec Abstrakt - Slovensky
@@ -209,9 +207,21 @@ verzia pre vyvážené postupnosti nepriniesla zaujímavé praktické výsledky.
 \newpage 
 \section*{Abstract}
 
-Abstract in the English language (translation of the abstract in the
-Slovak language).
-
+Succinct data structures are interesting in scenarios, when we work
+with huge amount of data and ordinary data structures could limit us
+because of their memory requirements. Bit vector with operations $\access$,
+$\rank$ a $\select$ is a building block of many practically useful
+succinct data structures. We are mainly concerned with implementation of
+bit vector based on the RRR representation that divides bit sequence into
+individually compressed blocks. In our work, we introduced a new algorithm
+for block encoding and decoding but also hybrid implementation that leaves
+some blocks uncompressed in exchange for space savings on all other compressed
+blocks. We provided implementation for both of these methods and then experimentally
+evaluated their performance on artificial but also real data. Our new decoding algorithm
+is very competitive in practice as it beats the previous implementations of decoding
+for longer blocks. The first variant of hybrid implementation turned out to be interesting
+for sparse sequences. The second variant, however, did not bring interesting practical
+results.
 
 \paragraph*{Keywords:} bit vector, succinct data structures
 
