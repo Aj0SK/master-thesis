@@ -31,18 +31,18 @@ In succinct data structures, it is common to distinguish between the space effic
 representations more strictly. Suppose that $I$ is the number of bits that are needed to
 store the data. We call the data representation
 \begin{itemize}
-	\item \textit{implicit} - if it uses $I + \BigO(1)$ bits of space,
-	\item \textit{succinct} - if it uses $I + o(I)$ bits of space and
-	\item \textit{compact} - if it uses $\BigO(I)$ bits of space.
+	\item \textit{implicit} -- if it uses $I + \BigO(1)$ bits of space,
+	\item \textit{succinct} -- if it uses $I + o(I)$ bits of space,
+	\item \textit{compact} -- if it uses $\BigO(I)$ bits of space.
 \end{itemize}
 
 In this work, we are mainly concerned with \textit{bit vector}. One of the simplest
 data structures that represents a sequence $S$ of zeroes and ones while supporting the
 methods:
 \begin{itemize}
-	\item $\access(i)$ - returning the $i$-th symbol of $S$,
-	\item $\rank_c(j)$ - returning the number of occurrences of symbol $c$ in $S$ before $j$-th index,
-	\item $\select_c(k)$ - returning the index of $k$-th occurrence of symbol $c$ in $S$.
+	\item $\access(i)$ -- returning the $i$-th symbol of $S$,
+	\item $\rank_c(j)$ -- returning the number of occurrences of symbol $c$ in $S$ before $j$-th index,
+	\item $\select_c(k)$ -- returning the index of $k$-th occurrence of symbol $c$ in $S$.
 \end{itemize}
 Values of these methods are defined only for integers $i, j, k$ such that $0\leq i<|S|$, $0\leq j\leq |S|$
 and $1\leq k\leq \#_c(S)$ where $\#_c(S)$ denotes the number of occurrences of symbol $c$ in $S$. The first
@@ -478,16 +478,17 @@ bit vector supporting $\access$, $\rank$ and $\select$ methods.
 
 \section{Outline of the Thesis}
 
-The goal of this thesis is to describe current state of implementation of the bit vector
+The goal of this thesis is to describe current state of bit vector implementations
 supporting $\access$, $\rank$ and $\select$ methods and come up with improvements that
-make bit vector usable in more scenarios. This can be either by speeding up the current
+make bit vector more usable in practice. This can be either by speeding up the current
 implementations, saving some additional space but also by combination of these two as
-obtaining some new ratios of query time and space used can also open doors to new applications.
+obtaining some new trade-offs of query time and space used can also open doors to new
+applications.
 
-In the second chapter, we show possible implementations of $\rank$ and
-$\select$ methods. We discuss what are the theoretically optimal solutions but also
-what are their practical drawbacks. We then proceed to describe one of the
-widely used implementations of a compressed bit vector called \textit{RRR}.
+In the second chapter, we show possible implementations of $\rank$ and $\select$ methods
+over bit sequence. We discuss what are the theoretically optimal solutions but also what
+are their practical drawbacks. We then proceed to describe one of the widely used
+implementations of a compressed bit vector called \textit{RRR}.
 
 In the third chapter, we propose our own modifications to the implementation of
 a compressed bit vector based on RRR and we discuss theoretical aspects of these
@@ -496,5 +497,4 @@ modifications.
 In the fourth chapter, we show our proposed implementation of previously devised
 methods and experimentally test and evaluate them. We measure the performance
 of our solution on artificial as well as real-world data. Finally, we demonstrate
-how our idea can be used to get a better ratio of query time and space used by the
-FM-index and thus deliver practically useful results.
+the capabilities of our new bit vector inside of the FM-index.

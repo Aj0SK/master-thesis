@@ -337,7 +337,7 @@ was created. For instance, \texttt{WT-DNA-1GB} has been created by:
 Other versions of test data have been created similarly. Queries into the underlying bit vector
 were generated randomly.
 
-As a baseline, we choose the 15 bit specialized implementation already implemented in \texttt{SDSL}
+As a baseline, we choose the 15-bit specialized implementation already implemented in \texttt{SDSL}
 that uses the table decoding method. We present the measured results of our and the original
 implementation in Fig.~\ref{obr:benchmark_sdsl_new_method}.
 
@@ -625,25 +625,31 @@ int decompress_class(int k) {
 
 \subsection{Experimental results}
 
-The goal of first benchmark was to observe, how the first version of hybrid encoding behaves on randomly generated
-sequences with fixed percentage of ones. The reason behind this test is that bit vector implementations based on RRR
-do not perform very well on this type of sequences and are often dominated by sparse bit vector implementation.
+The goal of the first benchmark was to observe, how the one-sided version of hybrid encoding
+behaves on randomly generated sequences with fixed percentage of ones. The reason behind this
+test is that bit vector implementations based on RRR do not perform very well on this type of
+sequences and are often dominated by sparse bit vector implementations.
 
-Thus, we generated a random sequence of bits containing 5\% of ones. and compared our original RRR implementation with hybrid
-implementation and also sparse bit vector provided by \texttt{SDSL}. We present the results in Fig.~\ref{obr:vysledky_hybrid_artif}.
-We may observe that our implementation was already competitive with sparse array for $\access$ and $\rank$. Hybrid encoding
-only amplified these differences. However, on $\select$ where our implementation was dominated by sparse array, these differences
-were not completely overcome by hybrid implementation. We can, however, conclude that hybrid version of 63 and 127-bit block
-created new viable alternatives, most importantly for $\select$ method.
+We generated a random sequence of bits containing 5\% of ones and compared hybrid implementation
+with our original RRR implementation and also sparse bit vector provided by \texttt{SDSL}. We
+present the results in Fig.~\ref{obr:vysledky_hybrid_artif}. We may observe that our implementation
+was already competitive with sparse array for $\access$ and $\rank$. Hybrid encoding only amplified
+these differences. However, on $\select$ where our implementation was dominated by sparse array,
+these differences were not completely overcome by hybrid implementation. We can, however, conclude
+that hybrid version of 63 and 127-bit block created new viable alternatives, most importantly for
+$\select$ method and 127-bit block where it move the representation very close to optimal 0.29
+bits per one bit in original sequence.
 
-We tested our second version of hybrid encoding on the previously used datasets \texttt{WT-DNA} and \texttt{WT-WEB}.
-The graph comparing results for classic bit vectors and hybrid bit vectors can be observed in Fig.~\ref{obr:vysledky_sdsl_hybrid}.
-The results of our hybrid implementation are not very promising on these data, except for the $\access$. The reason
-why the results are better for $\access$ is that hybrid implementation creates additional memory accesses when answering
+We tested our second version of hybrid encoding on the previously used datasets \texttt{WT-DNA}
+and \texttt{WT-WEB}. The graph comparing results for classic bit vectors and hybrid bit vectors
+can be observed in Fig.~\ref{obr:vysledky_sdsl_hybrid}. The results of our hybrid implementation
+are not very promising on these data, except for the $\access$. The reason why the results are
+better for $\access$ is that hybrid implementation creates additional memory accesses when answering
 $\rank$ and $\select$ as we described in the previous subsection. 
 
-To test if our hybrid implementation could be used in the practice, we benchmarked FM-index implementation of method $\countOp$,
-with hybrid bit vector used inside of the Huffman shaped wavelet tree. The results are shown in Fig~\ref{obr:benchmark_sdsl_hybrid_count}.
+To test if our hybrid implementation could be used in the practice, we benchmarked FM-index
+implementation of method $\countOp$, with hybrid bit vector used inside of the Huffman shaped
+wavelet tree. The results are shown in Fig~\ref{obr:benchmark_sdsl_hybrid_count}.
 
 \begin{figure}
 	\centerline{
@@ -666,9 +672,10 @@ with hybrid bit vector used inside of the Huffman shaped wavelet tree. The resul
 	queries over bit vectors from wavelet tree over DNA sequence data \texttt{WT-DNA} and XML bibliographic
 	data \texttt{WT-WEB}. On $x$-axis is the space usage of the particular representation and on $y$-axis
 	the average query time for the respective operation. Original implementation is denoted by dots. These
-	are our implementations except for the 15 bit version based on the table lookup provided by \texttt{SDSL}.
-	Every cross symbols hybrid implementation with particular cutoff. The same block size is denoted by the single color.
-	Name $\texttt{hybrid-}x\texttt{(}y\texttt{)}$ denotes implementation of block size $x$ with cutoff $y$.
+	are our implementations except for the 15-bit version based on the table lookup provided by \texttt{SDSL}.
+	Every cross symbols hybrid implementation with particular cutoff. The same block size is denoted by a
+	single color. Name $\texttt{hybrid-}x\texttt{(}y\texttt{)}$ denotes implementation of block size $x$ with
+	cutoff $y$.
 	}
 	\label{obr:vysledky_sdsl_hybrid}
 \end{figure}

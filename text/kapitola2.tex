@@ -191,9 +191,9 @@ number of possible queries over the block is at most its length $t_2^2$ and to s
 we need roughly $\BigO(\log t_2)$ bits. The table size is thus
 $$\BigO(2^{t_2^2}\cdot t_2^2 \cdot \log t_2) = o(n).$$
 
-When answering $select_1(i)$, we can easily find the location of right superblock. If this
+When answering $select_1(i)$, we first find the location of right superblock. If this
 is a long superblock, we just look at the precomputed positions of ones in the superblock.
-The matter is more complicated if we fall into a short superblock. In this case, we find
+The matter is more complicated if we are dealing with a short superblock. In this case, we find
 the location of the correct block. If this is a long block, we can once again just look
 at the position of one we are interested in. If it is a short block, we have the precomputed
 table where we index with the block and the position of one in the block, we are interested in.
