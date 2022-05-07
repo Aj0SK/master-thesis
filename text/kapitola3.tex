@@ -233,8 +233,8 @@ We just need to know how many cycles of length ${b_2 \choose c_2}$ fit into $o'$
 the offset of the second sub-block at which the last cycle is positioned when reaching 
 offset $o'$. This is straightforward to compute as:
 $$o_1 = \floor{o' \middle/{b_2 \choose c_2}}\qquad o_2 = o'\bmod {b_2 \choose c_2}$$
-Now we have obtained $(c_1, o_1)$ and $(c_2, o_2)$ so we can reuse the decoding subroutine for the
-block size $b_1$ and $b_2$.
+Now we have obtained $(c_1, o_1)$ and $(c_2, o_2)$ so we can reuse the decoding subroutines for the
+block lengths $b_1$ and $b_2$.
 
 In this section, we proposed new block ordering and showed that it can be encoded and decoded
 efficiently. Our method for block length $b_1$ and $b_2$ yields to a block length $b_1+b_2$.
@@ -268,7 +268,7 @@ this fixed percentage of ones distributed randomly.
 	\centerline{
 		\includegraphics[width=\textwidth]{images/rrr_space_savings}
 	}
-	\caption[TODO]{Individual graphs present for different block sizes (31, 63, 127), 
+	\caption[TODO]{Individual graphs present for different block lengths (31, 63, 127), 
     the space saved by using the compressed block representation. We can observe how
     the blocks class influences number of saved bits. Black numbers on the $x$-axis
     denote start and end of the interval where compressed version is even worse
@@ -278,7 +278,7 @@ this fixed percentage of ones distributed randomly.
 	\label{obr:rrrSpaceSavings}
 \end{figure}
 
-For a block size $b$, the random variable $X$ denoting number of ones in a single
+For a block length $b$, the random variable $X$ denoting number of ones in a single
 block follows a binomial distribution $$X \sim Bin(b, p).$$ As we may observe in
 Fig.~\ref{obr:hybridEncodingDistribution}, the probability that block contains
 a lot of ones decreases exponentially in a sequence containing only 5\% of ones.
@@ -290,10 +290,10 @@ idea of an encoding method we call \textit{hybrid encoding}.
 		\includegraphics[width=\textwidth]{images/hybrid_encoding_motivation}
 	}
 	\caption[TODO]{On these 3 graphs, we can see the cumulative distribution
-    of blocks classes for the block sizes 31, 63, 127. The frequency of ones is
+    of blocks classes for the block lengths 31, 63, 127. The frequency of ones is
     fixed to 5\%. Note the marked classes on the $x$-axis. Numbers 6, 12 and
     25 mark the place up to which 99\% of probability distribution lies for
-    the block sizes 31, 63 and 127 respectively.
+    the block lengths 31, 63 and 127 respectively.
 	}
     % Can be found on https://github.com/Aj0SK/master-thesis/blob/main/text/images/hybrid_encoding_motivation.png
 	\label{obr:hybridEncodingDistribution}
@@ -327,7 +327,7 @@ $$\lg (c_k+1) < \lg (b+1).$$ Let us now compare these two representations
 and the theoretical space savings that can be obtained.
 
 Let $n$ be a length of the
-sequence, $b$ the block size and $C_i$ the number of blocks with class $i$. To simplify the
+sequence, $b$ the block length and $C_i$ the number of blocks with class $i$. To simplify the
 calculations in this section, we assume that $b+1$ as well as $c_k+1$ is a power of 2 and
 $n$ is divisible by $b$.
 

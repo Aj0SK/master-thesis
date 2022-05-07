@@ -58,7 +58,7 @@ of the $\access$, $\rank$ and $\select$ methods. Even if the size of superblock 
 of \verb'rrr_vector', we did not make any changes to the default number of blocks per superblock that
 is set in \texttt{SDSL} to 32.
 
-We decided to use the specialization for block size 15 as an underlying solution for the encoding and
+We decided to use the specialization for block length 15 as an underlying solution for the encoding and
 decoding of sub-blocks. We provided specialized implementations for block lengths 31, 63 and 127 that
 are most used in practical scenarios. We based our implementation on the general implementation of
 \verb'rrr_vector' and tried to keep the number of changes as small as possible to easily observe the
@@ -220,7 +220,7 @@ We based our solutions on table lookup for block length 15 and combined two 15-b
 30-bit block decoding. To obtain the next interesting block length 31, we then extended this 30-bit
 solution by one bit. To obtain block length 63, there are, however, multiple possible combinations
 that look reasonable. We may take 62-bit solution that is built from two 31-bit blocks
-and then again extend it. On the other hand, it may be more beneficial, to do 63-bit block size by
+and then again extend it. On the other hand, it may be more beneficial, to do 63-bit block length by
 splitting it into 3 and 60 bit block. Thus, before choosing what solution we want to fully include
 into \texttt{SDSL}, we explored and tried several promising combinations and microbenchmarked them.
 
@@ -251,16 +251,16 @@ necessary to explain the measured phenomena later when exploring the results of 
 These benchmarks were used in the early stage of the development to measure a potential gain from
 our new method of encoding and decoding. We mainly focused on measuring different block lengths
 in combination with different methods used for dividing block to subproblems and with different
-approaches to obtain particular block size. The tested block lengths were 15, 30, 31, 62, 63
+approaches to obtain particular block length. The tested block lengths were 15, 30, 31, 62, 63
 and 127. Sizes 15, 31, 63 and 127 are most useful in practice, however, they can be obtained using
-different combinations of block size 30 and 62, e.g. 31 can be combined as 1 bit and 30-bit solution,
+different combinations of block length 30 and 62, e.g. 31 can be combined as 1 bit and 30-bit solution,
 63 can be divided to 1 and 62 as well as to 3 and two sub-problems of size 30. Even if these
 tests were not made on practically useful data, they were mainly used as an indication which
 implementations are interesting and should be the best candidates for further evaluation.
 
 We tested 3 different techniques to divide a problem into sub-problems. These were a linear scan,
 binary search and linear scan enhanced by \texttt{SIMD} instructions. In order to implement the
-solution for 127-bit block size, we used the 128 bit type \texttt{\_\_uint128\_t} provided by both
+solution for 127-bit block length, we used the 128 bit type \texttt{\_\_uint128\_t} provided by both
 \texttt{GCC} and \texttt{Clang} compilers. This type is implemented on platform \texttt{x86\_64}
 as a combination of two 64-bit integers. We compared these results with the table decoding specialization
 in \texttt{SDSL} and with on-the-fly decoding. We ran the deconding algorithm on randomly generated data.
@@ -282,7 +282,7 @@ version was measured to be even faster than on-the-fly decoding for 31-bit block
 	\centerline{
 	\begin{tabular}{|c|l|c|}
 		\hline
-		Block size &	Method									&	ns per query \\
+		Block length 		&	Method								&	ns per query \\
 		\hline
 		\multirow{2}{*}{15} & SDSL\_Table                         	&    2  \\
 							& SDSL\_ON\_THE\_FLY  					&   18  \\
@@ -462,7 +462,7 @@ our method performed the worst we can observe 10--20\% speed up on every block l
 		\includegraphics[width=\textwidth, height=0.4\textheight]{images/vysledky_sdsl_locate}
 	}
 	\caption[TODO]{Locating occurrences of patterns in the represented text. Displaying
-	the query time per occurrence for various block sizes and the size of index over the
+	the query time per occurrence for various block lengths and the size of index over the
 	text.
 	}
 	\label{obr:benchmark_sdsl_locate}
@@ -658,8 +658,8 @@ wavelet tree. The results are shown in Fig~\ref{obr:benchmark_sdsl_hybrid_count}
 	\caption[TODO]{Timing of $\access$, $\rank$ and $\select$ methods over the randomly generated
 	sequence with 5\% of ones in it. Comparison of standard implementation and our hybrid encoding
 	marked with cross. For reference, we included sparse vector implementation. We may observe how
-	implementations get closer to the entropy lower bound (0.29) with increasing block size. Name
-	$\texttt{hybrid-}x\texttt{(}y\texttt{)}$ denotes implementation of block size $x$ with cutoff $y$.
+	implementations get closer to the entropy lower bound (0.29) with increasing block length. Name
+	$\texttt{hybrid-}x\texttt{(}y\texttt{)}$ denotes implementation of block length $x$ with cutoff $y$.
 	}
 	\label{obr:vysledky_hybrid_artif}
 \end{figure}
@@ -673,8 +673,8 @@ wavelet tree. The results are shown in Fig~\ref{obr:benchmark_sdsl_hybrid_count}
 	data \texttt{WT-WEB}. On $x$-axis is the space usage of the particular representation and on $y$-axis
 	the average query time for the respective operation. Original implementation is denoted by dots. These
 	are our implementations except for the 15-bit version based on the table lookup provided by \texttt{SDSL}.
-	Every cross symbols hybrid implementation with particular cutoff. The same block size is denoted by a
-	single color. Name $\texttt{hybrid-}x\texttt{(}y\texttt{)}$ denotes implementation of block size $x$ with
+	Every cross symbols hybrid implementation with particular cutoff. The same block length is denoted by a
+	single color. Name $\texttt{hybrid-}x\texttt{(}y\texttt{)}$ denotes implementation of block length $x$ with
 	cutoff $y$.
 	}
 	\label{obr:vysledky_sdsl_hybrid}
@@ -708,7 +708,7 @@ wavelet tree. The results are shown in Fig~\ref{obr:benchmark_sdsl_hybrid_count}
 %	\begin{tabular}{|l|l|r|}
 %		\multicolumn{3}{c}{WT-DNA-1GB} \\
 %		\hline
-%		Block size 			& $c_k$					&  space used by hybrid \\
+%		Block length 		& $c_k$					&  space used by hybrid \\
 %		\hline
 %		\multirow{2}{*}{31} & 7                  	&  90\%  \\
 %							& 15  					&  97\%  \\
@@ -727,7 +727,7 @@ wavelet tree. The results are shown in Fig~\ref{obr:benchmark_sdsl_hybrid_count}
 %	\begin{tabular}{|l|l|r|}
 %		\multicolumn{3}{c}{WT-WEB-1GB} \\
 %		\hline
-%		Block size 			& $c_k$					&  space used by hybrid \\
+%		Block length 		& $c_k$					&  space used by hybrid \\
 %		\hline
 %		\multirow{2}{*}{31} & 7                  	&  73\%  \\
 %							& 15  					&  85\%  \\
