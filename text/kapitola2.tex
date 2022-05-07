@@ -84,7 +84,7 @@ answer $\rank$ query in constant time with only sublinear space overhead. The co
 solution is based on partitioning first proposed in this context by \cite{okanohara2007practical}.
 As in the previous solution, we start by splitting the bit sequence into superblocks. This time
 we set the length of superblock to $\BigO(\log^2 n)$ and again precompute $\rank$s for the beginning of
-every superblock. Then, every superblock is further divided into blocks of length $\ceil{(\log n)/2}$.
+every superblock. Then, every superblock is further divided into blocks of length $\ceil{(\log_2 n)/2}$.
 Similarly to superblocks, for all of these smaller blocks we precompute $\rank$. However, to save space,
 we only precompute these $\rank$s from the beginning of the corresponding superblock.
 
@@ -218,7 +218,7 @@ beneficial in scenarios when $nH_0(S)\ll n$.
 
 This is an idea that RRR is based on. RRR is a data structure based partly on the work of \cite{pagh2001low}
 and proposed by \cite{raman2007succinct}. The main idea of RRR is to split the bit sequence into blocks of size
-$b$ and then represent a block with $c$ ones using only $\ceil{\log {b \choose c}}$ bits as
+$b$ and then represent a block with $c$ ones using only $\lg {b \choose c}$ bits as
 there are ${b \choose c}$ combinations for positions of ones. The whole block can be then uniquely
 represented as a pair $(c, o)$ where $c$ is the number of ones in the block, called \emph{class} and
 $o$ is an \emph{offset} of this block in a sequence of all the ${b \choose c}$ blocks in this particular class.
@@ -244,9 +244,9 @@ For longer blocks, it is impractical or even impossible to store huge helper tab
 hand, bigger block sizes yield better compression rates because of smaller per block overhead. \cite{navarro2012fast}
 developed method we shall call \textit{on the fly-decoding}, that does not require these big helper tables. 
 This method relies on a bit by bit encoding and decoding of the block, taking $\BigO(b)$ time. While decoding,
-we can compute on every position using simple combinatorics, how many blocks precede a given prefix and decide,
-whether next bit should be 0 or 1. Pseudocode of this idea computing binary representation of block is in
-listing~\ref{alg:on_the_fly}.
+we can compute on every position, how many blocks precede a given prefix using simple combinatorics. Based on
+that number, we decide whether next bit should be 0 or 1. Pseudocode of this idea computing binary representation
+of block is in listing~\ref{alg:on_the_fly}.
 
 \begin{algorithm}
 \caption{Pseudocode for on-the-fly decoding}\label{alg:on_the_fly}
@@ -276,41 +276,42 @@ of bits
 
 In the previous paragraph, we showed how single block can be encoded and decoded. The next question is how the
 encoded pairs representing blocks are arranged in memory. This arrangement should consider space efficiency
-but also allow easy access to individual blocks of $B$. 
+but also allow easy access to individual blocks of $B$.
 
 The main part of this representation comprises of two arrays $C$ and $O$ storing the classes and offsets of
 the blocks, respectively. The array $C$ is an array of elements that are of fixed length. Every element takes
-$\lg (b+1)$ bits of space. The array $O$, on the other hand, is an array of elements of variable
-size where the $i$-th element is $\lg {b\choose C[i]}$ bits long. Note that accessing $i$-th element
+$\lg (b+1)$ bits of space as the number of ones in the block can be anywhere between 0 and $b$. The array $O$,
+on the other hand, is an array of elements of variable length where the $i$-th element is $\lg {b\choose C[i]}$
+bits long where ${b\choose C[i]}$ is the number of blocks along the class $C[i]$. Note that accessing $i$-th element
 in array $C$ is easier than doing the same in array $O$.
 
 \paragraph{Accessing bits in RRR}
 
-Accessing $x$-th bit of original sequence $B$ consists of three steps. The first is to obtain the
+Accessing $x$-th bit of original sequence $B$ consists of three steps. The first step is to obtain the
 compressed representation of a block where $x$-th bit is located. The second step is to decode this block and
 the third is to access the particular bit of interest in the decoded block. The $x$-th bit is contained in the
-$i$-th block where $i=\floor{x/b}$. Its compressed representation is $(C[i], O[i])$.
+$i$-th block where $i=\floor{x/b}$. Its compressed representation is $(C[i], O[i])$ where $C[i]$ stands for class
+and $O[i]$ for the offset along the all possible blocks with class $C[i]$.
 
 Obtaining $C[i]$ is trivial as it is at the fixed memory offset from the beginning of array $C$. Getting the
-value of $O[i]$ is harder as it is not at a known memory offset but it can be still expressed as
-$$\sum_{j=1}^{i-1} \lg {b\choose C[j]}.$$ This can not be, however, computed in constant time without
-any precomputed information and we need to basically one by one skip over elements that come before $O[i]$.
-To access the $i$-th block, we need in the worst case to look at all the elements of $C$ and this
-takes $\BigO(n/b)$ time. For now, we stay with this solution and analyze its space usage.
+value of $O[i]$ is harder as it is not at a known memory offset but this memory offset can be expressed as
+$$\sum_{j=1}^{i-1} \lg {b\choose C[j]}$$, where we basically sum up the lengths of all the elements preceding
+$i$-th in $O$. This can not be, however, computed in constant time without any precomputed information and we
+need to basically one by one skip over elements that come before $O[i]$. To access the $i$-th block without
+precomputed information, we need in the worst case to look at all the elements of $C$ and this takes $\BigO(n/b)$
+time. For now, let us analyze space usage of this solution.
 
 \paragraph{Space usage of RRR}
 
-Our current representation needs to store the arrays $C, O$ and helper table $D$. Let us now
-analyze the space used by these structures. $C$ is an array of $\ceil{n/b}$ elements of fixed size
-$\lg (b+1)$. For array $O$ we argue that its size is bounded by
-
+Our current representation needs to store the arrays $C, O$ and helper decoding table $D$. Let us now
+analyze the space used by these structures. Array of classes $C$ is an array of $\ceil{n/b}$ elements
+of fixed length $\lg (b+1)$. For offset array $O$ we argue that its size is bounded by
 \begin{align*}
     \sum_{i=1}^{n/b} \lg {b\choose c_i}
     &\leq \sum_{i=1}^{\ceil{n/b}} \log_2 {b\choose c_i} + \ceil{n/b} \\
     &= \log_2\prod_{i=1}^{\ceil{n/b}} {b\choose c_i} + \ceil{n/b} \\
     &\leq \log_2{n\choose \#_1(B)} + \ceil{n/b} &\leq nH_0(B) + \ceil{n/b}
 \end{align*}
-
 where $\#_1(B)$ denotes the total number of ones in $B$. The second inequality was obtained using
 the observation that ${n\choose k} {m\choose \ell} \leq {n+m\choose k+\ell}$. This can be seen
 when we interpret the left side of the equation as a number of ways we can choose $k$ elements

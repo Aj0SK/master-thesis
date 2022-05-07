@@ -309,11 +309,11 @@ we know that in $F$ the subsequence containing the prefix {\tt house} begins on 
 	\end{tabular}
 	}
 	\caption[TODO]{Assume that we are counting occurences of \texttt{home} and we already found the
-	range of rows where suffix \texttt{ouse} is located given by $b_1$ and $e_1$. Now to find range
-	of rows where \texttt{house} is located we first look where the run of symbol \texttt{h} begins
-	in $F$ -- $\Count[h]$. However, not all of the rows starting with \texttt{h} continue with
+	range of rows where suffix \texttt{ouse} is located given by $b_1$ and $e_1$. To find where range
+	of rows with \texttt{house} as a prefix is located, we first look at the position where rows starting with
+	\texttt{h} begin in $F$ -- $\Count[h]$. However, not all of the rows starting with \texttt{h} continue with
 	\texttt{ouse}. To find this subinterval, we use the information from previous iteration. We count
-	the number of occurences of \texttt{h} before position $b_1$ and use this as offset into run of
+	the number of occurences of \texttt{h} in $L$ before position $b_1$ and use this as offset into run of
 	symbol \texttt{h}. In this particular case, $b_0 = \Count[h] + rank_h(b_1) = 100 + 3 = 103$ and
 	$e_0 = \Count[h] + rank_h(e_1) = 100 + 5 = 105$.
 	}
@@ -378,7 +378,7 @@ from the alphabet $\Sigma$, storing ones at positions where $c$ occurs in $S$
 \[
     B_c[j]= 
 \begin{cases}
-	1,& \text{if} S[j]=c \\
+	1,& \text{if } S[j]=c \\
     0,& \text{otherwise.}
 \end{cases}
 \]
