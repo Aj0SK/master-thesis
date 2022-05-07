@@ -243,10 +243,6 @@ and $b_2$ and even combine different orderings.
 
 \section{Hybrid encoding}
 
-% TODO: premenovat C_i na nieco ine
-% TODO: pridat viac kontextu, preco sa zaoberame percentami jednotiek
-% TODO: ukazat ze vacsie b je lepsie
-
 In this section, we would like to focus more on the space-saving aspect of RRR and use some
 assumptions about the input bit sequence to change how blocks are represented and by doing
 it, save some additional space. Storing block of length $b$, in a raw bit representation
@@ -357,9 +353,8 @@ this class, it follows that $C_i$ follows binomial distribution. As
 $$C_i \sim Bin\left(n/b, {b\choose i}p^i(1-p)^{b-i}\right)$$ it follows that the expected value
 is equal to \ref{eq:hybrid_encoding_expected_c_i}.
 
-We present the expected space saved by hybrid implementation for some chosen values of
+We present the expected space used by hybrid implementation for some chosen values of
 $p, b$ and $c_k$ in Fig.~\ref{obr:hybridEncodingTheoretical}.
-% TODO: space saved should be used, need to regenerate to 1-x
 \begin{figure}
 	\centerline{
         \begin{tabular}{l c c c}
@@ -385,12 +380,11 @@ $p, b$ and $c_k$ in Fig.~\ref{obr:hybridEncodingTheoretical}.
                                 &   127 &   15      &   1.22\\
                                 &   127 &   63      &   0.99\\
         \end{tabular}
-        %\hspace{4em}
 	}
 	\caption[TODO]{
-        We may observe the ratio of expected space used by the hybrid implementation to space used by our
+        We may observe the space used by the hybrid implementation to space used by our
         standard RRR implementation for varios percentage of ones in the text -- $p$ as well as for
-        different block size -- $b$ and cutoff value -- $c_k$. 
+        different block lengths -- $b$ and cutoff value -- $c_k$. 
     }
 	\label{obr:hybridEncodingTheoretical}
 \end{figure}
@@ -462,10 +456,12 @@ that can be nicely combined with divide-and-conquer approach and reuse table dec
 for smaller sub-problems to which we divide the original problem.
 
 The second idea, targeted mainly on sequences with special properties, was to just store blocks that
-are rare in their original bit representation. By using their original representation, we loose some
+are rare in their original bit representation. By using their original representation, we lose some
 space on these blocks but save space on every single class value, as we do not need to distinguish
 between blocks that have certain classes. We devised two versions of hybrid encoding, one more suitable
 for bit vectors that are very sparse and contain small percentage of ones (5--10\%). We shall call this
-\emph{one-sided version of hybrid encoding}. The second version, for bit sequences that have balanced number
-of zeroes and ones but contain many blocks with either small or big number of ones shall be called
-\emph{two-sided version of hybrid encoding}.
+\emph{one-sided version of hybrid encoding} as it encodes in a standard way just blocks with smaller
+number of ones. The second version, is mainly targeted on bit sequences that have balanced number of
+zeroes and ones but contain many blocks with either small or big number of ones. We reffer to this one
+as \emph{two-sided version of hybrid encoding} as it encodes standardly blocks containing either too
+small or too big number of ones.

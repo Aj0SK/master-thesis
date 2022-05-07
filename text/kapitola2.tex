@@ -217,7 +217,7 @@ $$\lg {n \choose m} = nH_0(S)+\BigO(\log n).$$ This means that using this repres
 beneficial in scenarios when $nH_0(S)\ll n$.
 
 This is an idea that RRR is based on. RRR is a data structure based partly on the work of \cite{pagh2001low}
-and proposed by \cite{raman2007succinct}. The main idea of RRR is to split the bit sequence into blocks of size
+and proposed by \cite{raman2007succinct}. The main idea of RRR is to split the bit sequence into blocks of length
 $b$ and then represent a block with $c$ ones using only $\lg {b \choose c}$ bits as
 there are ${b \choose c}$ combinations for positions of ones. The whole block can be then uniquely
 represented as a pair $(c, o)$ where $c$ is the number of ones in the block, called \emph{class} and
@@ -241,7 +241,7 @@ Both these tables $E$ and $D$ can be precomputed by generating all the possible 
 order. After this precomputation, the encoding and decoding of a block takes constant time.
 
 For longer blocks, it is impractical or even impossible to store huge helper tables. On the other
-hand, bigger block sizes yield better compression rates because of smaller per block overhead. \cite{navarro2012fast}
+hand, longer blocks yield better compression rates because of smaller per block overhead. \cite{navarro2012fast}
 developed method we shall call \textit{on the fly-decoding}, that does not require these big helper tables. 
 This method relies on a bit by bit encoding and decoding of the block, taking $\BigO(b)$ time. While decoding,
 we can compute on every position, how many blocks precede a given prefix using simple combinatorics. Based on
@@ -344,26 +344,27 @@ $\BigO(\log(n)\cdot \frac{n}{bk})$ bits of space.
 	% source at https://docs.google.com/drawings/d/1f1M7e-dZIiIZh1RdgqnmptF3xWZBKqjms3f_aQwVMhg/edit
 \end{figure}
 
-When setting the block size to $\log(n)/2$ we obtain interesting practical results as
+When setting the block length to $\log(n)/2$ we obtain interesting practical results as
 the total space used by our representation is equal to $nH_0(B) + o(n)$ bits. This means
 that we are storing only a sublinear amount of data on top of the zeroth order empirical entropy.
 
-When we are interested in obtaining the best practical results, block size becomes
-one of the most important parameters of RRR implementation. As we shall show in the next
-chapter, bigger block size is better because of lower per bit overhead. Also, not all block
-sizes are used in practice. Very often, we are interested in block sizes of the form $2^k-1$.
-This is because the number of ones in block of size $2^k-1$ can be number between 0 and $2^k-1$
+When we are interested in obtaining the best practical results, block length becomes
+one of the most important parameters of RRR implementation. As we shall show in the chapter
+4, longer blocks yield lower per bit overhead. Also, not all block
+lengths are used in practice. Very often, we are interested in block lengths of the form $2^k-1$.
+This is because the number of ones in block of length $2^k-1$ can be number between 0 and $2^k-1$
 making this in total $2^k$ possibilities. Storing this number in the fixed bucket of size
 $k$ bits makes use of all the available space. This is why most commonly used bucket sizes in
-practice are 15, 31, 63 and 127. For block size of 15 the encoding and decoding table
-each occupies roughly 64kB of space. This is because every table consists of $2^{15}$ of entries
-each taking 2 bytes of storage. Unfortunately, for block size of 31 these two tables would consume
-roughly $2^{31}\cdot 4$ bytes of storage. That amounts to roughly 8.5GB of space and makes this approach
-unusable in practice. This problem force us to use the on the fly decoding for block sizes
-bigger than 15. The disadvantage of this approach is that it takes $\BigO(b)$ steps to decode the block.
-Furthermore, on the fly decoding contains branches and it is hard to parallelize its steps in some meaningful
-way. Overall, this makes the block size a parameter that we can adjust to balance between better space
-efficiency and faster runtime performance.
+practice are 4, 5, 6 and 7 for block lengths 15, 31, 63 and 127.
+
+For block length of 15 the encoding and decoding table each occupies roughly 64kB of space. This
+is because every table consists of $2^{15}$ of entries each taking 2 bytes of storage. Unfortunately,
+for block length of 31 these two tables would consume roughly $2^{31}\cdot 4$ bytes of storage. That
+amounts to roughly 8.5GB of space and makes this approach unusable in practice. This problem force us
+to use the on the fly decoding for block lengths bigger than 15. The disadvantage of this approach is
+that it takes $\BigO(b)$ steps to decode the block. Furthermore, on the fly decoding contains branches
+and it is hard to parallelize its steps in some meaningful way. Overall, this makes the block length a
+parameter that we can adjust to balance between better space efficiency and faster runtime performance.
 
 \paragraph{Alternatives}
 % https://github.com/simongog/sdsl-lite/blob/master/include/sdsl/sd_vector.hpp

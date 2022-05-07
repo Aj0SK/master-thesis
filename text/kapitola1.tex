@@ -1,10 +1,8 @@
 \chapter{Introduction to succinct data structures}
 \label{kap:kap1}
 
-% TODO: hlavne todo's tejto kapitoly
-% TODO: priestor pre FM-index, skontrolovat +-1 v FM-index Count, pridat viac prikladov pre succinct DS
 % TODO: mozno pridat konkretne struktury(Fenwick tree by \cite{bille2017succinct}, trie by \cite{grossi2015fast}),
-% TODO: mozno vymazat pouzivanie "character" a radsej vsade "symbol"
+% spomenut DS, pouzivajuce bit vector
 
 \section{Motivation}
 
@@ -159,8 +157,8 @@ One of the solutions that can be used for shorter texts is based on a \textit{su
 of $T$. This is a data structure which stores information about the lexicographical
 order of suffixes of $T$. More precisely, on $i$-th position of suffix array $S$, the starting
 position of suffix that is $i$-th in lexicographical order is stored. For simplicity, in this
-section, we assume that every text $T$ contains at the end a special character {\tt \$} and this
-character is also lexicographically smaller than any other character contained in $T$. Searching for
+section, we assume that every text $T$ contains at the end a special symbol {\tt \$} and this
+symbol is also lexicographically smaller than any other symbol contained in $T$. Searching for
 pattern $P$ in suffix array of $T$ uses the fact that if $P$ is contained in $T$ it is located at
 the beginning of some suffixes. It is easy to observe that these make up a consecutive subsequence
 of $S$.
@@ -191,7 +189,7 @@ rotations $T_1, T_2, \ldots , T_n$ of $T$ and put them sorted by their lexicogra
 order into the rows of table $M$ as seen in Fig.~\ref{obr:BWT}. We name the sequence created by the
 concatenation of symbols in first and last column $F$ and $L$, respectively. Last column $L$
 is what we also call the BWT of $T$. Note that the sequence $F$ can be obtained from $\mathit{T_{BWT}}$
-just by sorting all the characters in $\mathit{T_{BWT}}$. $F$ consists of runs of symbols that are
+just by sorting all the symbols in $\mathit{T_{BWT}}$. $F$ consists of runs of symbols that are
 sorted according to the lexicographical order. We shall use the helper sequence $\Count$ where
 $\Count[c]$ is number of occurrences of symbols smaller than $c$. Note that the run of symbol $c$ in
 $F$ starts at the index $\Count[c]$.
@@ -275,7 +273,7 @@ for word {\tt mouse} or {\tt h} for {\tt house}.
 
 To search for the range of rows in $M$ that have {\tt house} as a prefix we look into the range of all
 rows beginning with symbol {\tt h}. Locating this range is easy as it starts on position
-$\Count[\texttt{h}]$. Rows in this range are sorted according to the second character so there will be
+$\Count[\texttt{h}]$. Rows in this range are sorted according to the second symbol so there will be
 some lines continuing with symbol {\tt a} if the text contained for example word {\tt hashtag} or symbol
 {\tt e} if the word {\tt head} was present in the text. Among them, lines starting with {\tt house} are
 located, but we do not store anything except for $T_{BWT}$ and $\Count$. However, we already located the
@@ -330,12 +328,12 @@ of symbol $p_{n-1}$ in $F$ given by
 
 The next step is to find the subsequence of rows of $M$, given by $b_{n-2}$ and $e_{n-2}$, which has
 $P_{n-2\ldots}$ as a prefix. As we already located rows beginning with $P_{n-1\ldots}$, we can use
-this information. In a range from $b_{n-1}$ to $e_{n-1}$ some rows end with character $p_{n-2}$. These
+this information. In a range from $b_{n-1}$ to $e_{n-1}$ some rows end with symbol $p_{n-2}$. These
 are rows which after being rotated, create subsequence we are looking for. Subsequence we are looking
-for is also subsequence of a run of character $p_{n-2}$ in $F$, starting from $\Count[p_{n-2}]$ spanning
+for is also subsequence of a run of symbol $p_{n-2}$ in $F$, starting from $\Count[p_{n-2}]$ spanning
 rows up to $\Count[p_{n-2}+1]$. To find the beginning and end of our subsequence inside of this run, we
-compute the number of occurrences of character $p_{n-2}$ in $L$ up to $b_{n-1}$, the start of previous
-subsequence of rows and also the number of occurrences of character $p_{n-2}$ in $L$ up to $e_{n-1}$
+compute the number of occurrences of symbol $p_{n-2}$ in $L$ up to $b_{n-1}$, the start of previous
+subsequence of rows and also the number of occurrences of symbol $p_{n-2}$ in $L$ up to $e_{n-1}$
 giving us its end. This works thanks to the property \ref{chapter1:fmindexprop:prop2}. Thus giving us the
 new subsequence
 \begin{align*}
@@ -425,7 +423,7 @@ In wavelet tree, both $\rank_c$ and $\select_c$ methods on the original sequence
 be implemented using $\rank$/$\select$ methods applied on bit sequences that are stored
 in nodes along the path from the root to the leaf containing symbol $c$. Thus, the
 number of $\rank$ and $\select$ queries on individual bit vectors depends on the depth of
-a leaf containing queried character $c$. It is possible for this representation to use
+a leaf containing queried symbol $c$. It is possible for this representation to use
 just $\BigO(\log \sigma)$ times more space than the single bit vector over the sequence $S$
 as on every level of the wavelet tree, we store in total a bit vector of length roughly $|S|$.
 
