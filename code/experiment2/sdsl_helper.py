@@ -48,10 +48,12 @@ for file, block_size in res2.keys():
 test_cases = list(test_cases)
 block_sizes = list(block_sizes)
 
+test_cases.sort()
+
 fig, axs = plt.subplots(len(test_cases), 3)
 slovak_title = 'Čas pre 10^7 operácií prístup, rank, select'
 english_title = 'Access, rank and select query time as a function of block length'
-fig.suptitle(english_title)
+fig.suptitle(english_title, fontsize=20)
 
 for i in range(len(test_cases)):
     axs[i][0].set_title(test_cases[i] + " access")
@@ -87,11 +89,11 @@ for i in range(len(test_cases)):
     #axs[i][0].set_xlabel("veľkosť bloku")
     #axs[i][1].set_xlabel("veľkosť bloku")
 
-axs[-1][0].set_xlabel("block_size")
-axs[-1][1].set_xlabel("block_size")
-axs[-1][2].set_xlabel("block_size")
+axs[-1][0].set_xlabel("block_length")
+axs[-1][1].set_xlabel("block_length")
+axs[-1][2].set_xlabel("block_length")
 
-fig.set_size_inches(8, 10)
+fig.set_size_inches(10, 10)
 plt.tight_layout()
 plt.savefig("benchmark_sdsl_new_method.png")
 plt.clf()
