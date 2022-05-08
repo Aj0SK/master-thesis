@@ -1,16 +1,12 @@
 \chapter{Binary sequence representation}
 \label{kap:kap2}
 
-This chapter is dedicated to outlining the current state of the bit vector
-implementations. Bit vector is a data structure storing binary sequence and supporting
-methods $\access$, $\rank$ and $\select$. As we have shown in section~\ref{section:WaweletTree},
-wavelet tree can be used to build a vector from sequence over the general alphabet
-using the bit vector implementation. This is the reason why it is important to dedicate
-time to creating fast and efficient bit vector implementation. We start with succinct
+As we have shown in the previous section, bit vector can be used to solve various practical
+problems. This chapter is dedicated to outlining the current state of the bit vector
+implementations supporting methods $\access$, $\rank$ and $\select$. We start with a succinct
 representation of bit vector and present ideas to support $\rank$ and $\select$ in sublinear
-space. Then we look at the compressed representation of bit vector obtained using the method
-introduced by \cite{raman2007succinct}. In the end, we briefly mention the alternative implementations
-of compressed bit vector implementation.
+extra space. Then we look at the compressed representation of bit vector obtained using the
+method introduced by \cite{raman2007succinct}.
 
 \section{Bit vector implementation}
 
