@@ -11,7 +11,7 @@ method introduced by \cite{raman2007succinct}.
 \section{Bit vector implementation}
 
 In this section, we introduce practical but also optimal constant time implementations of
-$\rank$ and $\select$ methods using the sublinear space overhead.
+$\rank$ and $\select$ methods with sublinear space overhead.
 
 \subsection{Rank}
 \label{section:rank}
@@ -28,7 +28,7 @@ to compute $\rank(i)$, we go through all the bits preceding $i$-th and count all
 the ones. This solution is not practical for long bit vectors but it does not require
 any additional space and precomputation.
 
-The second approach is to precompute $\rank$ of every bit which enables to answer
+The second approach is to precompute $\rank$ of every bit, which enables us to answer
 $\rank$ query in constant time, using a single table lookup. However, the space needed to
 support this solution is $\BigO(n\cdot\log n)$ bits, where $n$ is the length of the
 bit sequence.
@@ -46,10 +46,9 @@ thus taking $\BigO(\log n)$ bits. This version of the implementation allows us t
 speed and space usage using the parameter $k$. Increasing parameter $k$ saves space, on the other
 hand, smaller $k$ requires less computation to be done inside of the superblock.
 
-In practice, the time of answering the query for smaller $k$ may be dominated by two cache misses
-that often occur when answering $\rank$. The first cache miss occurs when accessing precomputed
-$\rank$ and the second when accessing the beginning of the superblock. Subsequent linear scan
-through superblock is very cache-friendly and thus very fast.
+In practice, the time of answering the query for smaller $k$ may be dominated by cache miss
+that often occurs when accessing $\rank$ precomputed for the superblock. Subsequent linear
+scan through superblock is very cache-friendly and thus very fast.
 
 % TODO: moreover, bit operations - popcount
 % TODO: in theory, for k ~ log n we already get linear space and \BigO(1) time if we assume a strong-enough model (RAM with log n bit registers with popcount)
@@ -79,55 +78,55 @@ The previous solution works well and is commonly used in practice. However, it i
 answer $\rank$ query in constant time with only sublinear space overhead. The constant time
 solution is based on partitioning first proposed in this context by \cite{okanohara2007practical}.
 As in the previous solution, we start by splitting the bit sequence into superblocks. This time
-we set the length of superblock to $\BigO(\log^2 n)$ and again precompute $\rank$s for the beginning of
-every superblock. Then, every superblock is further divided into blocks of length $\ceil{(\log_2 n)/2}$.
-Similarly to superblocks, for all of these smaller blocks we precompute $\rank$. However, to save space,
+we set the length of a superblock to $\BigO(\log^2 n)$ and again precompute $\rank$s for the beginning of
+every superblock. Then, every superblock is further subdivided into blocks of length $\ceil{(\log_2 n)/2}$.
+Similarly to superblocks, for all of these smaller blocks, we precompute $\rank$. However, to save space,
 we only precompute these $\rank$s from the beginning of the corresponding superblock.
 
 Now, when queried for $\rank$ of some position $i$, we combine:
 \begin{enumerate}
-    \item $\rank$ precomputed for the beginning of its superblock,
-    \item $\rank$ precomputed for the beginning of its block,
+    \item $\rank$ precomputed for the beginning of its superblock, plus
+    \item $\rank$ precomputed for the beginning of its block, plus
     \item $\rank$ inside of its block
 \end{enumerate}
 
 The third step can be done also in constant time on unit-cost RAM model with word size $\Theta(\log n)$
-that we use in most of our work. We, however, use and analyze here the solution that uses the precomputed table.
-This table stores for every possible block and $\rank$ query its result. 
+that we use in most of our work. In weaker models, we can still use a precomputed table. This table stores
+for every possible block and $\rank$ query its result. 
 
 The additional space used by this solution can be broken down into three parts:
 \begin{enumerate}
-    \item Precomputed $\rank$ for every superblock. Number of superblocks is $\BigO(n/\log^2 n)$
+    \item Precomputed $\rank$ for every superblock: The number of superblocks is $\BigO(n/\log^2 n)$
     and we need $\BigO(\log n)$ bits to store every single $\rank$ value so the total amount is
     \begin{equation}
         \BigO\left(\frac{n}{\log^2 n}\cdot \log n\right) = o(n).
         \label{eq:rank_space_1}
     \end{equation}
-    \item Precomputed $\rank$ for every block. Number of smaller blocks is $\BigO(n/\log n)$. For every
+    \item Precomputed $\rank$ for every block: The number of smaller blocks is $\BigO(n/\log n)$. For every
     block, precomputed $\rank$ from the beginning of a superblock is stored. This value is at most $\log^2 n$,
     thus we need $\BigO(\log\log^2 n)=\BigO(\log\log n)$ bits to store it. The total amount of space is
     \begin{equation}
         \BigO\left(\frac{n}{\log n}\cdot \log\log n\right)=o(n).
         \label{eq:rank_space_2}
     \end{equation}
-    \item Precomputed table storing result for every possible $\rank$ query over block. There are only
-    $\BigO(2^{(\log n)/2}) = \BigO(\sqrt{n})$ blocks of length $\BigO((\log n)/2)$. Number of possible $\rank$
-    queries over block is equal to its length. For every element stored in the table we need at most
-    $\BigO(\log\log n)$ bits of space so the total amount of space is
+    \item Precomputed table storing result for every possible $\rank$ query over every possible block: There
+    are only $\BigO(2^{(\log n)/2}) = \BigO(\sqrt{n})$ blocks of length $\BigO((\log n)/2)$. The number of
+    possible $\rank$ queries over a block is equal to its length. For every element stored in the table we need
+    at most $\BigO(\log\log n)$ bits of space so the total amount of space is
     \begin{equation}
         \BigO(\sqrt{n}\cdot \log n\cdot \log\log n)=o(n).
         \label{eq:rank_space_3}
     \end{equation}
 \end{enumerate}
 
-The total space used for this solution of $\rank$ is therefore sum of \ref{eq:rank_space_1}, \ref{eq:rank_space_2} and
-\ref{eq:rank_space_3}, which is sublinear from $n$.
+The total space used for this solution of $\rank$ is therefore a sum of \ref{eq:rank_space_1}, \ref{eq:rank_space_2}
+and \ref{eq:rank_space_3}, which is sublinear in $n$.
 
-Even if optimal in theory, this solution is not often used in practice as it produces
-3 cache misses and quite complex implementation. One for accessing the precomputed rank up
-to the start of the superblock, then another one for the precomputed value of rank to the
-beginning of the block and in the end also one for accessing the precomputed $\rank$ value
-of the block.
+Even if optimal in theory, this solution is not often used in practice as it involves a
+quite complex implementation and produces 3 cache misses per query:  One for accessing the
+precomputed rank up to the start of the superblock, then another one for the precomputed
+value of rank to the beginning of the block and in the end also one for accessing the precomputed
+$\rank$ value of the block.
 
 % TODO: ... depends on model... can be \BigO(k/w) if we consider RAM model with w-bit registers
 % that supports popcount
@@ -147,25 +146,25 @@ result of $\select_c(i)$ if we have an efficient implementation of $\rank$. This
 with the solution from the previous section. At first, we binary search for the solution in the
 samples of $\rank$ stored in superblocks. After identifying the correct superblock of length $k$
 bits, we linearly scan for the result. This solution does not require any additional memory on top
-of the space used for $\rank$. The answer is computed in time $\BigO(\log(n/k)+k)$. This solution
-even if not optimal works very well in practice as observed by \cite{gonzalez2005practical} on bit
-vectors of length up to $2^{20}\approx 10^6$.
+of the space used for $\rank$. The answer is computed in time $\BigO(\log(n/k)+k)$. Even though this
+solution is not optimal, it works very well in practice, as observed by \cite{gonzalez2005practical}
+on bit vectors of length up to $2^{20}\approx 10^6$.
 
 \paragraph{Constant time select}
 
-\cite{clark1997compact} proposed solution for $\select$ in a constant time and sublinear space
+\cite{clark1997compact} proposed solution for $\select$ in constant time and sublinear space
 overhead. The solution is, similarly to the constant time $\rank$ solution, based on a division
-to superblocks and blocks.
+into blocks and superblocks.
 
 We begin by precomputing $select(i)$ for every $i$ being multiple of $t_1=\log n\cdot \log\log n$.
 These precomputed values take $\BigO(n/\log\log n)$ bits of space. Results of these precomputed
-$\select$ queries also split the bit sequence into superblocks of possibly variable length such that
+$\select$ queries split the bit sequence into superblocks of possibly variable length such that
 each superblock contains exactly $t_1$ ones (except possibly for the last superblock).
 
 There are now two categories of superblocks. The ones called \textit{long} that are longer
 than $t_1^2$. In long superblocks, we can store the positions of all ones as they are sparse
-and there is not many of these blocks as they are long. The total space used is $\BigO((n/t_1^2)\cdot t_1\cdot
-\log n) = \BigO(n/\log\log n)$.
+and there are not many of these blocks. The total space used is $$\BigO((n/t_1^2)\cdot t_1\cdot
+\log n) = \BigO(n/\log\log n),$$ which is still $o(n)$.
 
 Dealing with \textit{short} superblocks is harder. On short superblocks, we apply the idea that we
 already used for the original bit sequence. Inside of every short superblock, we precompute the
@@ -178,21 +177,21 @@ This procedure breaks short superblocks into blocks. Again, each of these blocks
 last one contains $t_2$ ones. For blocks longer than $t_2^2$, we store the positions of all
 ones as there are not many of these blocks. We may use the same reasoning as in the previous
 part to conclude that this takes $\BigO(n/t_2^2\cdot t_2\cdot \log\log n) = \BigO(n/\log\log n)$
-of bits.
+bits.
 
-To deal with the blocks smaller than $t_2^2$ we can again precompute a table of all
+To deal with the blocks smaller than $t_2^2$, we can again precompute a table of all
 the possible ways how the block may look and all the possible $\select$ queries over it with
-their result. Number of possible blocks of length $t_2^2$ is equal to $\BigO(2^{t_2^2})$,
-number of possible queries over the block is at most its length $t_2^2$ and to store the results
-we need roughly $\BigO(\log t_2)$ bits. The table size is thus
+their result. The number of possible blocks of length $t_2^2$ is equal to $\BigO(2^{t_2^2})$,
+the number of possible queries over the block is at most its length $t_2^2$ and to store the
+results we need roughly $\BigO(\log t_2)$ bits. The table size is thus
 $$\BigO(2^{t_2^2}\cdot t_2^2 \cdot \log t_2) = o(n).$$
 
-When answering $select_1(i)$, we first find the location of right superblock. If this
+When answering $select_1(i)$, we first find the location of the right superblock. If this
 is a long superblock, we just look at the precomputed positions of ones in the superblock.
 The matter is more complicated if we are dealing with a short superblock. In this case, we find
 the location of the correct block. If this is a long block, we can once again just look
-at the position of one we are interested in. If it is a short block, we have the precomputed
-table where we index with the block and the position of one in the block, we are interested in.
+at the position of one we are interested in. If it is a short block, we use the precomputed
+table.
 
 \section{Compressed representation}
 \label{section:compressed_bv}
@@ -312,9 +311,19 @@ where $\#_1(B)$ denotes the total number of ones in $B$. The second inequality w
 the observation that ${n\choose k} {m\choose \ell} \leq {n+m\choose k+\ell}$. This can be seen
 when we interpret the left side of the equation as a number of ways we can choose $k$ elements
 from $n$ elements and $\ell$ elements from another $m$ elements. This is all contained on the
-right side of the equation that includes all these combinations. $D$ is storing $2^b$ entries
-and each entry is using $b$ bits of storage. The total space used is then
-$$nH_0(B) + \ceil{n/b} + \ceil{n/b} \cdot \lg(b+1) + b2^b.$$
+right side of the equation that includes all these combinations. To understand the last inequality,
+consider all binary sequences of length $n$ with $m$ ones. There are ${n\choose m}$ such sequences,
+thus in worst case the space we need to represent single one of these sequences is equal to
+\begin{align*}
+    \log{n\choose m}
+    &= n\log n - m\log m - (n-m)\log (n-m) - \BigO(\log n) \\
+    &= m\log n + (n-m)\log n - m\log m - (n-m)\log (n-m) - \BigO(\log n) \\
+    &= n\left(\frac{m}{n}\log\frac{n}{m} + \frac{n-m}{n}\log\frac{n}{n-m}\right)-\BigO(\log n) \\
+    &= nH_0(B) - \BigO(\log n).
+\end{align*}
+
+Helper table $D$ is storing $2^b$ entries and each entry is using $b$ bits of storage. 
+To summarize, total space used is then $$nH_0(B) + \ceil{n/b} + \ceil{n/b} \cdot \lg(b+1) + b2^b.$$
 
 \paragraph{Block access speed up}
 
@@ -361,19 +370,3 @@ to use the on the fly decoding for block lengths bigger than 15. The disadvantag
 that it takes $\BigO(b)$ steps to decode the block. Furthermore, on the fly decoding contains branches
 and it is hard to parallelize its steps in some meaningful way. Overall, this makes the block length a
 parameter that we can adjust to balance between better space efficiency and faster runtime performance.
-
-\paragraph{Alternatives}
-% https://github.com/simongog/sdsl-lite/blob/master/include/sdsl/sd_vector.hpp
-
-So far we have provided just one example of the bit vector implementation.
-RRR is used on sequences with low entropy, where the frequency of zeroes/ones
-is shifted to one or the other side such as 20-40\% of all bits are the same.
-There is also a second class of the bit vector implementations, heavily
-used when the frequency of zeroes or ones is more significantly shifted.
-We stated that RRR is used in case of shifted frequencies, but when the number
-of ones is very small, e.g. less than 5\% of the sequence, sparse bit vector
-implementations may outperform solutions based on RRR as was observed by \cite{navarro2012fast}.
-Where RRR stands out from some of its alternatives is that it is also very competitive
-in cases where frequencies of zeroes and ones are similar globally, but the bit
-sequence has a lot of places where locally zeroes or ones are over-represented.
-Numerous sparse bit vector solutions are based on the work of \cite{okanohara2007practical}.
