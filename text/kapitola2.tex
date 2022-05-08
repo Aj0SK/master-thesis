@@ -268,7 +268,7 @@ of bits.
 
 \paragraph{Arrangement of encoded blocks}
 
-In the previous paragraph, we showed how single block can be encoded and decoded. The next question is how the
+In the previous paragraph, we showed how a single block can be decoded. The next question is how the
 encoded pairs representing blocks are arranged in memory. This arrangement should consider space efficiency
 but also allow easy access to individual blocks of $B$.
 
@@ -281,7 +281,7 @@ in array $C$ is easier than doing the same in array $O$.
 
 \paragraph{Accessing bits in RRR}
 
-Accessing $x$-th bit of original sequence $B$ consists of three steps. The first step is to obtain the
+Accessing $x$-th bit of the original sequence $B$ consists of three steps. The first step is to obtain the
 compressed representation of a block where $x$-th bit is located. The second step is to decode this block and
 the third is to access the particular bit of interest in the decoded block. The $x$-th bit is contained in the
 $i$-th block where $i=\floor{x/b}$. Its compressed representation is $(C[i], O[i])$ where $C[i]$ stands for class
@@ -289,17 +289,17 @@ and $O[i]$ for the offset along the all possible blocks with class $C[i]$.
 
 Obtaining $C[i]$ is trivial as it is at the fixed memory offset from the beginning of array $C$. Getting the
 value of $O[i]$ is harder as it is not at a known memory offset but this memory offset can be expressed as
-$$\sum_{j=1}^{i-1} \lg {b\choose C[j]}$$, where we basically sum up the lengths of all the elements preceding
-$i$-th in $O$. This can not be, however, computed in constant time without any precomputed information and we
+$$\sum_{j=0}^{i-1} \lg {b\choose C[j]}$$, where we basically sum up the lengths of all the elements preceding
+$O[i]$. This can not be, however, computed in constant time without any precomputed information and we
 need to basically one by one skip over elements that come before $O[i]$. To access the $i$-th block without
 precomputed information, we need in the worst case to look at all the elements of $C$ and this takes $\BigO(n/b)$
 time. For now, let us analyze space usage of this solution.
 
 \paragraph{Space usage of RRR}
 
-Our current representation needs to store the arrays $C, O$ and helper decoding table $D$. Let us now
-analyze the space used by these structures. Array of classes $C$ is an array of $\ceil{n/b}$ elements
-of fixed length $\lg (b+1)$. For offset array $O$ we argue that its size is bounded by
+Our current representation needs to store the arrays $C, O$. Let us now analyze the space used by these structures.
+Array of classes $C$ is an array of $\ceil{n/b}$ elements of fixed length $\lg (b+1)$. For offset array $O$ we argue
+that its size is bounded by
 \begin{align*}
     \sum_{i=1}^{n/b} \lg {b\choose c_i}
     &\leq \sum_{i=1}^{\ceil{n/b}} \log_2 {b\choose c_i} + \ceil{n/b} \\
@@ -308,28 +308,29 @@ of fixed length $\lg (b+1)$. For offset array $O$ we argue that its size is boun
 \end{align*}
 where $\#_1(B)$ denotes the total number of ones in $B$. The second inequality was obtained using
 the observation that ${n\choose k} {m\choose \ell} \leq {n+m\choose k+\ell}$. This can be seen
-when we interpret the left side of the equation as a number of ways we can choose $k$ elements
-from $n$ elements and $\ell$ elements from another $m$ elements. This is all contained on the
-right side of the equation that includes all these combinations. To understand the last inequality,
+when we interpret the left side as the number of ways we can choose $k$ elements
+from $n$ elements and $\ell$ elements from another $m$ elements. Any such choice is included in the
+right side, which represents choices of $k+\ell$ elements from $n+m$. To understand the last inequality,
 consider all binary sequences of length $n$ with $m$ ones. There are ${n\choose m}$ such sequences,
-thus in worst case the space we need to represent single one of these sequences is equal to
+thus in the worst case, the space we need to represent a single one of these sequences is equal to
 \begin{align*}
-    \log{n\choose m}
-    &= n\log n - m\log m - (n-m)\log (n-m) - \BigO(\log n) \\
-    &= m\log n + (n-m)\log n - m\log m - (n-m)\log (n-m) - \BigO(\log n) \\
-    &= n\left(\frac{m}{n}\log\frac{n}{m} + \frac{n-m}{n}\log\frac{n}{n-m}\right)-\BigO(\log n) \\
+    \lg{n\choose m}
+    &= n\log_2 n - m\log_2 m - (n-m)\log_2 (n-m) - \BigO(\log n) \\
+    &= m\log_2 n + (n-m)\log_2 n - m\log_2 m - (n-m)\log_2 (n-m) - \BigO(\log n) \\
+    &= n\left(\frac{m}{n}\log_2\frac{n}{m} + \frac{n-m}{n}\log_2\frac{n}{n-m}\right)-\BigO(\log n) \\
     &= nH_0(B) - \BigO(\log n).
 \end{align*}
 
-Helper table $D$ is storing $2^b$ entries and each entry is using $b$ bits of storage. 
-To summarize, total space used is then $$nH_0(B) + \ceil{n/b} + \ceil{n/b} \cdot \lg(b+1) + b2^b.$$
+If we choose the decoding method with a helper table,  $D$ is storing $2^b$ entries and each entry takes
+$b$ bits of storage. To summarize, the total space used is then
+$$nH_0(B) + \ceil{n/b} + \ceil{n/b} \cdot \lg(b+1) + b2^b.$$
 
 \paragraph{Block access speed up}
 
-To speed up the process of accessing block, we can store the pointers into every $k$-th element
+To speed up the process of accessing blocks, we can store pointers to every $k$-th element
 of $O$. This again creates some bigger superblocks as can be observed in Fig.~\ref{obr:RRRFinal}.
-This representation speeds up the process of locating offset $O[i]$. Now, we at first find the
-nearest pointer leading to superblock where $i$ is located and then we just skip through superblock
+This representation speeds up the process of locating offset $O[i]$. Now, we first find the
+nearest pointer leading to superblock where $i$ is located and then we just skip through the superblock
 at most $k$ times to locate $O[i]$. This additional structure of $\floor{n/(bk)}$ integers uses
 $\BigO(\log(n)\cdot \frac{n}{bk})$ bits of space.
 
@@ -341,19 +342,19 @@ $\BigO(\log(n)\cdot \frac{n}{bk})$ bits of space.
     blocks. $C$ stores the class which is in this case number of ones in the block.
     $O$ uses variable number of bits per entry, in general, $i$-th entry uses
     $\lg {b\choose C[i]}$ bits and stores the lexicographical order
-    of this block in the class $C[i]$. For $k=2$ we can see a helper array $P$
+    of this block in the class $C[i]$. For $k=2$, we can see a helper array $P$
     storing bit offsets into every $k$-th element namely $0, 2, 4\ldots$
 	}
 	\label{obr:RRRFinal}
 	% source at https://docs.google.com/drawings/d/1f1M7e-dZIiIZh1RdgqnmptF3xWZBKqjms3f_aQwVMhg/edit
 \end{figure}
 
-When setting the block length to $\log(n)/2$ we obtain interesting practical results as
+When setting the block length to $\log(n)/2$, we obtain interesting practical results as
 the total space used by our representation is equal to $nH_0(B) + o(n)$ bits. This means
 that we are storing only a sublinear amount of data on top of the zeroth order empirical entropy.
 
 When we are interested in obtaining the best practical results, block length becomes
-one of the most important parameters of RRR implementation. As we shall show in the chapter
+one of the most important parameters of RRR implementation. As we shall show in the Chapter
 4, longer blocks yield lower per bit overhead. Also, not all block
 lengths are used in practice. Very often, we are interested in block lengths of the form $2^k-1$.
 This is because the number of ones in block of length $2^k-1$ can be number between 0 and $2^k-1$
@@ -361,10 +362,10 @@ making this in total $2^k$ possibilities. Storing this number in the fixed bucke
 $k$ bits makes use of all the available space. This is why most commonly used bucket sizes in
 practice are 4, 5, 6 and 7 for block lengths 15, 31, 63 and 127.
 
-For block length of 15 the encoding and decoding table each occupies roughly 64kB of space. This
-is because every table consists of $2^{15}$ of entries each taking 2 bytes of storage. Unfortunately,
-for block length of 31 these two tables would consume roughly $2^{31}\cdot 4$ bytes of storage. That
-amounts to roughly 8.5GB of space and makes this approach unusable in practice. This problem force us
+For block length of 15, the encoding and decoding table each occupies roughly 64kB of space. This
+is because each table consists of $2^{15}$ entries each taking 2 bytes of storage. Unfortunately,
+for block length of 31, these two tables would consume roughly $2^{31}\cdot 4$ bytes of storage. That
+amounts to roughly 8.5GB of space and makes this approach unusable in practice. This problem forces us
 to use the on the fly decoding for block lengths bigger than 15. The disadvantage of this approach is
 that it takes $\BigO(b)$ steps to decode the block. Furthermore, on the fly decoding contains branches
 and it is hard to parallelize its steps in some meaningful way. Overall, this makes the block length a
