@@ -11,9 +11,10 @@ Both of these can be also accessed at \url{https://github.com/Aj0SK/master-thesi
 The first repository contains 4 experiments in directory \texttt{master-thesis/code}:
 \begin{itemize}
     \item \texttt{experiment1} -- microbenchmarking of various RRR implementations
-    \item \texttt{experiment2} -- \texttt{SDSL} and our benchmark of the new method
+    \item \texttt{experiment2} -- \texttt{SDSL} and our benchmark of the new decoding method
     \item \texttt{experiment3} -- our benchmark for hybrid implementation
-    \item \texttt{experiment4} -- \texttt{SDSL} benchmark of our new method using FM-index
+    \item \texttt{experiment4} -- \texttt{SDSL} benchmark of our new decoding method using FM-index
+    \item \texttt{experiment5} -- \texttt{SDSL} benchmark of two-sided hybrid encoding using FM-index
 \end{itemize}
 In all these folders, there are scripts to run the benchmarks. We used these also to obtain
 all the results in this work. 
@@ -26,10 +27,10 @@ on separate branches:
         to limit the number of benchmarked blocks and make the tests pseudorandom but reproducible
     \item \texttt{rrr\_vector\_31\_spec} -- branch with minimum changes, implementing 31 bit specialization
     \item \texttt{rrr\_vector\_63\_127\_spec} -- branch with 63 and 127 bit specializations (branched from \texttt{rrr\_vector\_31\_spec})
-    \item \texttt{rrr\_vector\_hybrid} -- hybrid implementation for block sizes 31, 63, 127
+    \item \texttt{rrr\_vector\_hybrid} -- hybrid implementation for block lengths 31, 63, 127
     \item \texttt{rrr\_vector\_hybrid\_twoside} -- special hybrid implementation for sequences with balanced zeroes and ones
     \item \texttt{rrr\_benchmark\_our} -- branch with 31, 63 and 127 bit specializations and benchmarks
-    \item \texttt{rrr\_benchmark\_hybrid} -- branch with hybrid 31, 63 and 127 bit specializations and benchmarks
+    \item \texttt{rrr\_benchmark\_our\_hybrid} -- branch with hybrid 31, 63 and 127 bit specializations and benchmarks
 \end{itemize}
 
 % Requirements:
