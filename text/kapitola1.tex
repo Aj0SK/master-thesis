@@ -175,9 +175,9 @@ In the rest of this section, we will explain how we construct the FM-index, how 
 and how/why FM-index uses bit vector with method $\rank$. This is particularly interesting for us
 as later in Chapter 4, we use FM-index to benchmark our new implementation of bit vector.
 
-\paragraph{Burrows-Wheeler transformation}
+\paragraph{Burrows-Wheeler transform}
 
-\textit{Burrows-Wheeler transformation}(BWT; \cite{burrows1994block}) is a key
+\textit{Burrows-Wheeler transform}(BWT; \cite{burrows1994block}) is a key
 part of the FM-index. BWT of a text $T$ gives us a sequence $\mathit{T_{BWT}}$ of the same
 length. Furthermore, this operation is reversible in a sense that we are able to reconstruct
 the original text $T$ only using $\mathit{T_{BWT}}$. This transformation is used as a
@@ -225,7 +225,7 @@ index $\Count[c]$.
 	}
 	\caption[TODO]{On the left, we may observe the matrix $M$ filled with cyclic rotations of sequence
 	$T = \mathtt{banana\$}$. On the right, we may observe the sorted suffixes of $T$(content of suffix array). The
-	Burrows-Wheeler transformation of $T$ is string $L=\mathtt{annb\$aa}$ -- the last column of $M$.
+	Burrows-Wheeler transform of $T$ is string $L=\mathtt{annb\$aa}$ -- the last column of $M$.
 	Note that in practice, we do not need to construct the whole table as more efficient algorithms exist.
 	It is also notable that matrix $M$ includes very similar information compared to suffix array.
 	FM-index stores only representation of columns $F$ and $L$, the grey area is not stored.
@@ -280,19 +280,22 @@ for word {\tt mouse} or {\tt h} for {\tt house}.
 
 First, let us show the process on an example (see Fig.~\ref{tab:fm_index_example}). Assume we are
 searching for the word {\tt house} and we already found the range of rows in $M$ that start with
-{\tt ouse}. Symbols in the last column of this range correspond to the symbols preceding {\tt ouse}
-in the text. We may observe different symbols in arbitrary order there such as {\tt m} for the word
-{\tt mouse} or {\tt h} for {\tt house}.
+{\tt ouse} (rows 200--204). Symbols in the last column of this range correspond to the symbols
+preceding {\tt ouse} in the text. We may observe different symbols in arbitrary order there such as
+{\tt m} for the word {\tt mouse} or {\tt h} for {\tt house}.
 
 To search for the range starting with {\tt house}, we look into the range of all rows beginning with the
 symbol {\tt h}. Locating this range is easy as it starts at position $\Count[\texttt{h}]$ and ends before
-$\Count[\texttt{i}]$. Rows in this range are sorted according to the second symbol so there will be some
-lines continuing with symbol {\tt a} if the text contained for example word {\tt hashtag} or symbol {\tt e}
+$\Count[\texttt{i}]$. Rows in this range are sorted according to the second symbol so there will be for
+example some lines continuing with symbol {\tt a} if the text contained word {\tt hashtag} or symbol {\tt e}
 if the word {\tt head} was present in the text. Among them, lines starting with {\tt house} are located,
-but we do not store anything except for $T_{BWT}$ and $\Count$. However, we already located the range
-where suffixes starting with {\tt ouse} are located. We can count how many times {\tt h} is located before
-this range in $T_{BWT}$ and denote it $r$. Thanks to the property \ref{chapter1:fmindexprop:prop2}, we know
-that in $F$ the subsequence containing the prefix {\tt house} begins on position $\Count[\texttt{h}]+r$.
+but we do not store anything except for $\Count$ and $L$. However, we already found the location of
+suffixes starting with {\tt ouse}. All the symbols {\tt h} in the last column correspond to left rotations
+of rows 100--105 by one. Note that rotations of row 103 and 104 are rows 201 and 204. Rotations of
+\texttt{hashtag}/\texttt{head}/\texttt{hind} start with \texttt{ash}/\texttt{ead}/\texttt{ind}, so they
+come \emph{before} row 200. On the other hand, rotation of row 105, starts with {\tt uge}, which comes
+\emph{after} {\tt ouse}. To locate the offset of {\tt house} along the lines starting with {\tt h},
+we need to count the number of occurences of {\tt h} in $L$ before the occurrences of {\tt ouse}.  
 
 % https://docs.google.com/spreadsheets/d/1C7O2qsEEnjYkf2N1gX6HbS8sZu3UNl86VIxL3X9msVo/edit#gid=0
 % TODO: pridat \tt ked sa to trosku zastabilizuje
@@ -303,7 +306,7 @@ that in $F$ the subsequence containing the prefix {\tt house} begins on position
 				    & Row n.     & F &  &   &   &   &   &   &   &   & L \\ \cline{5-10}\cline{2-3}\cline{12-12}
 				    & 0          &   &  &   &   &   &   &   &   &   &   \\ \cline{5-10}\cline{2-3}\cline{12-12}
 				    & \ldots     &   &  &   &   &   &   &   &   &   &   \\ \cline{5-10}\cline{2-3}\cline{12-12}
-	$\Count{[}h{]}$ & 100        & h &  & a & s & h &   &   &   &   &   \\ \cline{5-10}\cline{2-3}\cline{12-12}
+	$\Count{[}h{]}$ & 100        & h &  & a & s & h & t &   &   &   &   \\ \cline{5-10}\cline{2-3}\cline{12-12}
 				    & 101        & h &  & e & a & d &   &   &   &   &   \\ \cline{5-10}\cline{2-3}\cline{12-12}
 	                & 102        & h &  & i & n & d &   &   & b &   & e \\ \cline{5-10}\cline{2-3}\cline{12-12}
 	$b_0$		    & 103        & h &  & o & u & s & e &   &   &   &   \\ \cline{5-10}\cline{2-3}\cline{12-12}
@@ -319,13 +322,13 @@ that in $F$ the subsequence containing the prefix {\tt house} begins on position
 	                & \ldots     &   &  &   &   &   &   &   &   &   &   \\ \cline{5-10}\cline{2-3}\cline{12-12}
 	\end{tabular}
 	}
-	\caption[TODO]{Assume that we are counting occurences of \texttt{house} and we already found the
-	range of rows where suffix \texttt{ouse} is located given by $b_1$ and $e_1$. To find where range
-	of rows with \texttt{house} as a prefix is located, we first look at the position where rows starting with
-	\texttt{h} begin in $F$ -- $\Count[h]$. However, not all of the rows starting with \texttt{h} continue with
-	\texttt{ouse}. To find this subinterval, we use the information from previous iteration. We count
-	the number of occurences of \texttt{h} in $L$ before position $b_1$ and use this as offset into run of
-	symbol \texttt{h}. In this particular case, $b_0 = \Count[h] + rank_h(L, b_1) = 100 + 3 = 103$ and
+	\caption[TODO]{We are counting occurences of \texttt{house} and we already found the
+	range of rows starting with \texttt{ouse} given by $b_1$ and $e_1$. To find the range of rows starting
+	with \texttt{house}, we first look at the position where rows starting with \texttt{h} begin in $F$ -- $\Count[h]$.
+	However, not all of the rows starting with \texttt{h} continue with \texttt{ouse}. To find this subinterval,
+	we use the information from previous iteration. We count the number of occurences of \texttt{h} in $L$ before
+	position $b_1$ and use this as offset into run of symbol \texttt{h}. In this particular case,
+	$b_0 = \Count[h] + rank_h(L, b_1) = 100 + 3 = 103$ and
 	$e_0 = \Count[h] + rank_h(L, e_1) = 100 + 5 = 105$.
 	}
 	\label{tab:fm_index_example}
@@ -437,22 +440,16 @@ In a wavelet tree, both $\rank_c$ and $\select_c$ methods on the original sequen
 be implemented using $\rank$/$\select$ methods applied on bit sequences that are stored
 in nodes along the path from the root to the leaf containing symbol $c$. Thus, the
 number of $\rank$ and $\select$ queries on individual bit vectors depends on the depth of
-a leaf containing queried symbol $c$. It is possible for this representation to use
-just $\BigO(\log \sigma)$ times more space than the single bit vector over the sequence $S$
-as on every level of the wavelet tree, we store in total a bit vector of length roughly $|S|$.
+a leaf containing queried symbol $c$. Regarding space usage of wavelet tree, it is possible
+for this representation to use just $n\lg \sigma+o(n)$ bits of space where $n$ is the length
+of represented text $S$ as on every level of the wavelet tree, we store roughly a bit vector
+of length $n$.
 
 Even if this version of wavelet tree can be used inside of the FM-index, it is possible to
-make a solution that is faster in some scenarios. Both methods, $\rank_c$ and $\select_c$ now
-depend on the speed of the bit vector implementation, used in the nodes, but also on the depth
-of symbol $c$ in the tree. This depth is now for every single symbol roughly $\BigO(\log \sigma)$.
-
-To obtain an even better solution, let us give another perspective on the wavelet tree and assign
-a single bit to every edge. For every edge, its bit is either {\tt 0} if this edge leads from
-the parent to the left son or {\tt 1} otherwise. The example of this numbering may be also
-observed in Fig.~\ref{obr:WaveletTreeExample}. Now, we can think of the wavelet tree as an
-assignment of a binary code to every alphabet symbol. Code of a symbol $c$ is equal to
-concatenation of bits that are contained in edges along the path from the root to the leaf node
-containing symbol $c$.
+make a solution that is faster and more space efficient in some scenarios. Speed of both
+methods, $\rank_c$ and $\select_c$, depends on the speed of the bit vector implementation,
+used in the nodes, but also on the depth of symbol $c$ in the tree. This depth is now for
+every single symbol roughly $\BigO(\log \sigma)$.
 
 To obtain an even better solution, let us give another perspective on the wavelet tree and assign
 a single bit to every edge -- {\tt 0} for left and {\tt 1} for right (see Fig.~\ref{obr:WaveletTreeExample}).
@@ -472,16 +469,17 @@ compressor that considers only frequencies of symbols and $H_0(S)\leq \lg\sigma$
 case, we need $\lg \sigma$ bits to store every symbol. In some cases, however, it is the case
 that frequencies of symbols are not even and thus $H_0(S)\ll \lg\sigma$.
 
-Even if the maximum depth of a Huffman shaped wavelet tree may be bigger compared to the original,
+The maximum depth of a Huffman shaped wavelet tree may be bigger compared to the original, however,
 \cite{grabowski2004first} showed that we can enforce the maximum depth to be $\BigO(\log \sigma)$
 with the average depth limited by $H_0+2$. This is, however, as they claimed, not very practical.
 The most important fact is that with Huffman shaped wavelet tree, it is possible to decrease the
 average number of nodes accessed and thus decrease the average query time of $\rank$ and $\select$.
 
-The space used by the wavelet tree heavily depends on the space usage of individual bit vectors
-that are used to store the nodes of wavelet tree. If these are represented using a data structure
-that takes space close to the zero-order entropy of the sequence $S$, then the whole wavelet tree
-requires $nH_0(S) + o(n\log\sigma)$ bits of space as was shown by \cite{grossi2003high}.
+It is also possible for the original shape of the wavelet tree to achieve space usage of $nH_0(S) + o(n\log\sigma)$
+bits. This was shown by \cite{grossi2003high} and this representation relies on using compressed
+bit vector implementation, that takes space close to the zero-order entropy, inside of the tree's nodes.
+
+% TODO: upravit konstanty podla najdeneho clanku
 
 With the use of Huffman shaped wavelet tree, it is possible to bring down the space used by FM-index to
 $nH_k(T)+o(n\log \sigma)$ for the text $T$ of length $n$ over alphabet of size $\sigma$ where $H_k$ is

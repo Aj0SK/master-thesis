@@ -12,27 +12,27 @@ the query time and space usage.
 
 \section{Block encoding}
 
-As we discussed in section~\ref{section:compressed_bv}, there are to
+As we discussed in Section~\ref{section:compressed_bv}, there are to
 the best of our knowledge two widely used methods to encode and decode the
 blocks in RRR. Disadvantage of the table decoding method is its inability
 to reasonably support longer blocks in practice because of the huge size of
 helper tables. On the other hand, the on-the-fly decoding method may be used
-to support a longer blocks with the downside being longer encoding and decoding
+to support longer blocks with the downside being longer encoding and decoding
 times. In this section, we propose a new method for block encoding and decoding.
 The main objective of the new method is to enable use of longer blocks while not
 hurting the runtime so significantly.
 
 The main idea of our proposed solution is to use a divide-and-conquer approach to
-break the problem of finding the order of the block $B$ along the class $c$ to
-the finding of order of several smaller sub-blocks of $B$. The potential advantage of this
+break the problem of finding the order of the block $B$ in class $c$ into finding
+orders of several smaller sub-blocks of $B$. The potential advantage of this
 solution is that it may enable us to use the table method to solve the smaller
 subproblems. To facilitate our solution, we altered the respective order of the blocks
 along the class and we do not use the lexicographical ordering anymore. Note that we
-continue to use the number of ones to identify class of the block. In our solution, every
+continue to use the number of ones to identify the class of a block. In our solution, every
 block $B$ will be thought of as a concatenation of two smaller \textit{sub-blocks}, $B_1$
 and $B_2$. Primarily, the blocks are ordered according to the value of their \textit{class pair}
 $(c_1, c_2)$ where $c_1$ and $c_2$ are the classes of the smaller sub-blocks $B_1$ and $B_2$,
-respectively. Only then, the tie is broken by order of $B_1$ and $B_2$ along their respective
+respectively. Only then, the tie is broken by order of $B_1$ and $B_2$ in their respective
 classes. An example of the new ordering for blocks of length 6 is shown in Fig.~\ref{obr:lexicographicalVsUs}.
 
 \begin{figure}
@@ -65,10 +65,10 @@ classes. An example of the new ordering for blocks of length 6 is shown in Fig.~
         \end{tabular}
 	}
 	\caption[TODO]{
-        The example of new ordering for the block length $b=6$ and class $c=2$.
+        An example of the new ordering for block length $b=6$ and class $c=2$.
         Every block is divided into two sub-blocks of length 3. Note the differences to the
-        lexicographical ordering. Block {\tt 011 000} on offset 12 is preceded by lexicographicaly
-        greater blocks {\tt 100 001}, {\tt 100 010} and {\tt 100 100} as it has bigger number of ones
+        lexicographical ordering. Block {\tt 011 000} at offset 12 is preceded by lexicographically
+        greater blocks {\tt 100 001}, {\tt 100 010} and {\tt 100 100} since it has higher number of ones
         in the first sub-block.
     }
 	\label{obr:lexicographicalVsUs}
@@ -78,7 +78,7 @@ Formalizing this, we shall write $B\prec_X B'$ if blocks $B$ and $B'$ are of
 the same length, class and at the same time $B$ precedes $B'$ in ordering $X$.
 In this situation, we often refer to block $B$ as being smaller than $B'$.
 We write $B\prec_{\Lex} B'$ if $B$ precedes $B'$ in lexicographical ordering.
-Using this new notation, our new proposed ordering $P$ can be formalized as:
+Using this notation, our new proposed ordering $P$ can be formalized as:
 \begin{align*}
     B\prec_P B' \iff
     &[\#_1(B_1) < \#_1(B_1')] \\
@@ -86,8 +86,8 @@ Using this new notation, our new proposed ordering $P$ can be formalized as:
     &\lor [B_1 = B_1' \land B_2 \prec_{Y} B_2']
 \end{align*}
 where $B=B_1\cdot B_2$, $B'=B_1'\cdot B_2'$ and $X$, $Y$ are arbitrary orderings.
-Note that both $X$ and $Y$ do not have to be lexicographical orderings but can also again
-use our new ordering $P$.
+Note that as $X$ and $Y$, we can use lexicographic ordering or we can use the same
+idea recursively.
 
 In the rest of this section, we are going to explain how encoding and decoding works
 with our proposed ordering.
@@ -95,11 +95,12 @@ with our proposed ordering.
 \paragraph{Encoding}
 
 Before providing the general encoding routine, let us demonstrate the process on
-a simple example and then generalize the ideas behind the process. Imagine
-encoding block {\tt 100010} of length 6. Let us encode this block using our new
-subroutine with 3 as a sub-block length. We may observe that the class of this
-block is 2 as there are two ones in the whole block. Obtaining the offset is
-more complicated. We calculate it by enumerating the number of blocks preceding
+a simple example and then generalize the ideas behind the process. Imagine encoding
+block {\tt 100010} of length 6 using sub-block length 3. We can see this block in
+Fig.~\ref{obr:lexicographicalVsUs} at offset 10. 
+
+The class of this block is 2 as there are two ones in the whole block. Obtaining the
+offset is more complicated; we calculate it by counting the number of blocks preceding
 {\tt 100 010} in the class $c=2$. We divide the blocks preceding {\tt 100 010}
 into 3 categories:
 \begin{itemize}

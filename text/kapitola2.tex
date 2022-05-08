@@ -295,6 +295,8 @@ need to basically one by one skip over elements that come before $O[i]$. To acce
 precomputed information, we need in the worst case to look at all the elements of $C$ and this takes $\BigO(n/b)$
 time. For now, let us analyze space usage of this solution.
 
+% TODO: lowprio, odstranit obkec vyssie
+
 \paragraph{Space usage of RRR}
 
 Our current representation needs to store the arrays $C, O$. Let us now analyze the space used by these structures.
@@ -321,7 +323,7 @@ thus in the worst case, the space we need to represent a single one of these seq
     &= nH_0(B) - \BigO(\log n).
 \end{align*}
 
-If we choose the decoding method with a helper table,  $D$ is storing $2^b$ entries and each entry takes
+If we choose the decoding method with a helper table, $D$ is storing $2^b$ entries and each entry takes
 $b$ bits of storage. To summarize, the total space used is then
 $$nH_0(B) + \ceil{n/b} + \ceil{n/b} \cdot \lg(b+1) + b2^b.$$
 
