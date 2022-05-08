@@ -94,7 +94,7 @@ can be computed beforehand as there are only roughly $b^2$ combinations of possi
 Roughly speaking, we can do the last two steps at the price of two cache misses.
 
 The approach we use is to first precompute for every possible class $c$, numbers
-$Z_{max(c-b_2, 0)},\ldots , Z_{max(c-b_1, 0)}$ where $Z_i$ is the offset of first block with class
+$Z_{\max(c-b_2, 0)},\ldots , Z_{\max(c-b_1, 0)}$ where $Z_i$ is the offset of first block with class
 pair $(i, c-i)$. We map the offset of the block to the number $Z_i$ and thus identify $(c_i, c_j)$.
 As $Z$-numbers form an increasing sequence, we can binary search for ``group'' that contains our
 offset. Example of these values can be observed in Fig.~\ref{table:class_pairs} but also

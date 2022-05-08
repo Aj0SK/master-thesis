@@ -149,83 +149,36 @@ The resulting offset of block $B$ is given by the sum of these 3 quantities.
 
 \paragraph{Decoding}
 
-Decoding is a process of obtaining bit representation of block $B$ from its encoded
-representation $(c, o)$. When our new encoding scheme is used, the main part
-of the decoding process is to obtain encoded representations $(c_1, o_1)$ and
-$(c_2, o_2)$ of sub-blocks $B_1$ and $B_2$. These two can then be fed into
-the decoding subroutines to obtain sub-blocks $B_1$ and $B_2$. Concatenating these
-two representations gives us the decoded block $B$.
-
-% TODO: mozno ked bude cas sa k tomu mozme vratit ale bud to chce zmenit cisla
-% na ktorych ten priklad robim alebo neviem, nedava mi ziadnu value ten priklad
-
-%We shall again present this process on an example and decode the block $B$ from the previous
-%encoding example {\tt 100 010} encoded as $(2, 10)$.
-
-%The first step is to obtain the class pair of block $B$. This is pair of classes
-%of sub-block. We can use the table in Fig.~\ref{obr:lexicographicalVsUs} and see
-%that there are 3 blocks with class pair $(0, 2)$. As the offset of our block is 10,
-%we need to look for this block between blocks with bigger class pair. There are 9
-%blocks with class pair $(1, 1)$. As $3+9$ is bigger than 10, we can say that the
-%class pair of $B$ is $(1, 1)$ and this means that the first sub-block as well as
-%the second sub-block contains one 1. There are, however, 9 blocks with this exact
-%same property, the smallest one being {\tt 001 001} and the largest one {\tt 100 100}
-%as can be observed in Fig.~\ref{obr:lexicographicalVsUs} (offsets 3--11). We have
-%successfully narrowed our search into 9 blocks with same class pair and now we can
-%focus on identifying the offset of the first and second sub-block.
-
 We now propose a general decoding scheme for block $B$ of length $b$ combined from the
-sub-blocks of lengts $b_1$ and $b_2$. All we have at the beginning of decoding is the
-encoded pair $(c, o)$. Assume that our block has an unknown class pair $(c_1, c_2)$,
-such that $c_1+c_2=c$. Our first step is to find $c_1$ and $c_2$. All the possible
-blocks along the class $c$ are primarily sorted by class pair so blocks with the same
-class pair form a consecutive sequence. For every class $c$, we precompute numbers
-$Z_{max(c-b_2, 0)},\ldots , Z_{max(c-b_1, 0)}$ where $Z_i$ is the smallest offset of
-block having class pair $(i, c-i)$. Example of $Z$-values is in Fig.~\ref{obr:classPairsZVals}.
+sub-blocks of lengths $b_1$ and $b_2$. Decoding is a process of obtaining bit representation
+of block $B$ from its encoded representation $(c, o)$. When our new encoding scheme is used,
+the main part of the decoding process is to obtain encoded representations $(c_1, o_1)$ and
+$(c_2, o_2)$ of sub-blocks $B_1$ and $B_2$. These can then be fed into the decoding subroutines
+to obtain sub-blocks $B_1$ and $B_2$. Concatenating these two representations gives us the
+decoded block $B$.
 
-\begin{figure}
-	\centerline{
-        \begin{tabular}{l c c}
-            Offset  &   Block       & Class pair\\
-        \hline
-            0       & 00 111        & \multirow{1}{*}{$(0, 3)$} \\
-        \hline
-            1       & 01 011        & \multirow{6}{*}{$(1, 2)$} \\
-            2       & 01 101        & \\
-            3       & 01 110        & \\
-            4       & 10 011        & \\
-            5       & 10 101        & \\
-            6       & 10 110        & \\
-        \end{tabular}
-        \hspace{3em}
-        \begin{tabular}{l c c}
-            Offset  &   Block       & Class pair\\
-        \hline
-            7       & 11 001        & \multirow{3}{*}{$(2, 1)$} \\
-            8       & 11 010        & \\
-            9       & 11 100        & \\
-        \end{tabular}
-        }
-        \caption[TODO]{
-            Example of class pairs for class 3, block length 5 with sub-block lengths being 2 and 3.
-            Corresponding $Z$-values are $Z_0=0, Z_1=1, Z_2=7$.
-        }
-    \label{obr:classPairsZVals}
-\end{figure}
+Our first step when decoding is to find $c_1$ and $c_2$ using $o$. Assume that our block has an
+unknown class pair $(c_1, c_2)$, such that $c_1+c_2=c$. All the blocks with class $c$ are primarily
+sorted by class pair so blocks with the same class pair form a consecutive range. Range of class pair
+$(c_1,c_2)$ contains ${b_1 choose c1} \times {b_2\choose c2}$ blocks. To find the class pair of block
+with offset $o$ we precompute the beginnings of each range
+$Z_0,\ldots , Z_c$\footnote{more precisely $Z_{\max(c-b_2, 0)},\ldots , Z_{\max(c-b_1, 0)}$}
+where $Z_i$ is the beginning offset of block having class pair $(i, c-i)$ and then binary search
+to find the correct range. For example in Fig.~\ref{obr:lexicographicalVsUs} we basically need to decide,
+whether the offset belongs to the range 0--2 with class pair $(0, 2)$, or the range 3-11 with class pair
+$(1, 1)$, or the range 12--14 with class pair $(2,0)$.
 
 Assume that our block has the class pair equal to $(c_1, c_2)$. The second step is to
-find $o_1$ and $o_2$. There are more blocks that have the same class pair
-as block $B$. Among them, we would like to find $o'$-th where the new offset $o'$
-is given by subtracting the number of blocks with the smaller class pairs from the offset
-$o$ so $$o' = o - Z_{c_1}.$$
+find $o_1$ and $o_2$. Let $$o' = o - Z_{c_1}$$
+be the offset from the beginning of the range of blocks with class pair $(c_1, c_2)$.
 
 There are ${b_1 \choose c_1}$ and ${b_2 \choose c_2}$ ways how the first and second
-sub-block may look, respectively. As all the combinations of first and second sub-block are
-possible, we want to identify $o'$-th block among the ${b_1 \choose c_1}\cdot {b_2 \choose c_2}$
-blocks. Blocks are sorted primarily by the first sub-block and then by the second sub-block.
-This means, that the ordered sequence of the blocks within the class pair $(c_1, c_2)$ will be
-just all the possible ${b_2 \choose c_2}$ second sub-blocks repeating cyclically, every time
-with the different, yet increasing first sub-block. Furthermore, this cycle of
+sub-block may look, respectively. As all the combinations of the first and the second sub-block are
+possible, we want to identify the $o'$-th block among the range of ${b_1 \choose c_1}\cdot {b_2 \choose c_2}$
+blocks. The blocks are sorted primarily by the first sub-block and then by the second sub-block.
+This means that the ordered sequence of blocks within the class pair $(c_1, c_2)$ will be
+just a cyclically repeating sequence of all the possible ${b_2 \choose c_2}$ second sub-blocks, every
+time with a different, yet increasing first sub-block. Furthermore, this cycle of
 ${b_2 \choose c_2}$ sub-blocks will repeat ${b_1 \choose c_1}$ times (once for each possible
 first sub-block). Using $o'$ we can easily find the order of the first and the second sub-block.
 We just need to know how many cycles of length ${b_2 \choose c_2}$ fit into $o'$ and what is
@@ -246,9 +199,9 @@ In this section, we would like to focus more on the space-saving aspect of RRR a
 assumptions about the input bit sequence to change how blocks are represented and by doing
 it, save some additional space. Storing block of length $b$, in a raw bit representation
 always takes exactly $b$ bits of space. The number of bits used by compressed form, however,
-depends heavily on the blocks class. If the block is of class $c$, then compressed
+depends heavily on the blocks class. If the block has class~$c$, then the compressed
 representation uses $\lg (b+1)$ bits to store its class and $\lg {b\choose c}$
-bits to store the offset along the class. In Fig.~\ref{obr:rrrSpaceSavings}, we can see
+bits to store the offset along the class. In Fig.~\ref{obr:rrrSpaceSavings}, we show
 how the space saved per block depends on the block’s class. At the same time, we see
 that RRR saves most of the memory on very sparse and very dense blocks. We would like
 to exploit situations when the frequency of these blocks is very high.
