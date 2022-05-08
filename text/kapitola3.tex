@@ -101,8 +101,7 @@ Fig.~\ref{obr:lexicographicalVsUs} at offset 10.
 
 The class of this block is 2 as there are two ones in the whole block. Obtaining the
 offset is more complicated; we calculate it by counting the number of blocks preceding
-{\tt 100 010} in the class $c=2$. We divide the blocks preceding {\tt 100 010}
-into 3 categories:
+{\tt 100 010} in class $c=2$. We divide these blocks into 3 categories:
 \begin{itemize}
     \item Blocks with a smaller number of ones in the first sub-block.
     (There are 3 such blocks -- those beginning with {\tt 000}.)
@@ -111,48 +110,47 @@ into 3 categories:
     \item Blocks with the same first sub-block, but smaller second sub-block.
     (There is 1 such block, namely {\tt 100 001}.)
 \end{itemize}
-Summing up, we get that there are 10 blocks preceding {\tt 100 010} so it follows
-that its offset $o$ is equal to 10 (when indexing from 0). Together with its class,
+Summing up, we get that there are 10 blocks preceding {\tt 100 010}. Together with its class,
 we encode this block as a pair of numbers $(2, 10)$.
 
 Let us generalize the process of encoding block $B$ of length $b$
 with sub-blocks of length $b_1$ and $b_2$. We also need two orderings $X$ and $Y$
 that can be used to order sub-blocks $B_1$ and $B_2$, respectively.
-The first step is to count the number of ones to obtain class $c=\#_1(B)$.
-Then we compute the offset by counting the number of blocks $B'$ preceding $B$.
-These can be divided into 3 categories:
+The first step is to count the number of ones to obtain classes of individual
+sub-blocks $c_1 = \#_1(B_1)$ and $c_2=\#_1(B_2)$; thus $c=\#_1(B) = c_1+c_2$.
+To compute the offset of $B$ we first obtain pairs $(c_1, o_1)$ and $(c_2, o_2)$ by
+recursively encoding the sub-blocks $B_1$ and $B_2$. Then, we obtain the offset of $B$
+by counting the number of blocks $B'$ preceding $B$. These can be divided into 3 categories:
 \begin{enumerate}
-    \item $B'$ such that $\#_1(B'_1) < \#_1(B_1)$
+    \item $B'$ such that $\#_1(B'_1) < \#_1(B_1)$,
     \label{chapter3:encoding:1}
-    \item $B'$ such that $\#_1(B'_1) = \#_1(B_1), B'_1\prec_X B_1$
+    \item $B'$ such that $\#_1(B'_1) = \#_1(B_1), B'_1\prec_X B_1$, and
     \label{chapter3:encoding:2}
-    \item $B'$ such that $B'_1 = B_1, B'_2\prec_Y B_2$
+    \item $B'$ such that $B'_1 = B_1, B'_2\prec_Y B_2$.
     \label{chapter3:encoding:3}
 \end{enumerate}
 One can observe that these categories closely resemble the definition of our ordering
-in the previous paragraph.
+$P$ above.
 
-The number of blocks in the first category~\ref{chapter3:encoding:1} is equal to
+The number of blocks in the first category is equal to
 $$\sum_{i=0}^{c_1-1} {b_1\choose i} {b_2\choose c-i}.$$ For fixed $i$, ${b_1\choose i}$
-denotes the number of sub-blocks with $i$ ones and ${b_2\choose c-i}$ denotes the number
-of sub-blocks with the rest $c-i$ ones.
+counts the number of sub-blocks with $i$ ones and ${b_2\choose c-i}$ counts the number
+of sub-blocks with the remaining $c-i$ ones.
 
-The number of blocks in the second category~\ref{chapter3:encoding:2} is equal to
+The number of blocks in the second category is equal to
 $$o_1\times {b_2\choose c_2}.$$ These are all the blocks with first sub-block smaller
 than $B_1$ and any second sub-block with $c_2$ ones.
 
-The number of blocks in the third category~\ref{chapter3:encoding:3} is equal to $o_2$.
-This is number of blocks that have $B_1$ as the first sub-block and smaller second
-sub-block $B_2$.
+The number of blocks in the third category is equal to $o_2$.
+This is the number of blocks that have $B_1$ as the first sub-block and the second
+sub-block is smaller than $B_2$.
 
-As we mentioned, the offset of block $B$ is given by the sum of sizes of these 3 groups.
-However, to obtain these, we need to get $c_1, c_2, o_1$ and $o_2$. These numbers can be
-obtained by recursively encoding the sub-blocks $B_1$ and $B_2$.
+The resulting offset of block $B$ is given by the sum of these 3 quantities.
 
 \paragraph{Decoding}
 
 Decoding is a process of obtaining bit representation of block $B$ from its encoded
-representation $(c, o)$. When our new encoding scheme is used, main part
+representation $(c, o)$. When our new encoding scheme is used, the main part
 of the decoding process is to obtain encoded representations $(c_1, o_1)$ and
 $(c_2, o_2)$ of sub-blocks $B_1$ and $B_2$. These two can then be fed into
 the decoding subroutines to obtain sub-blocks $B_1$ and $B_2$. Concatenating these
