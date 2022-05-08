@@ -298,12 +298,12 @@ E[C_i] &= (n/b)\cdot {b\choose i}\cdot p^i\cdot (1-p)^{b-i} \label{eq:hybrid_enc
 \end{align}
 Here we mainly used the linearity of the expected value. To compute the expected value of
 $C_i$ we used the fact, that number of blocks of a certain class follows binomial
-distribution. We know that in the bit sequence, there is $p\%$ of ones. There is $n/b$ blocks
+distribution. We know that in the bit sequence, there is $p\%$ of ones. There are $n/b$ blocks
 and each has probability ${b\choose i}p^i(1-p)^{b-i}$ to be of class $i$. This probability
 is independent from the previous blocks and as we are interested in total number of blocks with
 this class, it follows that $C_i$ follows binomial distribution. As
 $$C_i \sim Bin\left(n/b, {b\choose i}p^i(1-p)^{b-i}\right)$$ it follows that the expected value
-is equal to \ref{eq:hybrid_encoding_expected_c_i}.
+is given by formula (\ref{eq:hybrid_encoding_expected_c_i}).
 
 We present the expected space used by hybrid implementation for some chosen values of
 $p, b$ and $c_k$ in Fig.~\ref{obr:hybridEncodingTheoretical}.
@@ -335,7 +335,7 @@ $p, b$ and $c_k$ in Fig.~\ref{obr:hybridEncodingTheoretical}.
 	}
 	\caption[TODO]{
         We may observe the space used by the hybrid implementation to space used by our
-        standard RRR implementation for varios percentage of ones in the text -- $p$ as well as for
+        standard RRR implementation for various percentage of ones in the text -- $p$ as well as for
         different block lengths -- $b$ and cutoff value -- $c_k$. 
     }
 	\label{obr:hybridEncodingTheoretical}
@@ -346,20 +346,20 @@ to be of the same or even better performance as it is easier to decode the block
 saved in the raw form. However, we should note that hybrid encoding is based on our expectations
 that the number of these blocks is low, so the possible speedup may not be very significant.
 
-\paragraph{Balanced sequences}
+\paragraph{Two-sided cut-off}
 
-The previous version of hybrid encoding may work well for sequences with low density of ones.
+The previous version of hybrid encoding may work well for blocks with low density of ones.
 However, we would also like to use this idea as a viable solution for sequences that contain
 similar frequencies of zeroes and ones but still exhibit behaviour that some block classes are
 underrepresented. This may, for example, occur when sequence has a property, that it is
 globally balanced, but is very unbalanced in some local parts. Then it may be the case, that
-blocks with low count of zeroes and ones are more frequent than blocks with balanced counts
+blocks with low count of zeroes or ones are more frequent than blocks with balanced counts
 of zeroes and ones.
 
-Let us say, that we want to only store $r$ classes instead of all $b+1$ of them. To make
+Let us say that we want to only store $r$ classes instead of all $b+1$ of them. To make
 some space saving possible, it must hold that $$\lg r < \lg (b+1).$$
-We create a range of classes given by closed interval $[\mathit{cut\_from}, \mathit{cut\_to}]$.
-If the blocks class is outside of this range, it is encoded in a standard way. On the other
+We create a range of classes given by a closed interval $[\mathit{cut\_from}, \mathit{cut\_to}]$.
+If the block's class is outside of this range, it is encoded in a standard way. On the other
 hand, all the values inside of this interval are mapped to one particular class number and the
 corresponding block is stored in a raw form instead of its offset. The special block class value
 could be without loss of generality the lowest value $\mathit{cut\_from}$. An example of this
@@ -379,7 +379,7 @@ idea can be observed in Fig.~\ref{obr:hybrid_encoding_valley}.
 In this example, the number of different possible class values $r$, is equal to 4.
 However, using this representation, we would not save any space as the maximum value
 of class is still 7 and we need 3 bits to store it. This would consume the same number
-of bits to store as original representation. It is easy to observe, however, that these
+of bits to store as original representation. It is easy to see, however, that these
 values can be mapped into the range $[0, 3]$, thus only consuming two bits per class value.
 
 \begin{figure}
@@ -403,7 +403,7 @@ $$(n/b)\lg (c_k+1) + \sum_{i=0}^{\mathit{cut\_from}-1} C_i\lg {b\choose i}
 + \sum_{i=\mathit{cut\_to}+1}^{b} C_i\lg {b\choose i}.$$
 
 To summarize, we proposed two different ideas to enhance current implementations of RRR.
-First idea is related to the way how blocks are encoded and decoded. We devised a new ordering
+The first idea is related to the way blocks are encoded and decoded. We devised a new ordering
 that can be nicely combined with divide-and-conquer approach and reuse table decoding subroutine
 for smaller sub-problems to which we divide the original problem.
 
@@ -414,6 +414,5 @@ between blocks that have certain classes. We devised two versions of hybrid enco
 for bit vectors that are very sparse and contain small percentage of ones (5--10\%). We shall call this
 \emph{one-sided version of hybrid encoding} as it encodes in a standard way just blocks with smaller
 number of ones. The second version, is mainly targeted on bit sequences that have balanced number of
-zeroes and ones but contain many blocks with either small or big number of ones. We reffer to this one
-as \emph{two-sided version of hybrid encoding} as it encodes standardly blocks containing either too
-small or too big number of ones.
+zeroes and ones but contain many blocks with either small or high number of ones. We refer to this one
+as \emph{two-sided version of hybrid encoding}.
