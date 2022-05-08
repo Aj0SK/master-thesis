@@ -187,14 +187,15 @@ to compress than the original text. Let us first explain the construction and th
 an intuition why it is easier to compress.
 
 Consider a sequence $T$ of symbols over an arbitrary alphabet $\Sigma$. Take all the cyclical
-rotations $T_1, T_2, \ldots , T_n$ of $T$ and put them sorted by their lexicographical
-order into the rows of table $M$ as seen in Fig.~\ref{obr:BWT}. We name the sequence created by the
-concatenation of symbols in first and last column $F$ and $L$, respectively. Last column $L$
-is what we also call the BWT of $T$. Note that the sequence $F$ can be obtained from $\mathit{T_{BWT}}$
-just by sorting all the symbols in $\mathit{T_{BWT}}$. $F$ consists of runs of symbols that are
-sorted according to the lexicographical order. We shall use the helper sequence $\Count$ where
-$\Count[c]$ is number of occurrences of symbols smaller than $c$. Note that the run of symbol $c$ in
-$F$ starts at the index $\Count[c]$.
+rotations $T_1, T_2, \ldots , T_n$ of $T$, sort them lexicographically and form a (conceptual)
+table $M$ (see an example in Fig.~\ref{obr:BWT}). Note that each column is a permutation of $T$.
+The first column, $F$, consists of all the characters of $T$, sorted. The last column, $L$, is
+the Burrows-Wheeler transform of $T$.
+
+FM-index stores columns $F$ and $L$. As the first column of $M$ consists of runs of sorted symbols,
+it is represented in $FM-index$ using the helper array $\Count$ where $\Count[c]$ is the number of
+occurrences of symbols \emph{preceding} $c$. Note that the run of symbol $c$ in $F$ starts at the
+index $\Count[c]$.
 
 \begin{figure}
 	\centerline{
@@ -233,28 +234,31 @@ $F$ starts at the index $\Count[c]$.
 
 BWT is usually more compressible than the original text because it frequently contains runs of the same
 symbol. This can be better explained on an example. Consider us having BWT of a text containing
-a lot of mentions of the word {\tt home}. All the rotations prefixed with {\tt ome} will form a
-consecutive subsequence of rows of $M$. Some of these rows will end with symbol {\tt c} for word {\tt come},
-some of them with {\tt m} for {\tt moment} but many of these lines contain {\tt h} at the end as this
-is very common symbol preceding {\tt ome} in the text.
+a lot of mentions of the word {\tt house}. All the rotations prefixed with {\tt ouse} will form a
+consecutive subsequence of rows of $M$. Some of these rows will end with symbol {\tt m} for word {\tt mouse},
+some of them with {\tt p} for {\tt spouse} but many of these lines contain {\tt h} at the end as this
+is very common symbol preceding {\tt ouse} in the text.
 
-\paragraph{Searching in FM-index}
+Generally, it is common for (natural) texts that symbols can be predicted quite well from the context
+following them. If we sort these contexts (beginnings of rows of $M$), then the last row will often
+contain runs of the same symbol but also subsequences where just a handful of symbols occur.
 
-As we already stated, FM-index is used for searching in the preprocessed text.
-Searching in FM-index is based on the two important properties of matrix $M$:
+\paragraph{Searching in an FM-index}
+
+Searching in an FM-index is based on two important properties of matrix $M$:
 
 \begin{enumerate}
-	\item Rotations starting with prefix $w$, form a consecutive subsequence of rows in $M$.
+	\item Rotations starting with prefix $w$ form a consecutive subsequence of rows in $M$.
 	\label{chapter1:fmindexprop:prop1}
 	\item The $i$-th occurence of symbol $c$ in $F$ corresponds to the $i$-th occurence of $c$ in~$L$.
 	\label{chapter1:fmindexprop:prop2}
 \end{enumerate}
 
 The first property also enabled us to search for a pattern in a suffix array. The second
-property is less trivial to observe. Let us take two rows in $M$, namely $T_i$ and $T_j$
-such that $i<j$. Let $T_i$ be of the form $cA$ and $T_j$ of the form $cB$ where $c$ is a
-symbol from the text and $A$ and $B$ are sequences of symbols. Since $i<j$, it follows that
-$A<B$ and this means that rotated rows $Ac$ and $Bc$ are in the same relative order as original rows.
+property is less trivial. Let us take two rows in $M$, namely $T_i$ and $T_j$ such that
+$i<j$. Let $T_i$ be of the form $cA$ and $T_j$ of the form $cB$ where $c$ is a symbol from
+the text and $A$ and $B$ are sequences of symbols. Since $i<j$, it follows that $A<B$ and
+this means that rotated rows $Ac$ and $Bc$ are in the same relative order as the original rows.
 From this observation, it follows that the relative ordering of the same symbol is preserved
 between $F$ and $L$.
 
