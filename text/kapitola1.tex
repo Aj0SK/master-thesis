@@ -228,6 +228,7 @@ index $\Count[c]$.
 	Burrows-Wheeler transformation of $T$ is string $L=\mathtt{annb\$aa}$ -- the last column of $M$.
 	Note that in practice, we do not need to construct the whole table as more efficient algorithms exist.
 	It is also notable that matrix $M$ includes very similar information compared to suffix array.
+	FM-index stores only representation of columns $F$ and $L$, the grey area is not stored.
 	}
 	\label{obr:BWT}
 \end{figure}
@@ -264,28 +265,34 @@ between $F$ and $L$.
 
 In the next part, we describe how we search for some arbitrary pattern $P=p_0p_1\ldots p_{n-1}$
 in FM-index. Let us denote suffix of $P$ starting at $i$-th element $P_{i\ldots}$. The result of
-the search for $P$ is a range of $M$s rows that have $P$ as their prefix. The search for these
-rows proceeds iteratively from the end of $P$ to its beginning. At first, we find rows that have suffix
-$P_{n-1\ldots}$ as their prefix and then gradually continue by finding rows that have as their prefix
-suffixes $P_{n-2\ldots}, P_{n-3\ldots}$ and so on up to $P_0=P$. In every step, these rows form a consecutive
-subsequence of rows of $M$ so we can represent this subsequence by its beginning and end. This follows
-from the observation \ref{chapter1:fmindexprop:prop1}.
+the search for $P$ is a range of $M$’s rows that have $P$ as their prefix. The search for these
+rows proceeds iteratively from the end of $P$ to its beginning. At first, we find the range of
+rows starting with  $P_{n-1\ldots}$, then gradually continue by finding rows that start with
+$P_{n-2\ldots}, P_{n-3\ldots}$ and so on up to $P_0=P$. In every step, these rows form a
+consecutive subsequence of rows of $M$ so we  will maintain just the beginning and the end of
+the interval. This follows from the observation \ref{chapter1:fmindexprop:prop1}.
 
-Now, we demonstrate the search of a pattern on an example. Let us assume we are searching for a word
+First, let us show the  we demonstrate the search of a pattern on an example. Let us assume we are searching for a word
 {\tt house} and we already found the range of rows in $M$ that have {\tt ouse}
 as their prefix. Symbols in the last column of this range correspond to the symbols
 preceding {\tt ouse} in the text. We may observe different symbols in arbitrary order there such as {\tt m}
 for word {\tt mouse} or {\tt h} for {\tt house}.
 
-To search for the range of rows in $M$ that have {\tt house} as a prefix we look into the range of all
-rows beginning with symbol {\tt h}. Locating this range is easy as it starts on position
-$\Count[\texttt{h}]$. Rows in this range are sorted according to the second symbol so there will be
-some lines continuing with symbol {\tt a} if the text contained for example word {\tt hashtag} or symbol
-{\tt e} if the word {\tt head} was present in the text. Among them, lines starting with {\tt house} are
-located, but we do not store anything except for $T_{BWT}$ and $\Count$. However, we already located the
-range where suffixes starting with {\tt ouse} are located. We can count how many times {\tt h} is located
-before this range in $T_{BWT}$ and denote it $r$. Thanks to the property \ref{chapter1:fmindexprop:prop2},
-we know that in $F$ the subsequence containing the prefix {\tt house} begins on position $\Count[\texttt{h}]+r$.
+First, let us show the process on an example (see Fig.~\ref{tab:fm_index_example}). Assume we are
+searching for the word {\tt house} and we already found the range of rows in $M$ that start with
+{\tt ouse}. Symbols in the last column of this range correspond to the symbols preceding {\tt ouse}
+in the text. We may observe different symbols in arbitrary order there such as {\tt m} for the word
+{\tt mouse} or {\tt h} for {\tt house}.
+
+To search for the range starting with {\tt house}, we look into the range of all rows beginning with the
+symbol {\tt h}. Locating this range is easy as it starts at position $\Count[\texttt{h}]$ and ends before
+$\Count[\texttt{i}]$. Rows in this range are sorted according to the second symbol so there will be some
+lines continuing with symbol {\tt a} if the text contained for example word {\tt hashtag} or symbol {\tt e}
+if the word {\tt head} was present in the text. Among them, lines starting with {\tt house} are located,
+but we do not store anything except for $T_{BWT}$ and $\Count$. However, we already located the range
+where suffixes starting with {\tt ouse} are located. We can count how many times {\tt h} is located before
+this range in $T_{BWT}$ and denote it $r$. Thanks to the property \ref{chapter1:fmindexprop:prop2}, we know
+that in $F$ the subsequence containing the prefix {\tt house} begins on position $\Count[\texttt{h}]+r$.
 
 % https://docs.google.com/spreadsheets/d/1C7O2qsEEnjYkf2N1gX6HbS8sZu3UNl86VIxL3X9msVo/edit#gid=0
 % TODO: pridat \tt ked sa to trosku zastabilizuje
@@ -312,7 +319,7 @@ we know that in $F$ the subsequence containing the prefix {\tt house} begins on 
 	                & \ldots     &   &  &   &   &   &   &   &   &   &   \\ \cline{5-10}\cline{2-3}\cline{12-12}
 	\end{tabular}
 	}
-	\caption[TODO]{Assume that we are counting occurences of \texttt{home} and we already found the
+	\caption[TODO]{Assume that we are counting occurences of \texttt{house} and we already found the
 	range of rows where suffix \texttt{ouse} is located given by $b_1$ and $e_1$. To find where range
 	of rows with \texttt{house} as a prefix is located, we first look at the position where rows starting with
 	\texttt{h} begin in $F$ -- $\Count[h]$. However, not all of the rows starting with \texttt{h} continue with
@@ -357,7 +364,7 @@ of occurrences of $P$ in $T$ is in listing \ref{alg:fm_index_count}.
 $b \gets \Count[P[n-1]]$\;
 $e \gets \Count[P[n-1]+1]$\;
 \For{$i=n-2$ \KwDownto $0$} {
-	\If{$e-b = 0$}{
+	\If{$b = e$}{
 		break\;
 	}
 	$b \gets \Count[P[i]] + \rank_{P[i]}(L, b)$\;
@@ -366,19 +373,19 @@ $e \gets \Count[P[n-1]+1]$\;
 \KwRet{$e-b$}
 \end{algorithm}
 
-We may observe that in FM-index, we use $\rank$ on sequence over a general alphabet. This application
-should, however, demonstrate how bit vector can be used inside of the FM-index. Thus, in the next
-paragraph, we show that these two problems are related and we can use bit vector to provide a
-reasonable implementation of the $\rank$/$\select$ methods on the sequence over a general alphabet.
+As we can see, the FM-index requires the method $\rank$ on a general string. In the next
+paragraph, we show that we can use bit vectors to provide a reasonable implementation of
+the $\rank$/$\select$ methods on a sequence over a general alphabet.
 
 \paragraph{Wavelet tree}
 \label{section:WaweletTree}
 
 Let us assume for a moment that we have a bit vector implementation supporting methods $\access$,
 $\rank$ and $\select$. We have a sequence $S$ over an arbitrary alphabet $\Sigma$. Our goal is to
-build vector over this sequence supporting the methods $\access$, $\rank$ and $\select$. The most
-straightforward approach that uses bit vector is to have one bit vector $B_c$ for every symbol $c$
-from the alphabet $\Sigma$, storing ones at positions where $c$ occurs in $S$
+build vector over this sequence supporting the methods $\access$, $\rank$ and $\select$.
+
+A straightforward approach that uses bit vector is to have one bit vector $B_c$ for every
+symbol $c$ from the alphabet $\Sigma$, storing ones at positions where $c$ occurs in $S$
 \[
     B_c[j]= 
 \begin{cases}
@@ -408,24 +415,25 @@ of roughly equal size. A bit vector $B$ of size $|S|$ is stored in this node suc
 Then two strings $S_0$ and $S_1$ are created from $S$ by taking just symbols
 from $\Sigma_0$ and $\Sigma_1$, respectively. The left and right child of the root node
 are then built by recursively applying the same idea on subsequences $S_0$ and $S_1$ until
-we end up with a trivial unary alphabet at the leaves. The example of this partitioning may
-be observed in Fig.~\ref{obr:WaveletTreeExample}. It follows that the depth of the wavelet
-tree is $\BigO(\log \sigma)$.
+we end up with a trivial unary alphabet at the leaves. An example of this partitioning is
+shown in Fig.~\ref{obr:WaveletTreeExample}. It follows that the depth of the wavelet tree
+is $\BigO(\log \sigma)$.
 \begin{figure}
 	\centerline{
 		\includegraphics[width=0.9\textwidth, height=0.3\textheight]{images/wavelet_tree}
 	}
 	\caption[TODO]{Wavelet tree representation of text $S=\mathit{aabadacdc}$. We can see how
 	the recursive partitioning of the alphabet works. In every node, we also show the
-	subsequence represented (grey text) in the subtree of the node. The stored data can be
-	recognized as they are in bold and black.
+	subsequence represented (grey text) in the subtree of the node. Note that we include the
+	grey parts in the visualisation to help in understanding but they are not stored by
+	the data structure.
 	}
 	\label{obr:WaveletTreeExample}
 	% based on https://simongog.github.io/assets/data/sdsl-slides/tutorial#23
 	% source at https://docs.google.com/drawings/d/1cJyda3bdTluajr3iXu1x1iL5HF0JPZqAHw6jwct9KLI/edit
 \end{figure}
 
-In wavelet tree, both $\rank_c$ and $\select_c$ methods on the original sequence can
+In a wavelet tree, both $\rank_c$ and $\select_c$ methods on the original sequence can
 be implemented using $\rank$/$\select$ methods applied on bit sequences that are stored
 in nodes along the path from the root to the leaf containing symbol $c$. Thus, the
 number of $\rank$ and $\select$ queries on individual bit vectors depends on the depth of
@@ -438,7 +446,7 @@ make a solution that is faster in some scenarios. Both methods, $\rank_c$ and $\
 depend on the speed of the bit vector implementation, used in the nodes, but also on the depth
 of symbol $c$ in the tree. This depth is now for every single symbol roughly $\BigO(\log \sigma)$.
 
-To obtain a better solution, let us give another perspective on the wavelet tree and assign
+To obtain an even better solution, let us give another perspective on the wavelet tree and assign
 a single bit to every edge. For every edge, its bit is either {\tt 0} if this edge leads from
 the parent to the left son or {\tt 1} otherwise. The example of this numbering may be also
 observed in Fig.~\ref{obr:WaveletTreeExample}. Now, we can think of the wavelet tree as an
@@ -446,19 +454,29 @@ assignment of a binary code to every alphabet symbol. Code of a symbol $c$ is eq
 concatenation of bits that are contained in edges along the path from the root to the leaf node
 containing symbol $c$.
 
+To obtain an even better solution, let us give another perspective on the wavelet tree and assign
+a single bit to every edge -- {\tt 0} for left and {\tt 1} for right (see Fig.~\ref{obr:WaveletTreeExample}).
+Now, we can think of the wavelet tree as an assignment of a binary code to every alphabet symbol.
+The code of a symbol $c$ is obtained by concatenating bits along the path from the root to the leaf
+for symbol $c$.
+
 The idea proposed by~\cite{makinen2005succinct} is to shape the wavelet tree in such a way that
-a code of every symbol is equal to its Huffman code. The advantage we get is that if queries for
-symbols are proportional to their frequencies, then we need to visit on average
-only $\BigO(H_0)$ nodes rather than $\BigO(\log \sigma)$, where $H_0$ is the empirical zero-order
+a code of every symbol is equal to its Huffman code. The first advantage is that the space used
+decreases from $\BigO(n\log \sigma)$ to $\BigO(nH_0(S))$. The second advantage we get is that if
+we query for each symbol according to its frequency, then on average, we need to visit
+$\BigO(H_0)$ nodes rather than $\BigO(\log \sigma)$, where $H_0$ is the empirical zero-order
 entropy, defined as $$H_0(S)=\sum_{c\in\Sigma} \frac{n_c}{n} \log \frac{n}{n_c},$$
 where $n_c$ denotes number of occurrences of symbol $c$ in sequence $S$ of length $n$. The value
 of zero-order entropy is a lower bound for the number of bits that $S$ can be compressed to by
-compressor that considers only frequencies of symbols. Even if the maximum depth of Huffman
-shaped wavelet tree may be bigger compared to the original, \cite{grabowski2004first} showed
-that we can enforce the maximum depth to be $\BigO(\log \sigma)$ with the average depth limited
-by $H_0+2$. This is, however, as they claimed, not very practical. The most important fact is
-that with Huffman shaped wavelet tree, it is possible to decrease the average number of nodes
-accessed and thus decrease the average query time of $\rank$ and $\select$.
+compressor that considers only frequencies of symbols and $H_0(S)\leq \lg\sigma$. In the worst
+case, we need $\lg \sigma$ bits to store every symbol. In some cases, however, it is the case
+that frequencies of symbols are not even and thus $H_0(S)\ll \lg\sigma$.
+
+Even if the maximum depth of a Huffman shaped wavelet tree may be bigger compared to the original,
+\cite{grabowski2004first} showed that we can enforce the maximum depth to be $\BigO(\log \sigma)$
+with the average depth limited by $H_0+2$. This is, however, as they claimed, not very practical.
+The most important fact is that with Huffman shaped wavelet tree, it is possible to decrease the
+average number of nodes accessed and thus decrease the average query time of $\rank$ and $\select$.
 
 The space used by the wavelet tree heavily depends on the space usage of individual bit vectors
 that are used to store the nodes of wavelet tree. If these are represented using a data structure
@@ -482,17 +500,17 @@ bit vector supporting $\access$, $\rank$ and $\select$ methods.
 
 \section{Outline of the Thesis}
 
-The goal of this thesis is to describe current state of bit vector implementations
+The goal of this thesis is to describe the current state of the bit vector implementations
 supporting $\access$, $\rank$ and $\select$ methods and come up with improvements that
-make bit vector more usable in practice. This can be either by speeding up the current
+make bit vectors more usable in practice. This can be either by speeding up the current
 implementations, saving some additional space but also by combination of these two as
 obtaining some new trade-offs of query time and space used can also open doors to new
 applications.
 
-In the second chapter, we show possible implementations of $\rank$ and $\select$ methods
-over bit sequence. We discuss what are the theoretically optimal solutions but also what
-are their practical drawbacks. We then proceed to describe one of the widely used
-implementations of a compressed bit vector called \textit{RRR}.
+In the second chapter, we describe the state-of-the-art implementations of $\rank$ and
+$\select$ methods over bit sequence. We discuss what are the theoretically optimal
+solutions but also what are their practical drawbacks. We then proceed to describe one
+of the widely used implementations of a compressed bit vector called \textit{RRR}.
 
 In the third chapter, we propose our own modifications to the implementation of
 a compressed bit vector based on RRR and we discuss theoretical aspects of these
