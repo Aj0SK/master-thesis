@@ -115,9 +115,9 @@ The additional space used by this solution can be broken down into three parts:
         \label{eq:rank_space_2}
     \end{equation}
     \item Precomputed table storing result for every possible $\rank$ query over block. There are only
-    $2^{(\log n)/2} = \sqrt{n}$ blocks of length $(\log n)/2$. Number of possible $\rank$ queries over
-    block is equal to its length. For every element stored in the table we need at most $\BigO(\log\log n)$
-    bits of space so the total amount of space is
+    $\BigO(2^{(\log n)/2}) = \BigO(\sqrt{n})$ blocks of length $\BigO((\log n)/2)$. Number of possible $\rank$
+    queries over block is equal to its length. For every element stored in the table we need at most
+    $\BigO(\log\log n)$ bits of space so the total amount of space is
     \begin{equation}
         \BigO(\sqrt{n}\cdot \log n\cdot \log\log n)=o(n).
         \label{eq:rank_space_3}
@@ -164,7 +164,7 @@ to superblocks and blocks.
 We begin by precomputing $select(i)$ for every $i$ being multiple of $t_1=\log n\cdot \log\log n$.
 These precomputed values take $\BigO(n/\log\log n)$ bits of space. Results of these precomputed
 $\select$ queries also split the bit sequence into superblocks of possibly variable length such that
-each superblock contains exactly $t_1$ ones (except possibly for the last).
+each superblock contains exactly $t_1$ ones (except possibly for the last superblock).
 
 There are now two categories of superblocks. The ones called \textit{long} that are longer
 than $t_1^2$. In long superblocks, we can store the positions of all ones as they are sparse

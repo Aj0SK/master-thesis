@@ -29,21 +29,22 @@ In succinct data structures, it is common to distinguish between the space effic
 representations more strictly. Suppose that $I$ is the number of bits that are needed to
 store the data. We call the data representation
 \begin{itemize}
-	\item \textit{implicit} -- if it uses $I + \BigO(1)$ bits of space,
-	\item \textit{succinct} -- if it uses $I + o(I)$ bits of space,
 	\item \textit{compact} -- if it uses $\BigO(I)$ bits of space.
+	\item \textit{succinct} -- if it uses $I + o(I)$ bits of space,
+	\item \textit{implicit} -- if it uses $I + \BigO(1)$ bits of space,
 \end{itemize}
 
 In this work, we are mainly concerned with \textit{bit vector}, one of the simplest
 data structures that represents a sequence $S$ of zeroes and ones while supporting the
 methods:
 \begin{itemize}
-	\item $\access(i)$ -- returning the $i$-th symbol of $S$,
-	\item $\rank_c(j)$ -- returning the number of occurrences of symbol $c$ in $S$ before $j$-th index,
-	\item $\select_c(k)$ -- returning the index of $k$-th occurrence of symbol $c$ in $S$.
+	\item $\access(S, i)$ -- returning the $i$-th symbol of $S$,
+	\item $\rank_c(S, j)$ -- returning the number of occurrences of symbol $c$ in $S$ before $j$-th index,
+	\item $\select_c(S, k)$ -- returning the index of $k$-th occurrence of symbol $c$ in $S$.
 \end{itemize}
 Values of these methods are defined only for integers $i, j, k$ such that $0\leq i<|S|$, $0\leq j\leq |S|$
-and $1\leq k\leq \#_c(S)$ where $\#_c(S)$ denotes the number of occurrences of symbol $c$ in $S$.
+and $1\leq k\leq \#_c(S)$ where $\#_c(S)$ denotes the number of occurrences of symbol $c$ in $S$. If it is
+clear on what sequence we are doing the operation, we use the variants $\access(i)$, $\rank_c(j)$ and $\select_c(k)$.
 
 The reason behind our focus on bit vector and particularly its compressed version
 is the fact that it is one of the main building blocks of many succinct data structures.
@@ -295,12 +296,12 @@ we know that in $F$ the subsequence containing the prefix {\tt house} begins on 
 	                & 102        & h &  & i & n & d &   &   & b &   & e \\ \cline{5-10}\cline{2-3}\cline{12-12}
 	$b_0$		    & 103        & h &  & o & u & s & e &   &   &   &   \\ \cline{5-10}\cline{2-3}\cline{12-12}
 	                & 104        & h &  & o & u & s & e &   &   &   &   \\ \cline{5-10}\cline{2-3}\cline{12-12}
-	$e_0$			& 105        & h &  & i & g & h &   &   &   &   &   \\ \cline{5-10}\cline{2-3}\cline{12-12}
+	$e_0$			& 105        & h &  & u & g & e &   &   &   &   &   \\ \cline{5-10}\cline{2-3}\cline{12-12}
 	                & \ldots     &   &  &   &   &   &   & \ldots  &   &   &   \\ \cline{5-10}\cline{2-3}\cline{12-12}
 	$b_1$           & 200        & o &  & u & s & e &   &   &   &   & m \\ \cline{5-10}\cline{2-3}\cline{12-12}
 				    & 201        & o &  & u & s & e &   &   &   &   & h \\ \cline{5-10}\cline{2-3}\cline{12-12}
 				    & 202        & o &  & u & s & e &   &   &   &   & m \\ \cline{5-10}\cline{2-3}\cline{12-12}
-				    & 203        & o &  & u & s & e &   &   &   &   & p \\ \cline{5-10}\cline{2-3}\cline{12-12}
+				    & 203        & o &  & u & s & e &   &   & s &   & p \\ \cline{5-10}\cline{2-3}\cline{12-12}
 				    & 204        & o &  & u & s & e &   &   &   &   & h \\ \cline{5-10}\cline{2-3}\cline{12-12}
 	$e_1$           & 205        &   &  &   &   &   &   &   &   &   &   \\ \cline{5-10}\cline{2-3}\cline{12-12}
 	                & \ldots     &   &  &   &   &   &   &   &   &   &   \\ \cline{5-10}\cline{2-3}\cline{12-12}
@@ -312,8 +313,8 @@ we know that in $F$ the subsequence containing the prefix {\tt house} begins on 
 	\texttt{h} begin in $F$ -- $\Count[h]$. However, not all of the rows starting with \texttt{h} continue with
 	\texttt{ouse}. To find this subinterval, we use the information from previous iteration. We count
 	the number of occurences of \texttt{h} in $L$ before position $b_1$ and use this as offset into run of
-	symbol \texttt{h}. In this particular case, $b_0 = \Count[h] + rank_h(b_1) = 100 + 3 = 103$ and
-	$e_0 = \Count[h] + rank_h(e_1) = 100 + 5 = 105$.
+	symbol \texttt{h}. In this particular case, $b_0 = \Count[h] + rank_h(L, b_1) = 100 + 3 = 103$ and
+	$e_0 = \Count[h] + rank_h(L, e_1) = 100 + 5 = 105$.
 	}
 	\label{tab:fm_index_example}
 \end{figure}
@@ -337,8 +338,8 @@ subsequence of rows and also the number of occurrences of symbol $p_{n-2}$ in $L
 giving us its end. This works thanks to the property \ref{chapter1:fmindexprop:prop2}. Thus giving us the
 new subsequence
 \begin{align*}
-	b_{n-2}&=\Count[p_{n-2}] + \rank_{p_{n-2}}(b_{n-1}) \\
-	e_{n-2}&=\Count[p_{n-2}] + \rank_{p_{n-2}}(e_{n-1}).\\
+	b_{n-2}&=\Count[p_{n-2}] + \rank_{p_{n-2}}(L, b_{n-1}) \\
+	e_{n-2}&=\Count[p_{n-2}] + \rank_{p_{n-2}}(L, e_{n-1}).\\
 \end{align*}
 We continue and repeat the previous step until we compute $b_0$ and $e_0$ or until $b_i=e_i$ for some $i$
 (in this case, the searched word is not present in the text). The possible pseudocode for counting the number
@@ -354,8 +355,8 @@ $e \gets \Count[P[n-1]+1]$\;
 	\If{$e-b = 0$}{
 		break\;
 	}
-	$b \gets \Count[P[i]] + \rank_{P[i]}(b)$\;
-	$e \gets \Count[P[i]] + \rank_{P[i]}(e)$\;
+	$b \gets \Count[P[i]] + \rank_{P[i]}(L, b)$\;
+	$e \gets \Count[P[i]] + \rank_{P[i]}(L, e)$\;
 }
 \KwRet{$e-b$}
 \end{algorithm}

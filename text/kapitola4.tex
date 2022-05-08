@@ -252,9 +252,9 @@ These benchmarks were used in the early stage of the development to measure a po
 our new method of encoding and decoding. We mainly focused on measuring different block lengths
 in combination with different methods used for dividing block to subproblems and with different
 approaches to obtain particular block length. The tested block lengths were 15, 30, 31, 62, 63
-and 127. Sizes 15, 31, 63 and 127 are most useful in practice, however, they can be obtained using
+and 127. Lengths 15, 31, 63 and 127 are most useful in practice, however, they can be obtained using
 different combinations of block length 30 and 62, e.g. 31 can be combined as 1 bit and 30-bit solution,
-63 can be divided to 1 and 62 as well as to 3 and two sub-problems of size 30. Even if these
+63 can be divided to 1 and 62 as well as to 3 and two sub-problems of length 30. Even if these
 tests were not made on practically useful data, they were mainly used as an indication which
 implementations are interesting and should be the best candidates for further evaluation.
 
@@ -554,14 +554,14 @@ int rank(int i) {
 \lstset{language=C++,caption={Rank query, hybrid implementation (one-sided)},label=code:rank_after}
 \begin{lstlisting}
 int rank(int i) {
-	int block_idx = i/BLOCK_SIZE;
+	int block_idx = i/BLOCK_LENGTH;
 	int superblock_index = block_idx/BLOCKS_PER_SUPERBLOCK;
 	int offset = P[superblock_idx];
 	int rank  = R[superblock_idx]; // precomputed rank for superblock
 	for (int j = superblock_idx*BLOCKS_PER_SUPERBLOCK; j < block_idx; ++j) {
 		uint16_t c = C[j];
 		if (c >= c_k) {
-			uint32_t o = rrr_helper::get_blocks_offset(O, offset, BLOCK_SIZE);
+			uint32_t o = rrr_helper::get_blocks_offset(O, offset, BLOCK_LENGTH);
 			rank += __popcount(btnr);
 		}
 		else {
@@ -569,7 +569,7 @@ int rank(int i) {
 		}
 		offset += rrr_helper::space_for_class(r);
 	}
-	uint16_t off = i % BLOCK_SIZE;
+	uint16_t off = i % BLOCK_LENGTH;
 	if (!off) {
 		return rank;
 	}
@@ -645,11 +645,14 @@ and \texttt{WT-WEB}. The graph comparing results for classic bit vectors and hyb
 can be observed in Fig.~\ref{obr:vysledky_sdsl_hybrid}. The results of our hybrid implementation
 are not very promising on these data, except for the $\access$. The reason why the results are
 better for $\access$ is that hybrid implementation creates additional memory accesses when answering
-$\rank$ and $\select$ as we described in the previous subsection. 
+$\rank$ and $\select$ as we described in the previous subsection.
 
 To test if our hybrid implementation could be used in the practice, we benchmarked FM-index
 implementation of method $\countOp$, with hybrid bit vector used inside of the Huffman shaped
-wavelet tree. The results are shown in Fig~\ref{obr:benchmark_sdsl_hybrid_count}.
+wavelet tree. The results are shown in Fig~\ref{obr:benchmark_sdsl_hybrid_count}. We may observe
+that hybrid implementation did not create any viable alternative and our original implementation
+has a faster or more succinct alternative for every cutoff on the graph. This could be expected
+as $\rank$ and $\select$ are way more used inside of the wavelet tree.
 
 \begin{figure}
 	\centerline{

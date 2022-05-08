@@ -4,17 +4,19 @@
 
 The goal of this thesis was to study existing implementations of compressed
 bit vector, explore their shortcomings and develop new implementation of bit
-vector that mitigates some of these issues. We picked up RRR -- one particular
-representation of bit vector and identified some of its problems.
+vector that mitigates some of the existing problems. We picked up RRR -- one
+particular representation of bit vector and identified places where this
+representation and work with it can be improved. 
 
-The biggest shortcoming was that there are only two widely used techniques to
-encode and decode block. Table method provides very fast encoding and decoding
-but uses to much space for longer blocks. On the other hand, on the fly decoding
-supports longer blocks but trades quite a lot of performance for this ability.
-We addressed this problem by proposing and implementing new decoding method based
-on the divide-and-conquer approach that can be used to divide the process of decoding
-of the block to more sub-problems that can be solved recursively or using one of the
-existing decoding methods.
+The biggest shortcoming was that were only two widely used techniques to
+encode and decode block and both have significant disadvanteges. Table method
+provides very fast encoding and decoding but uses too much space for longer
+blocks. On the other hand, on the fly decoding supports longer blocks but
+trades-off quite a lot of performance for this. We addressed this problem by
+proposing and implementing new decoding method based on the divide-and-conquer
+approach that can be used to divide the process of decoding of the block to more
+sub-problems that can be solved recursively or using one of the existing decoding
+methods.
 
 We implemented this idea and tested it as a part of \texttt{SDSL} library that is
 regarded as one of the most popular libraries implementing succinct data structures.
@@ -24,17 +26,16 @@ important result presented in this work is the relative speedup of FM-index when
 speedup of $\countOp$, $\extractOp$ and $\locateOp$ methods thanks to our changes. This
 was observed on various data types such as DNA sequences, source codes or protein sequences.
 
-The second idea was to adapt RRR implementation to the underlying bit sequence it is
-representing to obtain better performance to used space ratio. Idea of hybrid encoding
-is not to encode some of the blocks. By doing this we waste some space on blocks that
-are not compressed but gain on every other block.
+The second idea was of hybrid encoding. The idea is not to encode some of the possibly rare
+blocks. By doing this we waste some space on blocks that are not compressed but gain
+on every other block by decreasing number of bits used for class of the block.
 
-We developed two versions of hybrid encoding. The first is better suited for sparse
-sequences with low frequency of ones and was meant to rival sparse bit vector implementations
-on sequences with roughly 5\% of ones. This version indeed worked quite well and when
-compared to our ordinary version of bit vector it was able to deliver the same speed
-with roughly 5\% lower space usage. The second version of hybrid encoding was found
-not to be practically competitive in its current version due to additional memory
+We developed two versions of hybrid encoding. The one-sided version is better
+suited for sparse sequences with roughly 5\% of ones where RRR is often dominated by sparse
+bit vector implementations. This version indeed worked quite well and when compared to our
+ordinary version of bit vector it was able to deliver the same
+speed with roughly 5\% lower space usage. The second, two-sided version of hybrid encoding
+was found not to be practically competitive in its current version due to additional memory
 accesses that are needed to answer $\rank$ and $\select$ queries. 
 
 With our new decoding scheme, future work could lead to discovering what tradeoffs
