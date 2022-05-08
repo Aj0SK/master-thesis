@@ -1,7 +1,7 @@
 \chapter{Implementation and results}
 \label{kap:kap4}
 
-In this chapter, we propose the implementation of ideas we developed in the previous
+In this chapter, we propose the implementation of ideas we have developed in the previous
 chapter and show experimental results obtained when measuring their performance.
 This chapter is split into two sections according to the main topics discussed
 in the previous chapter, namely our new general encoding and decoding routine and hybrid
@@ -45,16 +45,15 @@ of \verb'rrr_vector'.
 To support $\access$, \verb'rrr_vector' supports single bit access operator \verb'[]' as well
 as \verb'get_int' method. To facilitate $\access$, \verb'rrr_vector' uses the implementation
 presented in Fig.~\ref{obr:RRRFinal} that consists of the array $C$ of fixed sized elements, storing
-classes, array $O$ of elements of variable length that stores offsets of blocks along their class and
-third array $P$, that stores pointers to the array $O$, more precisely to the beginning of every superblock.
+classes, array $O$ of elements of variable length that stores offsets of blocks and third array $P$,
+that stores pointers to the array $O$, more precisely to the beginning of every superblock.
 
-\texttt{SDSL} uses $\rank$ implementation, where result of $\rank$ is precomputed for the beginning
+\texttt{SDSL} uses $\rank$ implementation, where the result of $\rank$ is precomputed for the beginning
 of every superblock. To answer the query, we first access the precomputed value for the superblock. Then
-we do linear search for the final result inside of the superblock. As a $\select$ can be answered
-using the binary search and $\rank$ functionality, the first part of answering $\select$ is to binary
-search between precomputed values of $\rank$, then to do the $\select$ inside of the superblock. This
-demonstrates, how the size of superblock can be used to balance the ratio of space used and the speed
-of the $\access$, $\rank$ and $\select$ methods. Even if the size of superblock is one of the parameters
+we do a linear search for the final result inside of the superblock. The first part of answering $\select$
+is to binary search between precomputed values of $\rank$, then to do the $\select$ inside of the superblock.
+This demonstrates, how the size of superblock can be used to balance the ratio of space used and the speed
+of the $\access$, $\rank$ and $\select$ methods. Even if the size of a superblock is one of the parameters
 of \verb'rrr_vector', we did not make any changes to the default number of blocks per superblock that
 is set in \texttt{SDSL} to 32.
 
@@ -73,15 +72,16 @@ constructing the bit vector. This is why we focus more on the decoding part of t
 The decoding routine can be divided into three steps. The first is to divide problem into subproblems,
 second is to use subroutines to decode subproblems and third is to combine the results obtained to the final
 results. When implementing our decoding routine, we put most of our focus on the process of dividing
-a problem into sub-problems of smaller size. This is a part, where we obtain pairs $(c_1, o_1)$ and $(c_2, o_2)$
-from the encoded pair $(c, o)$. There are various reasons why we focus on this part of the algorithm.
-The first reason is that for smaller blocks solving the sub-problems is done using the helper table
-which is quite fast and can be hardly made faster as it consists of only one table lookup. The second
-reason is that the dividing of the problem is blocking us from solving the sub-problems and even though
-sub-problems may be potentially solved somehow in parallel, e.g. by instruction-level parallelism, this
-part is harder to parallelize.
+a problem into sub-problems of smaller size. This is the part, where we obtain pairs $(c_1, o_1)$ and $(c_2, o_2)$
+from the encoded pair $(c, o)$.
 
-Let us now break down the process of dividing the original problem into sub-problems into following 3 steps:
+There are various reasons why we focus on this part of the algorithm. The first reason is that for smaller
+blocks solving the sub-problems is done using the helper table which is quite fast and can hardly be made
+any faster as it consists of only one table lookup. The second reason is that the dividing of the problem
+is blocking us from solving the sub-problems and even though sub-problems may be potentially solved somehow
+in parallel, e.g., by instruction-level parallelism, this part is harder to parallelize.
+
+Let us now break down the process of dividing the original problem into sub-problems into the following 3 steps:
 \begin{enumerate}
 	\item Finding the class pair $(c_1, c_2)$.
 	\item Counting the number of possibilities for first and second sub-block $\text{pos}_1, \text{pos}_2$.
@@ -94,11 +94,11 @@ can be computed beforehand as there are only roughly $b^2$ combinations of possi
 Roughly speaking, we can do the last two steps at the price of two cache misses.
 
 The approach we use is to first precompute for every possible class $c$, numbers
-$Z_{\max(c-b_2, 0)},\ldots , Z_{\max(c-b_1, 0)}$ where $Z_i$ is the offset of first block with class
-pair $(i, c-i)$. We map the offset of the block to the number $Z_i$ and thus identify $(c_i, c_j)$.
-As $Z$-numbers form an increasing sequence, we can binary search for ``group'' that contains our
-offset. Example of these values can be observed in Fig.~\ref{table:class_pairs} but also
-in the previous chapter(Fig.~\ref{obr:classPairsZVals}).
+$Z_0,\ldots , Z_c$\footnote{more precisely $Z_{\max(c-b_2, 0)},\ldots , Z_{\max(c-b_1, 0)}$}
+where $Z_i$ is the offset of first block with class pair $(i, c-i)$. We map the offset of the block
+to the number $Z_i$ and thus identify $(c_i, c_j)$. As $Z$-numbers form an increasing sequence, we can
+binary search for ``group'' that contains our offset. Example of these values can be observed in
+Fig.~\ref{table:class_pairs}.
 
 \begin{figure}
 	\centerline{
@@ -119,15 +119,15 @@ in the previous chapter(Fig.~\ref{obr:classPairsZVals}).
 Despite having good time complexity, binary search may not be the fastest solution in practice
 as the number of buckets where our offset may land is bounded by $b+1$ and thus quite small.
 As we found out and later demonstrate, linear search outperforms binary search most of the
-time. Another idea that we tested was to speed up the linear search using the \texttt{SIMD}
+time. Another idea that we tested was to speed up the linear search using \texttt{SIMD}
 instructions. These can be used to do 4 comparisons at a time using a special 128-bit register.
-In practice, we found that sequential search using the \texttt{SIMD} instructions leads to the
+In practice, we found that sequential search using \texttt{SIMD} instructions leads to the
 best results for smaller block lengths. Examples for block length 30 of possible implementations
 that we tested, follow in listings \ref{code:linear}, \ref{code:linearSimd}, \ref{code:binary}.
 The naming convention adheres to \texttt{SDSL} naming of $k$ for class, $nr$ for the offset. To
 simplify naming, if block $B$ was encoded using division to sub-blocks $B_1$ and $B_2$ such
-that $B=B_1\cdot B_2$ then we call the $B_1$ \textit{left sub-block} and consequently its
-class $\text{left\_k}$ while $B_2$ is called \textit{right sub-block}.
+that $B=B_1\cdot B_2$ then we call $B_1$ the \textit{left sub-block} and consequently its
+class $\text{left\_k}$ while we call $B_2$ the \textit{right sub-block}.
 
 % https://github.com/Aj0SK/master-thesis/blob/ed7e5a787738ae66d4d75e312106098c74a1cdaf/code/shared/rrr_convert.h#L167
 \lstset{language=C++,caption={Linear search for classes of sub-blocks (b=30)},label=code:linear}
@@ -250,10 +250,10 @@ necessary to explain the measured phenomena later when exploring the results of 
 
 These benchmarks were used in the early stage of the development to measure a potential gain from
 our new method of encoding and decoding. We mainly focused on measuring different block lengths
-in combination with different methods used for dividing block to subproblems and with different
+in combination with different methods used for dividing a block into subproblems and with different
 approaches to obtain particular block length. The tested block lengths were 15, 30, 31, 62, 63
 and 127. Lengths 15, 31, 63 and 127 are most useful in practice, however, they can be obtained using
-different combinations of block length 30 and 62, e.g. 31 can be combined as 1 bit and 30-bit solution,
+different combinations of block length 30 and 62, e.g., 31 can be combined as 1 bit and 30-bit solution,
 63 can be divided to 1 and 62 as well as to 3 and two sub-problems of length 30. Even if these
 tests were not made on practically useful data, they were mainly used as an indication which
 implementations are interesting and should be the best candidates for further evaluation.
@@ -265,18 +265,18 @@ solution for 127-bit block length, we used the 128 bit type \texttt{\_\_uint128\
 as a combination of two 64-bit integers. We compared these results with the table decoding specialization
 in \texttt{SDSL} and with on-the-fly decoding. We ran the deconding algorithm on randomly generated data.
 We generated 1\,000 pairs of class and offset by first randomly picking class of the block and then the
-offset along this class. To make the fair comparison, we measured decoding time of the bit in the half of
-the block for the on-the-fly decoding as this decoding method can stop once it obtained the queried bit.
-The results we measured are shown in Tab.~\ref{obr:simple_benchmark}.
+offset along this class. To make the comparison fair, for the on-the-fly decoding, we measured the time
+to decode the middle bit as this decoding method can stop once it obtained the queried bit. The results
+we measured are shown in Tab.~\ref{obr:simple_benchmark}.
 
-We can observe there that our implementation is faster than on-the-fly decoding provided by \texttt{SDSL}
-on every block length that was tested. Linear version of decoding division outperforms binary search on
+As we can see, our implementation is faster than on-the-fly decoding provided by \texttt{SDSL}
+on every block length that was tested. Linear search outperforms binary search on
 every block length tested but the binary search is slowly catching up with increasing block length.
-For 30-bit block, the \texttt{SIMD} version dominates both linear and binary approach. This version is,
-however, harder to use for longer blocks as it ask for support of special instruction set. Version
+For 30-bit blocks, the \texttt{SIMD} version dominates both linear and binary searhc approaches. This version
+is, however, harder to use for longer blocks as it requires support of special instructions. Version
 obtaining 63-bit block using one 3-bit and two 30-bit blocks seems to be performing slightly better than
 the other variant that extends block length 62 by one bit. Important observation is that our 63-bit
-version was measured to be even faster than on-the-fly decoding for 31-bit block.
+version was measured to be even faster than on-the-fly decoding of a 31-bit block.
 
 \begin{figure}
 	\centerline{
@@ -323,13 +323,13 @@ usage of bit vectors.
 
 We used a benchmarking part of \texttt{SDSL} targeted on \verb'rrr_vector' class. This test
 measures on different types of data how query time for $\access$, $\rank$ and $\select$ depends
-on the block length used. The first type of sequence is randomly generated bit sequence with
+on the block length used. The first type of sequence is a randomly generated bit sequence with
 density of ones equal to 50\%. The origin of second type of data is closely described in
 \cite{gog2014optimized}. It consists of numerous bit vectors, stored in files such as
 \texttt{WT-DNA-16MB} or \texttt{WT-WEB-1GB}. The structured name describes how the bit vector
 was created. For instance, \texttt{WT-DNA-1GB} has been created by:
 \begin{itemize}
-	\item Taking 1GB prefix of file containing DNA sequence.
+	\item Taking 1GB prefix of a file containing DNA sequence.
 	\item Creating BWT of this text.
 	\item Building Huffman shaped wavelet tree over it.
 	\item Concatenating all the bit vectors in the wavelet tree.
@@ -347,13 +347,13 @@ implementation in Fig.~\ref{obr:benchmark_sdsl_new_method}.
 	}
 	\caption[TODO]{\texttt{SDSL} benchmark measuring the query time of $\access$, $\rank$ and $\select$
 	and its dependence on the block length across various data types. Our implementations are marked
-	by cross.
+	by cross, the \texttt{SDSL} implementations by dot.
 	}
 	\label{obr:benchmark_sdsl_new_method}
 \end{figure}
 
 There are several interesting things to observe in these results: Our new implementation
-beats older implementation on almost all block lengths and all types of data. Note that the difference is more
+beats the older implementation on almost all block lengths and all types of data. Note that the difference is more
 visible on random and DNA data. On web data, however, the difference is less noticeable. We attribute
 this behaviour to the fact, that was observed by creators of this dataset -- the number of
 uniform blocks (full of either zeroes or ones) is much bigger in \texttt{WT-WEB} than in \texttt{WT-DNA}.
@@ -394,7 +394,7 @@ benchmarks are run on the data from the \texttt{Pizza\&Chili} dataset and use ma
 proposed by \cite{ferragina2009compressed}. The data we show here are the English texts from
 Gutenberg project, source codes and then DNA and protein sequences. In these benchmarks, we used
 as a baseline the FM-index version based on block length 15. To provide more context, we also included
-version based on the uncompressed bit vector.
+a version based on the uncompressed bit vector.
 
 To measure performance of $\countOp$, the index over the text is built. Then, random patterns of
 various lengths are extracted from the text and subsequently used for benchmarking. Code
@@ -403,8 +403,8 @@ by \texttt{Pizza\&Chili} project. We measure the trade-off between space used fo
 speed normalized by the total number of symbols contained in all searched patterns. We present the
 results in Fig.~\ref{obr:benchmark_sdsl_count}.
 
-We may observe that the speed gain we have measured in the previous benchmarks also translated
-to speedup of FM-index operation $\countOp$. On the English dataset, block lengths 127 and 63 have
+Note that the speed gain we have measured in the previous benchmarks also translated
+into a speedup of FM-index operation $\countOp$. On the English dataset, block lengths 127 and 63 have
 been able to obtain the speed of the block lengths 63 and 31 provided by \texttt{SDSL}. The biggest
 speed up can be observed for 127-bit block -- on English data the time saved is close to 20\%, on
 DNA it is roughly 30\% speedup.
@@ -476,7 +476,7 @@ $\rank$ and $\select$ functionality in \texttt{SDSL} that run more on smaller bi
 but cover special cases such as bit vector full of zeroes/ones and certain special patterns
 that are not encountered often in practice. The second type of tests used was the benchmark
 running on wavelet tree built over the \texttt{WT-DNA} and \texttt{WT-WEB} data. Alongside
-the individual timings, this benchmark produces, as a checksum, sum of all the results of the
+the individual timings, this benchmark produces a~checksum of all the results of the
 $\access$, $\rank$ and $\select$ queries. These checksums can be compared between our and original
 implementation to make sure that our implementation is giving the correct results.
 

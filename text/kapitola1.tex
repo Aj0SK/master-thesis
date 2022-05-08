@@ -479,7 +479,11 @@ It is also possible for the original shape of the wavelet tree to achieve space 
 bits. This was shown by \cite{grossi2003high} and this representation relies on using compressed
 bit vector implementation, that takes space close to the zero-order entropy, inside of the tree's nodes.
 
-% TODO: upravit konstanty podla najdeneho clanku
+\paragraph{Space usage of FM-index}
+
+We already showed how FM-index is constructed, how the searching in FM-index works and how it can be
+supported should we have a data structure that supports $\rank$ and $\select$ on sequence over the general
+alphabet. We also showed how wavelet tree, one such data structure works.
 
 With the use of Huffman shaped wavelet tree, it is possible to bring down the space used by FM-index to
 $nH_k(T)+o(n\log \sigma)$ for the text $T$ of length $n$ over alphabet of size $\sigma$ where $H_k$ is
@@ -502,8 +506,8 @@ The goal of this thesis is to describe the current state of the bit vector imple
 supporting $\access$, $\rank$ and $\select$ methods and come up with improvements that
 make bit vectors more usable in practice. This can be either by speeding up the current
 implementations, saving some additional space but also by combination of these two as
-obtaining some new trade-offs of query time and space used can also open doors to new
-applications.
+obtaining some new trade-offs of query time and space used by the implementation can
+also open doors to new applications.
 
 In the second chapter, we describe the state-of-the-art implementations of $\rank$ and
 $\select$ methods over bit sequence. We discuss what are the theoretically optimal
