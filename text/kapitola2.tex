@@ -33,7 +33,7 @@ $\rank$ query in constant time, using a single table lookup. However, the space 
 support this solution is $\BigO(n\cdot\log n)$ bits, where $n$ is the length of the
 bit sequence.
 
-\cite{gonzalez2005practical} combined presented solutions to obtain an idea of a practically
+Presented solutions can be combined to obtain an idea of a practically
 interesting solution where the pre-computed $\rank$ values are stored only for some
 bits. At first, we choose a constant $k$ and split bit vector into non-overlapping
 subsequences of $k$ bits called \textit{superblocks}. We then precompute $\rank$ only for
@@ -76,12 +76,12 @@ scan through superblock is very cache-friendly and thus very fast.
 
 The previous solution works well and is commonly used in practice. However, it is possible to
 answer $\rank$ query in constant time with only sublinear space overhead. The constant time
-solution is based on partitioning first proposed in this context by \cite{okanohara2007practical}.
-As in the previous solution, we start by splitting the bit sequence into superblocks. This time
-we set the length of a superblock to $\BigO(\log^2 n)$ and again precompute $\rank$s for the beginning of
-every superblock. Then, every superblock is further subdivided into blocks of length $\ceil{(\log_2 n)/2}$.
-Similarly to superblocks, for all of these smaller blocks, we precompute $\rank$. However, to save space,
-we only precompute these $\rank$s from the beginning of the corresponding superblock.
+solution is based on work of \cite{jacobson1988succinct}. As in the previous solution, we start
+by splitting the bit sequence into superblocks. This time we set the length of a superblock to
+$\BigO(\log^2 n)$ and again precompute $\rank$s for the beginning of every superblock. Then, every
+superblock is further subdivided into blocks of length $\ceil{(\log_2 n)/2}$. Similarly to superblocks,
+for all of these smaller blocks, we precompute $\rank$. However, to save space, we only precompute
+these $\rank$s from the beginning of the corresponding superblock.
 
 Now, when queried for $\rank$ of some position $i$, we combine:
 \begin{enumerate}
@@ -201,24 +201,23 @@ time with just sublinear space overhead. In this section, we show that it is pos
 the whole bit vector close to the zeroth order entropy while still keeping the constant time $\rank$
 and $\select$.
 
-Up to now, we have been working with straightforward representation of bit vector in which we store
-all the bits one after another. This is in general the best thing we can hope for but there are scenarios
-where there is a room for improvement. The example is if zeroth order entropy $H_0$ of bit sequence
-is small. This occurs in sequences that have very skewed frequency of zeroes or ones. If sequence of
-length $n$ has $m$ ones in it, we can store it as before using $n$ bits but there is only ${n \choose m}$
-such sequences and it may be more beneficial for big $m$ to store the sequence number which one of these
-we are working with. It is possible to prove for sequence $S$ of length $n$ with $m$ ones that
-$$\lg {n \choose m} = nH_0(S)+\BigO(\log n).$$ This means that using this representation may be
-beneficial in scenarios when $nH_0(S)\ll n$.
+Up to now, we have been working with a straightforward representation of bit vector in which we store
+all the bits one after another. This is the best we can do in general, but there are scenarios
+where there is a room for improvement. One example is if the zeroth order entropy $H_0$ of a bit sequence
+is small. This occurs in sequences that have a very skewed frequency of zeroes or ones. If sequence of
+length $n$ has $m$ ones in it, we can store it as before using $n$ bits. There is, however, only ${n \choose m}$
+such sequences and it may be more beneficial for small/big $m$ to store rather the sequence number which
+one of these ${n \choose m}$ sequences we are working with. It is possible to prove for sequence $S$ of
+length $n$ with $m$ ones that $$\lg {n \choose m} = nH_0(S)+\BigO(\log n).$$ This means that using this
+representation may be beneficial in scenarios when $nH_0(S)\ll n$.
 
 This is an idea that RRR is based on. RRR is a data structure based partly on the work of \cite{pagh2001low}
-and proposed by \cite{raman2007succinct}. The main idea of RRR is to split the bit sequence into blocks of length
-$b$ and then represent a block with $c$ ones using only $\lg {b \choose c}$ bits as
-there are ${b \choose c}$ combinations for positions of ones. The whole block can be then uniquely
-represented as a pair $(c, o)$ where $c$ is the number of ones in the block, called \emph{class} and
-$o$ is an \emph{offset} of this block in a sequence of all the ${b \choose c}$ blocks in this particular class.
-Even if the ordering of the blocks with the same class can be arbitrary, only lexicographical ordering
-is heavily used in practice.
+and proposed by \cite{raman2007succinct}. We split the bit sequence into blocks of length $b$ and then
+represent a block with $c$ ones using only $\lg {b \choose c}$ bits as there are ${b \choose c}$ combinations
+for positions of ones. The whole block can then be uniquely represented as a pair $(c, o)$ where $c$ is the
+number of ones in the block, called \emph{class} and $o$ is an \emph{offset} of this block in a sequence of
+all the ${b \choose c}$ blocks in this particular class. Even if the ordering of the blocks with the same class
+can be arbitrary, only lexicographical ordering is heavily used in practice.
 
 Now, for this structure to work, we need to find a way how to convert between the bit representation of
 a block and its compressed form $(c, o)$. The process of obtaining $c$ and $o$ from the raw representation
@@ -240,15 +239,15 @@ hand, longer blocks yield better compression rates because of smaller per block 
 developed method we shall call \textit{on the fly-decoding}, that does not require these big helper tables. 
 This method relies on a bit by bit encoding and decoding of the block, taking $\BigO(b)$ time. While decoding,
 we can compute on every position, how many blocks precede a given prefix using simple combinatorics. Based on
-that number, we decide whether next bit should be 0 or 1. Pseudocode of this idea computing binary representation
-of block is in listing~\ref{alg:on_the_fly}.
+that number, we decide whether next bit should be {\tt 0} or {\tt 1}. Pseudocode of this idea computing binary
+representation of block is in listing~\ref{alg:on_the_fly}.
 
 \begin{algorithm}
-\caption{Pseudocode for on-the-fly decoding}\label{alg:on_the_fly}
+\caption{On-the-fly decoding}\label{alg:on_the_fly}
     \KwData{$c, o$}
     $block \gets 0$\;
     \For{$i=0$ \KwTo $b-1$} {
-        \tcp{$p$ is number of blocks with same prefix and zero on $i$-th position}
+        \tcp{$p$ is the number of blocks with the same prefix  and zero on $i$-th position}
         $p \gets {b-i-1\choose c}$\;
         \If{$o<p$} {
             \tcp{add zero at the end of the block}
@@ -263,9 +262,9 @@ of block is in listing~\ref{alg:on_the_fly}.
     \KwRet{$block$}
 \end{algorithm}
 
-On the fly decoding does not use helper tables $E$ and $D$ but to achieve the best possible time complexity
-it requires the precomputation of combination numbers it uses. These, however, use together less than $\BigO(b^3)$
-of bits
+On the fly decoding does not use helper tables $E$ and $D$ but to achieve the best possible time complexity,
+it requires the precomputation of Binomial coefficients it uses. These, however, use together less than $\BigO(b^3)$
+of bits.
 
 \paragraph{Arrangement of encoded blocks}
 
