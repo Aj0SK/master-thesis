@@ -483,24 +483,25 @@ compressed bit vector inside.
 
 \paragraph{Space usage of FM-index}
 
-We already showed how FM-index is constructed, how the searching in FM-index works and how it can be
-supported should we have a data structure that supports $\rank$ and $\select$ on sequence over the general
+We already showed how FM-index is constructed and how the searching in FM-index works and can be
+supported should we have a data structure that supports $\rank$ and $\select$ on sequences over the general
 alphabet. We also showed how wavelet tree, one such data structure works.
 
-With the use of Huffman shaped wavelet tree, it is possible to bring down the space used by FM-index to
-close to $nH_k(T)$ for the text $T$ of length $n$ over alphabet of size $\sigma$ where $H_k$ is
-$k$-th order empirical entropy. This quantity is defined as
-$$H_k(S) = \frac{1}{n} \sum_{w\in \Sigma^k} |w_S| H_0(w_S)$$ where $w_S$ is the string consisting of
-concatenation of symbols following $w$ in $S$. This measure gives us the lower bound for number of bits
-that $S$ can be compressed to by compressor that considers context of length $k$ when encoding each
-symbol of $S$. The example of the data structure obtaining bound $nH_k(T)+\BigO((n\log\log n)/\log_{\sigma}n)$
-is AF-index (alphabet friendly FM-index) proposed by \cite{ferragina2004alphabet}.
+\cite{karkkainen2011fixed} showed that combining Huffman shaped wavelet tree and compressed bit vector taking
+space close to zero-order entropy brings down the total space used by FM-index to $nH_k(T)+o(n)\log\sigma$ for
+the text $T$ of length $n$ over alphabet of size $\sigma$ where $H_k$ is $k$-th order empirical entropy. This
+quantity is defined as $$H_k(S) = \frac{1}{n} \sum_{w\in \Sigma^k} |w_S| H_0(w_S)$$ where $w_S$ is the string
+consisting of concatenation of symbols following $w$ in $S$. This measure gives us the lower bound for number
+of bits that $S$ can be compressed to by compressor that considers context of length $k$ when encoding each
+symbol of $S$.
 
 In this chapter, we presented some useful applications of the bit vector. We looked more closely on
 FM-index, the data structure used for the problem of text indexing. There, we encountered the
 problem of answering $\rank$ and $\select$ over the general alphabet and described wavelet tree,
 one possible data structure that can be used to solve it, assuming we have an implementation of
-bit vector supporting $\access$, $\rank$ and $\select$ methods.
+bit vector supporting $\access$, $\rank$ and $\select$ methods. We also showed, that compressed bit
+vector that takes space close to zero-order entropy can be used to obtain succinct representation of
+a wavelet tree but also very space efficient FM-index.
 
 \section{Outline of the Thesis}
 
