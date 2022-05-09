@@ -236,7 +236,7 @@ order. After this precomputation, the encoding and decoding of a block takes con
 
 For longer blocks, it is impractical or even impossible to store huge helper tables. On the other
 hand, longer blocks yield better compression rates because of smaller per block overhead. \cite{navarro2012fast}
-developed method we shall call \textit{on the fly-decoding}, that does not require these big helper tables. 
+developed method we shall call \textit{on-the-fly decoding}, that does not require these big helper tables. 
 This method relies on a bit by bit encoding and decoding of the block, taking $\BigO(b)$ time. While decoding,
 we can compute on every position, how many blocks precede a given prefix using simple combinatorics. Based on
 that number, we decide whether next bit should be {\tt 0} or {\tt 1}. Pseudocode of this idea computing binary
@@ -262,7 +262,7 @@ representation of block is in listing~\ref{alg:on_the_fly}.
     \KwRet{$block$}
 \end{algorithm}
 
-On the fly decoding does not use helper tables $E$ and $D$ but to achieve the best possible time complexity,
+On-the-fly decoding does not use helper tables $E$ and $D$ but to achieve the best possible time complexity,
 it requires the precomputation of Binomial coefficients it uses. These, however, use together less than $\BigO(b^3)$
 of bits.
 
@@ -368,7 +368,7 @@ For block length of 15, the encoding and decoding table each occupies roughly 64
 is because each table consists of $2^{15}$ entries each taking 2 bytes of storage. Unfortunately,
 for block length of 31, these two tables would consume roughly $2^{31}\cdot 4$ bytes of storage. That
 amounts to roughly 8.5GB of space and makes this approach unusable in practice. This problem forces us
-to use the on the fly decoding for block lengths bigger than 15. The disadvantage of this approach is
-that it takes $\BigO(b)$ steps to decode the block. Furthermore, on the fly decoding contains branches
+to use the on-the-fly decoding for block lengths bigger than 15. The disadvantage of this approach is
+that it takes $\BigO(b)$ steps to decode the block. Furthermore, on-the-fly decoding contains branches
 and it is hard to parallelize its steps in some meaningful way. Overall, this makes the block length a
 parameter that we can adjust to balance between better space efficiency and faster runtime performance.

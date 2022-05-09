@@ -8,10 +8,10 @@ vector that mitigates some of the existing problems. We picked up RRR -- one
 particular representation of bit vector and identified places where this
 representation and work with it can be improved. 
 
-The biggest shortcoming was that were only two widely used techniques to
-encode and decode block and both have significant disadvantages. Table method
-provides very fast encoding and decoding but uses too much space for longer
-blocks. On the other hand, on the fly decoding supports longer blocks but
+The biggest shortcoming was that there were only two widely used techniques to
+encode and decode blocks and both have significant disadvantages. The table lookup
+method provides very fast encoding and decoding but uses too much space for longer
+blocks. On the other hand, on-the-fly decoding supports longer blocks but
 trades-off quite a lot of performance for this. We addressed this problem by
 proposing and implementing new decoding method based on the divide-and-conquer
 approach that can be used to divide the process of decoding of the block to more
