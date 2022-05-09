@@ -12,10 +12,11 @@ of \textit{succinct data structures} focuses on representing data using as littl
 space as possible while trying to minimize the time and performance penalty on methods
 that these structures support. Many succinct data structures for varied problems
 have been devised such as succinct dictionaries~\citep{raman2007succinct},
-graph representations~\citep{farzan2013succinct}, grid representations~\citep{chazelle1988functional}
-or text collections~\citep{ferragina2000opportunistic}. While many of the succinct
-data structures come with solid theoretical bounds on the space they use, others look
-into real-world space usage and performance.
+graph representations~\citep{farzan2013succinct}, grid representations~\citep{chazelle1988functional},
+text collections~\citep{ferragina2000opportunistic} and many more, nicely summarized by
+\cite{navarro2016compact}. While many of the succinct data structures come with solid
+theoretical bounds on the space they use, others look into real-world space usage and
+performance.
 
 Succinct data structures are very helpful in scenarios where we work with an immense amount
 of data. In these scenarios, using the ordinary data structures may force us to place
@@ -173,7 +174,7 @@ taken by the original text $T$ as was observed by \cite{ferragina2001experimenta
 
 In the rest of this section, we will explain how we construct the FM-index, how we search in it
 and how/why FM-index uses bit vector with method $\rank$. This is particularly interesting for us
-as later in Chapter 4, we use FM-index to benchmark our new implementation of bit vector.
+as later, in Chapter 4, we use FM-index to benchmark our new implementation of bit vector.
 
 \paragraph{Burrows-Wheeler transform}
 
@@ -192,10 +193,10 @@ table $M$ (see an example in Fig.~\ref{obr:BWT}). Note that each column is a per
 The first column, $F$, consists of all the characters of $T$, sorted. The last column, $L$, is
 the Burrows-Wheeler transform of $T$.
 
-FM-index stores columns $F$ and $L$. As the first column of $M$ consists of runs of sorted symbols,
-it is represented in $FM-index$ using the helper array $\Count$ where $\Count[c]$ is the number of
-occurrences of symbols \emph{preceding} $c$. Note that the run of symbol $c$ in $F$ starts at the
-index $\Count[c]$.
+FM-index stores just columns $F$ and $L$ from matrix $M$. As the first column of $M$ consists of
+runs of sorted symbols, it can be represented in FM-index using the helper array $\Count$ where
+$\Count[c]$ is the number of occurrences of symbols \emph{preceding} $c$. Note that the run of
+symbol $c$ in $F$ starts at the index $\Count[c]$.
 
 \begin{figure}
 	\centerline{
@@ -227,8 +228,9 @@ index $\Count[c]$.
 	$T = \mathtt{banana\$}$. On the right, we may observe the sorted suffixes of $T$(content of suffix array). The
 	Burrows-Wheeler transform of $T$ is string $L=\mathtt{annb\$aa}$ -- the last column of $M$.
 	Note that in practice, we do not need to construct the whole table as more efficient algorithms exist.
-	It is also notable that matrix $M$ includes very similar information compared to suffix array.
-	FM-index stores only representation of columns $F$ and $L$, the grey area is not stored.
+	It is also notable that matrix $M$ includes very similar information compared to suffix array as
+	rows of $M$ basically start with individual suffixes. FM-index stores only representation of columns $F$
+	and $L$, the grey area is not stored.
 	}
 	\label{obr:BWT}
 \end{figure}
@@ -255,8 +257,8 @@ Searching in an FM-index is based on two important properties of matrix $M$:
 	\label{chapter1:fmindexprop:prop2}
 \end{enumerate}
 
-The first property also enabled us to search for a pattern in a suffix array. The second
-property is less trivial. Let us take two rows in $M$, namely $T_i$ and $T_j$ such that
+The first property also enabled us to search for a pattern in a suffix array. The second property
+is less trivial to observe. Let us take two rows in $M$, namely $T_i$ and $T_j$ such that
 $i<j$. Let $T_i$ be of the form $cA$ and $T_j$ of the form $cB$ where $c$ is a symbol from
 the text and $A$ and $B$ are sequences of symbols. Since $i<j$, it follows that $A<B$ and
 this means that rotated rows $Ac$ and $Bc$ are in the same relative order as the original rows.
@@ -269,14 +271,8 @@ the search for $P$ is a range of $M$’s rows that have $P$ as their prefix. The
 rows proceeds iteratively from the end of $P$ to its beginning. At first, we find the range of
 rows starting with  $P_{n-1\ldots}$, then gradually continue by finding rows that start with
 $P_{n-2\ldots}, P_{n-3\ldots}$ and so on up to $P_0=P$. In every step, these rows form a
-consecutive subsequence of rows of $M$ so we  will maintain just the beginning and the end of
+consecutive subsequence of rows of $M$ so we will maintain just the beginning and the end of
 the interval. This follows from the observation \ref{chapter1:fmindexprop:prop1}.
-
-First, let us show the  we demonstrate the search of a pattern on an example. Let us assume we are searching for a word
-{\tt house} and we already found the range of rows in $M$ that have {\tt ouse}
-as their prefix. Symbols in the last column of this range correspond to the symbols
-preceding {\tt ouse} in the text. We may observe different symbols in arbitrary order there such as {\tt m}
-for word {\tt mouse} or {\tt h} for {\tt house}.
 
 First, let us show the process on an example (see Fig.~\ref{tab:fm_index_example}). Assume we are
 searching for the word {\tt house} and we already found the range of rows in $M$ that start with
@@ -306,7 +302,7 @@ we need to count the number of occurences of {\tt h} in $L$ before the occurrenc
 				    & Row n.     & F &  &   &   &   &   &   &   &   & L \\ \cline{5-10}\cline{2-3}\cline{12-12}
 				    & 0          &   &  &   &   &   &   &   &   &   &   \\ \cline{5-10}\cline{2-3}\cline{12-12}
 				    & \ldots     &   &  &   &   &   &   &   &   &   &   \\ \cline{5-10}\cline{2-3}\cline{12-12}
-	$\Count{[}h{]}$ & 100        & h &  & a & s & h & t &   &   &   &   \\ \cline{5-10}\cline{2-3}\cline{12-12}
+	$\Count{[}h{]}$ & 100        & h &  & a & s & h & t & \ldots   &   &   &   \\ \cline{5-10}\cline{2-3}\cline{12-12}
 				    & 101        & h &  & e & a & d &   &   &   &   &   \\ \cline{5-10}\cline{2-3}\cline{12-12}
 	                & 102        & h &  & i & n & d &   &   & b &   & e \\ \cline{5-10}\cline{2-3}\cline{12-12}
 	$b_0$		    & 103        & h &  & o & u & s & e &   &   &   &   \\ \cline{5-10}\cline{2-3}\cline{12-12}
@@ -316,7 +312,7 @@ we need to count the number of occurences of {\tt h} in $L$ before the occurrenc
 	$b_1$           & 200        & o &  & u & s & e &   &   &   &   & m \\ \cline{5-10}\cline{2-3}\cline{12-12}
 				    & 201        & o &  & u & s & e &   &   &   &   & h \\ \cline{5-10}\cline{2-3}\cline{12-12}
 				    & 202        & o &  & u & s & e &   &   &   &   & m \\ \cline{5-10}\cline{2-3}\cline{12-12}
-				    & 203        & o &  & u & s & e &   &   & s &   & p \\ \cline{5-10}\cline{2-3}\cline{12-12}
+				    & 203        & o &  & u & s & e &   & \ldots  & s &   & p \\ \cline{5-10}\cline{2-3}\cline{12-12}
 				    & 204        & o &  & u & s & e &   &   &   &   & h \\ \cline{5-10}\cline{2-3}\cline{12-12}
 	$e_1$           & 205        &   &  &   &   &   &   &   &   &   &   \\ \cline{5-10}\cline{2-3}\cline{12-12}
 	                & \ldots     &   &  &   &   &   &   &   &   &   &   \\ \cline{5-10}\cline{2-3}\cline{12-12}
@@ -447,8 +443,8 @@ for this representation to use just $n\lg \sigma+o(n)$ bits of space.
 Even if this version of wavelet tree can be used inside of the FM-index, it is possible to
 make a solution that is faster and more space efficient in some scenarios. Time complexity
 of both methods, $\rank_c$ and $\select_c$, depends on the time complexity of the bit vector
-implementation, used in the nodes, but also on the depth of symbol $c$ in the tree. This depth
-is now for every single symbol roughly $\BigO(\log \sigma)$.
+implementation used in the nodes, but also on the depth of symbol $c$ in the tree. This depth
+is now for every single symbol $\BigO(\log \sigma)$.
 
 To obtain a better solution, let us give another perspective on the wavelet tree and assign
 a single bit to every edge -- {\tt 0} for left and {\tt 1} for right (see Fig.~\ref{obr:WaveletTreeExample}).
@@ -471,8 +467,9 @@ that frequencies of symbols are not even and thus $H_0(S)\ll \lg\sigma$.
 The maximum depth of a Huffman shaped wavelet tree may be bigger compared to the original, however,
 \cite{grabowski2004first} showed that we can enforce the maximum depth to be $\BigO(\log \sigma)$
 with the average depth limited by $H_0+2$. This is, however, as they claimed, not very practical.
-The most important fact is that with Huffman shaped wavelet tree, it is possible to decrease the
-average number of nodes accessed and thus decrease the average query time of $\rank$ and $\select$.
+The important fact is that with Huffman shaped wavelet tree, it is possible to decrease the space
+usage in some scenarios but also average number of nodes accessed and thus decrease the average
+query time of $\rank$ and $\select$.
 
 It was shown by \cite{grossi2003high} that it is also possible for the wavelet tree of original shape
 to achieve space usage of $nH_0(S) + o(n\log\sigma)$ bits, if the bit vector implementation that takes
@@ -499,9 +496,9 @@ In this chapter, we presented some useful applications of the bit vector. We loo
 FM-index, the data structure used for the problem of text indexing. There, we encountered the
 problem of answering $\rank$ and $\select$ over the general alphabet and described wavelet tree,
 one possible data structure that can be used to solve it, assuming we have an implementation of
-bit vector supporting $\access$, $\rank$ and $\select$ methods. We also showed, that compressed bit
+bit vector supporting $\access$, $\rank$ and $\select$ methods. We also showed that compressed bit
 vector that takes space close to zero-order entropy can be used to obtain succinct representation of
-a wavelet tree but also very space efficient FM-index.
+a wavelet tree but also very space efficient version of FM-index.
 
 \section{Outline of the Thesis}
 
