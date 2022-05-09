@@ -173,7 +173,7 @@ Supervisor: & \mfskolitel \\
 {\bf Acknowledgments:} I want to express my deepest gratitude to my supervisor Kuko
 for the time, knowledge and effort he put into this work. I am very thankful for the
 opportunity to work under his guidance. I am also very grateful for the enormous
-support I am receiving every day from my family and my partner Kika.
+support I receive from my family and my partner Kika every day.
  
 % --- Koniec poďakovania
 
@@ -184,7 +184,7 @@ support I am receiving every day from my family and my partner Kika.
 \section*{Abstrakt}  
 
 Úsporné dátové štruktúry sú užitočné v prípadoch, keď pracujeme s veľkým
-objemom dát a klasické dátové štruktúry nás limitujú svojími pamäťovými
+množstvom dát a klasické dátové štruktúry nás limitujú svojími pamäťovými
 nárokmi. Bitové pole s operáciami $\access$, $\rank$ a $\select$ je stavebným
 kameňom mnohých prakticky užitočných úsporných dátových štruktúr. V našej práci
 sa venujeme implementácii bitového poľa pomocou metódy \textit{RRR}, ktorá delí
@@ -192,11 +192,13 @@ postupnosť bitov na bloky, ktoré sú ďalej jednotlivo komprimované. V tejto 
 sme predstavili nový algoritmus na kompresiu a dekompresiu blokov ale aj novú
 hybridnú metódu, ktorá výmenou za nekódovanie niektorých blokov šetrí priestor
 na reprezentácii ostatných. Obidve myšlienky sme naimplementovali a experimentálne
-otestovali v umelých aj reálnych podmienkach. Naša dekódovacia stratégia sa ukázala
+otestovali v umelých ale aj reálnych podmienkach. Naša dekódovacia stratégia sa ukázala
 veľmi kompetitívnou a v testoch jasne porazila predchádzajúce implementácie v
-rýchlosti dekódovania dlhších blokov. Prvý variant hybridnej implementácie sa ukázal
-zaujímavým pre riedke bitové postupnosti avšak druhý variant nepriniesol zaujímavé
-praktické výsledky.
+rýchlosti dekódovania dlhších blokov. Zrýchlenie sa prenieslo aj na implementáciu
+dátovej štruktúry FM-index, ktorá s našou verziou bitového poľa dosahovala pre dlhšie
+bloky zrýchlenie na úrovni cez 10\%. Jednostranná verzia hybridnej implementácie sa
+ukázala zaujímavou pre riedkejšie bitové postupnosti avšak druhý obojstranný variant
+nepriniesol zaujímavé praktické výsledky.
 
 \paragraph*{Kľúčové slová:} bitové pole, úsporné dátové štruktúry
 % --- Koniec Abstrakt - Slovensky
@@ -218,11 +220,13 @@ individually compressed blocks. In our work, we introduced a new algorithm
 for block encoding and decoding and also a hybrid implementation that leaves
 some blocks uncompressed in exchange for space savings on all other compressed
 blocks. We provided implementation for both of these methods and then experimentally
-evaluated their performance on artificial but also real data. Our new decoding algorithm
-is very competitive in practice as it beats the previous implementations of decoding
-for longer blocks. The first variant of hybrid implementation turned out to be interesting
-for sparse sequences. The second variant, however, did not bring interesting practical
-results.
+evaluated their performance on artificial and real data. Our new decoding algorithm
+is very competitive in practice as it beats the existing decoding implementations
+on longer blocks. We have been able to also measure the speedup of data structure
+FM-index, which with our version of bit vector achieved over 10\% speedup for
+longer blocks. The one-sided variant of hybrid implementation turned out to be
+interesting for sparse sequences. The two-sided variant, however, did not bring
+interesting practical results.
 
 \paragraph*{Keywords:} bit vector, succinct data structures
 
