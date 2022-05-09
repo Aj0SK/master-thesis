@@ -6,7 +6,7 @@ The goal of this thesis was to study existing implementations of compressed
 bit vector, explore their shortcomings and develop new implementation of bit
 vector that mitigates some of the existing problems. We picked up RRR -- one
 particular representation of bit vector and identified places where this
-representation and work with it can be improved. 
+representation and algorithms working with it can be improved.
 
 The biggest shortcoming was that there were only two widely used techniques to
 encode and decode blocks and both have significant disadvantages. The table lookup
@@ -24,7 +24,7 @@ The new method was very successful in artificial but also practical testing. The
 important result presented in this work is the relative speedup of FM-index when
 \texttt{SDSL} bit vector is replaced by our implementation. We measured about 20--30\%
 speedup of $\countOp$, $\extractOp$ and $\locateOp$ methods thanks to our changes. This
-was observed on various data types such as DNA sequences, source codes or protein sequences.
+was observed on various data such as DNA sequences, source codes or protein sequences.
 
 The second idea was of hybrid encoding. The idea is not to encode some of the possibly rare
 blocks. By doing this we waste some space on blocks that are not compressed but gain
@@ -33,13 +33,18 @@ on every other block by decreasing number of bits used for class of the block.
 We developed two versions of hybrid encoding. The one-sided version is better
 suited for sparse sequences with roughly 5\% of ones where RRR is often dominated by sparse
 bit vector implementations. This version indeed worked quite well and when compared to our
-ordinary version of bit vector it was able to deliver the same
-speed with roughly 5\% lower space usage. The second, two-sided version of hybrid encoding
-was found not to be practically competitive in its current version due to additional memory
-accesses that are needed to answer $\rank$ and $\select$ queries. 
+ordinary version of bit vector it was able to deliver the same speed with roughly 5\% lower
+space usage. The second, two-sided version of hybrid encoding was found not to be practically
+competitive in its current version due to additional memory accesses that are needed to answer
+$\rank$ and $\select$ queries. 
 
 With our new decoding scheme, future work could lead to discovering what tradeoffs
 between space usage and speed can be achieved with longer blocks, e.g., 255-bit block.
 Working with longer blocks is way slower because computers natively support 64-bit
 integers. Our new method, however, enables us to quickly decompose problem into smaller
 subproblems that could fit into a 64-bit integer.
+
+Future work on hybrid encoding could lead to more experiments on other types of data and finding
+the ways how to limit the memory accesses that are created because of hybrid encoding. Another
+practically interesting idea would be to develop a method that automatically adapts the cutoff
+to the underlying data to get the best possible results.
