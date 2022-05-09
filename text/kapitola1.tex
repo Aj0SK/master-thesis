@@ -384,8 +384,8 @@ the $\rank$/$\select$ methods on a sequence over a general alphabet.
 \label{section:WaweletTree}
 
 Let us assume for a moment that we have a bit vector implementation supporting methods $\access$,
-$\rank$ and $\select$. We have a sequence $S$ over an arbitrary alphabet $\Sigma$. Our goal is to
-build vector over this sequence supporting the methods $\access$, $\rank$ and $\select$.
+$\rank$ and $\select$. We have a sequence $S$ of length $n$ over an arbitrary alphabet $\Sigma$.
+Our goal is to build vector over this sequence supporting the methods $\access$, $\rank$ and $\select$.
 
 A straightforward approach that uses bit vector is to have one bit vector $B_c$ for every
 symbol $c$ from the alphabet $\Sigma$, storing ones at positions where $c$ occurs in $S$
@@ -399,14 +399,14 @@ symbol $c$ from the alphabet $\Sigma$, storing ones at positions where $c$ occur
 
 This is very fast because each $\rank$ and $\select$ operation can be answered using only a single
 binary $\rank$ or $\select$. However, we use roughly $|\Sigma|$ times more space than the single bit
-vector over this sequence would use. Or in other words, our space usage is growing linearly with the
+vector over this sequence would use. Or in other words, the space usage is growing linearly with the
 alphabet size.
 
 \textit{Wavelet tree} data structure proposed by \cite{grossi2003high} uses a divide-and-conquer
 approach to solve this problem. It takes the alphabet $\Sigma$ of size $\sigma$ and recursively
 splits the alphabet into two subsets creating a hierarchical partitioning of an alphabet. In the
 root node of the tree, the alphabet $\Sigma$ is split into two subsets $\Sigma_0$ and $\Sigma_1$
-of roughly equal size. A bit vector $B$ of size $|S|$ is stored in this node such that
+of roughly equal size. A bit vector $B$ of size $n$ is stored in this node such that
 \[
     B[i]= 
 \begin{cases}
@@ -440,18 +440,17 @@ In a wavelet tree, both $\rank_c$ and $\select_c$ methods on the original sequen
 be implemented using $\rank$/$\select$ methods applied on bit sequences that are stored
 in nodes along the path from the root to the leaf containing symbol $c$. Thus, the
 number of $\rank$ and $\select$ queries on individual bit vectors depends on the depth of
-a leaf containing queried symbol $c$. Regarding space usage of wavelet tree, it is possible
-for this representation to use just $n\lg \sigma+o(n)$ bits of space where $n$ is the length
-of represented text $S$ as on every level of the wavelet tree, we store roughly a bit vector
-of length $n$.
+a leaf containing queried symbol $c$. Regarding the space usage of wavelet tree; as on every
+level of the wavelet tree, we store roughly a bit vector of length $n$, it is possible
+for this representation to use just $n\lg \sigma+o(n)$ bits of space.
 
 Even if this version of wavelet tree can be used inside of the FM-index, it is possible to
-make a solution that is faster and more space efficient in some scenarios. Speed of both
-methods, $\rank_c$ and $\select_c$, depends on the speed of the bit vector implementation,
-used in the nodes, but also on the depth of symbol $c$ in the tree. This depth is now for
-every single symbol roughly $\BigO(\log \sigma)$.
+make a solution that is faster and more space efficient in some scenarios. Time complexity
+of both methods, $\rank_c$ and $\select_c$, depends on the time complexity of the bit vector
+implementation, used in the nodes, but also on the depth of symbol $c$ in the tree. This depth
+is now for every single symbol roughly $\BigO(\log \sigma)$.
 
-To obtain an even better solution, let us give another perspective on the wavelet tree and assign
+To obtain a better solution, let us give another perspective on the wavelet tree and assign
 a single bit to every edge -- {\tt 0} for left and {\tt 1} for right (see Fig.~\ref{obr:WaveletTreeExample}).
 Now, we can think of the wavelet tree as an assignment of a binary code to every alphabet symbol.
 The code of a symbol $c$ is obtained by concatenating bits along the path from the root to the leaf
@@ -459,7 +458,7 @@ for symbol $c$.
 
 The idea proposed by~\cite{makinen2005succinct} is to shape the wavelet tree in such a way that
 a code of every symbol is equal to its Huffman code. The first advantage is that the space used
-decreases from $\BigO(n\log \sigma)$ to $\BigO(nH_0(S))$. The second advantage we get is that if
+decreases from $\BigO(n\log \sigma)$ to $\BigO(nH_0(S))$. The second advantage is that if
 we query for each symbol according to its frequency, then on average, we need to visit
 $\BigO(H_0)$ nodes rather than $\BigO(\log \sigma)$, where $H_0$ is the empirical zero-order
 entropy, defined as $$H_0(S)=\sum_{c\in\Sigma} \frac{n_c}{n} \log \frac{n}{n_c},$$
@@ -475,9 +474,12 @@ with the average depth limited by $H_0+2$. This is, however, as they claimed, no
 The most important fact is that with Huffman shaped wavelet tree, it is possible to decrease the
 average number of nodes accessed and thus decrease the average query time of $\rank$ and $\select$.
 
-It is also possible for the original shape of the wavelet tree to achieve space usage of $nH_0(S) + o(n\log\sigma)$
-bits. This was shown by \cite{grossi2003high} and this representation relies on using compressed
-bit vector implementation, that takes space close to the zero-order entropy, inside of the tree's nodes.
+It was shown by \cite{grossi2003high} that it is also possible for the wavelet tree of original shape
+to achieve space usage of $nH_0(S) + o(n\log\sigma)$ bits, if the bit vector implementation that takes
+space close to the zero-order entropy is used inside of the tree nodes.
+
+In practice, it is beneficial to combine these two ideas and use the Huffman shaped wavelet tree with
+compressed bit vector inside.
 
 \paragraph{Space usage of FM-index}
 
@@ -486,13 +488,13 @@ supported should we have a data structure that supports $\rank$ and $\select$ on
 alphabet. We also showed how wavelet tree, one such data structure works.
 
 With the use of Huffman shaped wavelet tree, it is possible to bring down the space used by FM-index to
-$nH_k(T)+o(n\log \sigma)$ for the text $T$ of length $n$ over alphabet of size $\sigma$ where $H_k$ is
+close to $nH_k(T)$ for the text $T$ of length $n$ over alphabet of size $\sigma$ where $H_k$ is
 $k$-th order empirical entropy. This quantity is defined as
 $$H_k(S) = \frac{1}{n} \sum_{w\in \Sigma^k} |w_S| H_0(w_S)$$ where $w_S$ is the string consisting of
 concatenation of symbols following $w$ in $S$. This measure gives us the lower bound for number of bits
 that $S$ can be compressed to by compressor that considers context of length $k$ when encoding each
-symbol of $S$. The example of the data structure obtaining bound $nH_k(T)+o(n\log \sigma)$ is AF-index
-(alphabet friendly FM-index) proposed by \cite{ferragina2004alphabet}.
+symbol of $S$. The example of the data structure obtaining bound $nH_k(T)+\BigO((n\log\log n)/\log_{\sigma}n)$
+is AF-index (alphabet friendly FM-index) proposed by \cite{ferragina2004alphabet}.
 
 In this chapter, we presented some useful applications of the bit vector. We looked more closely on
 FM-index, the data structure used for the problem of text indexing. There, we encountered the
