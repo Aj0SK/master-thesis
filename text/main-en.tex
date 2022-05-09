@@ -213,16 +213,16 @@ nepriniesol zaujímavé praktické výsledky.
 Succinct data structures are interesting in scenarios, when we work
 with huge amount of data and ordinary data structures could limit us
 because of their memory requirements. Bit vector with operations $\access$,
-$\rank$ a $\select$ is a building block of many practically useful
+$\rank$ and $\select$ is a building block of many practically useful
 succinct data structures. We are mainly concerned with implementation of
-bit vector based on the RRR representation that divides bit sequence into
+bit vector based on the RRR representation which divides bit sequence into
 individually compressed blocks. In our work, we introduced a new algorithm
-for block encoding and decoding and also a hybrid implementation that leaves
+for block encoding and decoding and also a hybrid implementation which leaves
 some blocks uncompressed in exchange for space savings on all other compressed
 blocks. We provided implementation for both of these methods and then experimentally
 evaluated their performance on artificial and real data. Our new decoding algorithm
 is very competitive in practice as it beats the existing decoding implementations
-on longer blocks. We have been able to also measure the speedup of data structure
+on longer blocks. We also have been able to measure the speedup of data structure
 FM-index, which with our version of bit vector achieved over 10\% speedup for
 longer blocks. The one-sided variant of hybrid implementation turned out to be
 interesting for sparse sequences. The two-sided variant, however, did not bring

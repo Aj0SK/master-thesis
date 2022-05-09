@@ -160,7 +160,7 @@ decoded block $B$.
 Our first step when decoding is to find $c_1$ and $c_2$ using $o$. Assume that our block has an
 unknown class pair $(c_1, c_2)$, such that $c_1+c_2=c$. All the blocks with class $c$ are primarily
 sorted by class pair so blocks with the same class pair form a consecutive range. Range of class pair
-$(c_1,c_2)$ contains ${b_1 choose c1} \times {b_2\choose c2}$ blocks. To find the class pair of block
+$(c_1,c_2)$ contains ${b_1\choose c1} \times {b_2\choose c2}$ blocks. To find the class pair of block
 with offset $o$ we precompute the beginnings of each range
 $Z_0,\ldots , Z_c$\footnote{more precisely $Z_{\max(c-b_2, 0)},\ldots , Z_{\max(c-b_1, 0)}$}
 where $Z_i$ is the beginning offset of block having class pair $(i, c-i)$ and then binary search

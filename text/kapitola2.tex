@@ -1,12 +1,12 @@
 \chapter{Binary sequence representation}
 \label{kap:kap2}
 
-As we have shown in the previous section, bit vector can be used to solve various practical
-problems. This chapter is dedicated to outlining the current state of the bit vector
-implementations supporting methods $\access$, $\rank$ and $\select$. We start with a succinct
-representation of bit vector and present ideas to support $\rank$ and $\select$ in sublinear
-extra space. Then we look at the compressed representation of bit vector obtained using the
-method introduced by \cite{raman2007succinct}.
+As we have shown in the previous section, bit vector can be used inside of the data structures
+that solve various practical problems. This chapter is dedicated to outlining the current state
+of the bit vector implementations supporting methods $\access$, $\rank$ and $\select$. We start
+with a succinct representation of bit vector and present ideas to support $\rank$ and $\select$
+in sublinear extra space. Then we look at the compressed representation of bit vector introduced
+by \cite{raman2007succinct}.
 
 \section{Bit vector implementation}
 
@@ -201,23 +201,23 @@ time with just sublinear space overhead. In this section, we show that it is pos
 the whole bit vector close to the zeroth order entropy while still keeping the constant time $\rank$
 and $\select$.
 
-Up to now, we have been working with a straightforward representation of bit vector in which we store
-all the bits one after another. This is the best we can do in general, but there are scenarios
+Up to now, we have been working with a straightforward representation of bit vector which consists of
+all the bits, stored one after another. This is the best we can do in general, but there are scenarios
 where there is a room for improvement. One example is if the zeroth order entropy $H_0$ of a bit sequence
 is small. This occurs in sequences that have a very skewed frequency of zeroes or ones. If sequence of
 length $n$ has $m$ ones in it, we can store it as before using $n$ bits. There is, however, only ${n \choose m}$
 such sequences and it may be more beneficial for small/big $m$ to store rather the sequence number which
 one of these ${n \choose m}$ sequences we are working with. It is possible to prove for sequence $S$ of
-length $n$ with $m$ ones that $$\lg {n \choose m} = nH_0(S)+\BigO(\log n).$$ This means that using this
-representation may be beneficial in scenarios when $nH_0(S)\ll n$.
+length $n$ with $m$ ones that $$\lg {n \choose m} = nH_0(S)-\BigO(\log n).$$ This means that using this
+representation may be beneficial in scenarios when $nH_0(S)\ll n$. This is an idea that RRR is based on.
 
-This is an idea that RRR is based on. RRR is a data structure based partly on the work of \cite{pagh2001low}
-and proposed by \cite{raman2007succinct}. We split the bit sequence into blocks of length $b$ and then
-represent a block with $c$ ones using only $\lg {b \choose c}$ bits as there are ${b \choose c}$ combinations
-for positions of ones. The whole block can then be uniquely represented as a pair $(c, o)$ where $c$ is the
-number of ones in the block, called \emph{class} and $o$ is an \emph{offset} of this block in a sequence of
-all the ${b \choose c}$ blocks in this particular class. Even if the ordering of the blocks with the same class
-can be arbitrary, only lexicographical ordering is heavily used in practice.
+RRR is a data structure based partly on the work of \cite{pagh2001low} and proposed by \cite{raman2007succinct}.
+We split the bit sequence into blocks of length $b$ and then represent a block with $c$ ones using only
+$\lg {b \choose c}$ bits as there are ${b \choose c}$ combinations for positions of ones. The whole block
+can then be uniquely represented as a pair $(c, o)$ where $c$ is the number of ones in the block, called
+\emph{class} and $o$ is an \emph{offset} of this block in a sequence of all the ${b \choose c}$ blocks in
+this particular class. Even if the ordering of the blocks with the same class can be arbitrary, only
+lexicographical ordering is heavily used in practice.
 
 Now, for this structure to work, we need to find a way how to convert between the bit representation of
 a block and its compressed form $(c, o)$. The process of obtaining $c$ and $o$ from the raw representation
@@ -322,6 +322,7 @@ thus in the worst case, the space we need to represent a single one of these seq
     &= n\left(\frac{m}{n}\log_2\frac{n}{m} + \frac{n-m}{n}\log_2\frac{n}{n-m}\right)-\BigO(\log n) \\
     &= nH_0(B) - \BigO(\log n).
 \end{align*}
+The first equation is obtained by using Stirling's approximation.
 
 If we choose the decoding method with a helper table, $D$ is storing $2^b$ entries and each entry takes
 $b$ bits of storage. To summarize, the total space used is then
