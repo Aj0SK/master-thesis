@@ -1,0 +1,884 @@
+# TC_ID = ENGLISH
+# IDX_ID = FM_HUFF_RRR15
+# test_case = english.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/ENGLISH.FM_HUFF_RRR15.16x16
+# Load_index_time_in_sec = 0.09
+# text_size = 209715200
+# Index_size_in_bytes = 175376382
+# number=10000 length=512 file=../data/english.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 3.70
+# Extract_time/Num_chars_extracted = 0.0007
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0007
+
+# TC_ID = DNA
+# IDX_ID = FM_HUFF_RRR15
+# test_case = dna.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/DNA.FM_HUFF_RRR15.16x16
+# Load_index_time_in_sec = 0.07
+# text_size = 209715200
+# Index_size_in_bytes = 155133914
+# number=10000 length=512 file=../data/dna.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 2.08
+# Extract_time/Num_chars_extracted = 0.0004
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0004
+
+# TC_ID = PROTEINS
+# IDX_ID = FM_HUFF_RRR15
+# test_case = proteins.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/PROTEINS.FM_HUFF_RRR15.16x16
+# Load_index_time_in_sec = 0.10
+# text_size = 209715200
+# Index_size_in_bytes = 207347126
+# number=10000 length=512 file=../data/proteins.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 4.07
+# Extract_time/Num_chars_extracted = 0.0008
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0008
+
+# TC_ID = SOURCES
+# IDX_ID = FM_HUFF_RRR15
+# test_case = sources.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/SOURCES.FM_HUFF_RRR15.16x16
+# Load_index_time_in_sec = 0.09
+# text_size = 209715200
+# Index_size_in_bytes = 177698538
+# number=10000 length=512 file=../data/sources.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 3.19
+# Extract_time/Num_chars_extracted = 0.0006
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0006
+
+# TC_ID = ENGLISH
+# IDX_ID = FM_HUFF_RRR31
+# test_case = english.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/ENGLISH.FM_HUFF_RRR31.16x16
+# Load_index_time_in_sec = 0.08
+# text_size = 209715200
+# Index_size_in_bytes = 161305190
+# number=10000 length=512 file=../data/english.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 4.84
+# Extract_time/Num_chars_extracted = 0.0009
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0010
+
+# TC_ID = DNA
+# IDX_ID = FM_HUFF_RRR31
+# test_case = dna.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/DNA.FM_HUFF_RRR31.16x16
+# Load_index_time_in_sec = 0.07
+# text_size = 209715200
+# Index_size_in_bytes = 149357986
+# number=10000 length=512 file=../data/dna.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 2.66
+# Extract_time/Num_chars_extracted = 0.0005
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0005
+
+# TC_ID = PROTEINS
+# IDX_ID = FM_HUFF_RRR31
+# test_case = proteins.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/PROTEINS.FM_HUFF_RRR31.16x16
+# Load_index_time_in_sec = 0.10
+# text_size = 209715200
+# Index_size_in_bytes = 199941006
+# number=10000 length=512 file=../data/proteins.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 5.41
+# Extract_time/Num_chars_extracted = 0.0011
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0011
+
+# TC_ID = SOURCES
+# IDX_ID = FM_HUFF_RRR31
+# test_case = sources.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/SOURCES.FM_HUFF_RRR31.16x16
+# Load_index_time_in_sec = 0.08
+# text_size = 209715200
+# Index_size_in_bytes = 160092978
+# number=10000 length=512 file=../data/sources.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 4.25
+# Extract_time/Num_chars_extracted = 0.0008
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0008
+
+# TC_ID = ENGLISH
+# IDX_ID = FM_HUFF_RRR63
+# test_case = english.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/ENGLISH.FM_HUFF_RRR63.16x16
+# Load_index_time_in_sec = 0.08
+# text_size = 209715200
+# Index_size_in_bytes = 153885206
+# number=10000 length=512 file=../data/english.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 5.84
+# Extract_time/Num_chars_extracted = 0.0011
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0012
+
+# TC_ID = DNA
+# IDX_ID = FM_HUFF_RRR63
+# test_case = dna.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/DNA.FM_HUFF_RRR63.16x16
+# Load_index_time_in_sec = 0.08
+# text_size = 209715200
+# Index_size_in_bytes = 146176570
+# number=10000 length=512 file=../data/dna.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 3.27
+# Extract_time/Num_chars_extracted = 0.0006
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0007
+
+# TC_ID = PROTEINS
+# IDX_ID = FM_HUFF_RRR63
+# test_case = proteins.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/PROTEINS.FM_HUFF_RRR63.16x16
+# Load_index_time_in_sec = 0.10
+# text_size = 209715200
+# Index_size_in_bytes = 196709206
+# number=10000 length=512 file=../data/proteins.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 7.05
+# Extract_time/Num_chars_extracted = 0.0014
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0014
+
+# TC_ID = SOURCES
+# IDX_ID = FM_HUFF_RRR63
+# test_case = sources.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/SOURCES.FM_HUFF_RRR63.16x16
+# Load_index_time_in_sec = 0.07
+# text_size = 209715200
+# Index_size_in_bytes = 151850978
+# number=10000 length=512 file=../data/sources.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 5.24
+# Extract_time/Num_chars_extracted = 0.0010
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0010
+
+# TC_ID = ENGLISH
+# IDX_ID = FM_HUFF_RRR127
+# test_case = english.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/ENGLISH.FM_HUFF_RRR127.16x16
+# Load_index_time_in_sec = 0.08
+# text_size = 209715200
+# Index_size_in_bytes = 150537174
+# number=10000 length=512 file=../data/english.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 8.44
+# Extract_time/Num_chars_extracted = 0.0016
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0017
+
+# TC_ID = DNA
+# IDX_ID = FM_HUFF_RRR127
+# test_case = dna.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/DNA.FM_HUFF_RRR127.16x16
+# Load_index_time_in_sec = 0.07
+# text_size = 209715200
+# Index_size_in_bytes = 144634322
+# number=10000 length=512 file=../data/dna.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 5.48
+# Extract_time/Num_chars_extracted = 0.0011
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0011
+
+# TC_ID = PROTEINS
+# IDX_ID = FM_HUFF_RRR127
+# test_case = proteins.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/PROTEINS.FM_HUFF_RRR127.16x16
+# Load_index_time_in_sec = 0.09
+# text_size = 209715200
+# Index_size_in_bytes = 195954566
+# number=10000 length=512 file=../data/proteins.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 11.34
+# Extract_time/Num_chars_extracted = 0.0022
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0022
+
+# TC_ID = SOURCES
+# IDX_ID = FM_HUFF_RRR127
+# test_case = sources.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/SOURCES.FM_HUFF_RRR127.16x16
+# Load_index_time_in_sec = 0.07
+# text_size = 209715200
+# Index_size_in_bytes = 148831890
+# number=10000 length=512 file=../data/sources.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 7.78
+# Extract_time/Num_chars_extracted = 0.0015
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0015
+
+# TC_ID = ENGLISH
+# IDX_ID = FM_HUFF_RRR31_7
+# test_case = english.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/ENGLISH.FM_HUFF_RRR31_7.16x16
+# Load_index_time_in_sec = 0.08
+# text_size = 209715200
+# Index_size_in_bytes = 165149166
+# number=10000 length=512 file=../data/english.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 5.95
+# Extract_time/Num_chars_extracted = 0.0012
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0012
+
+# TC_ID = DNA
+# IDX_ID = FM_HUFF_RRR31_7
+# test_case = dna.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/DNA.FM_HUFF_RRR31_7.16x16
+# Load_index_time_in_sec = 0.07
+# text_size = 209715200
+# Index_size_in_bytes = 153140130
+# number=10000 length=512 file=../data/dna.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 3.01
+# Extract_time/Num_chars_extracted = 0.0006
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0006
+
+# TC_ID = PROTEINS
+# IDX_ID = FM_HUFF_RRR31_7
+# test_case = proteins.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/PROTEINS.FM_HUFF_RRR31_7.16x16
+# Load_index_time_in_sec = 0.10
+# text_size = 209715200
+# Index_size_in_bytes = 208230038
+# number=10000 length=512 file=../data/proteins.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 6.26
+# Extract_time/Num_chars_extracted = 0.0012
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0012
+
+# TC_ID = SOURCES
+# IDX_ID = FM_HUFF_RRR31_7
+# test_case = sources.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/SOURCES.FM_HUFF_RRR31_7.16x16
+# Load_index_time_in_sec = 0.08
+# text_size = 209715200
+# Index_size_in_bytes = 160604770
+# number=10000 length=512 file=../data/sources.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 5.53
+# Extract_time/Num_chars_extracted = 0.0011
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0011
+
+# TC_ID = ENGLISH
+# IDX_ID = FM_HUFF_RRR31_15
+# test_case = english.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/ENGLISH.FM_HUFF_RRR31_15.16x16
+# Load_index_time_in_sec = 0.08
+# text_size = 209715200
+# Index_size_in_bytes = 161792646
+# number=10000 length=512 file=../data/english.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 5.93
+# Extract_time/Num_chars_extracted = 0.0012
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0012
+
+# TC_ID = DNA
+# IDX_ID = FM_HUFF_RRR31_15
+# test_case = dna.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/DNA.FM_HUFF_RRR31_15.16x16
+# Load_index_time_in_sec = 0.07
+# text_size = 209715200
+# Index_size_in_bytes = 152866138
+# number=10000 length=512 file=../data/dna.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 3.13
+# Extract_time/Num_chars_extracted = 0.0006
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0006
+
+# TC_ID = PROTEINS
+# IDX_ID = FM_HUFF_RRR31_15
+# test_case = proteins.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/PROTEINS.FM_HUFF_RRR31_15.16x16
+# Load_index_time_in_sec = 0.10
+# text_size = 209715200
+# Index_size_in_bytes = 206964686
+# number=10000 length=512 file=../data/proteins.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 6.60
+# Extract_time/Num_chars_extracted = 0.0013
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0013
+
+# TC_ID = SOURCES
+# IDX_ID = FM_HUFF_RRR31_15
+# test_case = sources.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/SOURCES.FM_HUFF_RRR31_15.16x16
+# Load_index_time_in_sec = 0.08
+# text_size = 209715200
+# Index_size_in_bytes = 159215170
+# number=10000 length=512 file=../data/sources.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 5.51
+# Extract_time/Num_chars_extracted = 0.0011
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0011
+
+# TC_ID = ENGLISH
+# IDX_ID = FM_HUFF_RRR63_7
+# test_case = english.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/ENGLISH.FM_HUFF_RRR63_7.16x16
+# Load_index_time_in_sec = 0.08
+# text_size = 209715200
+# Index_size_in_bytes = 165082550
+# number=10000 length=512 file=../data/english.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 5.83
+# Extract_time/Num_chars_extracted = 0.0011
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0012
+
+# TC_ID = DNA
+# IDX_ID = FM_HUFF_RRR63_7
+# test_case = dna.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/DNA.FM_HUFF_RRR63_7.16x16
+# Load_index_time_in_sec = 0.07
+# text_size = 209715200
+# Index_size_in_bytes = 150226666
+# number=10000 length=512 file=../data/dna.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 2.78
+# Extract_time/Num_chars_extracted = 0.0005
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0006
+
+# TC_ID = PROTEINS
+# IDX_ID = FM_HUFF_RRR63_7
+# test_case = proteins.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/PROTEINS.FM_HUFF_RRR63_7.16x16
+# Load_index_time_in_sec = 0.10
+# text_size = 209715200
+# Index_size_in_bytes = 203926502
+# number=10000 length=512 file=../data/proteins.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 5.91
+# Extract_time/Num_chars_extracted = 0.0012
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0012
+
+# TC_ID = SOURCES
+# IDX_ID = FM_HUFF_RRR63_7
+# test_case = sources.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/SOURCES.FM_HUFF_RRR63_7.16x16
+# Load_index_time_in_sec = 0.07
+# text_size = 209715200
+# Index_size_in_bytes = 159934898
+# number=10000 length=512 file=../data/sources.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 5.47
+# Extract_time/Num_chars_extracted = 0.0011
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0011
+
+# TC_ID = ENGLISH
+# IDX_ID = FM_HUFF_RRR63_15
+# test_case = english.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/ENGLISH.FM_HUFF_RRR63_15.16x16
+# Load_index_time_in_sec = 0.07
+# text_size = 209715200
+# Index_size_in_bytes = 159472134
+# number=10000 length=512 file=../data/english.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 5.92
+# Extract_time/Num_chars_extracted = 0.0012
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0012
+
+# TC_ID = DNA
+# IDX_ID = FM_HUFF_RRR63_15
+# test_case = dna.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/DNA.FM_HUFF_RRR63_15.16x16
+# Load_index_time_in_sec = 0.07
+# text_size = 209715200
+# Index_size_in_bytes = 149949058
+# number=10000 length=512 file=../data/dna.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 2.84
+# Extract_time/Num_chars_extracted = 0.0006
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0006
+
+# TC_ID = PROTEINS
+# IDX_ID = FM_HUFF_RRR63_15
+# test_case = proteins.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/PROTEINS.FM_HUFF_RRR63_15.16x16
+# Load_index_time_in_sec = 0.10
+# text_size = 209715200
+# Index_size_in_bytes = 204258462
+# number=10000 length=512 file=../data/proteins.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 5.93
+# Extract_time/Num_chars_extracted = 0.0012
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0012
+
+# TC_ID = SOURCES
+# IDX_ID = FM_HUFF_RRR63_15
+# test_case = sources.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/SOURCES.FM_HUFF_RRR63_15.16x16
+# Load_index_time_in_sec = 0.07
+# text_size = 209715200
+# Index_size_in_bytes = 155652066
+# number=10000 length=512 file=../data/sources.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 5.58
+# Extract_time/Num_chars_extracted = 0.0011
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0011
+
+# TC_ID = ENGLISH
+# IDX_ID = FM_HUFF_RRR63_31
+# test_case = english.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/ENGLISH.FM_HUFF_RRR63_31.16x16
+# Load_index_time_in_sec = 0.07
+# text_size = 209715200
+# Index_size_in_bytes = 155308662
+# number=10000 length=512 file=../data/english.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 6.66
+# Extract_time/Num_chars_extracted = 0.0013
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0013
+
+# TC_ID = DNA
+# IDX_ID = FM_HUFF_RRR63_31
+# test_case = dna.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/DNA.FM_HUFF_RRR63_31.16x16
+# Load_index_time_in_sec = 0.07
+# text_size = 209715200
+# Index_size_in_bytes = 149202034
+# number=10000 length=512 file=../data/dna.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 3.21
+# Extract_time/Num_chars_extracted = 0.0006
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0006
+
+# TC_ID = PROTEINS
+# IDX_ID = FM_HUFF_RRR63_31
+# test_case = proteins.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/PROTEINS.FM_HUFF_RRR63_31.16x16
+# Load_index_time_in_sec = 0.10
+# text_size = 209715200
+# Index_size_in_bytes = 202897006
+# number=10000 length=512 file=../data/proteins.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 6.78
+# Extract_time/Num_chars_extracted = 0.0013
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0013
+
+# TC_ID = SOURCES
+# IDX_ID = FM_HUFF_RRR63_31
+# test_case = sources.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/SOURCES.FM_HUFF_RRR63_31.16x16
+# Load_index_time_in_sec = 0.07
+# text_size = 209715200
+# Index_size_in_bytes = 152499914
+# number=10000 length=512 file=../data/sources.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 6.29
+# Extract_time/Num_chars_extracted = 0.0012
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0012
+
+# TC_ID = ENGLISH
+# IDX_ID = FM_HUFF_RRR127_7
+# test_case = english.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/ENGLISH.FM_HUFF_RRR127_7.16x16
+# Load_index_time_in_sec = 0.08
+# text_size = 209715200
+# Index_size_in_bytes = 168895678
+# number=10000 length=512 file=../data/english.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 6.93
+# Extract_time/Num_chars_extracted = 0.0014
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0014
+
+# TC_ID = DNA
+# IDX_ID = FM_HUFF_RRR127_7
+# test_case = dna.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/DNA.FM_HUFF_RRR127_7.16x16
+# Load_index_time_in_sec = 0.07
+# text_size = 209715200
+# Index_size_in_bytes = 149242370
+# number=10000 length=512 file=../data/dna.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 3.32
+# Extract_time/Num_chars_extracted = 0.0006
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0007
+
+# TC_ID = PROTEINS
+# IDX_ID = FM_HUFF_RRR127_7
+# test_case = proteins.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/PROTEINS.FM_HUFF_RRR127_7.16x16
+# Load_index_time_in_sec = 0.10
+# text_size = 209715200
+# Index_size_in_bytes = 202436694
+# number=10000 length=512 file=../data/proteins.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 7.15
+# Extract_time/Num_chars_extracted = 0.0014
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0014
+
+# TC_ID = SOURCES
+# IDX_ID = FM_HUFF_RRR127_7
+# test_case = sources.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/SOURCES.FM_HUFF_RRR127_7.16x16
+# Load_index_time_in_sec = 0.08
+# text_size = 209715200
+# Index_size_in_bytes = 164896666
+# number=10000 length=512 file=../data/sources.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 6.52
+# Extract_time/Num_chars_extracted = 0.0013
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0013
+
+# TC_ID = ENGLISH
+# IDX_ID = FM_HUFF_RRR127_15
+# test_case = english.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/ENGLISH.FM_HUFF_RRR127_15.16x16
+# Load_index_time_in_sec = 0.08
+# text_size = 209715200
+# Index_size_in_bytes = 162942118
+# number=10000 length=512 file=../data/english.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 7.09
+# Extract_time/Num_chars_extracted = 0.0014
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0014
+
+# TC_ID = DNA
+# IDX_ID = FM_HUFF_RRR127_15
+# test_case = dna.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/DNA.FM_HUFF_RRR127_15.16x16
+# Load_index_time_in_sec = 0.07
+# text_size = 209715200
+# Index_size_in_bytes = 148768810
+# number=10000 length=512 file=../data/dna.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 3.41
+# Extract_time/Num_chars_extracted = 0.0007
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0007
+
+# TC_ID = PROTEINS
+# IDX_ID = FM_HUFF_RRR127_15
+# test_case = proteins.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/PROTEINS.FM_HUFF_RRR127_15.16x16
+# Load_index_time_in_sec = 0.10
+# text_size = 209715200
+# Index_size_in_bytes = 202536990
+# number=10000 length=512 file=../data/proteins.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 7.15
+# Extract_time/Num_chars_extracted = 0.0014
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0014
+
+# TC_ID = SOURCES
+# IDX_ID = FM_HUFF_RRR127_15
+# test_case = sources.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/SOURCES.FM_HUFF_RRR127_15.16x16
+# Load_index_time_in_sec = 0.08
+# text_size = 209715200
+# Index_size_in_bytes = 159501298
+# number=10000 length=512 file=../data/sources.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 6.71
+# Extract_time/Num_chars_extracted = 0.0013
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0013
+
+# TC_ID = ENGLISH
+# IDX_ID = FM_HUFF_RRR127_31
+# test_case = english.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/ENGLISH.FM_HUFF_RRR127_31.16x16
+# Load_index_time_in_sec = 0.08
+# text_size = 209715200
+# Index_size_in_bytes = 156929454
+# number=10000 length=512 file=../data/english.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 7.88
+# Extract_time/Num_chars_extracted = 0.0015
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0016
+
+# TC_ID = DNA
+# IDX_ID = FM_HUFF_RRR127_31
+# test_case = dna.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/DNA.FM_HUFF_RRR127_31.16x16
+# Load_index_time_in_sec = 0.07
+# text_size = 209715200
+# Index_size_in_bytes = 148192058
+# number=10000 length=512 file=../data/dna.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 3.64
+# Extract_time/Num_chars_extracted = 0.0007
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0007
+
+# TC_ID = PROTEINS
+# IDX_ID = FM_HUFF_RRR127_31
+# test_case = proteins.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/PROTEINS.FM_HUFF_RRR127_31.16x16
+# Load_index_time_in_sec = 0.10
+# text_size = 209715200
+# Index_size_in_bytes = 202336414
+# number=10000 length=512 file=../data/proteins.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 7.57
+# Extract_time/Num_chars_extracted = 0.0015
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0015
+
+# TC_ID = SOURCES
+# IDX_ID = FM_HUFF_RRR127_31
+# test_case = sources.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/SOURCES.FM_HUFF_RRR127_31.16x16
+# Load_index_time_in_sec = 0.07
+# text_size = 209715200
+# Index_size_in_bytes = 154392666
+# number=10000 length=512 file=../data/sources.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 7.40
+# Extract_time/Num_chars_extracted = 0.0014
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0015
+
+# TC_ID = ENGLISH
+# IDX_ID = FM_HUFF_RRR127_63
+# test_case = english.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/ENGLISH.FM_HUFF_RRR127_63.16x16
+# Load_index_time_in_sec = 0.07
+# text_size = 209715200
+# Index_size_in_bytes = 152334750
+# number=10000 length=512 file=../data/english.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 8.77
+# Extract_time/Num_chars_extracted = 0.0017
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0017
+
+# TC_ID = DNA
+# IDX_ID = FM_HUFF_RRR127_63
+# test_case = dna.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/DNA.FM_HUFF_RRR127_63.16x16
+# Load_index_time_in_sec = 0.07
+# text_size = 209715200
+# Index_size_in_bytes = 147206034
+# number=10000 length=512 file=../data/dna.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 4.00
+# Extract_time/Num_chars_extracted = 0.0008
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0008
+
+# TC_ID = PROTEINS
+# IDX_ID = FM_HUFF_RRR127_63
+# test_case = proteins.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/PROTEINS.FM_HUFF_RRR127_63.16x16
+# Load_index_time_in_sec = 0.10
+# text_size = 209715200
+# Index_size_in_bytes = 201040846
+# number=10000 length=512 file=../data/proteins.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 8.21
+# Extract_time/Num_chars_extracted = 0.0016
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0016
+
+# TC_ID = SOURCES
+# IDX_ID = FM_HUFF_RRR127_63
+# test_case = sources.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/SOURCES.FM_HUFF_RRR127_63.16x16
+# Load_index_time_in_sec = 0.07
+# text_size = 209715200
+# Index_size_in_bytes = 150241474
+# number=10000 length=512 file=../data/sources.200MB
+# Total_num_chars_extracted = 5120000
+# Extract_time_in_sec = 8.26
+# Extract_time/Num_chars_extracted = 0.0016
+
+(Load_time+Extract_time)/Num_chars_extracted = 0.0016
+

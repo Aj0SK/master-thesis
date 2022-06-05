@@ -1,0 +1,1440 @@
+# TC_ID = ENGLISH
+# IDX_ID = CSA_SADA
+# test_case = english.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/ENGLISH.CSA_SADA.16x16
+# Load_index_time_in_sec = 0.08
+# text_size = 209715200
+# Index_size_in_bytes = 188070163
+# pat_cnt = 80
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 80
+# Total_Num_occs_found = 2013378
+# Locate_time_in_secs = 3.34
+# Locate_time/Num_occs = 0.0017
+
+# (Load_time+Locate_time)/Num_occs = 0.0017
+
+# TC_ID = ENGLISH
+# IDX_ID = CSA_SADA
+# test_case = english.200MB
+# SAMPLE_ID = 32x32
+# S_SA = 32
+# S_ISA = 32
+Load from file indexes/ENGLISH.CSA_SADA.32x32
+# Load_index_time_in_sec = 0.06
+# text_size = 209715200
+# Index_size_in_bytes = 139889315
+# pat_cnt = 80
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 80
+# Total_Num_occs_found = 2013378
+# Locate_time_in_secs = 8.20
+# Locate_time/Num_occs = 0.0041
+
+# (Load_time+Locate_time)/Num_occs = 0.0041
+
+# TC_ID = ENGLISH
+# IDX_ID = CSA_SADA
+# test_case = english.200MB
+# SAMPLE_ID = 64x64
+# S_SA = 64
+# S_ISA = 64
+Load from file indexes/ENGLISH.CSA_SADA.64x64
+# Load_index_time_in_sec = 0.05
+# text_size = 209715200
+# Index_size_in_bytes = 115798811
+# pat_cnt = 80
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 80
+# Total_Num_occs_found = 2013378
+# Locate_time_in_secs = 18.15
+# Locate_time/Num_occs = 0.0090
+
+# (Load_time+Locate_time)/Num_occs = 0.0090
+
+# TC_ID = DNA
+# IDX_ID = CSA_SADA
+# test_case = dna.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/DNA.CSA_SADA.16x16
+# Load_index_time_in_sec = 0.09
+# text_size = 209715200
+# Index_size_in_bytes = 201734355
+# pat_cnt = 8
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 8
+# Total_Num_occs_found = 2028690
+# Locate_time_in_secs = 4.32
+# Locate_time/Num_occs = 0.0021
+
+# (Load_time+Locate_time)/Num_occs = 0.0022
+
+# TC_ID = DNA
+# IDX_ID = CSA_SADA
+# test_case = dna.200MB
+# SAMPLE_ID = 32x32
+# S_SA = 32
+# S_ISA = 32
+Load from file indexes/DNA.CSA_SADA.32x32
+# Load_index_time_in_sec = 0.07
+# text_size = 209715200
+# Index_size_in_bytes = 153553067
+# pat_cnt = 8
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 8
+# Total_Num_occs_found = 2028690
+# Locate_time_in_secs = 9.64
+# Locate_time/Num_occs = 0.0048
+
+# (Load_time+Locate_time)/Num_occs = 0.0048
+
+# TC_ID = DNA
+# IDX_ID = CSA_SADA
+# test_case = dna.200MB
+# SAMPLE_ID = 64x64
+# S_SA = 64
+# S_ISA = 64
+Load from file indexes/DNA.CSA_SADA.64x64
+# Load_index_time_in_sec = 0.06
+# text_size = 209715200
+# Index_size_in_bytes = 129462779
+# pat_cnt = 8
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 8
+# Total_Num_occs_found = 2028690
+# Locate_time_in_secs = 20.19
+# Locate_time/Num_occs = 0.0100
+
+# (Load_time+Locate_time)/Num_occs = 0.0100
+
+# TC_ID = PROTEINS
+# IDX_ID = CSA_SADA
+# test_case = proteins.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/PROTEINS.CSA_SADA.16x16
+# Load_index_time_in_sec = 0.11
+# text_size = 209715200
+# Index_size_in_bytes = 233305611
+# pat_cnt = 3389
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 3389
+# Total_Num_occs_found = 2000237
+# Locate_time_in_secs = 3.03
+# Locate_time/Num_occs = 0.0015
+
+# (Load_time+Locate_time)/Num_occs = 0.0016
+
+# TC_ID = PROTEINS
+# IDX_ID = CSA_SADA
+# test_case = proteins.200MB
+# SAMPLE_ID = 32x32
+# S_SA = 32
+# S_ISA = 32
+Load from file indexes/PROTEINS.CSA_SADA.32x32
+# Load_index_time_in_sec = 0.09
+# text_size = 209715200
+# Index_size_in_bytes = 185124979
+# pat_cnt = 3389
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 3389
+# Total_Num_occs_found = 2000237
+# Locate_time_in_secs = 6.29
+# Locate_time/Num_occs = 0.0031
+
+# (Load_time+Locate_time)/Num_occs = 0.0032
+
+# TC_ID = PROTEINS
+# IDX_ID = CSA_SADA
+# test_case = proteins.200MB
+# SAMPLE_ID = 64x64
+# S_SA = 64
+# S_ISA = 64
+Load from file indexes/PROTEINS.CSA_SADA.64x64
+# Load_index_time_in_sec = 0.07
+# text_size = 209715200
+# Index_size_in_bytes = 161034259
+# pat_cnt = 3389
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 3389
+# Total_Num_occs_found = 2000237
+# Locate_time_in_secs = 12.85
+# Locate_time/Num_occs = 0.0064
+
+# (Load_time+Locate_time)/Num_occs = 0.0065
+
+# TC_ID = SOURCES
+# IDX_ID = CSA_SADA
+# test_case = sources.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/SOURCES.CSA_SADA.16x16
+# Load_index_time_in_sec = 0.08
+# text_size = 209715200
+# Index_size_in_bytes = 173319059
+# pat_cnt = 27
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 27
+# Total_Num_occs_found = 4701681
+# Locate_time_in_secs = 5.55
+# Locate_time/Num_occs = 0.0012
+
+# (Load_time+Locate_time)/Num_occs = 0.0012
+
+# TC_ID = SOURCES
+# IDX_ID = CSA_SADA
+# test_case = sources.200MB
+# SAMPLE_ID = 32x32
+# S_SA = 32
+# S_ISA = 32
+Load from file indexes/SOURCES.CSA_SADA.32x32
+# Load_index_time_in_sec = 0.06
+# text_size = 209715200
+# Index_size_in_bytes = 125138371
+# pat_cnt = 27
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 27
+# Total_Num_occs_found = 4701681
+# Locate_time_in_secs = 13.23
+# Locate_time/Num_occs = 0.0028
+
+# (Load_time+Locate_time)/Num_occs = 0.0028
+
+# TC_ID = SOURCES
+# IDX_ID = CSA_SADA
+# test_case = sources.200MB
+# SAMPLE_ID = 64x64
+# S_SA = 64
+# S_ISA = 64
+Load from file indexes/SOURCES.CSA_SADA.64x64
+# Load_index_time_in_sec = 0.05
+# text_size = 209715200
+# Index_size_in_bytes = 101047971
+# pat_cnt = 27
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 27
+# Total_Num_occs_found = 4701681
+# Locate_time_in_secs = 30.16
+# Locate_time/Num_occs = 0.0064
+
+# (Load_time+Locate_time)/Num_occs = 0.0064
+
+# TC_ID = ENGLISH
+# IDX_ID = FM_HUFF
+# test_case = english.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/ENGLISH.FM_HUFF.16x16
+# Load_index_time_in_sec = 0.11
+# text_size = 209715200
+# Index_size_in_bytes = 223399307
+# pat_cnt = 80
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 80
+# Total_Num_occs_found = 2013378
+# Locate_time_in_secs = 4.57
+# Locate_time/Num_occs = 0.0023
+
+# (Load_time+Locate_time)/Num_occs = 0.0023
+
+# TC_ID = ENGLISH
+# IDX_ID = FM_HUFF
+# test_case = english.200MB
+# SAMPLE_ID = 32x32
+# S_SA = 32
+# S_ISA = 32
+Load from file indexes/ENGLISH.FM_HUFF.32x32
+# Load_index_time_in_sec = 0.08
+# text_size = 209715200
+# Index_size_in_bytes = 175218459
+# pat_cnt = 80
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 80
+# Total_Num_occs_found = 2013378
+# Locate_time_in_secs = 11.53
+# Locate_time/Num_occs = 0.0057
+
+# (Load_time+Locate_time)/Num_occs = 0.0058
+
+# TC_ID = ENGLISH
+# IDX_ID = FM_HUFF
+# test_case = english.200MB
+# SAMPLE_ID = 64x64
+# S_SA = 64
+# S_ISA = 64
+Load from file indexes/ENGLISH.FM_HUFF.64x64
+# Load_index_time_in_sec = 0.07
+# text_size = 209715200
+# Index_size_in_bytes = 151127955
+# pat_cnt = 80
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 80
+# Total_Num_occs_found = 2013378
+# Locate_time_in_secs = 25.58
+# Locate_time/Num_occs = 0.0127
+
+# (Load_time+Locate_time)/Num_occs = 0.0127
+
+# TC_ID = DNA
+# IDX_ID = FM_HUFF
+# test_case = dna.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/DNA.FM_HUFF.16x16
+# Load_index_time_in_sec = 0.07
+# text_size = 209715200
+# Index_size_in_bytes = 157726559
+# pat_cnt = 8
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 8
+# Total_Num_occs_found = 2028690
+# Locate_time_in_secs = 3.25
+# Locate_time/Num_occs = 0.0016
+
+# (Load_time+Locate_time)/Num_occs = 0.0016
+
+# TC_ID = DNA
+# IDX_ID = FM_HUFF
+# test_case = dna.200MB
+# SAMPLE_ID = 32x32
+# S_SA = 32
+# S_ISA = 32
+Load from file indexes/DNA.FM_HUFF.32x32
+# Load_index_time_in_sec = 0.05
+# text_size = 209715200
+# Index_size_in_bytes = 109545271
+# pat_cnt = 8
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 8
+# Total_Num_occs_found = 2028690
+# Locate_time_in_secs = 7.55
+# Locate_time/Num_occs = 0.0037
+
+# (Load_time+Locate_time)/Num_occs = 0.0037
+
+# TC_ID = DNA
+# IDX_ID = FM_HUFF
+# test_case = dna.200MB
+# SAMPLE_ID = 64x64
+# S_SA = 64
+# S_ISA = 64
+Load from file indexes/DNA.FM_HUFF.64x64
+# Load_index_time_in_sec = 0.04
+# text_size = 209715200
+# Index_size_in_bytes = 85454983
+# pat_cnt = 8
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 8
+# Total_Num_occs_found = 2028690
+# Locate_time_in_secs = 15.70
+# Locate_time/Num_occs = 0.0077
+
+# (Load_time+Locate_time)/Num_occs = 0.0078
+
+# TC_ID = PROTEINS
+# IDX_ID = FM_HUFF
+# test_case = proteins.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/PROTEINS.FM_HUFF.16x16
+# Load_index_time_in_sec = 0.10
+# text_size = 209715200
+# Index_size_in_bytes = 214341547
+# pat_cnt = 3389
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 3389
+# Total_Num_occs_found = 2000237
+# Locate_time_in_secs = 3.28
+# Locate_time/Num_occs = 0.0016
+
+# (Load_time+Locate_time)/Num_occs = 0.0017
+
+# TC_ID = PROTEINS
+# IDX_ID = FM_HUFF
+# test_case = proteins.200MB
+# SAMPLE_ID = 32x32
+# S_SA = 32
+# S_ISA = 32
+Load from file indexes/PROTEINS.FM_HUFF.32x32
+# Load_index_time_in_sec = 0.08
+# text_size = 209715200
+# Index_size_in_bytes = 166160915
+# pat_cnt = 3389
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 3389
+# Total_Num_occs_found = 2000237
+# Locate_time_in_secs = 6.67
+# Locate_time/Num_occs = 0.0033
+
+# (Load_time+Locate_time)/Num_occs = 0.0034
+
+# TC_ID = PROTEINS
+# IDX_ID = FM_HUFF
+# test_case = proteins.200MB
+# SAMPLE_ID = 64x64
+# S_SA = 64
+# S_ISA = 64
+Load from file indexes/PROTEINS.FM_HUFF.64x64
+# Load_index_time_in_sec = 0.06
+# text_size = 209715200
+# Index_size_in_bytes = 142070195
+# pat_cnt = 3389
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 3389
+# Total_Num_occs_found = 2000237
+# Locate_time_in_secs = 13.61
+# Locate_time/Num_occs = 0.0068
+
+# (Load_time+Locate_time)/Num_occs = 0.0068
+
+# TC_ID = SOURCES
+# IDX_ID = FM_HUFF
+# test_case = sources.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/SOURCES.FM_HUFF.16x16
+# Load_index_time_in_sec = 0.11
+# text_size = 209715200
+# Index_size_in_bytes = 249239191
+# pat_cnt = 27
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 27
+# Total_Num_occs_found = 4701681
+# Locate_time_in_secs = 9.10
+# Locate_time/Num_occs = 0.0019
+
+# (Load_time+Locate_time)/Num_occs = 0.0020
+
+# TC_ID = SOURCES
+# IDX_ID = FM_HUFF
+# test_case = sources.200MB
+# SAMPLE_ID = 32x32
+# S_SA = 32
+# S_ISA = 32
+Load from file indexes/SOURCES.FM_HUFF.32x32
+# Load_index_time_in_sec = 0.10
+# text_size = 209715200
+# Index_size_in_bytes = 201058503
+# pat_cnt = 27
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 27
+# Total_Num_occs_found = 4701681
+# Locate_time_in_secs = 22.78
+# Locate_time/Num_occs = 0.0048
+
+# (Load_time+Locate_time)/Num_occs = 0.0049
+
+# TC_ID = SOURCES
+# IDX_ID = FM_HUFF
+# test_case = sources.200MB
+# SAMPLE_ID = 64x64
+# S_SA = 64
+# S_ISA = 64
+Load from file indexes/SOURCES.FM_HUFF.64x64
+# Load_index_time_in_sec = 0.08
+# text_size = 209715200
+# Index_size_in_bytes = 176968103
+# pat_cnt = 27
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 27
+# Total_Num_occs_found = 4701681
+# Locate_time_in_secs = 49.61
+# Locate_time/Num_occs = 0.0106
+
+# (Load_time+Locate_time)/Num_occs = 0.0106
+
+# TC_ID = ENGLISH
+# IDX_ID = FM_HUFF_RRR15
+# test_case = english.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/ENGLISH.FM_HUFF_RRR15.16x16
+# Load_index_time_in_sec = 0.08
+# text_size = 209715200
+# Index_size_in_bytes = 175376382
+# pat_cnt = 80
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 80
+# Total_Num_occs_found = 2013378
+# Locate_time_in_secs = 7.66
+# Locate_time/Num_occs = 0.0038
+
+# (Load_time+Locate_time)/Num_occs = 0.0038
+
+# TC_ID = ENGLISH
+# IDX_ID = FM_HUFF_RRR15
+# test_case = english.200MB
+# SAMPLE_ID = 32x32
+# S_SA = 32
+# S_ISA = 32
+Load from file indexes/ENGLISH.FM_HUFF_RRR15.32x32
+# Load_index_time_in_sec = 0.06
+# text_size = 209715200
+# Index_size_in_bytes = 127195534
+# pat_cnt = 80
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 80
+# Total_Num_occs_found = 2013378
+# Locate_time_in_secs = 19.17
+# Locate_time/Num_occs = 0.0095
+
+# (Load_time+Locate_time)/Num_occs = 0.0096
+
+# TC_ID = ENGLISH
+# IDX_ID = FM_HUFF_RRR15
+# test_case = english.200MB
+# SAMPLE_ID = 64x64
+# S_SA = 64
+# S_ISA = 64
+Load from file indexes/ENGLISH.FM_HUFF_RRR15.64x64
+# Load_index_time_in_sec = 0.05
+# text_size = 209715200
+# Index_size_in_bytes = 103105030
+# pat_cnt = 80
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 80
+# Total_Num_occs_found = 2013378
+# Locate_time_in_secs = 42.43
+# Locate_time/Num_occs = 0.0211
+
+# (Load_time+Locate_time)/Num_occs = 0.0211
+
+# TC_ID = DNA
+# IDX_ID = FM_HUFF_RRR15
+# test_case = dna.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/DNA.FM_HUFF_RRR15.16x16
+# Load_index_time_in_sec = 0.07
+# text_size = 209715200
+# Index_size_in_bytes = 155133914
+# pat_cnt = 8
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 8
+# Total_Num_occs_found = 2028690
+# Locate_time_in_secs = 5.66
+# Locate_time/Num_occs = 0.0028
+
+# (Load_time+Locate_time)/Num_occs = 0.0028
+
+# TC_ID = DNA
+# IDX_ID = FM_HUFF_RRR15
+# test_case = dna.200MB
+# SAMPLE_ID = 32x32
+# S_SA = 32
+# S_ISA = 32
+Load from file indexes/DNA.FM_HUFF_RRR15.32x32
+# Load_index_time_in_sec = 0.05
+# text_size = 209715200
+# Index_size_in_bytes = 106952626
+# pat_cnt = 8
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 8
+# Total_Num_occs_found = 2028690
+# Locate_time_in_secs = 13.57
+# Locate_time/Num_occs = 0.0067
+
+# (Load_time+Locate_time)/Num_occs = 0.0067
+
+# TC_ID = DNA
+# IDX_ID = FM_HUFF_RRR15
+# test_case = dna.200MB
+# SAMPLE_ID = 64x64
+# S_SA = 64
+# S_ISA = 64
+Load from file indexes/DNA.FM_HUFF_RRR15.64x64
+# Load_index_time_in_sec = 0.04
+# text_size = 209715200
+# Index_size_in_bytes = 82862338
+# pat_cnt = 8
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 8
+# Total_Num_occs_found = 2028690
+# Locate_time_in_secs = 29.08
+# Locate_time/Num_occs = 0.0143
+
+# (Load_time+Locate_time)/Num_occs = 0.0144
+
+# TC_ID = PROTEINS
+# IDX_ID = FM_HUFF_RRR15
+# test_case = proteins.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/PROTEINS.FM_HUFF_RRR15.16x16
+# Load_index_time_in_sec = 0.09
+# text_size = 209715200
+# Index_size_in_bytes = 207347126
+# pat_cnt = 3389
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 3389
+# Total_Num_occs_found = 2000237
+# Locate_time_in_secs = 5.76
+# Locate_time/Num_occs = 0.0029
+
+# (Load_time+Locate_time)/Num_occs = 0.0029
+
+# TC_ID = PROTEINS
+# IDX_ID = FM_HUFF_RRR15
+# test_case = proteins.200MB
+# SAMPLE_ID = 32x32
+# S_SA = 32
+# S_ISA = 32
+Load from file indexes/PROTEINS.FM_HUFF_RRR15.32x32
+# Load_index_time_in_sec = 0.07
+# text_size = 209715200
+# Index_size_in_bytes = 159166494
+# pat_cnt = 3389
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 3389
+# Total_Num_occs_found = 2000237
+# Locate_time_in_secs = 12.20
+# Locate_time/Num_occs = 0.0061
+
+# (Load_time+Locate_time)/Num_occs = 0.0061
+
+# TC_ID = PROTEINS
+# IDX_ID = FM_HUFF_RRR15
+# test_case = proteins.200MB
+# SAMPLE_ID = 64x64
+# S_SA = 64
+# S_ISA = 64
+Load from file indexes/PROTEINS.FM_HUFF_RRR15.64x64
+# Load_index_time_in_sec = 0.06
+# text_size = 209715200
+# Index_size_in_bytes = 135075774
+# pat_cnt = 3389
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 3389
+# Total_Num_occs_found = 2000237
+# Locate_time_in_secs = 25.72
+# Locate_time/Num_occs = 0.0129
+
+# (Load_time+Locate_time)/Num_occs = 0.0129
+
+# TC_ID = SOURCES
+# IDX_ID = FM_HUFF_RRR15
+# test_case = sources.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/SOURCES.FM_HUFF_RRR15.16x16
+# Load_index_time_in_sec = 0.08
+# text_size = 209715200
+# Index_size_in_bytes = 177698538
+# pat_cnt = 27
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 27
+# Total_Num_occs_found = 4701681
+# Locate_time_in_secs = 15.09
+# Locate_time/Num_occs = 0.0032
+
+# (Load_time+Locate_time)/Num_occs = 0.0032
+
+# TC_ID = SOURCES
+# IDX_ID = FM_HUFF_RRR15
+# test_case = sources.200MB
+# SAMPLE_ID = 32x32
+# S_SA = 32
+# S_ISA = 32
+Load from file indexes/SOURCES.FM_HUFF_RRR15.32x32
+# Load_index_time_in_sec = 0.06
+# text_size = 209715200
+# Index_size_in_bytes = 129517850
+# pat_cnt = 27
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 27
+# Total_Num_occs_found = 4701681
+# Locate_time_in_secs = 36.75
+# Locate_time/Num_occs = 0.0078
+
+# (Load_time+Locate_time)/Num_occs = 0.0078
+
+# TC_ID = SOURCES
+# IDX_ID = FM_HUFF_RRR15
+# test_case = sources.200MB
+# SAMPLE_ID = 64x64
+# S_SA = 64
+# S_ISA = 64
+Load from file indexes/SOURCES.FM_HUFF_RRR15.64x64
+# Load_index_time_in_sec = 0.05
+# text_size = 209715200
+# Index_size_in_bytes = 105427450
+# pat_cnt = 27
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 27
+# Total_Num_occs_found = 4701681
+# Locate_time_in_secs = 79.13
+# Locate_time/Num_occs = 0.0168
+
+# (Load_time+Locate_time)/Num_occs = 0.0168
+
+# TC_ID = ENGLISH
+# IDX_ID = FM_HUFF_RRR31
+# test_case = english.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/ENGLISH.FM_HUFF_RRR31.16x16
+# Load_index_time_in_sec = 0.08
+# text_size = 209715200
+# Index_size_in_bytes = 161305190
+# pat_cnt = 80
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 80
+# Total_Num_occs_found = 2013378
+# Locate_time_in_secs = 14.59
+# Locate_time/Num_occs = 0.0072
+
+# (Load_time+Locate_time)/Num_occs = 0.0073
+
+# TC_ID = ENGLISH
+# IDX_ID = FM_HUFF_RRR31
+# test_case = english.200MB
+# SAMPLE_ID = 32x32
+# S_SA = 32
+# S_ISA = 32
+Load from file indexes/ENGLISH.FM_HUFF_RRR31.32x32
+# Load_index_time_in_sec = 0.05
+# text_size = 209715200
+# Index_size_in_bytes = 113124342
+# pat_cnt = 80
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 80
+# Total_Num_occs_found = 2013378
+# Locate_time_in_secs = 34.25
+# Locate_time/Num_occs = 0.0170
+
+# (Load_time+Locate_time)/Num_occs = 0.0170
+
+# TC_ID = ENGLISH
+# IDX_ID = FM_HUFF_RRR31
+# test_case = english.200MB
+# SAMPLE_ID = 64x64
+# S_SA = 64
+# S_ISA = 64
+Load from file indexes/ENGLISH.FM_HUFF_RRR31.64x64
+# Load_index_time_in_sec = 0.04
+# text_size = 209715200
+# Index_size_in_bytes = 89033838
+# pat_cnt = 80
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 64
+# Total_Num_occs_found = 1645318
+# Locate_time_in_secs = 60.10
+# Locate_time/Num_occs = 0.0365
+
+# (Load_time+Locate_time)/Num_occs = 0.0366
+
+# TC_ID = DNA
+# IDX_ID = FM_HUFF_RRR31
+# test_case = dna.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/DNA.FM_HUFF_RRR31.16x16
+# Load_index_time_in_sec = 0.07
+# text_size = 209715200
+# Index_size_in_bytes = 149357986
+# pat_cnt = 8
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 8
+# Total_Num_occs_found = 2028690
+# Locate_time_in_secs = 11.43
+# Locate_time/Num_occs = 0.0056
+
+# (Load_time+Locate_time)/Num_occs = 0.0057
+
+# TC_ID = DNA
+# IDX_ID = FM_HUFF_RRR31
+# test_case = dna.200MB
+# SAMPLE_ID = 32x32
+# S_SA = 32
+# S_ISA = 32
+Load from file indexes/DNA.FM_HUFF_RRR31.32x32
+# Load_index_time_in_sec = 0.05
+# text_size = 209715200
+# Index_size_in_bytes = 101176698
+# pat_cnt = 8
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 8
+# Total_Num_occs_found = 2028690
+# Locate_time_in_secs = 25.81
+# Locate_time/Num_occs = 0.0127
+
+# (Load_time+Locate_time)/Num_occs = 0.0127
+
+# TC_ID = DNA
+# IDX_ID = FM_HUFF_RRR31
+# test_case = dna.200MB
+# SAMPLE_ID = 64x64
+# S_SA = 64
+# S_ISA = 64
+Load from file indexes/DNA.FM_HUFF_RRR31.64x64
+# Load_index_time_in_sec = 0.04
+# text_size = 209715200
+# Index_size_in_bytes = 77086410
+# pat_cnt = 8
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 8
+# Total_Num_occs_found = 2028690
+# Locate_time_in_secs = 53.40
+# Locate_time/Num_occs = 0.0263
+
+# (Load_time+Locate_time)/Num_occs = 0.0263
+
+# TC_ID = PROTEINS
+# IDX_ID = FM_HUFF_RRR31
+# test_case = proteins.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/PROTEINS.FM_HUFF_RRR31.16x16
+# Load_index_time_in_sec = 0.09
+# text_size = 209715200
+# Index_size_in_bytes = 199941006
+# pat_cnt = 3389
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 3389
+# Total_Num_occs_found = 2000237
+# Locate_time_in_secs = 11.39
+# Locate_time/Num_occs = 0.0057
+
+# (Load_time+Locate_time)/Num_occs = 0.0057
+
+# TC_ID = PROTEINS
+# IDX_ID = FM_HUFF_RRR31
+# test_case = proteins.200MB
+# SAMPLE_ID = 32x32
+# S_SA = 32
+# S_ISA = 32
+Load from file indexes/PROTEINS.FM_HUFF_RRR31.32x32
+# Load_index_time_in_sec = 0.07
+# text_size = 209715200
+# Index_size_in_bytes = 151760374
+# pat_cnt = 3389
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 3389
+# Total_Num_occs_found = 2000237
+# Locate_time_in_secs = 24.07
+# Locate_time/Num_occs = 0.0120
+
+# (Load_time+Locate_time)/Num_occs = 0.0121
+
+# TC_ID = PROTEINS
+# IDX_ID = FM_HUFF_RRR31
+# test_case = proteins.200MB
+# SAMPLE_ID = 64x64
+# S_SA = 64
+# S_ISA = 64
+Load from file indexes/PROTEINS.FM_HUFF_RRR31.64x64
+# Load_index_time_in_sec = 0.06
+# text_size = 209715200
+# Index_size_in_bytes = 127669654
+# pat_cnt = 3389
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 3389
+# Total_Num_occs_found = 2000237
+# Locate_time_in_secs = 51.05
+# Locate_time/Num_occs = 0.0255
+
+# (Load_time+Locate_time)/Num_occs = 0.0256
+
+# TC_ID = SOURCES
+# IDX_ID = FM_HUFF_RRR31
+# test_case = sources.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/SOURCES.FM_HUFF_RRR31.16x16
+# Load_index_time_in_sec = 0.08
+# text_size = 209715200
+# Index_size_in_bytes = 160092978
+# pat_cnt = 27
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 27
+# Total_Num_occs_found = 4701681
+# Locate_time_in_secs = 29.58
+# Locate_time/Num_occs = 0.0063
+
+# (Load_time+Locate_time)/Num_occs = 0.0063
+
+# TC_ID = SOURCES
+# IDX_ID = FM_HUFF_RRR31
+# test_case = sources.200MB
+# SAMPLE_ID = 32x32
+# S_SA = 32
+# S_ISA = 32
+Load from file indexes/SOURCES.FM_HUFF_RRR31.32x32
+# Load_index_time_in_sec = 0.05
+# text_size = 209715200
+# Index_size_in_bytes = 111912290
+# pat_cnt = 27
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 27
+# Total_Num_occs_found = 4701681
+# Locate_time_in_secs = 67.86
+# Locate_time/Num_occs = 0.0144
+
+# (Load_time+Locate_time)/Num_occs = 0.0144
+
+# TC_ID = SOURCES
+# IDX_ID = FM_HUFF_RRR31
+# test_case = sources.200MB
+# SAMPLE_ID = 64x64
+# S_SA = 64
+# S_ISA = 64
+Load from file indexes/SOURCES.FM_HUFF_RRR31.64x64
+# Load_index_time_in_sec = 0.04
+# text_size = 209715200
+# Index_size_in_bytes = 87821890
+# pat_cnt = 27
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 27
+# Total_Num_occs_found = 4701681
+# Locate_time_in_secs = 141.79
+# Locate_time/Num_occs = 0.0302
+
+# (Load_time+Locate_time)/Num_occs = 0.0302
+
+# TC_ID = ENGLISH
+# IDX_ID = FM_HUFF_RRR63
+# test_case = english.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/ENGLISH.FM_HUFF_RRR63.16x16
+# Load_index_time_in_sec = 0.07
+# text_size = 209715200
+# Index_size_in_bytes = 153885206
+# pat_cnt = 80
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 80
+# Total_Num_occs_found = 2013378
+# Locate_time_in_secs = 18.16
+# Locate_time/Num_occs = 0.0090
+
+# (Load_time+Locate_time)/Num_occs = 0.0091
+
+# TC_ID = ENGLISH
+# IDX_ID = FM_HUFF_RRR63
+# test_case = english.200MB
+# SAMPLE_ID = 32x32
+# S_SA = 32
+# S_ISA = 32
+Load from file indexes/ENGLISH.FM_HUFF_RRR63.32x32
+# Load_index_time_in_sec = 0.05
+# text_size = 209715200
+# Index_size_in_bytes = 105704358
+# pat_cnt = 80
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 80
+# Total_Num_occs_found = 2013378
+# Locate_time_in_secs = 41.52
+# Locate_time/Num_occs = 0.0206
+
+# (Load_time+Locate_time)/Num_occs = 0.0206
+
+# TC_ID = ENGLISH
+# IDX_ID = FM_HUFF_RRR63
+# test_case = english.200MB
+# SAMPLE_ID = 64x64
+# S_SA = 64
+# S_ISA = 64
+Load from file indexes/ENGLISH.FM_HUFF_RRR63.64x64
+# Load_index_time_in_sec = 0.04
+# text_size = 209715200
+# Index_size_in_bytes = 81613854
+# pat_cnt = 80
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 51
+# Total_Num_occs_found = 1445937
+# Locate_time_in_secs = 62.60
+# Locate_time/Num_occs = 0.0433
+
+# (Load_time+Locate_time)/Num_occs = 0.0433
+
+# TC_ID = DNA
+# IDX_ID = FM_HUFF_RRR63
+# test_case = dna.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/DNA.FM_HUFF_RRR63.16x16
+# Load_index_time_in_sec = 0.07
+# text_size = 209715200
+# Index_size_in_bytes = 146176570
+# pat_cnt = 8
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 8
+# Total_Num_occs_found = 2028690
+# Locate_time_in_secs = 14.62
+# Locate_time/Num_occs = 0.0072
+
+# (Load_time+Locate_time)/Num_occs = 0.0072
+
+# TC_ID = DNA
+# IDX_ID = FM_HUFF_RRR63
+# test_case = dna.200MB
+# SAMPLE_ID = 32x32
+# S_SA = 32
+# S_ISA = 32
+Load from file indexes/DNA.FM_HUFF_RRR63.32x32
+# Load_index_time_in_sec = 0.05
+# text_size = 209715200
+# Index_size_in_bytes = 97995282
+# pat_cnt = 8
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 8
+# Total_Num_occs_found = 2028690
+# Locate_time_in_secs = 32.26
+# Locate_time/Num_occs = 0.0159
+
+# (Load_time+Locate_time)/Num_occs = 0.0159
+
+# TC_ID = DNA
+# IDX_ID = FM_HUFF_RRR63
+# test_case = dna.200MB
+# SAMPLE_ID = 64x64
+# S_SA = 64
+# S_ISA = 64
+Load from file indexes/DNA.FM_HUFF_RRR63.64x64
+# Load_index_time_in_sec = 0.04
+# text_size = 209715200
+# Index_size_in_bytes = 73904994
+# pat_cnt = 8
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 8
+# Total_Num_occs_found = 2028690
+# Locate_time_in_secs = 66.31
+# Locate_time/Num_occs = 0.0327
+
+# (Load_time+Locate_time)/Num_occs = 0.0327
+
+# TC_ID = PROTEINS
+# IDX_ID = FM_HUFF_RRR63
+# test_case = proteins.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/PROTEINS.FM_HUFF_RRR63.16x16
+# Load_index_time_in_sec = 0.09
+# text_size = 209715200
+# Index_size_in_bytes = 196709206
+# pat_cnt = 3389
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 3389
+# Total_Num_occs_found = 2000237
+# Locate_time_in_secs = 14.11
+# Locate_time/Num_occs = 0.0071
+
+# (Load_time+Locate_time)/Num_occs = 0.0071
+
+# TC_ID = PROTEINS
+# IDX_ID = FM_HUFF_RRR63
+# test_case = proteins.200MB
+# SAMPLE_ID = 32x32
+# S_SA = 32
+# S_ISA = 32
+Load from file indexes/PROTEINS.FM_HUFF_RRR63.32x32
+# Load_index_time_in_sec = 0.07
+# text_size = 209715200
+# Index_size_in_bytes = 148528574
+# pat_cnt = 3389
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 3389
+# Total_Num_occs_found = 2000237
+# Locate_time_in_secs = 30.06
+# Locate_time/Num_occs = 0.0150
+
+# (Load_time+Locate_time)/Num_occs = 0.0151
+
+# TC_ID = PROTEINS
+# IDX_ID = FM_HUFF_RRR63
+# test_case = proteins.200MB
+# SAMPLE_ID = 64x64
+# S_SA = 64
+# S_ISA = 64
+Load from file indexes/PROTEINS.FM_HUFF_RRR63.64x64
+# Load_index_time_in_sec = 0.06
+# text_size = 209715200
+# Index_size_in_bytes = 124437854
+# pat_cnt = 3389
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 3172
+# Total_Num_occs_found = 1909292
+# Locate_time_in_secs = 60.01
+# Locate_time/Num_occs = 0.0314
+
+# (Load_time+Locate_time)/Num_occs = 0.0315
+
+# TC_ID = SOURCES
+# IDX_ID = FM_HUFF_RRR63
+# test_case = sources.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/SOURCES.FM_HUFF_RRR63.16x16
+# Load_index_time_in_sec = 0.07
+# text_size = 209715200
+# Index_size_in_bytes = 151850978
+# pat_cnt = 27
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 27
+# Total_Num_occs_found = 4701681
+# Locate_time_in_secs = 37.00
+# Locate_time/Num_occs = 0.0079
+
+# (Load_time+Locate_time)/Num_occs = 0.0079
+
+# TC_ID = SOURCES
+# IDX_ID = FM_HUFF_RRR63
+# test_case = sources.200MB
+# SAMPLE_ID = 32x32
+# S_SA = 32
+# S_ISA = 32
+Load from file indexes/SOURCES.FM_HUFF_RRR63.32x32
+# Load_index_time_in_sec = 0.05
+# text_size = 209715200
+# Index_size_in_bytes = 103670290
+# pat_cnt = 27
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 27
+# Total_Num_occs_found = 4701681
+# Locate_time_in_secs = 83.38
+# Locate_time/Num_occs = 0.0177
+
+# (Load_time+Locate_time)/Num_occs = 0.0177
+
+# TC_ID = SOURCES
+# IDX_ID = FM_HUFF_RRR63
+# test_case = sources.200MB
+# SAMPLE_ID = 64x64
+# S_SA = 64
+# S_ISA = 64
+Load from file indexes/SOURCES.FM_HUFF_RRR63.64x64
+# Load_index_time_in_sec = 0.04
+# text_size = 209715200
+# Index_size_in_bytes = 79579890
+# pat_cnt = 27
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 27
+# Total_Num_occs_found = 4701681
+# Locate_time_in_secs = 173.18
+# Locate_time/Num_occs = 0.0368
+
+# (Load_time+Locate_time)/Num_occs = 0.0368
+
+# TC_ID = ENGLISH
+# IDX_ID = FM_HUFF_RRR127
+# test_case = english.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/ENGLISH.FM_HUFF_RRR127.16x16
+# Load_index_time_in_sec = 0.07
+# text_size = 209715200
+# Index_size_in_bytes = 150537174
+# pat_cnt = 80
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 80
+# Total_Num_occs_found = 2013378
+# Locate_time_in_secs = 27.75
+# Locate_time/Num_occs = 0.0138
+
+# (Load_time+Locate_time)/Num_occs = 0.0138
+
+# TC_ID = ENGLISH
+# IDX_ID = FM_HUFF_RRR127
+# test_case = english.200MB
+# SAMPLE_ID = 32x32
+# S_SA = 32
+# S_ISA = 32
+Load from file indexes/ENGLISH.FM_HUFF_RRR127.32x32
+# Load_index_time_in_sec = 0.05
+# text_size = 209715200
+# Index_size_in_bytes = 102356326
+# pat_cnt = 80
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 77
+# Total_Num_occs_found = 1969965
+# Locate_time_in_secs = 60.44
+# Locate_time/Num_occs = 0.0307
+
+# (Load_time+Locate_time)/Num_occs = 0.0307
+
+# TC_ID = ENGLISH
+# IDX_ID = FM_HUFF_RRR127
+# test_case = english.200MB
+# SAMPLE_ID = 64x64
+# S_SA = 64
+# S_ISA = 64
+Load from file indexes/ENGLISH.FM_HUFF_RRR127.64x64
+# Load_index_time_in_sec = 0.04
+# text_size = 209715200
+# Index_size_in_bytes = 78265822
+# pat_cnt = 80
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 32
+# Total_Num_occs_found = 1075804
+# Locate_time_in_secs = 67.43
+# Locate_time/Num_occs = 0.0627
+
+# (Load_time+Locate_time)/Num_occs = 0.0627
+
+# TC_ID = DNA
+# IDX_ID = FM_HUFF_RRR127
+# test_case = dna.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/DNA.FM_HUFF_RRR127.16x16
+# Load_index_time_in_sec = 0.07
+# text_size = 209715200
+# Index_size_in_bytes = 144634322
+# pat_cnt = 8
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 8
+# Total_Num_occs_found = 2028690
+# Locate_time_in_secs = 23.32
+# Locate_time/Num_occs = 0.0115
+
+# (Load_time+Locate_time)/Num_occs = 0.0115
+
+# TC_ID = DNA
+# IDX_ID = FM_HUFF_RRR127
+# test_case = dna.200MB
+# SAMPLE_ID = 32x32
+# S_SA = 32
+# S_ISA = 32
+Load from file indexes/DNA.FM_HUFF_RRR127.32x32
+# Load_index_time_in_sec = 0.05
+# text_size = 209715200
+# Index_size_in_bytes = 96453034
+# pat_cnt = 8
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 8
+# Total_Num_occs_found = 2028690
+# Locate_time_in_secs = 51.70
+# Locate_time/Num_occs = 0.0255
+
+# (Load_time+Locate_time)/Num_occs = 0.0255
+
+# TC_ID = DNA
+# IDX_ID = FM_HUFF_RRR127
+# test_case = dna.200MB
+# SAMPLE_ID = 64x64
+# S_SA = 64
+# S_ISA = 64
+Load from file indexes/DNA.FM_HUFF_RRR127.64x64
+# Load_index_time_in_sec = 0.04
+# text_size = 209715200
+# Index_size_in_bytes = 72362746
+# pat_cnt = 8
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 5
+# Total_Num_occs_found = 1234711
+# Locate_time_in_secs = 66.27
+# Locate_time/Num_occs = 0.0537
+
+# (Load_time+Locate_time)/Num_occs = 0.0537
+
+# TC_ID = PROTEINS
+# IDX_ID = FM_HUFF_RRR127
+# test_case = proteins.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/PROTEINS.FM_HUFF_RRR127.16x16
+# Load_index_time_in_sec = 0.09
+# text_size = 209715200
+# Index_size_in_bytes = 195954566
+# pat_cnt = 3389
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 3389
+# Total_Num_occs_found = 2000237
+# Locate_time_in_secs = 22.02
+# Locate_time/Num_occs = 0.0110
+
+# (Load_time+Locate_time)/Num_occs = 0.0111
+
+# TC_ID = PROTEINS
+# IDX_ID = FM_HUFF_RRR127
+# test_case = proteins.200MB
+# SAMPLE_ID = 32x32
+# S_SA = 32
+# S_ISA = 32
+Load from file indexes/PROTEINS.FM_HUFF_RRR127.32x32
+# Load_index_time_in_sec = 0.07
+# text_size = 209715200
+# Index_size_in_bytes = 147773934
+# pat_cnt = 3389
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 3389
+# Total_Num_occs_found = 2000237
+# Locate_time_in_secs = 47.84
+# Locate_time/Num_occs = 0.0239
+
+# (Load_time+Locate_time)/Num_occs = 0.0240
+
+# TC_ID = PROTEINS
+# IDX_ID = FM_HUFF_RRR127
+# test_case = proteins.200MB
+# SAMPLE_ID = 64x64
+# S_SA = 64
+# S_ISA = 64
+Load from file indexes/PROTEINS.FM_HUFF_RRR127.64x64
+# Load_index_time_in_sec = 0.06
+# text_size = 209715200
+# Index_size_in_bytes = 123683214
+# pat_cnt = 3389
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 1959
+# Total_Num_occs_found = 1195502
+# Locate_time_in_secs = 60.05
+# Locate_time/Num_occs = 0.0502
+
+# (Load_time+Locate_time)/Num_occs = 0.0503
+
+# TC_ID = SOURCES
+# IDX_ID = FM_HUFF_RRR127
+# test_case = sources.200MB
+# SAMPLE_ID = 16x16
+# S_SA = 16
+# S_ISA = 16
+Load from file indexes/SOURCES.FM_HUFF_RRR127.16x16
+# Load_index_time_in_sec = 0.07
+# text_size = 209715200
+# Index_size_in_bytes = 148831890
+# pat_cnt = 27
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 27
+# Total_Num_occs_found = 4701681
+# Locate_time_in_secs = 57.17
+# Locate_time/Num_occs = 0.0122
+
+# (Load_time+Locate_time)/Num_occs = 0.0122
+
+# TC_ID = SOURCES
+# IDX_ID = FM_HUFF_RRR127
+# test_case = sources.200MB
+# SAMPLE_ID = 32x32
+# S_SA = 32
+# S_ISA = 32
+Load from file indexes/SOURCES.FM_HUFF_RRR127.32x32
+# Load_index_time_in_sec = 0.05
+# text_size = 209715200
+# Index_size_in_bytes = 100651202
+# pat_cnt = 27
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 27
+# Total_Num_occs_found = 4701681
+# Locate_time_in_secs = 126.09
+# Locate_time/Num_occs = 0.0268
+
+# (Load_time+Locate_time)/Num_occs = 0.0268
+
+# TC_ID = SOURCES
+# IDX_ID = FM_HUFF_RRR127
+# test_case = sources.200MB
+# SAMPLE_ID = 64x64
+# S_SA = 64
+# S_ISA = 64
+Load from file indexes/SOURCES.FM_HUFF_RRR127.64x64
+# Load_index_time_in_sec = 0.04
+# text_size = 209715200
+# Index_size_in_bytes = 76560802
+# pat_cnt = 27
+# pat_length = 5
+# forbidden_chars = 
+# processed_pattern = 27
+# Total_Num_occs_found = 4701681
+# Locate_time_in_secs = 260.93
+# Locate_time/Num_occs = 0.0555
+
+# (Load_time+Locate_time)/Num_occs = 0.0555
+
