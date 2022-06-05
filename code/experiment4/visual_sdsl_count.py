@@ -5,7 +5,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 markers = ["s", "x"]
-names = ["sdsl", "our"]
+names = ["sdsl", "my"]
+
+def translate(s):
+    if s == "ENGLISH":
+        return "Anglický text"
+    elif s == "SOURCES":
+        return "Zdrojové kódy"
+    return s
 
 def return_results(path):
     results = {}
@@ -39,7 +46,7 @@ reimplemented = ["FM_HUFF_RRR31", "FM_HUFF_RRR63", "FM_HUFF_RRR127"]
 old_version_path = "./res1-count.txt"
 new_version_path = "./res2-count.txt"
 
-rows, cols = 2, 2
+rows, cols = 1, 1
 
 res1 = return_results(old_version_path)
 res2 = return_results(new_version_path)
@@ -52,13 +59,14 @@ for r in res:
         if dataset_name not in datasets:
             datasets.append(dataset_name)
 
-if rows*cols != len(datasets):
-    print("Not enough of space in graph.")
-    exit(1)
-
 fig, axs = plt.subplots(rows, cols, figsize=(8,6))
 pts = [set() for i in range(len(datasets))]
-fig.suptitle('FM-index count', fontsize=20)
+fig.suptitle('FM-index spočítaj', fontsize=20)
+
+# DNA
+# SOURCES
+# ENGLISH
+DATASET = "SOURCES"
 
 labels = set()
 
@@ -67,8 +75,11 @@ for r in range(len(res)):
         if structure not in map_name.keys():
             continue
 
+        if dataset_name != DATASET:
+            continue
+
         time, memory = res[r][dataset_name, structure]
-        if structure not in reimplemented and names[r] == "our":
+        if structure not in reimplemented and names[r] == "my":
             continue
         dataset_index = datasets.index(dataset_name)
         x = [memory]
@@ -80,20 +91,20 @@ for r in range(len(res)):
         m = markers[r]
         if structure == "FM_HUFF":
             m = '*'
-        axs[row][col].scatter(x, y, label = l, marker = m, s = 35)
-        axs[row][col].set_title(dataset_name, fontsize=16)
+        axs.scatter(x, y, label = l, marker = m, s = 120)
+        axs.set_title(translate(dataset_name), fontsize=16)
         for yy in y:
             pts[dataset_index].add(yy)
 
 for i in range(rows):
-    axs[i][0].set_ylabel("µsec / pattern symbol", fontsize=12)
+    axs.set_ylabel("µs / symbol vzorky", fontsize=16)
 
 for i in range(cols):
-    axs[-1][i].set_xlabel("bits per text symbol", fontsize=12)
+    axs.set_xlabel("bity na symbol textu", fontsize=16)
 
 for i in range(rows):
     for j in range(cols):
-        axs[i][j].set_yticks(list(pts[i*rows+j]))
+        axs.set_yticks(list(pts[i*rows+j]))
 
 fig.subplots_adjust(bottom=0.3, wspace=0.33)
 
@@ -107,7 +118,7 @@ fig.legend(
   loc="upper center",
   bbox_to_anchor=(0.5, 0),
   bbox_transform=plt.gcf().transFigure,
-  ncol=len(list(labels)),
+  ncol=len(list(labels))//2,
   handletextpad=0.01,
   labelspacing=0.0,
   borderpad=0.1,
@@ -117,7 +128,7 @@ fig.legend(
 
 fig.tight_layout(pad=1.0)
 
-plt.savefig("vysledky_sdsl_count.png", bbox_inches='tight')
+plt.savefig(f"vysledky_sdsl_count_{DATASET}.png", bbox_inches='tight')
 plt.clf()
 
 
