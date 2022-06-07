@@ -66,7 +66,7 @@ fig.suptitle('FM-index spočítaj', fontsize=20)
 # DNA
 # SOURCES
 # ENGLISH
-DATASET = "SOURCES"
+DATASET = "DNA"
 
 labels = set()
 
@@ -102,9 +102,9 @@ for i in range(rows):
 for i in range(cols):
     axs.set_xlabel("bity na symbol textu", fontsize=16)
 
-for i in range(rows):
-    for j in range(cols):
-        axs.set_yticks(list(pts[i*rows+j]))
+#for i in range(rows):
+#    for j in range(cols):
+#        axs.set_yticks(list(pts[i*rows+j]))
 
 fig.subplots_adjust(bottom=0.3, wspace=0.33)
 
