@@ -33,7 +33,7 @@ block_sizes = [31, 63, 127]
 fig, axs = plt.subplots(nrows=1, ncols=len(
     block_sizes), figsize=(9, 3))
 fig.suptitle(
-    "Bits saved by compressed form as a function of blocks class")
+    "Počet ušetrených bitov v závislosti od triedy bloku", fontsize=20)
 
 for (i, block_size) in enumerate(block_sizes):
     x = [i for i in range(block_size+1)]
@@ -62,11 +62,13 @@ for (i, block_size) in enumerate(block_sizes):
             axs[i].get_xticklabels()[j].set_fontsize("x-large")
         else:
             axs[i].get_xticklabels()[j].set_color("0.5")
-    axs[i].set_title(translate("b=" + str(block_size)))
-    #axs[i].set_xlabel("class of block")
+    axs[i].set_title(translate("b=" + str(block_size)), fontsize=16)
+    axs[i].set_xlabel("trieda bloku", fontsize=12)
+
+axs[0].set_ylabel("úspora", fontsize=12)
 
 #axs[0].set_ylabel("bits saved")
 fig.tight_layout()
-plt.show()
-# plt.savefig("binomial_dist.png", bbox_inches='tight')
-# plt.clf()
+# plt.show()
+plt.savefig("savings.png", bbox_inches='tight')
+plt.clf()
